@@ -99,7 +99,7 @@ def analyze_with_gemini(raw_text: str):
 2. "qa_list": 提取 2-3 個核心問答條目，每個元素包含:
    - "question": 問題描述
    - "answer": 簡明摘要回答
-   - "timestamp": 該問題在音頻中大概對應的起始秒數（浮點數，如 0.0、17.5 等）
+   - "timestamp": 該問題在音頻中大概對應的起始秒數（浮點數）
 """
 
     token = get_auth_token()
@@ -125,30 +125,7 @@ def analyze_with_gemini(raw_text: str):
             except Exception:
                 pass
 
-    # 兜底分析：若為 Demo 長語音，輸出精緻的 3 組結構化歷史問答
-    if len(raw_text) > 30:
-        return {
-            "formal_text": "我小時候在元朗附近生活，那時還有很多農田，常常看見有人踩單車。大學畢業之後，有時會和朋友去附近散步，跟他們介紹雀鳥的叫聲和各種蟲鳴。近年附近許多地方都建起了樓宇，原本寧靜的自然環境也慢慢變了，印象最深刻的就是這些轉變。",
-            "qa_list": [
-                {
-                    "question": "童年時期元朗周邊的環境與出行方式如何？",
-                    "answer": "到處都是農田，居民平日經常踩單車出行，鄉村氣息濃厚。",
-                    "timestamp": 0.0
-                },
-                {
-                    "question": "大學時期重回舊地，主要分享了什麼回憶？",
-                    "answer": "經常與朋友在附近散步，辨識並介紹樹上的雀鳥啼鳴與草叢中的蟲鳴叫聲。",
-                    "timestamp": 17.5
-                },
-                {
-                    "question": "近年來該地區發生了怎樣的空間與環境變遷？",
-                    "answer": "許多農田與空地建起了密集樓宇，昔日寧靜自然的鄉郊環境逐漸消逝。",
-                    "timestamp": 33.0
-                }
-            ]
-        }
-
-    # 短語音（現場麥克風測試）動態即時規整
+    # 100% 纯动态本地语义规整与 Q&A 抽取（彻底移除任何写死的固定预设回答）
     formal_sentence = (
         raw_text.replace("係", "是")
         .replace("邊位", "哪一位")
@@ -165,15 +142,26 @@ def analyze_with_gemini(raw_text: str):
         .replace("講", "說")
         .replace("食", "吃")
     )
+
+    # 动态抽取问答（完全基于当前输入的转录文本进行切分）
+    qa_list = [
+        {
+            "question": "現場口述核心內容與語意概述？",
+            "answer": f"受訪者口述內容記錄：『{formal_sentence}』。",
+            "timestamp": 0.0
+        }
+    ]
+    if len(raw_text) > 30:
+        half_len = len(raw_text) // 2
+        qa_list.append({
+            "question": "口述後半段重點記述是什麼？",
+            "answer": f"受訪者進一步陳述：『{formal_sentence[half_len:]}』。",
+            "timestamp": 15.0
+        })
+
     return {
-        "formal_text": f"書面規整結果：{formal_sentence}",
-        "qa_list": [
-            {
-                "question": f"現場口述核心內容：{raw_text}",
-                "answer": f"受訪者現場陳述語意整理（書面化表達：『{formal_sentence}』）。",
-                "timestamp": 0.0
-            }
-        ]
+        "formal_text": formal_sentence,
+        "qa_list": qa_list
     }
 
 @app.post("/api/process")
