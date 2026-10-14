@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>口述歷史智能轉錄與分析系統 - Oral History Demo</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger-bg: #fee2e2;
+            --danger-text: #b91c1c;
+            --danger-border: #f87171;
+            --success: #15803d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0 0 8px 0;
+            color: #0f172a;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 18px;
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .drop-zone {
+            flex: 1;
+            min-width: 250px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .player-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        audio {
+            flex-grow: 1;
+            height: 40px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-record {
+            background-color: #ef4444;
+        }
+
+        .btn-record:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-recording {
+            background-color: var(--success) !important;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .qa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .qa-card {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .qa-card:hover {
+            border-color: var(--primary);
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        .qa-tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .qa-q {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #0f172a;
+        }
+
+        .qa-a {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .transcript-content {
+            line-height: 2.2;
+            font-size: 16px;
+            min-height: 80px;
+        }
+
+        .word-token {
+            display: inline-block;
+            padding: 2px 4px;
+            margin: 2px 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .word-token:hover {
+            background-color: #e2e8f0;
+        }
+
+        .word-uncertain {
+            background-color: var(--danger-bg);
+            color: var(--danger-text);
+            border-bottom: 2px dashed var(--danger-border);
+            font-weight: 600;
+        }
+
+        .formal-text {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #334155;
+        }
+
+        .status-msg {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .privacy-banner {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #166534;
+            line-height: 1.6;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 480px;
+            width: 90%;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: #0f172a;
+            font-size: 17px;
+        }
+
+        .modal-box p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>香港口述歷史：智能轉錄與分析系統</h1>
+        <p>現場實時麥克風錄音 · 本地上傳 · Google STT 逐詞跳軸 · Gemini 語意重構</p>
+    </header>
+
+    <div class="privacy-banner">
+        🔒 <strong>數據隱私與知情承諾 (Responsible AI)</strong>：
+        本系統僅在內存緩衝區處理音頻並流轉至 Google STT / Gemini API；<strong>後台不設永久存儲</strong>，轉譯與分析完成後內存即時釋放。
+    </div>
+
+    <div class="card">
+        <h2>
+            <span>輸入控制與播放</span>
+            <span id="statusText" class="status-msg">已就緒</span>
+        </h2>
+        
+        <div class="action-row">
+            <button class="btn btn-record" id="recordBtn" onclick="handleRecordButtonClick()">
+                🎙️ 開啟現場麥克風錄音
+            </button>
+            <div class="drop-zone" onclick="document.getElementById('audioFileInput').click()">
+                <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" onchange="handleFileSelect(event)">
+                <span id="uploadHint">📁 點擊或拖入音頻文件 (WAV / M4A)</span>
+            </div>
+        </div>
+
+        <div class="player-bar">
+            <audio id="audioPlayer" controls>
+                <source id="audioSource" src="./Demo Story.wav" type="audio/wav">
+                您的瀏覽器不支持音頻播放。
+            </audio>
+            <button class="btn" id="analyzeBtn" onclick="triggerProcess()">⚡ 開始轉譯與大模型分析</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>核心問答摘要（點擊自動跳轉至對應音頻秒數）</h2>
+        <div class="qa-grid" id="qaContainer">
+            <div class="qa-card" onclick="seekAudio(0.0)">
+                <span class="qa-tag">跳轉至 0.0s</span>
+                <div class="qa-q">Q1: 童年元朗的自然景觀與日常？</div>
+                <div class="qa-a">「細個嗰陣喺元朗附近...仲有好多農田同埋踩單車...見到面都會打招呼。」</div>
+            </div>
+            <div class="qa-card" onclick="seekAudio(17.5)">
+                <span class="qa-tag">跳轉至 17.5s</span>
+                <div class="qa-q">Q2: 大學時期在元朗附近的活動與聲音記憶？</div>
+                <div class="qa-a">「大學之後有時都會同啲人去附近行下...嗰度聽得到雀仔叫同埋草叢蟲鳴...」</div>
+            </div>
+            <div class="qa-card" onclick="seekAudio(33.0)">
+                <span class="qa-tag">跳轉至 33.0s</span>
+                <div class="qa-q">Q3: 近年來周圍環境發生了什麼變遷？</div>
+                <div class="qa-a">「近年附近好多地方都起咗新樓...周圍嘅環境都慢慢變緊...呢個係最深回憶。」</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>
+            <span>語音逐詞轉錄（紅色標記表示低置信度/口誤）</span>
+            <span style="font-size: 13px; font-weight: normal; color: var(--danger-text);">* 點擊任意詞彙可即時定位播放</span>
+        </h2>
+        <div class="transcript-content" id="wordsContainer"></div>
+    </div>
+
+    <div class="card">
+        <h2>Gemini 多語言書面化與規整結果</h2>
+        <div class="formal-text" id="formalText">
+            我小時候在元朗附近生活，那時周圍還有很多農田，經常能看見人們在路邊騎單車，見面時都會親切打招呼。升讀大學之後，有時也會和朋友去附近散步走走；那裡十分幽靜，能聽到小鳥啼鳴，草叢中也有昆蟲在鳴叫。然而這幾年周圍許多地方都建起了新樓，原本寧靜的自然環境也在逐漸改變，这麼是我印象中最深的一段回憶。
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="consentModal">
+    <div class="modal-box">
+        <h3>📋 口述歷史錄音知情授權 (Consent Notice)</h3>
+        <p>
+            您即將開啟麥克風進行語音錄製。本次錄音數據僅用於現場實時轉錄演示及語意分析，
+            <strong>後台伺服器不會進行任何永久性存儲或轉授權</strong>，轉譯完成後即刻從記憶體中清除。
+        </p>
+        <p>請確認您同意提供此段語音進行本次體驗：</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeConsentModal(false)">取消</button>
+            <button class="btn" onclick="closeConsentModal(true)">同意並開啟麥克風</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const player = document.getElementById('audioPlayer');
+    const wordsContainer = document.getElementById('wordsContainer');
+    const qaContainer = document.getElementById('qaContainer');
+    const formalText = document.getElementById('formalText');
+    const statusText = document.getElementById('statusText');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const recordBtn = document.getElementById('recordBtn');
+    const uploadHint = document.getElementById('uploadHint');
+    const consentModal = document.getElementById('consentModal');
+
+    let currentSelectedFile = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let timerInterval = null;
+    let recordSeconds = 0;
+    let userHasConsented = false;
+
+    const defaultWords = [
+        {word: "我", conf: 0.951, start: 0.0, end: 2.4},
+        {word: "細個嗰陣", conf: 0.951, start: 2.4, end: 3.2},
+        {word: "喺元朗附近", conf: 0.951, start: 3.2, end: 4.7},
+        {word: "時為", conf: 0.755, start: 4.7, end: 7.4},
+        {word: "仲有好多農田", conf: 0.951, start: 7.4, end: 8.6},
+        {word: "同埋成日都會見到啲人踩單車啦", conf: 0.951, start: 8.6, end: 13.5},
+        {word: "見到面都會", conf: 0.951, start: 13.5, end: 17.5},
+        {word: "大學之後", conf: 0.951, start: 17.5, end: 19.8},
+        {word: "有時都會同啲人去附近行下先", conf: 0.951, start: 19.8, end: 25.3},
+        {word: "嗰度呢就聽得到啲雀仔叫添", conf: 0.951, start: 25.3, end: 29.7},
+        {word: "同埋啲床(蟲)都會喺度明(鳴)呀", conf: 0.890, start: 29.7, end: 32.3},
+        {word: "今年(近年)呀", conf: 0.951, start: 32.3, end: 33.4},
+        {word: "附近好多地方都起咗身有(新樓)", conf: 0.951, start: 33.4, end: 38.3},
+        {word: "同埋公平(周圍)嘅環境都慢慢變緊", conf: 0.951, start: 38.3, end: 42.3},
+        {word: "記得嘅就係大家以說以上", conf: 0.886, start: 42.3, end: 46.7}
+    ];
+
+    function handleRecordButtonClick() {
+        if (!isRecording) {
+            if (!userHasConsented) {
+                consentModal.style.display = 'flex';
+                return;
+            }
+            startRecordingProcess();
+        } else {
+            stopRecordingProcess();
+        }
+    }
+
+    function closeConsentModal(agreed) {
+        consentModal.style.display = 'none';
+        if (agreed) {
+            userHasConsented = true;
+            startRecordingProcess();
+        }
+    }
+
+    async function startRecordingProcess() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                player.src = audioUrl;
+                player.load();
+
+                currentSelectedFile = new File([audioBlob], "recorded_speech.webm", { type: 'audio/webm' });
+                uploadHint.innerText = `現場錄音完成 (${(audioBlob.size / 1024).toFixed(1)} KB)`;
+                statusText.innerText = "錄音已就緒，自動觸發識別中...";
+                triggerProcess();
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            recordBtn.classList.add('btn-recording');
+            recordSeconds = 0;
+            recordBtn.innerText = "⏹️ 停止錄音並轉譯 (0s)";
+            
+            timerInterval = setInterval(() => {
+                recordSeconds++;
+                recordBtn.innerText = `⏹️ 停止錄音並轉譯 (${recordSeconds}s)`;
+            }, 1000);
+
+        } catch (err) {
+            alert("無法獲取麥克風權限，請確認瀏覽器已允許使用麥克風。");
+            console.error(err);
+        }
+    }
+
+    function stopRecordingProcess() {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        isRecording = false;
+        clearInterval(timerInterval);
+        recordBtn.classList.remove('btn-recording');
+        recordBtn.innerText = "🎙️ 開啟現場麥克風錄音";
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        currentSelectedFile = file;
+        uploadHint.innerText = `已選擇: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+        const fileURL = URL.createObjectURL(file);
+        player.src = fileURL;
+        player.load();
+        statusText.innerText = "音頻已載入，點擊按鈕發起轉譯";
+    }
+
+    function renderWords(words) {
+        wordsContainer.innerHTML = '';
+        words.forEach(item => {
+            const span = document.createElement('span');
+            const confVal = item.confidence !== undefined ? item.confidence : item.conf;
+            span.className = 'word-token' + (confVal < 0.90 ? ' word-uncertain' : '');
+            span.innerText = item.word;
+            span.title = `置信度: ${(confVal * 100).toFixed(1)}% | 時間: ${item.start}s - ${item.end}s`;
+            span.onclick = () => seekAudio(item.start);
+            wordsContainer.appendChild(span);
+        });
+    }
+
+    function seekAudio(seconds) {
+        player.currentTime = seconds;
+        player.play();
+    }
+
+    async function triggerProcess() {
+        statusText.innerText = "正在調用 Google STT 與 Gemini API，請稍候...";
+        analyzeBtn.disabled = true;
+
+        const formData = new FormData();
+        if (currentSelectedFile) {
+            formData.append("file", currentSelectedFile);
+        }
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/api/process", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || "後端返回異常");
+            }
+
+            const data = await response.json();
+            statusText.innerText = "轉譯完成！";
+
+            if (data.llm_result && data.llm_result.formal_text) {
+                formalText.innerText = data.llm_result.formal_text;
+            }
+
+            if (data.words && data.words.length > 0) {
+                renderWords(data.words);
+            }
+
+            if (data.llm_result && data.llm_result.qa_list && data.llm_result.qa_list.length > 0) {
+                qaContainer.innerHTML = '';
+                data.llm_result.qa_list.forEach((qa, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'qa-card';
+                    const time = qa.timestamp || 0;
+                    card.onclick = () => seekAudio(time);
+                    card.innerHTML = `
+                        <span class="qa-tag">跳轉至 ${time}s</span>
+                        <div class="qa-q">Q${idx + 1}: ${qa.question}</div>
+                        <div class="qa-a">${qa.answer}</div>
+                    `;
+                    qaContainer.appendChild(card);
+                });
+            }
+
+        } catch (err) {
+            console.error(err);
+            statusText.innerText = `調用失敗: ${err.message} (請確保 python server.py 正在運行)`;
+        } finally {
+            analyzeBtn.disabled = false;
+        }
+    }
+
+    window.onload = () => {
+        renderWords(defaultWords);
+    };
+</script>
+
+</body>
+</html>
