@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var API_BASE = (window.VTN_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, '');
+ var API_BASE = (window.VTN_API_BASE || window.location.origin || 'http://127.0.0.1:8000').replace(/\/$/, '');
   var STORE_KEY = 'vtn-records-v1';
   var MAX_RECORD_SEC = 180;
   var AUDIO_QUOTA_BYTES = 6 * 1024 * 1024;
