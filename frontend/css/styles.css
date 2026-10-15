@@ -1,0 +1,1622 @@
+/* ==========================================================================
+   Voices of the North — 主頁（Home）
+   Direction B「Oat × Sage」：象牙米白 / 森林綠 / 柔玉綠 / 暖金
+   設計不變量：正文 ≥18px（任何文字硬底線 14px）、按鈕高 ≥58px、
+   觸控間距 ≥12px、全部 rem/em、對比度 ≥4.5:1、尊重 reduced-motion。
+   ========================================================================== */
+
+/* ---------- 設計令牌 ---------- */
+:root {
+  /* 底色 / 卡片 */
+  --ivory:        #F6F1E6;   /* app 米白底 */
+  --ivory-deep:   #EFE8D7;
+  --cream:        #FDFBF4;   /* 卡片米白 */
+  --frame:        #E4DECE;   /* 桌面外框底 */
+
+  /* 森林綠主色 */
+  --forest:       #2C5742;
+  --forest-deep:  #21453A;
+  --forest-rich:  #31604A;
+
+  /* 玉綠輔色 */
+  --jade:         #7FA68C;
+  --jade-strong:  #5E8C70;
+  --jade-pale:    #DCE9DC;
+  --sage-line:    #B9CDB6;
+  --sage-wash:    #EAF0E5;
+
+  /* 暖金 */
+  --gold:         #83632B;   /* 標籤文字（保對比） */
+  --gold-pale:    #F1E3C1;
+
+  /* 文字 */
+  --ink:          #24483A;
+  --ink-body:     #2E4A3B;
+  --muted:        #5D7063;  /* 米白底上對比 ≥4.5:1 */
+  --muted-soft:   #6E7B6E;
+
+  /* 線條 / 陰影 */
+  --hairline:     rgba(112, 102, 74, 0.16);
+  --shadow-card:  0 16px 32px -22px rgba(52, 72, 55, 0.38),
+                  0 2px 6px rgba(52, 72, 55, 0.05);
+  --shadow-cta:   0 20px 38px -18px rgba(30, 62, 47, 0.65),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  /* 節奏：Direction B 刻意放慢 */
+  --ease-slow:    cubic-bezier(0.33, 1, 0.68, 1);
+  --dur:          380ms;
+
+  --nav-h: 74px;
+
+  /* 底導航實際佔高：8px 上 padding + 58px 項目 + 10px 下 padding + 1px 邊框
+     + iPhone 底部安全區。彈層／FAB 一律用呢個變數留位，唔好硬編碼。 */
+  --vtn-nav-h: calc(77px + env(safe-area-inset-bottom));
+}
+
+/* ---------- 基礎 ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  /* 320px 時約 17px、430px 時 18px，全程不小於 16px（14px 硬底線由此保證） */
+  font-size: clamp(16px, 14.2px + 0.884vw, 18px);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background: var(--frame);
+  color: var(--ink-body);
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", system-ui, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img { display: block; max-width: 100%; }
+
+a { text-decoration: none; }
+
+:where(a, button):focus-visible {
+  outline: 3px solid var(--jade-strong);
+  outline-offset: 2px;
+}
+
+/* ---------- App 外殼（固定手機框：頂欄／滾動頁／底導航三段式） ----------
+   外殼本身唔再做滾動容器（overflow:hidden，高度鎖定 100dvh）；
+   縱向滾動交俾內層 .page —— 底導航做 flex 尾列固定，唔會跟內容走。 */
+.app-shell {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ivory);
+}
+
+@media (min-width: 480px) {
+  .app-shell {
+    height: calc(100dvh - 48px);
+    margin: 24px 0;
+    border-radius: 30px;
+    box-shadow: 0 30px 80px -30px rgba(50, 60, 45, 0.45),
+                0 0 0 1px rgba(120, 110, 80, 0.18);
+  }
+}
+
+/* ==========================================================================
+   頂部品牌列
+   ========================================================================== */
+.topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(18px + env(safe-area-inset-top)) 22px 4px;
+}
+
+.topbar__logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  object-fit: contain;
+}
+
+.topbar__title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.topbar__dot { color: #9AAB9C; font-weight: 400; }
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+.hero {
+  position: relative;
+  padding: 52px 24px 0;
+  min-height: 224px;
+}
+
+.hero__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero__art img {
+  position: absolute;
+  top: -46px;
+  right: -46px;
+  width: 112%;
+  height: calc(100% + 40px);
+  object-fit: cover;
+  /* 官方 16:9 水墨圖：村落重心在右，右錨定裁切保留村屋與太陽 */
+  object-position: right center;
+}
+
+.hero__fade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+/* 左側融入象牙白，保證文字區乾淨（官方水墨圖山色較豐富，漸層加闊）；
+   右緣柔光消除 16:9 橫圖的直邊裁切 */
+.hero__fade--corner {
+  background:
+    linear-gradient(to left,
+      rgba(246, 241, 230, 0.55) 0%,
+      rgba(246, 241, 230, 0.15) 5%,
+      rgba(246, 241, 230, 0) 11%),
+    linear-gradient(to right,
+      var(--ivory) 6%,
+      rgba(246, 241, 230, 0.92) 22%,
+      rgba(246, 241, 230, 0.66) 46%,
+      rgba(246, 241, 230, 0.28) 62%,
+      rgba(246, 241, 230, 0) 74%);
+}
+/* 底部融入下一區塊（消融前景草木與河岸的硬邊） */
+.hero__fade--bottom {
+  background: linear-gradient(to top,
+    var(--ivory) 8%,
+    rgba(246, 241, 230, 0.97) 24%,
+    rgba(246, 241, 230, 0.62) 44%,
+    rgba(246, 241, 230, 0) 66%);
+}
+
+.hero__copy {
+  position: relative;
+  z-index: 2;
+}
+
+.hero__greeting {
+  margin: 0 0 8px;
+  font-size: 1.14rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-shadow: 0 1px 10px rgba(246, 241, 230, 0.9),
+               0 0 3px rgba(246, 241, 230, 0.85);
+}
+
+.hero__title {
+  margin: 0 0 12px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 1.1rem + 3.6vw, 2.55rem);
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  text-shadow: 0 2px 14px rgba(246, 241, 230, 0.85);
+}
+
+.hero__sub {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--muted);
+  text-shadow: 0 1px 10px rgba(246, 241, 230, 0.9),
+               0 0 3px rgba(246, 241, 230, 0.85);
+}
+
+/* ==========================================================================
+   主 CTA：開始錄音（全頁唯一主操作）
+   ========================================================================== */
+.cta-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(100% - 44px);
+  margin: 2px 22px 0;
+  padding: 26px 24px 24px;
+  border: 0;
+  border-radius: 24px;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  background: linear-gradient(150deg,
+    var(--forest-rich) 0%,
+    #28503D 55%,
+    var(--forest-deep) 100%);
+  box-shadow: var(--shadow-cta);
+  transition: transform var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cta-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 26px 44px -18px rgba(30, 62, 47, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.cta-card:active { transform: translateY(0) scale(0.985); }
+
+.cta-card__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 13px;
+}
+
+.cta-card__mic {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1.5px solid rgba(255, 255, 255, 0.30);
+}
+.cta-card__mic i { font-size: 1.55rem; }
+
+.cta-card__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.cta-card__sub {
+  margin-top: 4px;
+  font-size: 0.97rem;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+/* 聲波 */
+.eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+}
+.eq i {
+  width: 4px;
+  height: var(--h, 16px);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.52);
+  transform-origin: center;
+  animation: eq-breathe 1.7s ease-in-out var(--d, 0ms) infinite;
+}
+@keyframes eq-breathe {
+  0%, 100% { transform: scaleY(0.45); opacity: 0.55; }
+  50%      { transform: scaleY(1);    opacity: 0.95; }
+}
+
+/* ==========================================================================
+   精選故事
+   ========================================================================== */
+.featured { padding: 32px 20px 0; }
+
+.featured__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.featured__title {
+  margin: 0;
+  font-size: 1.42rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.featured__rule {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--sage-line), rgba(185, 205, 182, 0));
+}
+
+/* ---------- 故事卡 ---------- */
+.story-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.story-card__main {
+  position: relative;
+  display: flex;
+  gap: 13px;
+  min-height: 130px;
+}
+
+.story-card__cover {
+  flex: none;
+  width: 112px;
+  align-self: stretch;
+  border-radius: 15px;
+  overflow: hidden;
+  background: var(--ivory-deep);
+}
+.story-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.story-card__cover:hover img { transform: scale(1.03); }
+.story-card__cover img { transition: transform 500ms var(--ease-slow); }
+
+.story-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 2px 6px;
+}
+
+.story-card__name {
+  margin: 0 0 4px;
+  font-size: 1.17rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+.story-card__meta {
+  margin: 0 0 10px;
+  font-size: 0.875rem;   /* 14px 硬底線 */
+  line-height: 1.45;
+  color: var(--muted-soft);
+  white-space: nowrap;
+}
+
+.story-card__tag {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--gold-pale);
+  color: var(--gold);
+  font-size: 0.875rem;   /* =14px 硬底線 */
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.story-card__play {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--forest);
+  background: var(--jade-pale);
+  box-shadow: 0 8px 16px -8px rgba(44, 87, 66, 0.5),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease-slow),
+              background-color var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+.story-card__play i { font-size: 1.05rem; transform: translateX(1.5px); }
+.story-card__play:hover { transform: translateY(-2px); background: #D3E3D5; }
+.story-card__play:active { transform: scale(0.95); }
+
+/* FR-B4 強制披露（14px 硬底線；米白卡上對比 ≥4.5:1） */
+.story-card__disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  padding: 11px 12px 2px;
+  border-top: 1px dashed var(--hairline);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.story-card__disclosure > i {
+  flex: none;
+  margin-top: 3px;
+  font-size: 0.95rem;
+  color: var(--forest);
+}
+.story-card__disclosure em {
+  font-style: normal;
+  color: var(--ink-body);
+}
+
+/* ==========================================================================
+   信任承諾條
+   ========================================================================== */
+.trust-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 20px 24px;
+  padding: 16px 18px;
+  border-radius: 17px;
+  background: var(--sage-wash);
+  border: 1px solid #DDE7D7;
+}
+
+.trust-bar__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--forest);
+}
+.trust-bar__icon svg { width: 34px; height: 34px; }
+
+.trust-bar__text {
+  margin: 0;
+  font-size: 0.97rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #315542;
+}
+
+/* ==========================================================================
+   底部導航（外殼 flex 尾列，喺滾動容器之外，永遠貼實屏幕底部）
+   ========================================================================== */
+.bottom-nav {
+  position: relative;
+  z-index: 30;                 /* 高層級：展開嘅文字稿／問答都喺獨立滾動區內，唔會蓋住佢 */
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(253, 251, 244, 0.94);
+  border-top: 1px solid rgba(90, 110, 92, 0.16);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 -10px 24px -16px rgba(31, 50, 38, 0.35);
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 58px;
+  border-radius: 15px;
+  color: #7C8A80;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav__icon {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  padding: 0 18px;
+  border-radius: 13px;
+  transition: background-color var(--dur) var(--ease-slow);
+}
+.bottom-nav__icon i { font-size: 1.26rem; }
+
+.bottom-nav__item:hover { color: var(--forest); }
+.bottom-nav__item:active .bottom-nav__icon { transform: scale(0.94); }
+.bottom-nav__icon { transition: background-color var(--dur) var(--ease-slow),
+                                   transform 180ms ease; }
+
+.bottom-nav__item.is-active {
+  color: var(--forest);
+  font-weight: 700;
+}
+.bottom-nav__item.is-active .bottom-nav__icon {
+  background: var(--jade-pale);
+}
+
+/* ==========================================================================
+   Toast（原型階段：未建成頁面的誠實反饋）
+   ========================================================================== */
+/* 覆蓋 Bootstrap `.toast:not(.show){display:none}`：可見性統一由 .is-show 控制 */
+.toast:not(.show) { display: flex; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 80;                    /* 高於語言底部彈層（70/71） */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: min(388px, calc(100vw - 40px));
+  padding: 13px 19px;
+  border-radius: 999px;
+  background: var(--forest-deep);
+  color: #F4F8F1;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  box-shadow: 0 14px 30px -12px rgba(20, 40, 30, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 18px);
+  transition: opacity var(--dur) var(--ease-slow),
+              transform var(--dur) var(--ease-slow);
+}
+.toast.is-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+/* 語言彈層打開時，Toast 上移到彈層上方，避免被遮擋 */
+body:has(.sheet.is-show) .toast {
+  bottom: calc(568px + env(safe-area-inset-bottom));
+}
+.toast__icon { color: #9FC7AC; font-size: 1rem; }
+
+/* ==========================================================================
+   第二頁：錄音管理（我的錄音）
+   ========================================================================== */
+
+/* ---------- 頁面主體：外殼內唯一嘅縱向滾動容器 ----------
+   flex-1＋min-height:0 食盡頂欄同底導航之間嘅空間；
+   內容多長都只喺呢度滾動，底導航維持喺外殼底部。
+   頁尾用各頁自帶 padding-bottom／承諾條留氣位，最後一項唔會被遮擋。 */
+.app-shell > .page {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.app-shell > .page::-webkit-scrollbar { display: none; }
+
+/* 彈層（錄音抽屜／AI 助手）打開期間鎖定背景滾動 */
+.app-shell.is-modal-open > .page {
+  overflow: hidden;
+}
+
+.page--manage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 管理頁 Hero：無問候語，標題直接開始，緊接分頁欄 */
+.hero--manage {
+  flex: none;
+  padding: 36px 24px 0;
+  min-height: 176px;
+}
+
+/* ---------- 狀態分頁（segmented tabs） ---------- */
+.rec-tabs {
+  flex: none;
+  padding: 4px 20px 0;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 6px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.tabs__btn {
+  position: relative;
+  min-height: 58px;          /* ≥58px 觸控底線 */
+  padding: 8px 6px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #8A938A;
+  font-family: inherit;
+  font-size: 1.12rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease-slow),
+              color var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 非首個分頁左側細分隔線；相鄰任一側為選中態時隱藏 */
+.tabs__btn:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  width: 1px;
+  height: 30px;
+  transform: translateY(-50%);
+  background: rgba(112, 102, 74, 0.18);
+}
+.tabs__btn.is-active::before,
+.tabs__btn:has(+ .tabs__btn.is-active)::before { display: none; }
+
+.tabs__btn:hover { color: var(--forest); }
+
+.tabs__btn.is-active {
+  background: var(--jade-pale);
+  color: var(--forest);
+  font-weight: 700;
+}
+
+/* 選中態底部森林綠短劃線 */
+.tabs__btn.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  width: 46px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--forest);
+  transform: translateX(-50%);
+}
+
+/* ---------- 面板與誠實空狀態 ---------- */
+.panels {
+  flex: 1 0 auto;   /* 內容超過一屏時讓外殼自然滾動，不與承諾條重疊 */
+  display: flex;
+  min-height: 0;
+}
+
+.empty {
+  display: none;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 22px 32px 14px;
+  outline: none;
+}
+.empty.is-show {
+  display: flex;
+  animation: panel-in var(--dur) var(--ease-slow) both;
+}
+
+/* 待轉寫／已完成分頁嘅空狀態內容包層：必須沿用 .empty 嘅置中契約。
+   否則普通 block 包層 shrink-to-fit（約標題闊），內裡 <img> 貼實左邊緣，
+   而標題文字居中——插畫就會相對標題偏左。 */
+.empty__inner {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.empty__art {
+  flex: none;
+  width: min(222px, 60%);
+  height: auto;
+  margin-bottom: 14px;
+}
+
+/* 草稿分頁使用官方橫向插畫：放大少許，四邊羽化融入米白底色 */
+.empty__art--drafts {
+  width: min(300px, 82%);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 9%, #000 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 9%, #000 92%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.empty__title {
+  margin: 0 0 10px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.empty__text {
+  margin: 0;
+  max-width: 24em;
+  font-size: 1.0rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 管理頁承諾條：單行陳列（14px 硬底線；緊湊間距確保一整行） */
+.page--manage .trust-bar {
+  flex: none;
+  gap: 9px;
+  /* 底部 safe-area 由底導航自身 padding 處理；呢度只留滾動尾氣位 */
+  margin: 10px 12px 18px;
+  padding: 11px 13px;
+}
+.page--manage .trust-bar__icon { width: 24px; height: 24px; }
+.page--manage .trust-bar__icon svg { width: 24px; height: 24px; }
+.page--manage .trust-bar__text {
+  font-size: 0.875rem;   /* 14px 硬底線 */
+  line-height: 1.45;
+  min-width: 0;          /* 容許喺 flex 列內收窄換行，唔好撐破版面 */
+}
+.page--manage .trust-bar { min-width: 0; }
+
+/* ==========================================================================
+   第三頁：村落故事
+   ========================================================================== */
+
+.page--stories { padding-bottom: 18px; }
+
+/* Hero：需容納標題、副標與篩選膠囊（縮短標題至膠囊的垂直距離） */
+.hero--stories {
+  padding: 36px 20px 0;
+  min-height: 232px;
+}
+
+/* ---------- 篩選膠囊（FR-B2：僅真實存在的值） ---------- */
+.filter-chips {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+}
+
+.chip {
+  flex: 0 1 auto;
+  min-height: 58px;              /* ≥58px 觸控底線 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 22px;
+  white-space: nowrap;
+  border: 1.8px solid var(--forest);
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.82);
+  color: var(--forest);
+  font-family: inherit;
+  font-size: 1.04rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -10px rgba(44, 87, 66, 0.5);
+  transition: background-color var(--dur) var(--ease-slow),
+              color var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chip__dot { margin: 0 1px; }
+
+.chip:hover {
+  background: var(--cream);
+  box-shadow: 0 8px 18px -10px rgba(44, 87, 66, 0.55);
+}
+
+.chip.is-active {
+  flex: 0 0 auto;
+  background: var(--forest);
+  color: #FDFBF4;
+  font-weight: 700;
+  box-shadow: 0 10px 22px -12px rgba(33, 69, 58, 0.7);
+}
+
+/* ---------- 唯一故事卡 ---------- */
+.story-hero-card {
+  display: flex;
+  gap: 16px;
+  margin: 18px 16px 0;
+  padding: 14px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+.story-hero-card.is-hidden { display: none; }
+
+.story-hero-card__cover {
+  flex: 0 0 136px;
+  align-self: stretch;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ivory-deep);
+}
+.story-hero-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-hero-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2px 4px 2px 0;
+}
+
+.story-hero-card__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.22rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.story-hero-card__meta {
+  margin: 8px 0 0;
+  font-size: 1.02rem;
+  color: var(--muted);
+}
+
+.story-hero-card__role {
+  margin: 4px 0 0;
+  font-size: 0.96rem;
+  color: var(--muted-soft);
+}
+
+.story-hero-card__tag {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--gold-pale);
+  color: var(--gold);
+  font-size: 0.875rem;          /* 14px 硬底線 */
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* 開啟故事：整列大按鈕，播放鍵置於右側圓形容器 */
+.open-story {
+  position: relative;
+  width: 100%;
+  min-height: 64px;              /* ≥58px 觸控底線 */
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  padding: 8px 66px 8px 22px;
+  border: 1.8px solid var(--forest);
+  border-radius: 18px;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow),
+              transform var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+.open-story:hover {
+  background: var(--jade-pale);
+  box-shadow: 0 12px 24px -16px rgba(33, 69, 58, 0.6);
+}
+.open-story:active { transform: scale(0.985); }
+
+.open-story__label {
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.open-story__play {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--jade-pale);
+  color: var(--forest-deep);
+  font-size: 0.95rem;
+}
+.open-story__play i { transform: translateX(2px); }  /* 視覺補償：play 三角形居中 */
+.open-story:hover .open-story__play { background: var(--cream); }
+
+/* ---------- 模糊位置卡（FR-B5） ---------- */
+.map-card {
+  margin: 16px 16px 0;
+  padding: 18px 18px 20px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.map-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.map-card__pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-size: 1.3rem;
+}
+
+.map-card__heading { min-width: 0; }
+
+.map-card__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.18rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.map-card__note {
+  margin: 5px 0 0;
+  font-size: 0.96rem;
+  color: var(--muted);
+}
+
+.map-card__frame {
+  position: relative;
+  margin-top: 14px;
+  height: 238px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-deep);
+}
+.map-card__fallback,
+.map-card__leaflet {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.map-card__fallback {
+  object-fit: cover;
+  z-index: 0;
+}
+.map-card__leaflet {
+  z-index: 1;
+  background: var(--ivory-deep);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.map-card__leaflet.is-ready { opacity: 1; }
+.map-card__leaflet.is-failed { display: none; }
+
+/* 地圖載入態 */
+.map-card__loading {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.92);
+  border: 1px solid var(--hairline);
+  color: var(--forest-deep);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+.map-card__loading.is-hidden { opacity: 0; pointer-events: none; }
+.map-card__spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid #c7d6c2;
+  border-top-color: var(--forest);
+  animation: map-spin 0.8s linear infinite;
+}
+@keyframes map-spin { to { transform: rotate(360deg); } }
+
+/* 指北針 */
+.map-card__north {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(253, 251, 244, 0.92);
+  border: 1px solid var(--hairline);
+  color: var(--forest-deep);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 2px 8px -3px rgba(33, 69, 58, 0.4);
+}
+.map-card__north span { margin-top: -1px; font-size: 0.95rem; }
+
+/* Leaflet 微調：配合米白風格＋長者字號 */
+.map-card__leaflet .leaflet-control-attribution {
+  background: rgba(253, 251, 244, 0.82);
+  font-size: 0.62rem;
+  color: #6f7d70;
+}
+.map-card__leaflet .leaflet-control-scale-line {
+  background: rgba(253, 251, 244, 0.82);
+  border-color: var(--forest-deep);
+  color: var(--forest-deep);
+  font-size: 0.66rem;
+}
+.map-card__leaflet .leaflet-bar a {
+  color: var(--forest-deep);
+  border-radius: 0;
+}
+.leaflet-vtn-popup .leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  background: var(--cream);
+  box-shadow: 0 10px 26px -12px rgba(33, 69, 58, 0.55);
+}
+.leaflet-vtn-popup .leaflet-popup-content {
+  margin: 11px 14px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--forest-deep);
+}
+
+.map-card__tiles-note {
+  margin: 9px 2px 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-card__leaflet, .map-card__loading { transition: none; }
+  .map-card__spinner { animation: none; }
+}
+
+/* ---------- 強制披露卡（FR-B4） ---------- */
+.disclosure-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 16px 16px 0;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: var(--gold-pale);
+  border: 1px solid rgba(131, 99, 43, 0.18);
+}
+
+.disclosure-card__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2.4px solid #B0893C;
+  border-radius: 50%;
+  color: #9A7226;
+  font-size: 1.15rem;
+}
+
+.disclosure-card__body { min-width: 0; }
+
+.disclosure-card__en {
+  margin: 0;
+  font-size: 0.875rem;             /* 14px 硬底線 */
+  line-height: 1.55;
+  color: #6B5326;
+}
+
+.disclosure-card__zh {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #6B5326;
+  white-space: nowrap;
+}
+@media (max-width: 360px) {
+  .disclosure-card__zh { white-space: normal; }
+}
+
+/* ---------- 窄屏微調（≤360px）：封面收窄防擠壓，長文案安全換行 ---------- */
+@media (max-width: 360px) {
+  .story-hero-card { gap: 12px; padding: 12px; }
+  .story-hero-card__cover { flex-basis: 120px; }
+  .story-hero-card__title { font-size: 1.04rem; }
+  .story-hero-card__tag { white-space: normal; }
+  .open-story__label { font-size: 1.05rem; }
+  .map-card__title { font-size: 1.02rem; white-space: normal; }
+  .filter-chips { left: 14px; right: 14px; flex-wrap: wrap; }
+  .chip { padding: 12px 18px; font-size: 0.95rem; }
+}
+
+/* ==========================================================================
+   第四頁：我的（管理中心）
+   ========================================================================== */
+
+.page--me { padding-bottom: 16px; }
+
+/* Hero：雙行標題較高，卡片輕疊於背景草叢之上。
+   底部保留 26px padding，確保任何字體渲染下副文都不被卡片遮擋。 */
+.hero--me {
+  padding: 42px 22px 26px;
+  min-height: 272px;
+}
+
+.hero__eyebrow {
+  margin: 0 0 4px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.85rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--forest);
+  text-shadow: 0 2px 14px rgba(246, 241, 230, 0.9);
+}
+
+.hero__title--xl {
+  margin-bottom: 14px;
+  font-size: clamp(2.35rem, 1.25rem + 4.6vw, 3.05rem);
+}
+
+.hero__sub--stack {
+  font-size: 1.3rem;
+  line-height: 1.62;
+}
+
+/* ---------- 管理入口清單 ---------- */
+.me-list {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: -10px;               /* 只輕疊背景草叢，保留與副文的安全距離 */
+  padding: 0 16px;
+}
+
+/* 整列可點的入口卡（<a> 或 <button> 共用） */
+.me-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 100px;              /* 遠高於 58px 觸控底線 */
+  padding: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--cream);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+.me-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 36px -24px rgba(52, 72, 55, 0.45),
+              0 2px 6px rgba(52, 72, 55, 0.05);
+}
+.me-item:active { transform: scale(0.99); }
+
+/* 左側 sage 圓底圖標 */
+.me-item__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-size: 1.55rem;
+}
+
+.me-item__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.me-item__title {
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.me-item__sub {
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+/* 四檔私隱副標強制單行（其餘副文容許自然換行） */
+.me-item__sub--oneline { white-space: nowrap; }
+
+/* 右側箭頭圓鈕 */
+.me-item__chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--jade-pale);
+  color: var(--forest);
+  font-size: 1.05rem;
+}
+.me-item__chevron i { transform: translateX(2px); }   /* 視覺補償居中 */
+
+/* ---------- 模糊地點說明條（FR-MY5） ---------- */
+.me-note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background: var(--sage-wash);
+}
+
+.me-note__pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 2.5px dashed rgba(44, 87, 66, 0.75);
+  border-radius: 50%;
+  color: var(--forest);
+  font-size: 1.3rem;
+}
+
+.me-note__divider {
+  flex: none;
+  align-self: stretch;
+  width: 2px;
+  margin: 4px 0;
+  background: rgba(93, 128, 104, 0.35);
+}
+
+.me-note__text {
+  margin: 0;
+  font-size: 1.0rem;
+  line-height: 1.5;
+  color: var(--forest);
+}
+
+/* ---------- 關於入口（FR-MY6） ---------- */
+.me-item--about {
+  min-height: 88px;
+  gap: 12px;
+  padding: 14px;
+}
+
+.me-item__icon--gold {
+  width: 52px;
+  height: 52px;
+  background: transparent;
+  border: 2.6px solid #B0893C;
+  color: #9A7226;
+  font-size: 1.4rem;
+}
+
+.me-item__divider {
+  flex: none;
+  align-self: stretch;
+  width: 2px;
+  margin: 6px 0;
+  background: var(--hairline);
+}
+
+.me-item__title--about {
+  font-family: "Helvetica Neue", Arial, "Noto Sans TC", "PingFang HK", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* 關於卡箭頭略縮，把寬度留給英文標題 */
+.me-item--about .me-item__chevron { width: 46px; height: 46px; font-size: 0.98rem; }
+
+/* ---------- 窄屏微調（≤360px） ---------- */
+@media (max-width: 360px) {
+  .hero--me { min-height: 252px; }
+  .hero__eyebrow { font-size: 1.6rem; }
+  .hero__sub--stack { font-size: 1.12rem; }
+  .me-list { gap: 12px; padding: 0 12px; }
+  .me-item { gap: 10px; min-height: 92px; padding: 12px; }
+  .me-item__icon { width: 50px; height: 50px; font-size: 1.3rem; }
+  .me-item__title { font-size: 1.12rem; }
+  .me-item__sub { font-size: 0.88rem; }   /* ≥14px 硬底線 */
+  .me-item__chevron { width: 44px; height: 44px; font-size: 0.95rem; }
+  .me-note { gap: 10px; padding: 12px; }
+  .me-note__pin { width: 48px; height: 48px; font-size: 1.15rem; }
+  .me-note__text { font-size: 0.9rem; }
+  .me-item__icon--gold { width: 44px; height: 44px; font-size: 1.15rem; }
+  .me-item--about .me-item__chevron { width: 42px; height: 42px; }
+  .me-item__title--about { font-size: 0.88rem; }   /* ≥14px 硬底線 */
+}
+
+/* ==========================================================================
+   語言選擇底部彈層（Bottom sheet）
+   ========================================================================== */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(31, 42, 33, 0.46);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-slow);
+}
+.sheet-overlay.is-show { opacity: 1; }
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 71;
+  width: min(430px, 100vw);
+  padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0;
+  background: var(--cream);
+  box-shadow: 0 -18px 44px -18px rgba(28, 44, 35, 0.45);
+  transform: translate(-50%, 100%);
+  transition: transform var(--dur) var(--ease-slow);
+}
+.sheet.is-show { transform: translate(-50%, 0); }
+
+.sheet__handle {
+  width: 44px;
+  height: 5px;
+  margin: 4px auto 12px;
+  border-radius: 999px;
+  background: rgba(93, 112, 99, 0.32);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sheet__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: var(--forest);
+}
+
+.sheet__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-size: 1.15rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur) var(--ease-slow);
+}
+.sheet__close:hover { background: var(--jade-pale); }
+
+/* ---------- 語言選項單選列 ---------- */
+.lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 66px;
+  padding: 13px 16px;
+  border: 1.8px solid var(--hairline);
+  border-radius: 18px;
+  background: var(--sage-wash);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur) var(--ease-slow),
+              border-color var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+}
+.lang-option:hover {
+  border-color: var(--sage-line);
+  box-shadow: 0 8px 18px -14px rgba(44, 87, 66, 0.55);
+}
+.lang-option.is-selected {
+  border-color: var(--forest);
+  background: var(--jade-pale);
+  box-shadow: 0 10px 22px -16px rgba(33, 69, 58, 0.7);
+}
+
+.lang-option__names {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.lang-option__primary {
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--forest);
+}
+.lang-option__sub {
+  font-size: 0.88rem;              /* ≥14px 硬底線 */
+  color: var(--muted);
+}
+
+.lang-option__tag {
+  flex: none;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: #F4F8F1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.lang-option__tag--soon {
+  background: transparent;
+  border: 1.5px solid var(--sage-line);
+  color: var(--muted);
+}
+
+.lang-option__check {
+  flex: none;
+  font-size: 1.45rem;
+  color: var(--muted-soft);
+}
+.lang-option.is-selected .lang-option__check { color: var(--forest); }
+
+/* ---------- 彈層說明與關閉 ---------- */
+.sheet__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 16px 2px 14px;
+  font-size: 0.88rem;              /* ≥14px 硬底線 */
+  line-height: 1.55;
+  color: var(--muted);
+}
+.sheet__hint i { margin-top: 3px; color: var(--jade-strong); }
+
+.sheet__cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 58px;                /* ≥58px 觸控底線 */
+  border: 0;
+  border-radius: 999px;
+  background: var(--forest);
+  color: #F4F8F1;
+  font-family: inherit;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: var(--shadow-cta);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur) var(--ease-slow);
+}
+.sheet__cancel:hover { background: var(--forest-rich); }
+
+/* 鍵盤焦點可見性 */
+.lang-option:focus-visible,
+.sheet__close:focus-visible,
+.sheet__cancel:focus-visible {
+  outline: 3px solid var(--jade-strong);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   無障礙：系統要求減少動態時，全部靜止
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

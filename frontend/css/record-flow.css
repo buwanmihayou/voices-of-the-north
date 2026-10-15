@@ -1,0 +1,533 @@
+/* =============================================================================
+ * Voices of the North — 真實錄音流程 + 我的錄音卡片（Direction B）
+ * 載入於 index.html / recording.html / stories.html；class 一律 vtn-rec- 前綴。
+ * ========================================================================== */
+
+/* =============================================================================
+ * 1. 故事頁補充：真實錄音標記與高亮
+ * ========================================================================== */
+.story-hero-card__note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  color: var(--gold, #83632B);
+  font-weight: 500;
+}
+.story-hero-card.is-highlight {
+  outline: 3px solid rgba(94, 140, 112, 0.65);
+  outline-offset: 3px;
+  transition: outline 0.4s ease;
+}
+
+/* =============================================================================
+ * 2. 錄音底部抽屜（全步驟共用容器）
+ *    掛載於 .app-shell 內，position:absolute 以手機框為定位參照；
+ *    bottom 預留底導航高度（--vtn-nav-h），遮罩／抽屜都唔會蓋住導航列。
+ * ========================================================================== */
+.vtn-rec-overlay {
+  position: absolute;
+  inset: 0 0 var(--vtn-nav-h, 77px) 0;
+  z-index: 60;                      /* 高於底導航(30)／AI 助手層(50)，低於 toast(80) */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(24, 38, 30, 0.46);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.vtn-rec-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+.vtn-rec-sheet {
+  width: 100%;
+  max-width: 460px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  background: var(--cream, #FDFBF4);
+  box-shadow: 0 -24px 60px -18px rgba(20, 35, 27, 0.5);
+  transform: translateY(24px);
+  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+}
+.vtn-rec-overlay.is-open .vtn-rec-sheet { transform: translateY(0); }
+/* sheet 頭欄固定，內容區獨立滾動，彈窗高度自適應但永不超出視口 */
+.vtn-rec-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* 底導航已自帶 safe-area padding，sheet 喺導航上方，無需再重複留安全區 */
+  padding: 18px 18px 20px;
+}
+@media (min-width: 560px) {
+  .vtn-rec-overlay { align-items: center; padding: 16px; }
+  .vtn-rec-sheet {
+    max-height: 92%;
+    border-radius: 28px;
+  }
+  .vtn-rec-body { padding-bottom: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vtn-rec-overlay, .vtn-rec-sheet { transition: none; }
+}
+
+.vtn-rec-sheet__head {
+  position: relative;
+  flex: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  border-radius: 28px 28px 0 0;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-rec-sheet__titles { flex: 1 1 auto; min-width: 0; }
+.vtn-rec-sheet__title { margin: 0; font-size: 1.1rem; font-weight: 900; }
+.vtn-rec-sheet__sub {
+  margin: 1px 0 0;
+  font-size: 0.8rem;
+  color: #DCE9DC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vtn-rec-sheet__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #F4F8F1;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.vtn-rec-sheet__close:hover { background: rgba(255, 255, 255, 0.14); }
+
+.vtn-rec-step[hidden] { display: none; }
+
+/* ---------- 服務狀態膠囊 ---------- */
+.vtn-rec-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 auto 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.vtn-rec-status i { font-size: 0.72rem; }
+.vtn-rec-status--online { background: #DCE9DC; color: #2C5742; }
+.vtn-rec-status--offline { background: #F1E3C1; color: #6d5326; }
+.vtn-rec-status--checking { background: #EAF0E5; color: #5D7063; }
+
+/* ---------- 通用文案／按鈕 ---------- */
+.vtn-rec-lead {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 1.06rem;
+  font-weight: 900;
+  color: var(--forest, #21453A);
+}
+.vtn-rec-desc {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: #4a5a4e;
+}
+.vtn-rec-center { text-align: center; }
+
+.vtn-rec-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 2px solid var(--forest, #2C5742);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-rec-btn--primary { background: var(--forest, #2C5742); color: #F4F8F1; }
+.vtn-rec-btn--primary:hover { background: #31604A; }
+.vtn-rec-btn--ghost { background: #fff; color: var(--forest, #2C5742); }
+.vtn-rec-btn--ghost:hover { background: #EAF0E5; }
+.vtn-rec-btn--gold {
+  border-color: #b3925a;
+  background: var(--gold, #83632B);
+  color: #FFF8E8;
+}
+.vtn-rec-btn + .vtn-rec-btn { margin-top: 10px; }
+.vtn-rec-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- 準備步：大咪 ---------- */
+.vtn-rec-mic {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin: 6px auto 14px;
+  padding: 0;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+  font-size: 2.3rem;
+  box-shadow: 0 18px 40px -14px rgba(33, 69, 58, 0.7);
+  cursor: pointer;
+}
+.vtn-rec-mic.is-live { animation: vtn-rec-mic-pulse 1.6s ease-out infinite; }
+@keyframes vtn-rec-mic-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(200, 92, 72, 0.45), 0 18px 40px -14px rgba(33,69,58,0.7); }
+  70%  { box-shadow: 0 0 0 22px rgba(200, 92, 72, 0), 0 18px 40px -14px rgba(33,69,58,0.7); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 92, 72, 0), 0 18px 40px -14px rgba(33,69,58,0.7); }
+}
+.vtn-rec-mic.is-live { background: #B55443; }
+
+.vtn-rec-timer {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--forest, #21453A);
+  letter-spacing: 0.04em;
+}
+.vtn-rec-hint-live {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #B55443;
+  font-weight: 700;
+}
+.vtn-rec-wave {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  margin: 0 0 18px;
+}
+.vtn-rec-wave i {
+  width: 5px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--jade, #5E8C70);
+  animation: vtn-rec-eq 0.9s ease-in-out infinite;
+}
+.vtn-rec-wave i:nth-child(2n) { animation-delay: 0.15s; }
+.vtn-rec-wave i:nth-child(3n) { animation-delay: 0.3s; }
+@keyframes vtn-rec-eq {
+  0%, 100% { height: 10px; }
+  50% { height: 36px; }
+}
+
+/* ---------- 試聽／音訊 ---------- */
+.vtn-rec-audio {
+  width: 100%;
+  margin: 4px 0 14px;
+  border-radius: 14px;
+}
+.vtn-rec-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 0 14px;
+}
+.vtn-rec-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #EAF0E5;
+  color: #3d5a48;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.vtn-rec-pill--gold { background: #F1E3C1; color: #6d5326; }
+.vtn-rec-pill--red { background: #f6e3df; color: #9c4637; }
+
+/* ---------- 處理步驟 ---------- */
+.vtn-rec-steps {
+  list-style: none;
+  margin: 4px 0 18px;
+  padding: 0;
+}
+.vtn-rec-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 4px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #8a978b;
+}
+.vtn-rec-steps .step-ico {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: #EAF0E5;
+  color: #7a8a7d;
+}
+.vtn-rec-steps li.is-active { color: var(--forest, #2C5742); }
+.vtn-rec-steps li.is-active .step-ico {
+  background: var(--forest, #2C5742);
+  color: #fff;
+}
+.vtn-rec-steps li.is-done { color: var(--forest, #2C5742); }
+.vtn-rec-steps li.is-done .step-ico { background: #DCE9DC; color: var(--forest, #2C5742); }
+.vtn-rec-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vtn-rec-spin 0.8s linear infinite;
+}
+@keyframes vtn-rec-spin { to { transform: rotate(360deg); } }
+
+/* ---------- 結果 ---------- */
+.vtn-rec-result-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: var(--forest, #21453A);
+}
+.vtn-rec-formal {
+  margin: 0 0 14px;
+  padding: 13px 15px;
+  border: 1px solid #B9CDB6;
+  border-left: 5px solid var(--jade, #5E8C70);
+  border-radius: 14px;
+  background: #fff;
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: #2c3f33;
+}
+.vtn-rec-subhead {
+  margin: 4px 0 8px;
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #5D7063;
+}
+.vtn-rec-qa {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.vtn-rec-qa button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #B9CDB6;
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+.vtn-rec-qa button:hover { background: #F6F1E6; }
+.vtn-rec-qa .qa-q { flex: 1 1 auto; font-size: 0.92rem; font-weight: 700; color: #2c3f33; }
+.vtn-rec-qa .qa-a {
+  flex-basis: 100%;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #55655a;
+  padding-top: 2px;
+}
+.vtn-rec-qa .qa-t {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.vtn-rec-words {
+  max-height: 132px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #F6F1E6;
+  line-height: 2.1;
+  margin-bottom: 14px;
+}
+.vtn-rec-word {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #d8ddcf;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+.vtn-rec-word:hover { background: #DCE9DC; }
+.vtn-rec-word.is-low { border-color: #d9a99f; color: #9c4637; }
+.vtn-rec-word .w-t {
+  margin-left: 5px;
+  font-size: 0.68rem;
+  color: #8a978b;
+  font-variant-numeric: tabular-nums;
+}
+
+.vtn-rec-note {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin: 12px 0 0;
+  padding: 10px 13px;
+  border-radius: 12px;
+  background: rgba(241, 227, 193, 0.65);
+  color: #6d5326;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.vtn-rec-note i { margin-top: 2px; }
+
+/* =============================================================================
+ * 3. 我的錄音 — 已完成／待轉寫卡片
+ * ========================================================================== */
+.vtn-rec-list { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 10px; }
+
+/* 有真實錄音時，收起空狀態插畫（維持同一 section） */
+.empty.has-list { text-align: left; align-items: stretch; }
+.empty.has-list .empty__inner { display: none; }
+
+/* 防橫向溢出：截斷 flex 嘅 min-width:auto 鏈，
+   否則卡片標題 nowrap 嘅 max-content 會成個分頁撐闊並被外層裁掉 */
+.panels > .empty { min-width: 0; }
+.vtn-rec-list { width: 100%; min-width: 0; }
+.vtn-rec-card { min-width: 0; max-width: 100%; }
+.vtn-rec-card__body { min-width: 0; max-width: 100%; }
+.vtn-rec-audio { max-width: 100%; min-width: 0; }
+.vtn-rec-qa button { max-width: 100%; }
+.vtn-rec-qa .qa-q { min-width: 0; overflow-wrap: anywhere; }
+.vtn-rec-formal { overflow-wrap: anywhere; }
+
+.vtn-rec-card {
+  border: 1px solid #d9dfce;
+  border-radius: 20px;
+  background: var(--cream, #FDFBF4);
+  box-shadow: 0 8px 24px -16px rgba(33, 69, 58, 0.5);
+  overflow: hidden;
+}
+.vtn-rec-card.is-new { outline: 3px solid rgba(94, 140, 112, 0.55); outline-offset: 2px; }
+.vtn-rec-card__head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 13px 15px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+.vtn-rec-card__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #DCE9DC;
+  color: var(--forest, #2C5742);
+  font-size: 1.05rem;
+}
+.vtn-rec-card__icon--pending { background: #F1E3C1; color: #83632B; }
+.vtn-rec-card__main { flex: 1 1 auto; min-width: 0; }
+.vtn-rec-card__title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 900;
+  color: var(--forest, #21453A);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vtn-rec-card__meta {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #7d8b7f;
+}
+.vtn-rec-card__chevron {
+  flex: none;
+  color: #7d8b7f;
+  transition: transform 0.2s ease;
+}
+.vtn-rec-card.is-open .vtn-rec-card__chevron { transform: rotate(180deg); }
+
+.vtn-rec-card__body { padding: 0 15px 15px; }
+.vtn-rec-card__body[hidden] { display: none; }
+
+.vtn-rec-card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+
+.vtn-rec-card__actions { display: flex; gap: 8px; margin-top: 12px; }
+.vtn-rec-card__actions button {
+  flex: 1 1 auto;
+  min-height: 44px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vtn-rec-card__retry {
+  border: 0;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-rec-card__remove {
+  border: 1.5px solid #c9bfb8;
+  background: #fff;
+  color: #7c6f68;
+}
+
+.tabs__btn .tab-count {
+  display: inline-block;
+  min-width: 1.3em;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #DCE9DC;
+  color: var(--forest, #2C5742);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vtn-rec-overlay, .vtn-rec-sheet, .vtn-rec-mic.is-live,
+  .vtn-rec-wave i, .vtn-rec-spinner, .vtn-rec-card__chevron {
+    transition: none !important;
+    animation: none !important;
+  }
+}

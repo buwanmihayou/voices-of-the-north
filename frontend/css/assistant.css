@@ -1,0 +1,476 @@
+/* =============================================================================
+ * Ask the Village — 村落問答助手（無框架版，四頁原型共用）
+ * 與 components/FloatingAIAssistant.jsx 視覺同源；Direction B「Oat × Sage」。
+ * class 一律 vtn-ai- 前綴，避免與 Bootstrap 5 衝突。
+ *
+ * 定位模型（2026-06 改版）：
+ *   根層 .vtn-ai-root 掛載於 .app-shell 內，position:absolute 覆蓋「底導航以上」
+ *   成個 App 內容區（bottom: var(--vtn-nav-h)）——FAB、遮罩、全寬 BottomSheet
+ *   一律限制喺手機框視口入面，桌面睇亦唔會溢出框外；底導航全程可見可點。
+ * ========================================================================== */
+
+.vtn-ai-root {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: var(--vtn-nav-h, 77px);
+  z-index: 50;                          /* 高於底導航(30)，低於錄音彈層(60)／toast(80) */
+  overflow: hidden;                     /* 關閉滑走嘅面板只可喺根層內被裁走，唔可以喺導航區露頭 */
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  pointer-events: none;                 /* 容器不擋操作，子元素各自開啟 */
+}
+.vtn-ai-root * { box-sizing: border-box; }
+
+/* ---------- 半透明黑色遮罩（點擊關閉） ---------- */
+.vtn-ai-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 38, 30, 0.46);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.vtn-ai-root.is-open .vtn-ai-mask {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- 預設：提示氣泡 + FAB（錨於內容區右下角、底導航之上） ---------- */
+.vtn-ai-launcher {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.vtn-ai-root.is-open .vtn-ai-launcher {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.vtn-ai-hint {
+  position: relative;
+  max-width: min(218px, calc(100vw - 104px));
+  padding: 10px 14px;
+  border-radius: 16px 16px 4px 16px;
+  background: #FDFBF4;
+  color: #24483A;
+  box-shadow: 0 10px 30px -12px rgba(33, 69, 58, 0.45);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  animation: vtn-ai-hint-in 0.32s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.vtn-ai-hint small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #5D7063;
+}
+.vtn-ai-hint-close {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #B9CDB6;
+  border-radius: 50%;
+  background: #fff;
+  color: #5D7063;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.vtn-ai-hint-close:hover { background: #EAF0E5; }
+.vtn-ai-hint.is-hidden { display: none; }
+
+.vtn-ai-fab {
+  pointer-events: auto;
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--forest, #2C5742);
+  box-shadow: 0 16px 34px -10px rgba(33, 69, 58, 0.6);
+  cursor: pointer;
+  animation: vtn-ai-fab-pulse 2.8s ease-out infinite;
+  transition: transform 0.2s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-fab:hover { transform: scale(1.06); }
+.vtn-ai-fab:active { transform: scale(0.96); }
+.vtn-ai-fab img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.vtn-ai-fab-badge {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--gold-pale, #F1E3C1);
+  color: var(--gold, #83632B);
+  font-size: 0.7rem;
+}
+
+/* ---------- 聊天面板：App 內全寬 BottomSheet（底導航以上全屏覆蓋） ---------- */
+.vtn-ai-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;              /* 關閉滑走後唔可以攔截底導航點擊 */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  background: #FDFBF4;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -24px 60px -18px rgba(20, 35, 27, 0.5);
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.vtn-ai-root.is-open .vtn-ai-panel {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* 桌面手機框（≥560px）：留 12px 氣位嘅懸浮卡片，四邊圓角 */
+@media (min-width: 560px) {
+  .vtn-ai-panel {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    height: auto;
+    border: 1px solid #B9CDB6;
+    border-radius: 26px;
+  }
+}
+
+.vtn-ai-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px 11px 14px;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-ai-head img {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 2px solid #DCE9DC;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.vtn-ai-head-titles { flex: 1 1 auto; min-width: 0; }
+.vtn-ai-head-title {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+.vtn-ai-head-sub {
+  margin: 1px 0 0;
+  font-size: 0.8rem;
+  color: #DCE9DC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vtn-ai-head-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #F4F8F1;
+  font-size: 1.05rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-head-btn:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* ---------- 訊息區（獨立滾動：訊息再多都唔會撐破彈窗） ---------- */
+.vtn-ai-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px 13px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--ivory, #F6F1E6);
+  scroll-behavior: smooth;
+}
+
+.vtn-ai-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+}
+.vtn-ai-row--user { justify-content: flex-end; }
+
+.vtn-ai-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-top: 2px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(33, 69, 58, 0.18);
+}
+
+.vtn-ai-bubble {
+  max-width: 84%;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 5px;
+  background: #EAF0E5;
+  color: #24483A;
+  font-size: 0.97rem;
+  line-height: 1.65;
+  box-shadow: 0 2px 8px -4px rgba(33, 69, 58, 0.35);
+  overflow-wrap: anywhere;
+}
+.vtn-ai-row--user .vtn-ai-bubble {
+  border-radius: 18px 18px 5px 18px;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-ai-bubble.is-error {
+  border: 1px solid #d9b3b0;
+  background: #f9eceb;
+}
+
+.vtn-ai-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 0 14px;
+  border: 2px solid var(--forest, #2C5742);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--forest, #2C5742);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vtn-ai-disclosure {
+  margin: 6px 0 0;
+  padding: 0 2px;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--gold, #83632B);
+}
+
+.vtn-ai-sources-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 7px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #5D7063;
+}
+.vtn-ai-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.vtn-ai-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #B9CDB6;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--forest, #2C5742);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.vtn-ai-chip:hover { background: #DCE9DC; }
+.vtn-ai-chip i { font-size: 0.78rem; }
+
+/* 推薦問題 */
+.vtn-ai-suggests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+.vtn-ai-suggest {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 2px solid var(--forest, #2C5742);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--forest, #2C5742);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-suggest:hover { background: #DCE9DC; }
+.vtn-ai-suggest:disabled { opacity: 0.5; cursor: default; }
+
+.vtn-ai-corpus-note {
+  margin: 2px 0 0;
+  padding: 0 2px;
+  text-align: center;
+  font-size: 0.74rem;
+  color: #7a8578;
+}
+
+/* 打字中三點 */
+.vtn-ai-typing { display: inline-flex; gap: 5px; align-items: center; padding: 3px 1px; }
+.vtn-ai-typing span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--jade-strong, #5E8C70);
+  animation: vtn-ai-bounce 1.2s infinite ease-in-out;
+}
+.vtn-ai-typing span:nth-child(2) { animation-delay: 0.18s; }
+.vtn-ai-typing span:nth-child(3) { animation-delay: 0.36s; }
+
+/* ---------- 底欄：誠實註 + 輸入 ---------- */
+.vtn-ai-pledge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(241, 227, 193, 0.7);
+  color: #6d5326;
+  font-size: 0.74rem;
+  text-align: center;
+}
+
+.vtn-ai-form {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 11px;
+  border-top: 1px solid #B9CDB6;
+  background: #FDFBF4;
+}
+.vtn-ai-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 18px;
+  border: 2px solid #B9CDB6;
+  border-radius: 999px;
+  background: #fff;
+  color: #24483A;
+  font-family: inherit;
+  font-size: 0.97rem;
+}
+.vtn-ai-input::placeholder { color: #8a978b; }
+.vtn-ai-input:focus {
+  outline: none;
+  border-color: var(--forest, #2C5742);
+  box-shadow: 0 0 0 3px rgba(94, 140, 112, 0.35);
+}
+.vtn-ai-send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+  font-size: 1.05rem;
+  box-shadow: 0 10px 20px -10px rgba(33, 69, 58, 0.8);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-send:hover { background: var(--forest-rich, #31604A); }
+.vtn-ai-send:disabled { opacity: 0.4; cursor: default; }
+.vtn-ai-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vtn-ai-spin 0.8s linear infinite;
+}
+
+/* ---------- 動畫 ---------- */
+@keyframes vtn-ai-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+  40% { transform: translateY(-5px); opacity: 1; }
+}
+@keyframes vtn-ai-spin { to { transform: rotate(360deg); } }
+@keyframes vtn-ai-fab-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(44, 87, 66, 0.32), 0 16px 34px -10px rgba(33,69,58,0.6); }
+  70%  { box-shadow: 0 0 0 13px rgba(44, 87, 66, 0), 0 16px 34px -10px rgba(33,69,58,0.6); }
+  100% { box-shadow: 0 0 0 0 rgba(44, 87, 66, 0), 0 16px 34px -10px rgba(33,69,58,0.6); }
+}
+@keyframes vtn-ai-hint-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vtn-ai-fab, .vtn-ai-hint, .vtn-ai-typing span, .vtn-ai-spinner,
+  .vtn-ai-panel, .vtn-ai-mask, .vtn-ai-launcher, .vtn-ai-suggest,
+  .vtn-ai-head-btn, .vtn-ai-chip {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 極窄機（≤340px）：FAB 同氣泡再收窄少少，確保唔貼邊／溢出 */
+@media (max-width: 340px) {
+  .vtn-ai-launcher { right: 10px; }
+  .vtn-ai-hint { max-width: calc(100vw - 96px); }
+}

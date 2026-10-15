@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Voices of the North — Next.js 全域基底
+   Direction B「Oat × Sage」，與靜態原型 css/styles.css 同色階
+   ========================================================================== */
+
+html {
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #F6F1E6;
+  color: #2E4A3B;
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #DCE9DC;
+  color: #21453A;
+}
+
+/* 無障礙：尊重系統的減少動態偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
