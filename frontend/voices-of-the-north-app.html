@@ -4,364 +4,5734 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#F6F1E6">
-  <meta name="description" content="Voices of the North 北部都會區·鄉村故事館 — 聽見長者故事，保存地方記憶。">
-  <title>Voices of the North · 北部都會區鄉村故事館</title>
+  <meta name="description" content="Voices of the North 北部都會區・鄉村故事館 —— 聽見長者故事，保存地方記憶。">
+  <title>Voices of the North・北部都會區鄉村故事館（單檔演示）</title>
 
+  <!-- App icon -->
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="apple-touch-icon" href="assets/app-icon.png">
 
-  <!-- 清洁 CDN 引用，杜绝 Markdown 转义错误 -->
+  <!-- Fonts：繁體中文（香港）排版，Noto Serif TC 標題 + Noto Sans TC 內文 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap"
+        rel="stylesheet">
 
-  <style>
-    :root {
-      --ivory: #F6F1E6;
-      --ivory-deep: #EFE8D7;
-      --cream: #FDFBF4;
-      --frame: #E4DECE;
-      --forest: #2C5742;
-      --forest-deep: #21453A;
-      --forest-rich: #31604A;
-      --jade: #7FA68C;
-      --terracotta: #B65D3A;
-      --terracotta-dark: #9E4A28;
-      --gold: #C98A2C;
-      --ink: #1F2922;
-      --ink-muted: #526357;
-      --ink-subtle: #839488;
-      --card-bg: rgba(253, 251, 244, 0.94);
-      --font-serif: "Noto Serif TC", serif;
-      --font-sans: "Noto Sans TC", sans-serif;
-    }
+  <!-- Bootstrap 5.3 + Font Awesome 6（團隊技術棧） -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css"
+        rel="stylesheet">
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      margin: 0; padding: 0;
-      background-color: #D8D2C2;
-      font-family: var(--font-sans);
-      color: var(--ink);
-      display: flex; justify-content: center; min-height: 100vh;
-    }
 
-    .app-viewport {
-      width: 100%; max-width: 440px; min-height: 100vh;
-      background-color: var(--ivory);
-      position: relative; display: flex; flex-direction: column;
-      box-shadow: 0 0 40px rgba(0,0,0,0.12);
-      padding-bottom: 70px;
-    }
+<style>
+/* ===== css/styles.css ===== */
+/* ==========================================================================
+   Voices of the North — 主頁（Home）
+   Direction B「Oat × Sage」：象牙米白 / 森林綠 / 柔玉綠 / 暖金
+   設計不變量：正文 ≥18px（任何文字硬底線 14px）、按鈕高 ≥58px、
+   觸控間距 ≥12px、全部 rem/em、對比度 ≥4.5:1、尊重 reduced-motion。
+   ========================================================================== */
 
-    .vtn-view { display: none !important; }
-    .vtn-view.is-active { display: block !important; }
+/* ---------- 設計令牌 ---------- */
+:root {
+  /* 底色 / 卡片 */
+  --ivory:        #F6F1E6;   /* app 米白底 */
+  --ivory-deep:   #EFE8D7;
+  --cream:        #FDFBF4;   /* 卡片米白 */
+  --frame:        #E4DECE;   /* 桌面外框底 */
 
-    /* 顶部导航 */
-    .top-header {
-      background: var(--forest);
-      color: #FFF;
-      padding: 14px 18px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .top-header h1 {
-      font-size: 16px; margin: 0; font-family: var(--font-serif);
-      letter-spacing: 0.5px;
-    }
+  /* 森林綠主色 */
+  --forest:       #2C5742;
+  --forest-deep:  #21453A;
+  --forest-rich:  #31604A;
 
-    /* 卡片通用样式 */
-    .content-box {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 18px;
-      margin: 14px;
-      border: 1px solid var(--frame);
-      box-shadow: 0 4px 16px rgba(44,87,66,0.06);
-    }
+  /* 玉綠輔色 */
+  --jade:         #7FA68C;
+  --jade-strong:  #5E8C70;
+  --jade-pale:    #DCE9DC;
+  --sage-line:    #B9CDB6;
+  --sage-wash:    #EAF0E5;
 
-    /* 录音与控制台 */
-    .rec-btn {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      border: none; outline: none;
-      background: var(--terracotta);
-      color: #FFF; font-size: 26px;
-      display: flex; align-items: center; justify-content: center;
-      margin: 20px auto;
-      box-shadow: 0 6px 20px rgba(182,93,58,0.4);
-      cursor: pointer; transition: all 0.2s;
-    }
-    .rec-btn.recording {
-      background: #D9383A;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-      100% { transform: scale(1); }
-    }
+  /* 暖金 */
+  --gold:         #83632B;   /* 標籤文字（保對比） */
+  --gold-pale:    #F1E3C1;
 
-    .qa-card {
-      background: var(--cream);
-      border-radius: 10px;
-      padding: 12px; margin-bottom: 10px;
-      border-left: 4px solid var(--forest);
-    }
-    .qa-time {
-      font-size: 11px; color: var(--gold); font-weight: bold;
-    }
+  /* 文字 */
+  --ink:          #24483A;
+  --ink-body:     #2E4A3B;
+  --muted:        #5D7063;  /* 米白底上對比 ≥4.5:1 */
+  --muted-soft:   #6E7B6E;
 
-    /* 底部导航栏 */
-    .bottom-bar {
-      position: fixed; bottom: 0; width: 100%; max-width: 440px;
-      height: 64px; background: #FFF;
-      display: flex; border-top: 1px solid var(--frame);
-      z-index: 100;
-    }
-    .bottom-nav-item {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      color: var(--ink-subtle); text-decoration: none; font-size: 11px;
-    }
-    .bottom-nav-item i { font-size: 18px; margin-bottom: 3px; }
-    .bottom-nav-item.active { color: var(--forest); font-weight: bold; }
-  </style>
+  /* 線條 / 陰影 */
+  --hairline:     rgba(112, 102, 74, 0.16);
+  --shadow-card:  0 16px 32px -22px rgba(52, 72, 55, 0.38),
+                  0 2px 6px rgba(52, 72, 55, 0.05);
+  --shadow-cta:   0 20px 38px -18px rgba(30, 62, 47, 0.65),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  /* 節奏：Direction B 刻意放慢 */
+  --ease-slow:    cubic-bezier(0.33, 1, 0.68, 1);
+  --dur:          380ms;
+
+  --nav-h: 74px;
+
+  /* 底導航實際佔高：8px 上 padding + 58px 項目 + 10px 下 padding + 1px 邊框
+     + iPhone 底部安全區。彈層／FAB 一律用呢個變數留位，唔好硬編碼。 */
+  --vtn-nav-h: calc(77px + env(safe-area-inset-bottom));
+}
+
+/* ---------- 基礎 ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  /* 320px 時約 17px、430px 時 18px，全程不小於 16px（14px 硬底線由此保證） */
+  font-size: clamp(16px, 14.2px + 0.884vw, 18px);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background: var(--frame);
+  color: var(--ink-body);
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", system-ui, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img { display: block; max-width: 100%; }
+
+a { text-decoration: none; }
+
+:where(a, button):focus-visible {
+  outline: 3px solid var(--jade-strong);
+  outline-offset: 2px;
+}
+
+/* ---------- App 外殼（固定手機框：頂欄／滾動頁／底導航三段式） ----------
+   外殼本身唔再做滾動容器（overflow:hidden，高度鎖定 100dvh）；
+   縱向滾動交俾內層 .page —— 底導航做 flex 尾列固定，唔會跟內容走。 */
+.app-shell {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ivory);
+}
+
+@media (min-width: 480px) {
+  .app-shell {
+    height: calc(100dvh - 48px);
+    margin: 24px 0;
+    border-radius: 30px;
+    box-shadow: 0 30px 80px -30px rgba(50, 60, 45, 0.45),
+                0 0 0 1px rgba(120, 110, 80, 0.18);
+  }
+}
+
+/* ==========================================================================
+   頂部品牌列
+   ========================================================================== */
+.topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(18px + env(safe-area-inset-top)) 22px 4px;
+}
+
+.topbar__logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  object-fit: contain;
+}
+
+.topbar__title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.topbar__dot { color: #9AAB9C; font-weight: 400; }
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+.hero {
+  position: relative;
+  padding: 52px 24px 0;
+  min-height: 224px;
+}
+
+.hero__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero__art img {
+  position: absolute;
+  top: -46px;
+  right: -46px;
+  width: 112%;
+  height: calc(100% + 40px);
+  object-fit: cover;
+  /* 官方 16:9 水墨圖：村落重心在右，右錨定裁切保留村屋與太陽 */
+  object-position: right center;
+}
+
+.hero__fade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+/* 左側融入象牙白，保證文字區乾淨（官方水墨圖山色較豐富，漸層加闊）；
+   右緣柔光消除 16:9 橫圖的直邊裁切 */
+.hero__fade--corner {
+  background:
+    linear-gradient(to left,
+      rgba(246, 241, 230, 0.55) 0%,
+      rgba(246, 241, 230, 0.15) 5%,
+      rgba(246, 241, 230, 0) 11%),
+    linear-gradient(to right,
+      var(--ivory) 6%,
+      rgba(246, 241, 230, 0.92) 22%,
+      rgba(246, 241, 230, 0.66) 46%,
+      rgba(246, 241, 230, 0.28) 62%,
+      rgba(246, 241, 230, 0) 74%);
+}
+/* 底部融入下一區塊（消融前景草木與河岸的硬邊） */
+.hero__fade--bottom {
+  background: linear-gradient(to top,
+    var(--ivory) 8%,
+    rgba(246, 241, 230, 0.97) 24%,
+    rgba(246, 241, 230, 0.62) 44%,
+    rgba(246, 241, 230, 0) 66%);
+}
+
+.hero__copy {
+  position: relative;
+  z-index: 2;
+}
+
+.hero__greeting {
+  margin: 0 0 8px;
+  font-size: 1.14rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-shadow: 0 1px 10px rgba(246, 241, 230, 0.9),
+               0 0 3px rgba(246, 241, 230, 0.85);
+}
+
+.hero__title {
+  margin: 0 0 12px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 1.1rem + 3.6vw, 2.55rem);
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  text-shadow: 0 2px 14px rgba(246, 241, 230, 0.85);
+}
+
+.hero__sub {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--muted);
+  text-shadow: 0 1px 10px rgba(246, 241, 230, 0.9),
+               0 0 3px rgba(246, 241, 230, 0.85);
+}
+
+/* ==========================================================================
+   主 CTA：開始錄音（全頁唯一主操作）
+   ========================================================================== */
+.cta-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(100% - 44px);
+  margin: 2px 22px 0;
+  padding: 26px 24px 24px;
+  border: 0;
+  border-radius: 24px;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  background: linear-gradient(150deg,
+    var(--forest-rich) 0%,
+    #28503D 55%,
+    var(--forest-deep) 100%);
+  box-shadow: var(--shadow-cta);
+  transition: transform var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cta-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 26px 44px -18px rgba(30, 62, 47, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.cta-card:active { transform: translateY(0) scale(0.985); }
+
+.cta-card__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 13px;
+}
+
+.cta-card__mic {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1.5px solid rgba(255, 255, 255, 0.30);
+}
+.cta-card__mic i { font-size: 1.55rem; }
+
+.cta-card__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.cta-card__sub {
+  margin-top: 4px;
+  font-size: 0.97rem;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+/* 聲波 */
+.eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+}
+.eq i {
+  width: 4px;
+  height: var(--h, 16px);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.52);
+  transform-origin: center;
+  animation: eq-breathe 1.7s ease-in-out var(--d, 0ms) infinite;
+}
+@keyframes eq-breathe {
+  0%, 100% { transform: scaleY(0.45); opacity: 0.55; }
+  50%      { transform: scaleY(1);    opacity: 0.95; }
+}
+
+/* ==========================================================================
+   精選故事
+   ========================================================================== */
+.featured { padding: 32px 20px 0; }
+
+.featured__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.featured__title {
+  margin: 0;
+  font-size: 1.42rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.featured__rule {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--sage-line), rgba(185, 205, 182, 0));
+}
+
+/* ---------- 故事卡 ---------- */
+.story-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.story-card__main {
+  position: relative;
+  display: flex;
+  gap: 13px;
+  min-height: 130px;
+}
+
+.story-card__cover {
+  flex: none;
+  width: 112px;
+  align-self: stretch;
+  border-radius: 15px;
+  overflow: hidden;
+  background: var(--ivory-deep);
+}
+.story-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.story-card__cover:hover img { transform: scale(1.03); }
+.story-card__cover img { transition: transform 500ms var(--ease-slow); }
+
+.story-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 2px 6px;
+}
+
+.story-card__name {
+  margin: 0 0 4px;
+  font-size: 1.17rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+.story-card__meta {
+  margin: 0 0 10px;
+  font-size: 0.875rem;   /* 14px 硬底線 */
+  line-height: 1.45;
+  color: var(--muted-soft);
+  white-space: nowrap;
+}
+
+.story-card__tag {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--gold-pale);
+  color: var(--gold);
+  font-size: 0.875rem;   /* =14px 硬底線 */
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.story-card__play {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--forest);
+  background: var(--jade-pale);
+  box-shadow: 0 8px 16px -8px rgba(44, 87, 66, 0.5),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease-slow),
+              background-color var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+.story-card__play i { font-size: 1.05rem; transform: translateX(1.5px); }
+.story-card__play:hover { transform: translateY(-2px); background: #D3E3D5; }
+.story-card__play:active { transform: scale(0.95); }
+
+/* FR-B4 強制披露（14px 硬底線；米白卡上對比 ≥4.5:1） */
+.story-card__disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  padding: 11px 12px 2px;
+  border-top: 1px dashed var(--hairline);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.story-card__disclosure > i {
+  flex: none;
+  margin-top: 3px;
+  font-size: 0.95rem;
+  color: var(--forest);
+}
+.story-card__disclosure em {
+  font-style: normal;
+  color: var(--ink-body);
+}
+
+/* ==========================================================================
+   信任承諾條
+   ========================================================================== */
+.trust-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 20px 24px;
+  padding: 16px 18px;
+  border-radius: 17px;
+  background: var(--sage-wash);
+  border: 1px solid #DDE7D7;
+}
+
+.trust-bar__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--forest);
+}
+.trust-bar__icon svg { width: 34px; height: 34px; }
+
+.trust-bar__text {
+  margin: 0;
+  font-size: 0.97rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #315542;
+}
+
+/* ==========================================================================
+   底部導航（外殼 flex 尾列，喺滾動容器之外，永遠貼實屏幕底部）
+   ========================================================================== */
+.bottom-nav {
+  position: relative;
+  z-index: 30;                 /* 高層級：展開嘅文字稿／問答都喺獨立滾動區內，唔會蓋住佢 */
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(253, 251, 244, 0.94);
+  border-top: 1px solid rgba(90, 110, 92, 0.16);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 -10px 24px -16px rgba(31, 50, 38, 0.35);
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 58px;
+  border-radius: 15px;
+  color: #7C8A80;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav__icon {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  padding: 0 18px;
+  border-radius: 13px;
+  transition: background-color var(--dur) var(--ease-slow);
+}
+.bottom-nav__icon i { font-size: 1.26rem; }
+
+.bottom-nav__item:hover { color: var(--forest); }
+.bottom-nav__item:active .bottom-nav__icon { transform: scale(0.94); }
+.bottom-nav__icon { transition: background-color var(--dur) var(--ease-slow),
+                                   transform 180ms ease; }
+
+.bottom-nav__item.is-active {
+  color: var(--forest);
+  font-weight: 700;
+}
+.bottom-nav__item.is-active .bottom-nav__icon {
+  background: var(--jade-pale);
+}
+
+/* ==========================================================================
+   Toast（原型階段：未建成頁面的誠實反饋）
+   ========================================================================== */
+/* 覆蓋 Bootstrap `.toast:not(.show){display:none}`：可見性統一由 .is-show 控制 */
+.toast:not(.show) { display: flex; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 80;                    /* 高於語言底部彈層（70/71） */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: min(388px, calc(100vw - 40px));
+  padding: 13px 19px;
+  border-radius: 999px;
+  background: var(--forest-deep);
+  color: #F4F8F1;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  box-shadow: 0 14px 30px -12px rgba(20, 40, 30, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 18px);
+  transition: opacity var(--dur) var(--ease-slow),
+              transform var(--dur) var(--ease-slow);
+}
+.toast.is-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+/* 語言彈層打開時，Toast 上移到彈層上方，避免被遮擋 */
+body:has(.sheet.is-show) .toast {
+  bottom: calc(568px + env(safe-area-inset-bottom));
+}
+.toast__icon { color: #9FC7AC; font-size: 1rem; }
+
+/* ==========================================================================
+   第二頁：錄音管理（我的錄音）
+   ========================================================================== */
+
+/* ---------- 頁面主體：外殼內唯一嘅縱向滾動容器 ----------
+   flex-1＋min-height:0 食盡頂欄同底導航之間嘅空間；
+   內容多長都只喺呢度滾動，底導航維持喺外殼底部。
+   頁尾用各頁自帶 padding-bottom／承諾條留氣位，最後一項唔會被遮擋。 */
+.app-shell > .page {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.app-shell > .page::-webkit-scrollbar { display: none; }
+
+/* 彈層（錄音抽屜／AI 助手）打開期間鎖定背景滾動 */
+.app-shell.is-modal-open > .page {
+  overflow: hidden;
+}
+
+.page--manage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 管理頁 Hero：無問候語，標題直接開始，緊接分頁欄 */
+.hero--manage {
+  flex: none;
+  padding: 36px 24px 0;
+  min-height: 176px;
+}
+
+/* ---------- 狀態分頁（segmented tabs） ---------- */
+.rec-tabs {
+  flex: none;
+  padding: 4px 20px 0;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 6px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.tabs__btn {
+  position: relative;
+  min-height: 58px;          /* ≥58px 觸控底線 */
+  padding: 8px 6px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #8A938A;
+  font-family: inherit;
+  font-size: 1.12rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease-slow),
+              color var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 非首個分頁左側細分隔線；相鄰任一側為選中態時隱藏 */
+.tabs__btn:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  width: 1px;
+  height: 30px;
+  transform: translateY(-50%);
+  background: rgba(112, 102, 74, 0.18);
+}
+.tabs__btn.is-active::before,
+.tabs__btn:has(+ .tabs__btn.is-active)::before { display: none; }
+
+.tabs__btn:hover { color: var(--forest); }
+
+.tabs__btn.is-active {
+  background: var(--jade-pale);
+  color: var(--forest);
+  font-weight: 700;
+}
+
+/* 選中態底部森林綠短劃線 */
+.tabs__btn.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  width: 46px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--forest);
+  transform: translateX(-50%);
+}
+
+/* ---------- 面板與誠實空狀態 ---------- */
+.panels {
+  flex: 1 0 auto;   /* 內容超過一屏時讓外殼自然滾動，不與承諾條重疊 */
+  display: flex;
+  min-height: 0;
+}
+
+.empty {
+  display: none;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 22px 32px 14px;
+  outline: none;
+}
+.empty.is-show {
+  display: flex;
+  animation: panel-in var(--dur) var(--ease-slow) both;
+}
+
+/* 待轉寫／已完成分頁嘅空狀態內容包層：必須沿用 .empty 嘅置中契約。
+   否則普通 block 包層 shrink-to-fit（約標題闊），內裡 <img> 貼實左邊緣，
+   而標題文字居中——插畫就會相對標題偏左。 */
+.empty__inner {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.empty__art {
+  flex: none;
+  width: min(222px, 60%);
+  height: auto;
+  margin-bottom: 14px;
+}
+
+/* 草稿分頁使用官方橫向插畫：放大少許，四邊羽化融入米白底色 */
+.empty__art--drafts {
+  width: min(300px, 82%);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 9%, #000 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 9%, #000 92%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.empty__title {
+  margin: 0 0 10px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.empty__text {
+  margin: 0;
+  max-width: 24em;
+  font-size: 1.0rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 管理頁承諾條：單行陳列（14px 硬底線；緊湊間距確保一整行） */
+.page--manage .trust-bar {
+  flex: none;
+  gap: 9px;
+  /* 底部 safe-area 由底導航自身 padding 處理；呢度只留滾動尾氣位 */
+  margin: 10px 12px 18px;
+  padding: 11px 13px;
+}
+.page--manage .trust-bar__icon { width: 24px; height: 24px; }
+.page--manage .trust-bar__icon svg { width: 24px; height: 24px; }
+.page--manage .trust-bar__text {
+  font-size: 0.875rem;   /* 14px 硬底線 */
+  line-height: 1.45;
+  min-width: 0;          /* 容許喺 flex 列內收窄換行，唔好撐破版面 */
+}
+.page--manage .trust-bar { min-width: 0; }
+
+/* ==========================================================================
+   第三頁：村落故事
+   ========================================================================== */
+
+.page--stories { padding-bottom: 18px; }
+
+/* Hero：需容納標題、副標與篩選膠囊（縮短標題至膠囊的垂直距離） */
+.hero--stories {
+  padding: 36px 20px 0;
+  min-height: 232px;
+}
+
+/* ---------- 篩選膠囊（FR-B2：僅真實存在的值） ---------- */
+.filter-chips {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+}
+
+.chip {
+  flex: 0 1 auto;
+  min-height: 58px;              /* ≥58px 觸控底線 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 22px;
+  white-space: nowrap;
+  border: 1.8px solid var(--forest);
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.82);
+  color: var(--forest);
+  font-family: inherit;
+  font-size: 1.04rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -10px rgba(44, 87, 66, 0.5);
+  transition: background-color var(--dur) var(--ease-slow),
+              color var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chip__dot { margin: 0 1px; }
+
+.chip:hover {
+  background: var(--cream);
+  box-shadow: 0 8px 18px -10px rgba(44, 87, 66, 0.55);
+}
+
+.chip.is-active {
+  flex: 0 0 auto;
+  background: var(--forest);
+  color: #FDFBF4;
+  font-weight: 700;
+  box-shadow: 0 10px 22px -12px rgba(33, 69, 58, 0.7);
+}
+
+/* ---------- 唯一故事卡 ---------- */
+.story-hero-card {
+  display: flex;
+  gap: 16px;
+  margin: 18px 16px 0;
+  padding: 14px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+.story-hero-card.is-hidden { display: none; }
+
+.story-hero-card__cover {
+  flex: 0 0 136px;
+  align-self: stretch;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ivory-deep);
+}
+.story-hero-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-hero-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2px 4px 2px 0;
+}
+
+.story-hero-card__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.22rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.story-hero-card__meta {
+  margin: 8px 0 0;
+  font-size: 1.02rem;
+  color: var(--muted);
+}
+
+.story-hero-card__role {
+  margin: 4px 0 0;
+  font-size: 0.96rem;
+  color: var(--muted-soft);
+}
+
+.story-hero-card__tag {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--gold-pale);
+  color: var(--gold);
+  font-size: 0.875rem;          /* 14px 硬底線 */
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* 開啟故事：整列大按鈕，播放鍵置於右側圓形容器 */
+.open-story {
+  position: relative;
+  width: 100%;
+  min-height: 64px;              /* ≥58px 觸控底線 */
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  padding: 8px 66px 8px 22px;
+  border: 1.8px solid var(--forest);
+  border-radius: 18px;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow),
+              transform var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+.open-story:hover {
+  background: var(--jade-pale);
+  box-shadow: 0 12px 24px -16px rgba(33, 69, 58, 0.6);
+}
+.open-story:active { transform: scale(0.985); }
+
+.open-story__label {
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.open-story__play {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--jade-pale);
+  color: var(--forest-deep);
+  font-size: 0.95rem;
+}
+.open-story__play i { transform: translateX(2px); }  /* 視覺補償：play 三角形居中 */
+.open-story:hover .open-story__play { background: var(--cream); }
+
+/* ---------- 模糊位置卡（FR-B5） ---------- */
+.map-card {
+  margin: 16px 16px 0;
+  padding: 18px 18px 20px;
+  background: var(--cream);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.map-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.map-card__pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-size: 1.3rem;
+}
+
+.map-card__heading { min-width: 0; }
+
+.map-card__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.18rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.map-card__note {
+  margin: 5px 0 0;
+  font-size: 0.96rem;
+  color: var(--muted);
+}
+
+.map-card__frame {
+  position: relative;
+  margin-top: 14px;
+  height: 238px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: var(--ivory-deep);
+}
+.map-card__fallback,
+.map-card__leaflet {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.map-card__fallback {
+  object-fit: cover;
+  z-index: 0;
+}
+.map-card__leaflet {
+  z-index: 1;
+  background: var(--ivory-deep);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.map-card__leaflet.is-ready { opacity: 1; }
+.map-card__leaflet.is-failed { display: none; }
+
+/* 地圖載入態 */
+.map-card__loading {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.92);
+  border: 1px solid var(--hairline);
+  color: var(--forest-deep);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+.map-card__loading.is-hidden { opacity: 0; pointer-events: none; }
+.map-card__spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid #c7d6c2;
+  border-top-color: var(--forest);
+  animation: map-spin 0.8s linear infinite;
+}
+@keyframes map-spin { to { transform: rotate(360deg); } }
+
+/* 指北針 */
+.map-card__north {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(253, 251, 244, 0.92);
+  border: 1px solid var(--hairline);
+  color: var(--forest-deep);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 2px 8px -3px rgba(33, 69, 58, 0.4);
+}
+.map-card__north span { margin-top: -1px; font-size: 0.95rem; }
+
+/* Leaflet 微調：配合米白風格＋長者字號 */
+.map-card__leaflet .leaflet-control-attribution {
+  background: rgba(253, 251, 244, 0.82);
+  font-size: 0.62rem;
+  color: #6f7d70;
+}
+.map-card__leaflet .leaflet-control-scale-line {
+  background: rgba(253, 251, 244, 0.82);
+  border-color: var(--forest-deep);
+  color: var(--forest-deep);
+  font-size: 0.66rem;
+}
+.map-card__leaflet .leaflet-bar a {
+  color: var(--forest-deep);
+  border-radius: 0;
+}
+.leaflet-vtn-popup .leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  background: var(--cream);
+  box-shadow: 0 10px 26px -12px rgba(33, 69, 58, 0.55);
+}
+.leaflet-vtn-popup .leaflet-popup-content {
+  margin: 11px 14px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--forest-deep);
+}
+
+.map-card__tiles-note {
+  margin: 9px 2px 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-card__leaflet, .map-card__loading { transition: none; }
+  .map-card__spinner { animation: none; }
+}
+
+/* ---------- 強制披露卡（FR-B4） ---------- */
+.disclosure-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 16px 16px 0;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: var(--gold-pale);
+  border: 1px solid rgba(131, 99, 43, 0.18);
+}
+
+.disclosure-card__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2.4px solid #B0893C;
+  border-radius: 50%;
+  color: #9A7226;
+  font-size: 1.15rem;
+}
+
+.disclosure-card__body { min-width: 0; }
+
+.disclosure-card__en {
+  margin: 0;
+  font-size: 0.875rem;             /* 14px 硬底線 */
+  line-height: 1.55;
+  color: #6B5326;
+}
+
+.disclosure-card__zh {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #6B5326;
+  white-space: nowrap;
+}
+@media (max-width: 360px) {
+  .disclosure-card__zh { white-space: normal; }
+}
+
+/* ---------- 窄屏微調（≤360px）：封面收窄防擠壓，長文案安全換行 ---------- */
+@media (max-width: 360px) {
+  .story-hero-card { gap: 12px; padding: 12px; }
+  .story-hero-card__cover { flex-basis: 120px; }
+  .story-hero-card__title { font-size: 1.04rem; }
+  .story-hero-card__tag { white-space: normal; }
+  .open-story__label { font-size: 1.05rem; }
+  .map-card__title { font-size: 1.02rem; white-space: normal; }
+  .filter-chips { left: 14px; right: 14px; flex-wrap: wrap; }
+  .chip { padding: 12px 18px; font-size: 0.95rem; }
+}
+
+/* ==========================================================================
+   第四頁：我的（管理中心）
+   ========================================================================== */
+
+.page--me { padding-bottom: 16px; }
+
+/* Hero：雙行標題較高，卡片輕疊於背景草叢之上。
+   底部保留 26px padding，確保任何字體渲染下副文都不被卡片遮擋。 */
+.hero--me {
+  padding: 42px 22px 26px;
+  min-height: 272px;
+}
+
+.hero__eyebrow {
+  margin: 0 0 4px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.85rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--forest);
+  text-shadow: 0 2px 14px rgba(246, 241, 230, 0.9);
+}
+
+.hero__title--xl {
+  margin-bottom: 14px;
+  font-size: clamp(2.35rem, 1.25rem + 4.6vw, 3.05rem);
+}
+
+.hero__sub--stack {
+  font-size: 1.3rem;
+  line-height: 1.62;
+}
+
+/* ---------- 管理入口清單 ---------- */
+.me-list {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: -10px;               /* 只輕疊背景草叢，保留與副文的安全距離 */
+  padding: 0 16px;
+}
+
+/* 整列可點的入口卡（<a> 或 <button> 共用） */
+.me-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 100px;              /* 遠高於 58px 觸控底線 */
+  padding: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--cream);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+  -webkit-tap-highlight-color: transparent;
+}
+.me-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 36px -24px rgba(52, 72, 55, 0.45),
+              0 2px 6px rgba(52, 72, 55, 0.05);
+}
+.me-item:active { transform: scale(0.99); }
+
+/* 左側 sage 圓底圖標 */
+.me-item__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-size: 1.55rem;
+}
+
+.me-item__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.me-item__title {
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.me-item__sub {
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+/* 四檔私隱副標強制單行（其餘副文容許自然換行） */
+.me-item__sub--oneline { white-space: nowrap; }
+
+/* 右側箭頭圓鈕 */
+.me-item__chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--jade-pale);
+  color: var(--forest);
+  font-size: 1.05rem;
+}
+.me-item__chevron i { transform: translateX(2px); }   /* 視覺補償居中 */
+
+/* ---------- 模糊地點說明條（FR-MY5） ---------- */
+.me-note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 84px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background: var(--sage-wash);
+}
+
+.me-note__pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 2.5px dashed rgba(44, 87, 66, 0.75);
+  border-radius: 50%;
+  color: var(--forest);
+  font-size: 1.3rem;
+}
+
+.me-note__divider {
+  flex: none;
+  align-self: stretch;
+  width: 2px;
+  margin: 4px 0;
+  background: rgba(93, 128, 104, 0.35);
+}
+
+.me-note__text {
+  margin: 0;
+  font-size: 1.0rem;
+  line-height: 1.5;
+  color: var(--forest);
+}
+
+/* ---------- 關於入口（FR-MY6） ---------- */
+.me-item--about {
+  min-height: 88px;
+  gap: 12px;
+  padding: 14px;
+}
+
+.me-item__icon--gold {
+  width: 52px;
+  height: 52px;
+  background: transparent;
+  border: 2.6px solid #B0893C;
+  color: #9A7226;
+  font-size: 1.4rem;
+}
+
+.me-item__divider {
+  flex: none;
+  align-self: stretch;
+  width: 2px;
+  margin: 6px 0;
+  background: var(--hairline);
+}
+
+.me-item__title--about {
+  font-family: "Helvetica Neue", Arial, "Noto Sans TC", "PingFang HK", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* 關於卡箭頭略縮，把寬度留給英文標題 */
+.me-item--about .me-item__chevron { width: 46px; height: 46px; font-size: 0.98rem; }
+
+/* ---------- 窄屏微調（≤360px） ---------- */
+@media (max-width: 360px) {
+  .hero--me { min-height: 252px; }
+  .hero__eyebrow { font-size: 1.6rem; }
+  .hero__sub--stack { font-size: 1.12rem; }
+  .me-list { gap: 12px; padding: 0 12px; }
+  .me-item { gap: 10px; min-height: 92px; padding: 12px; }
+  .me-item__icon { width: 50px; height: 50px; font-size: 1.3rem; }
+  .me-item__title { font-size: 1.12rem; }
+  .me-item__sub { font-size: 0.88rem; }   /* ≥14px 硬底線 */
+  .me-item__chevron { width: 44px; height: 44px; font-size: 0.95rem; }
+  .me-note { gap: 10px; padding: 12px; }
+  .me-note__pin { width: 48px; height: 48px; font-size: 1.15rem; }
+  .me-note__text { font-size: 0.9rem; }
+  .me-item__icon--gold { width: 44px; height: 44px; font-size: 1.15rem; }
+  .me-item--about .me-item__chevron { width: 42px; height: 42px; }
+  .me-item__title--about { font-size: 0.88rem; }   /* ≥14px 硬底線 */
+}
+
+/* ==========================================================================
+   語言選擇底部彈層（Bottom sheet）
+   ========================================================================== */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(31, 42, 33, 0.46);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-slow);
+}
+.sheet-overlay.is-show { opacity: 1; }
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 71;
+  width: min(430px, 100vw);
+  padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0;
+  background: var(--cream);
+  box-shadow: 0 -18px 44px -18px rgba(28, 44, 35, 0.45);
+  transform: translate(-50%, 100%);
+  transition: transform var(--dur) var(--ease-slow);
+}
+.sheet.is-show { transform: translate(-50%, 0); }
+
+.sheet__handle {
+  width: 44px;
+  height: 5px;
+  margin: 4px auto 12px;
+  border-radius: 999px;
+  background: rgba(93, 112, 99, 0.32);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sheet__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: var(--forest);
+}
+
+.sheet__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sage-wash);
+  color: var(--forest);
+  font-size: 1.15rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur) var(--ease-slow);
+}
+.sheet__close:hover { background: var(--jade-pale); }
+
+/* ---------- 語言選項單選列 ---------- */
+.lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 66px;
+  padding: 13px 16px;
+  border: 1.8px solid var(--hairline);
+  border-radius: 18px;
+  background: var(--sage-wash);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur) var(--ease-slow),
+              border-color var(--dur) var(--ease-slow),
+              box-shadow var(--dur) var(--ease-slow);
+}
+.lang-option:hover {
+  border-color: var(--sage-line);
+  box-shadow: 0 8px 18px -14px rgba(44, 87, 66, 0.55);
+}
+.lang-option.is-selected {
+  border-color: var(--forest);
+  background: var(--jade-pale);
+  box-shadow: 0 10px 22px -16px rgba(33, 69, 58, 0.7);
+}
+
+.lang-option__names {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.lang-option__primary {
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--forest);
+}
+.lang-option__sub {
+  font-size: 0.88rem;              /* ≥14px 硬底線 */
+  color: var(--muted);
+}
+
+.lang-option__tag {
+  flex: none;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: #F4F8F1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.lang-option__tag--soon {
+  background: transparent;
+  border: 1.5px solid var(--sage-line);
+  color: var(--muted);
+}
+
+.lang-option__check {
+  flex: none;
+  font-size: 1.45rem;
+  color: var(--muted-soft);
+}
+.lang-option.is-selected .lang-option__check { color: var(--forest); }
+
+/* ---------- 彈層說明與關閉 ---------- */
+.sheet__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 16px 2px 14px;
+  font-size: 0.88rem;              /* ≥14px 硬底線 */
+  line-height: 1.55;
+  color: var(--muted);
+}
+.sheet__hint i { margin-top: 3px; color: var(--jade-strong); }
+
+.sheet__cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 58px;                /* ≥58px 觸控底線 */
+  border: 0;
+  border-radius: 999px;
+  background: var(--forest);
+  color: #F4F8F1;
+  font-family: inherit;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: var(--shadow-cta);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur) var(--ease-slow);
+}
+.sheet__cancel:hover { background: var(--forest-rich); }
+
+/* 鍵盤焦點可見性 */
+.lang-option:focus-visible,
+.sheet__close:focus-visible,
+.sheet__cancel:focus-visible {
+  outline: 3px solid var(--jade-strong);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   無障礙：系統要求減少動態時，全部靜止
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* ===== css/record-flow.css ===== */
+/* =============================================================================
+ * Voices of the North — 真實錄音流程 + 我的錄音卡片（Direction B）
+ * 載入於 index.html / recording.html / stories.html；class 一律 vtn-rec- 前綴。
+ * ========================================================================== */
+
+/* =============================================================================
+ * 1. 故事頁補充：真實錄音標記與高亮
+ * ========================================================================== */
+.story-hero-card__note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  color: var(--gold, #83632B);
+  font-weight: 500;
+}
+.story-hero-card.is-highlight {
+  outline: 3px solid rgba(94, 140, 112, 0.65);
+  outline-offset: 3px;
+  transition: outline 0.4s ease;
+}
+
+/* =============================================================================
+ * 2. 錄音底部抽屜（全步驟共用容器）
+ *    掛載於 .app-shell 內，position:absolute 以手機框為定位參照；
+ *    bottom 預留底導航高度（--vtn-nav-h），遮罩／抽屜都唔會蓋住導航列。
+ * ========================================================================== */
+.vtn-rec-overlay {
+  position: absolute;
+  inset: 0 0 var(--vtn-nav-h, 77px) 0;
+  z-index: 60;                      /* 高於底導航(30)／AI 助手層(50)，低於 toast(80) */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(24, 38, 30, 0.46);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.vtn-rec-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+.vtn-rec-sheet {
+  width: 100%;
+  max-width: 460px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  background: var(--cream, #FDFBF4);
+  box-shadow: 0 -24px 60px -18px rgba(20, 35, 27, 0.5);
+  transform: translateY(24px);
+  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+}
+.vtn-rec-overlay.is-open .vtn-rec-sheet { transform: translateY(0); }
+/* sheet 頭欄固定，內容區獨立滾動，彈窗高度自適應但永不超出視口 */
+.vtn-rec-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* 底導航已自帶 safe-area padding，sheet 喺導航上方，無需再重複留安全區 */
+  padding: 18px 18px 20px;
+}
+@media (min-width: 560px) {
+  .vtn-rec-overlay { align-items: center; padding: 16px; }
+  .vtn-rec-sheet {
+    max-height: 92%;
+    border-radius: 28px;
+  }
+  .vtn-rec-body { padding-bottom: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vtn-rec-overlay, .vtn-rec-sheet { transition: none; }
+}
+
+.vtn-rec-sheet__head {
+  position: relative;
+  flex: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  border-radius: 28px 28px 0 0;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-rec-sheet__titles { flex: 1 1 auto; min-width: 0; }
+.vtn-rec-sheet__title { margin: 0; font-size: 1.1rem; font-weight: 900; }
+.vtn-rec-sheet__sub {
+  margin: 1px 0 0;
+  font-size: 0.8rem;
+  color: #DCE9DC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vtn-rec-sheet__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #F4F8F1;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.vtn-rec-sheet__close:hover { background: rgba(255, 255, 255, 0.14); }
+
+.vtn-rec-step[hidden] { display: none; }
+
+/* ---------- 服務狀態膠囊 ---------- */
+.vtn-rec-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 auto 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.vtn-rec-status i { font-size: 0.72rem; }
+.vtn-rec-status--online { background: #DCE9DC; color: #2C5742; }
+.vtn-rec-status--offline { background: #F1E3C1; color: #6d5326; }
+.vtn-rec-status--checking { background: #EAF0E5; color: #5D7063; }
+
+/* ---------- 通用文案／按鈕 ---------- */
+.vtn-rec-lead {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 1.06rem;
+  font-weight: 900;
+  color: var(--forest, #21453A);
+}
+.vtn-rec-desc {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: #4a5a4e;
+}
+.vtn-rec-center { text-align: center; }
+
+.vtn-rec-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 2px solid var(--forest, #2C5742);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-rec-btn--primary { background: var(--forest, #2C5742); color: #F4F8F1; }
+.vtn-rec-btn--primary:hover { background: #31604A; }
+.vtn-rec-btn--ghost { background: #fff; color: var(--forest, #2C5742); }
+.vtn-rec-btn--ghost:hover { background: #EAF0E5; }
+.vtn-rec-btn--gold {
+  border-color: #b3925a;
+  background: var(--gold, #83632B);
+  color: #FFF8E8;
+}
+.vtn-rec-btn + .vtn-rec-btn { margin-top: 10px; }
+.vtn-rec-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- 準備步：大咪 ---------- */
+.vtn-rec-mic {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin: 6px auto 14px;
+  padding: 0;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+  font-size: 2.3rem;
+  box-shadow: 0 18px 40px -14px rgba(33, 69, 58, 0.7);
+  cursor: pointer;
+}
+.vtn-rec-mic.is-live { animation: vtn-rec-mic-pulse 1.6s ease-out infinite; }
+@keyframes vtn-rec-mic-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(200, 92, 72, 0.45), 0 18px 40px -14px rgba(33,69,58,0.7); }
+  70%  { box-shadow: 0 0 0 22px rgba(200, 92, 72, 0), 0 18px 40px -14px rgba(33,69,58,0.7); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 92, 72, 0), 0 18px 40px -14px rgba(33,69,58,0.7); }
+}
+.vtn-rec-mic.is-live { background: #B55443; }
+
+.vtn-rec-timer {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--forest, #21453A);
+  letter-spacing: 0.04em;
+}
+.vtn-rec-hint-live {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #B55443;
+  font-weight: 700;
+}
+.vtn-rec-wave {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  margin: 0 0 18px;
+}
+.vtn-rec-wave i {
+  width: 5px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--jade, #5E8C70);
+  animation: vtn-rec-eq 0.9s ease-in-out infinite;
+}
+.vtn-rec-wave i:nth-child(2n) { animation-delay: 0.15s; }
+.vtn-rec-wave i:nth-child(3n) { animation-delay: 0.3s; }
+@keyframes vtn-rec-eq {
+  0%, 100% { height: 10px; }
+  50% { height: 36px; }
+}
+
+/* ---------- 試聽／音訊 ---------- */
+.vtn-rec-audio {
+  width: 100%;
+  margin: 4px 0 14px;
+  border-radius: 14px;
+}
+.vtn-rec-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 0 14px;
+}
+.vtn-rec-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #EAF0E5;
+  color: #3d5a48;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.vtn-rec-pill--gold { background: #F1E3C1; color: #6d5326; }
+.vtn-rec-pill--red { background: #f6e3df; color: #9c4637; }
+
+/* ---------- 處理步驟 ---------- */
+.vtn-rec-steps {
+  list-style: none;
+  margin: 4px 0 18px;
+  padding: 0;
+}
+.vtn-rec-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 4px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #8a978b;
+}
+.vtn-rec-steps .step-ico {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: #EAF0E5;
+  color: #7a8a7d;
+}
+.vtn-rec-steps li.is-active { color: var(--forest, #2C5742); }
+.vtn-rec-steps li.is-active .step-ico {
+  background: var(--forest, #2C5742);
+  color: #fff;
+}
+.vtn-rec-steps li.is-done { color: var(--forest, #2C5742); }
+.vtn-rec-steps li.is-done .step-ico { background: #DCE9DC; color: var(--forest, #2C5742); }
+.vtn-rec-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vtn-rec-spin 0.8s linear infinite;
+}
+@keyframes vtn-rec-spin { to { transform: rotate(360deg); } }
+
+/* ---------- 結果 ---------- */
+.vtn-rec-result-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: var(--forest, #21453A);
+}
+.vtn-rec-formal {
+  margin: 0 0 14px;
+  padding: 13px 15px;
+  border: 1px solid #B9CDB6;
+  border-left: 5px solid var(--jade, #5E8C70);
+  border-radius: 14px;
+  background: #fff;
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: #2c3f33;
+}
+.vtn-rec-subhead {
+  margin: 4px 0 8px;
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #5D7063;
+}
+.vtn-rec-qa {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.vtn-rec-qa button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #B9CDB6;
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+.vtn-rec-qa button:hover { background: #F6F1E6; }
+.vtn-rec-qa .qa-q { flex: 1 1 auto; font-size: 0.92rem; font-weight: 700; color: #2c3f33; }
+.vtn-rec-qa .qa-a {
+  flex-basis: 100%;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #55655a;
+  padding-top: 2px;
+}
+.vtn-rec-qa .qa-t {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.vtn-rec-words {
+  max-height: 132px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #F6F1E6;
+  line-height: 2.1;
+  margin-bottom: 14px;
+}
+.vtn-rec-word {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #d8ddcf;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+.vtn-rec-word:hover { background: #DCE9DC; }
+.vtn-rec-word.is-low { border-color: #d9a99f; color: #9c4637; }
+.vtn-rec-word .w-t {
+  margin-left: 5px;
+  font-size: 0.68rem;
+  color: #8a978b;
+  font-variant-numeric: tabular-nums;
+}
+
+.vtn-rec-note {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin: 12px 0 0;
+  padding: 10px 13px;
+  border-radius: 12px;
+  background: rgba(241, 227, 193, 0.65);
+  color: #6d5326;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.vtn-rec-note i { margin-top: 2px; }
+
+/* =============================================================================
+ * 3. 我的錄音 — 已完成／待轉寫卡片
+ * ========================================================================== */
+.vtn-rec-list { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 10px; }
+
+/* 有真實錄音時，收起空狀態插畫（維持同一 section） */
+.empty.has-list { text-align: left; align-items: stretch; }
+.empty.has-list .empty__inner { display: none; }
+
+/* 防橫向溢出：截斷 flex 嘅 min-width:auto 鏈，
+   否則卡片標題 nowrap 嘅 max-content 會成個分頁撐闊並被外層裁掉 */
+.panels > .empty { min-width: 0; }
+.vtn-rec-list { width: 100%; min-width: 0; }
+.vtn-rec-card { min-width: 0; max-width: 100%; }
+.vtn-rec-card__body { min-width: 0; max-width: 100%; }
+.vtn-rec-audio { max-width: 100%; min-width: 0; }
+.vtn-rec-qa button { max-width: 100%; }
+.vtn-rec-qa .qa-q { min-width: 0; overflow-wrap: anywhere; }
+.vtn-rec-formal { overflow-wrap: anywhere; }
+
+.vtn-rec-card {
+  border: 1px solid #d9dfce;
+  border-radius: 20px;
+  background: var(--cream, #FDFBF4);
+  box-shadow: 0 8px 24px -16px rgba(33, 69, 58, 0.5);
+  overflow: hidden;
+}
+.vtn-rec-card.is-new { outline: 3px solid rgba(94, 140, 112, 0.55); outline-offset: 2px; }
+.vtn-rec-card__head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 13px 15px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+.vtn-rec-card__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #DCE9DC;
+  color: var(--forest, #2C5742);
+  font-size: 1.05rem;
+}
+.vtn-rec-card__icon--pending { background: #F1E3C1; color: #83632B; }
+.vtn-rec-card__main { flex: 1 1 auto; min-width: 0; }
+.vtn-rec-card__title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 900;
+  color: var(--forest, #21453A);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vtn-rec-card__meta {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #7d8b7f;
+}
+.vtn-rec-card__chevron {
+  flex: none;
+  color: #7d8b7f;
+  transition: transform 0.2s ease;
+}
+.vtn-rec-card.is-open .vtn-rec-card__chevron { transform: rotate(180deg); }
+
+.vtn-rec-card__body { padding: 0 15px 15px; }
+.vtn-rec-card__body[hidden] { display: none; }
+
+.vtn-rec-card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+
+.vtn-rec-card__actions { display: flex; gap: 8px; margin-top: 12px; }
+.vtn-rec-card__actions button {
+  flex: 1 1 auto;
+  min-height: 44px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vtn-rec-card__retry {
+  border: 0;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-rec-card__remove {
+  border: 1.5px solid #c9bfb8;
+  background: #fff;
+  color: #7c6f68;
+}
+
+.tabs__btn .tab-count {
+  display: inline-block;
+  min-width: 1.3em;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #DCE9DC;
+  color: var(--forest, #2C5742);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vtn-rec-overlay, .vtn-rec-sheet, .vtn-rec-mic.is-live,
+  .vtn-rec-wave i, .vtn-rec-spinner, .vtn-rec-card__chevron {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* ===== css/assistant.css ===== */
+/* =============================================================================
+ * Ask the Village — 村落問答助手（無框架版，四頁原型共用）
+ * 與 components/FloatingAIAssistant.jsx 視覺同源；Direction B「Oat × Sage」。
+ * class 一律 vtn-ai- 前綴，避免與 Bootstrap 5 衝突。
+ *
+ * 定位模型（2026-06 改版）：
+ *   根層 .vtn-ai-root 掛載於 .app-shell 內，position:absolute 覆蓋「底導航以上」
+ *   成個 App 內容區（bottom: var(--vtn-nav-h)）——FAB、遮罩、全寬 BottomSheet
+ *   一律限制喺手機框視口入面，桌面睇亦唔會溢出框外；底導航全程可見可點。
+ * ========================================================================== */
+
+.vtn-ai-root {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: var(--vtn-nav-h, 77px);
+  z-index: 50;                          /* 高於底導航(30)，低於錄音彈層(60)／toast(80) */
+  overflow: hidden;                     /* 關閉滑走嘅面板只可喺根層內被裁走，唔可以喺導航區露頭 */
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  pointer-events: none;                 /* 容器不擋操作，子元素各自開啟 */
+}
+.vtn-ai-root * { box-sizing: border-box; }
+
+/* ---------- 半透明黑色遮罩（點擊關閉） ---------- */
+.vtn-ai-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 38, 30, 0.46);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.vtn-ai-root.is-open .vtn-ai-mask {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- 預設：提示氣泡 + FAB（錨於內容區右下角、底導航之上） ---------- */
+.vtn-ai-launcher {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.vtn-ai-root.is-open .vtn-ai-launcher {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.vtn-ai-hint {
+  position: relative;
+  max-width: min(218px, calc(100vw - 104px));
+  padding: 10px 14px;
+  border-radius: 16px 16px 4px 16px;
+  background: #FDFBF4;
+  color: #24483A;
+  box-shadow: 0 10px 30px -12px rgba(33, 69, 58, 0.45);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  animation: vtn-ai-hint-in 0.32s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.vtn-ai-hint small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #5D7063;
+}
+.vtn-ai-hint-close {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #B9CDB6;
+  border-radius: 50%;
+  background: #fff;
+  color: #5D7063;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.vtn-ai-hint-close:hover { background: #EAF0E5; }
+.vtn-ai-hint.is-hidden { display: none; }
+
+.vtn-ai-fab {
+  pointer-events: auto;
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--forest, #2C5742);
+  box-shadow: 0 16px 34px -10px rgba(33, 69, 58, 0.6);
+  cursor: pointer;
+  animation: vtn-ai-fab-pulse 2.8s ease-out infinite;
+  transition: transform 0.2s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-fab:hover { transform: scale(1.06); }
+.vtn-ai-fab:active { transform: scale(0.96); }
+.vtn-ai-fab img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.vtn-ai-fab-badge {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--gold-pale, #F1E3C1);
+  color: var(--gold, #83632B);
+  font-size: 0.7rem;
+}
+
+/* ---------- 聊天面板：App 內全寬 BottomSheet（底導航以上全屏覆蓋） ---------- */
+.vtn-ai-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;              /* 關閉滑走後唔可以攔截底導航點擊 */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  background: #FDFBF4;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -24px 60px -18px rgba(20, 35, 27, 0.5);
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.vtn-ai-root.is-open .vtn-ai-panel {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* 桌面手機框（≥560px）：留 12px 氣位嘅懸浮卡片，四邊圓角 */
+@media (min-width: 560px) {
+  .vtn-ai-panel {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    height: auto;
+    border: 1px solid #B9CDB6;
+    border-radius: 26px;
+  }
+}
+
+.vtn-ai-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px 11px 14px;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-ai-head img {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 2px solid #DCE9DC;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.vtn-ai-head-titles { flex: 1 1 auto; min-width: 0; }
+.vtn-ai-head-title {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+.vtn-ai-head-sub {
+  margin: 1px 0 0;
+  font-size: 0.8rem;
+  color: #DCE9DC;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vtn-ai-head-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #F4F8F1;
+  font-size: 1.05rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-head-btn:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* ---------- 訊息區（獨立滾動：訊息再多都唔會撐破彈窗） ---------- */
+.vtn-ai-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px 13px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--ivory, #F6F1E6);
+  scroll-behavior: smooth;
+}
+
+.vtn-ai-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+}
+.vtn-ai-row--user { justify-content: flex-end; }
+
+.vtn-ai-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-top: 2px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(33, 69, 58, 0.18);
+}
+
+.vtn-ai-bubble {
+  max-width: 84%;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 5px;
+  background: #EAF0E5;
+  color: #24483A;
+  font-size: 0.97rem;
+  line-height: 1.65;
+  box-shadow: 0 2px 8px -4px rgba(33, 69, 58, 0.35);
+  overflow-wrap: anywhere;
+}
+.vtn-ai-row--user .vtn-ai-bubble {
+  border-radius: 18px 18px 5px 18px;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+}
+.vtn-ai-bubble.is-error {
+  border: 1px solid #d9b3b0;
+  background: #f9eceb;
+}
+
+.vtn-ai-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 0 14px;
+  border: 2px solid var(--forest, #2C5742);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--forest, #2C5742);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vtn-ai-disclosure {
+  margin: 6px 0 0;
+  padding: 0 2px;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--gold, #83632B);
+}
+
+.vtn-ai-sources-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 7px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #5D7063;
+}
+.vtn-ai-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.vtn-ai-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #B9CDB6;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--forest, #2C5742);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.vtn-ai-chip:hover { background: #DCE9DC; }
+.vtn-ai-chip i { font-size: 0.78rem; }
+
+/* 推薦問題 */
+.vtn-ai-suggests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+.vtn-ai-suggest {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 2px solid var(--forest, #2C5742);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--forest, #2C5742);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-suggest:hover { background: #DCE9DC; }
+.vtn-ai-suggest:disabled { opacity: 0.5; cursor: default; }
+
+.vtn-ai-corpus-note {
+  margin: 2px 0 0;
+  padding: 0 2px;
+  text-align: center;
+  font-size: 0.74rem;
+  color: #7a8578;
+}
+
+/* 打字中三點 */
+.vtn-ai-typing { display: inline-flex; gap: 5px; align-items: center; padding: 3px 1px; }
+.vtn-ai-typing span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--jade-strong, #5E8C70);
+  animation: vtn-ai-bounce 1.2s infinite ease-in-out;
+}
+.vtn-ai-typing span:nth-child(2) { animation-delay: 0.18s; }
+.vtn-ai-typing span:nth-child(3) { animation-delay: 0.36s; }
+
+/* ---------- 底欄：誠實註 + 輸入 ---------- */
+.vtn-ai-pledge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(241, 227, 193, 0.7);
+  color: #6d5326;
+  font-size: 0.74rem;
+  text-align: center;
+}
+
+.vtn-ai-form {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 11px;
+  border-top: 1px solid #B9CDB6;
+  background: #FDFBF4;
+}
+.vtn-ai-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 18px;
+  border: 2px solid #B9CDB6;
+  border-radius: 999px;
+  background: #fff;
+  color: #24483A;
+  font-family: inherit;
+  font-size: 0.97rem;
+}
+.vtn-ai-input::placeholder { color: #8a978b; }
+.vtn-ai-input:focus {
+  outline: none;
+  border-color: var(--forest, #2C5742);
+  box-shadow: 0 0 0 3px rgba(94, 140, 112, 0.35);
+}
+.vtn-ai-send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--forest, #2C5742);
+  color: #F4F8F1;
+  font-size: 1.05rem;
+  box-shadow: 0 10px 20px -10px rgba(33, 69, 58, 0.8);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vtn-ai-send:hover { background: var(--forest-rich, #31604A); }
+.vtn-ai-send:disabled { opacity: 0.4; cursor: default; }
+.vtn-ai-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: vtn-ai-spin 0.8s linear infinite;
+}
+
+/* ---------- 動畫 ---------- */
+@keyframes vtn-ai-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+  40% { transform: translateY(-5px); opacity: 1; }
+}
+@keyframes vtn-ai-spin { to { transform: rotate(360deg); } }
+@keyframes vtn-ai-fab-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(44, 87, 66, 0.32), 0 16px 34px -10px rgba(33,69,58,0.6); }
+  70%  { box-shadow: 0 0 0 13px rgba(44, 87, 66, 0), 0 16px 34px -10px rgba(33,69,58,0.6); }
+  100% { box-shadow: 0 0 0 0 rgba(44, 87, 66, 0), 0 16px 34px -10px rgba(33,69,58,0.6); }
+}
+@keyframes vtn-ai-hint-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vtn-ai-fab, .vtn-ai-hint, .vtn-ai-typing span, .vtn-ai-spinner,
+  .vtn-ai-panel, .vtn-ai-mask, .vtn-ai-launcher, .vtn-ai-suggest,
+  .vtn-ai-head-btn, .vtn-ai-chip {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 極窄機（≤340px）：FAB 同氣泡再收窄少少，確保唔貼邊／溢出 */
+@media (max-width: 340px) {
+  .vtn-ai-launcher { right: 10px; }
+  .vtn-ai-hint { max-width: calc(100vw - 96px); }
+}
+
+
+/* ===== 單檔 SPA 分頁切換（必須在三個樣式之後，覆寫 display） ===== */
+.vtn-view { display: none !important; }
+.vtn-view.is-active { display: block !important; }
+.page--manage.vtn-view.is-active { display: flex !important; flex-direction: column; }
+
+</style>
 </head>
 <body>
+<div class="app-shell" id="appShell">
 
-<div class="app-viewport">
-  <div class="top-header">
-    <h1><i class="fa-solid fa-landmark me-2"></i>北部都會區 · 鄉村故事館</h1>
-    <span class="badge bg-light text-dark" id="statusBadge" style="font-size:10px;">在線</span>
+    <header class="topbar">
+      <img class="topbar__logo" src="assets/app-icon.png" alt="Voices of the North 標誌" width="40" height="40">
+      <span class="topbar__title">北部都會區 <span class="topbar__dot" aria-hidden="true">・</span> 鄉村故事館</span>
+    </header>
+
+    <!-- ======== 分頁：home ======== -->
+<main class="page vtn-view is-active" data-view="home">
+
+      <!-- ============ Hero：歡迎 + 村落晨光插畫 ============ -->
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/home-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <p class="hero__greeting" id="greeting">早晨，歡迎返嚟</p>
+          <h1 class="hero__title" id="heroTitle">留住村落嘅聲音</h1>
+          <p class="hero__sub">聽見長者故事，保存地方記憶</p>
+        </div>
+      </section>
+
+      <!-- ============ 唯一主操作：開始錄音 ============ -->
+      <button type="button" class="cta-card" id="startRecordBtn"
+              aria-label="開始錄音。首次錄音可以先聽示範。">
+        <span class="cta-card__visual" aria-hidden="true">
+          <span class="eq">
+            <i style="--h:11px;--d:0ms"></i><i style="--h:19px;--d:160ms"></i><i style="--h:27px;--d:320ms"></i>
+            <i style="--h:17px;--d:480ms"></i><i style="--h:11px;--d:640ms"></i>
+          </span>
+          <span class="cta-card__mic"><i class="fa-solid fa-microphone"></i></span>
+          <span class="eq">
+            <i style="--h:11px;--d:640ms"></i><i style="--h:17px;--d:480ms"></i><i style="--h:27px;--d:320ms"></i>
+            <i style="--h:19px;--d:160ms"></i><i style="--h:11px;--d:0ms"></i>
+          </span>
+        </span>
+        <span class="cta-card__title">開始錄音</span>
+        <span class="cta-card__sub">首次錄音可先聽示範</span>
+      </button>
+
+      <!-- ============ 精選故事（全 app 僅一張） ============ -->
+      <section class="featured" aria-labelledby="featuredTitle">
+        <div class="featured__head">
+          <h2 class="featured__title" id="featuredTitle">精選故事</h2>
+          <span class="featured__rule" aria-hidden="true"></span>
+        </div>
+
+        <article class="story-card" id="featuredStoryCard">
+          <div class="story-card__main">
+            <a class="story-card__cover" href="#story-YL-001" id="storyCoverLink"
+               data-demo-play
+               aria-label="播放示範故事：元朗・村落晨光（真實示範錄音）">
+              <img src="assets/story-cover-village.png" alt="水彩插畫：晨光中的元朗村落，青磚瓦屋與紅對聯" width="618" height="618">
+            </a>
+
+            <div class="story-card__body">
+              <h3 class="story-card__name">元朗 <span aria-hidden="true">・</span> 村落晨光</h3>
+              <p class="story-card__meta">角色扮演示範故事 <span aria-hidden="true">・</span> <span class="text-nowrap" data-demo-duration>00:51</span></p>
+              <span class="story-card__tag">示範故事</span>
+            </div>
+
+            <button type="button" class="story-card__play" id="storyPlayBtn"
+                    data-demo-play
+                    aria-label="播放示範故事《元朗・村落晨光》（真實示範錄音，非合成人聲）"
+                    aria-pressed="false">
+              <i class="fa-solid fa-play" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <!-- FR-B4 強制披露：逐字英文 + 繁中說明 -->
+          <p class="story-card__disclosure">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>
+              <em lang="en">Role-played demo story — created for hackathon demonstration purposes.</em><br>
+              音軌為 Boris Lau 真實示範錄音，並非合成人聲。
+            </span>
+          </p>
+        </article>
+      </section>
+
+      <!-- ============ 信任承諾條 ============ -->
+      <div class="trust-bar" role="note" aria-label="我們的承諾">
+        <span class="trust-bar__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
+                  stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M15.5 27.5v-7M21 27.5V21M27 27.5v-10M33 27.5v-6"
+                  stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <p class="trust-bar__text">
+          原音為本 <span aria-hidden="true">・</span> 不確定內容會標示 <span aria-hidden="true">・</span> 分享範圍由你選擇
+        </p>
+      </div>
+    </main>
+
+    <!-- ======== 分頁：recording ======== -->
+<main class="page page--manage vtn-view" data-view="recording">
+
+      <!-- ============ Hero：頁標題 + 村落背景 ============ -->
+      <section class="hero hero--manage" aria-labelledby="pageTitle-recording">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/recording-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <h1 class="hero__title" id="pageTitle-recording">我的錄音</h1>
+          <p class="hero__sub">整理你的草稿、待轉寫與已完成內容</p>
+        </div>
+      </section>
+
+      <!-- ============ 狀態分頁（真實資料；目前全為空） ============ -->
+      <section class="rec-tabs">
+        <div class="tabs" role="tablist" aria-label="錄音狀態分類">
+          <button type="button" class="tabs__btn is-active" role="tab"
+                  id="tab-drafts" aria-controls="panel-drafts" aria-selected="true" tabindex="0">
+            草稿
+          </button>
+          <button type="button" class="tabs__btn" role="tab"
+                  id="tab-pending" aria-controls="panel-pending" aria-selected="false" tabindex="-1">
+            待轉寫<span class="tab-count" id="countPending" hidden>0</span>
+          </button>
+          <button type="button" class="tabs__btn" role="tab"
+                  id="tab-done" aria-controls="panel-done" aria-selected="false" tabindex="-1">
+            已完成<span class="tab-count" id="countDone" hidden>0</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============ 空狀態（誠實：不偽造任何錄音） ============ -->
+      <div class="panels">
+
+        <section class="empty is-show" role="tabpanel"
+                 id="panel-drafts" aria-labelledby="tab-drafts" tabindex="0">
+          <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
+          <h2 class="empty__title">目前沒有錄音草稿</h2>
+          <p class="empty__text">未完成的錄音會保存在這裡，<br>方便你稍後繼續核對。</p>
+        </section>
+
+        <section class="empty" role="tabpanel"
+                 id="panel-pending" aria-labelledby="tab-pending" tabindex="0" hidden>
+          <div class="vtn-rec-list" id="recListPending"></div>
+          <div class="empty__inner" id="emptyPending">
+            <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
+            <h2 class="empty__title">目前沒有待轉寫的錄音</h2>
+            <p class="empty__text">完成的錄音上傳後會在這裡排隊，<br>等待語音轉寫成文字。</p>
+          </div>
+        </section>
+
+        <section class="empty" role="tabpanel"
+                 id="panel-done"
+                 aria-labelledby="tab-done" tabindex="0" hidden>
+          <div class="vtn-rec-list" id="recListDone"></div>
+          <div class="empty__inner" id="emptyDone">
+            <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
+            <h2 class="empty__title">目前沒有已完成的故事</h2>
+            <p class="empty__text">經過核對並確認分享範圍的故事，<br>會保存在這裡。</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ============ 承諾提示條（FR-M4） ============ -->
+      <div class="trust-bar" role="note" aria-label="私隱承諾">
+        <span class="trust-bar__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
+                  stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <rect x="17" y="23" width="14" height="11" rx="2.4"
+                  stroke="currentColor" stroke-width="2.6"/>
+            <path d="M19.8 23v-3.2a4.2 4.2 0 0 1 8.4 0V23"
+                  stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <p class="trust-bar__text">現場錄音只作暫時處理，不會永久儲存；示範故事為範例媒體。</p>
+      </div>
+    </main>
+
+    <!-- ======== 分頁：stories ======== -->
+<main class="page page--stories vtn-view" data-view="stories">
+
+      <!-- ============ Hero：頁標題 + 篩選 + 村落背景 ============ -->
+      <section class="hero hero--stories" aria-labelledby="pageTitle-stories">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/stories-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <h1 class="hero__title" id="pageTitle-stories">村落故事</h1>
+          <p class="hero__sub">聽聽長者分享的地方記憶</p>
+        </div>
+
+        <!-- 篩選：僅展示實際存在的值（FR-B2）；單一故事同時符合地點與主題 -->
+        <div class="filter-chips" role="group" aria-label="按地點及主題篩選故事">
+          <button type="button" class="chip is-active" aria-pressed="true"
+                  data-filter-type="location" data-filter-value="yuen-long">
+            元朗
+          </button>
+          <button type="button" class="chip" aria-pressed="false"
+                  data-filter-type="topic" data-filter-value="community">
+            社區變遷 <span class="chip__dot" aria-hidden="true">・</span> 鄉土記憶
+          </button>
+        </div>
+      </section>
+
+      <!-- ============ 唯一故事卡（誠實：僅一張角色扮演示範故事，FR-B3） ============ -->
+      <article class="story-hero-card" id="story-YL-001"
+               data-location="yuen-long" data-topic="community">
+        <div class="story-hero-card__cover">
+          <img src="assets/story-cover-village.png"
+               alt="水彩插畫：晨光中的元朗村落，青磚瓦屋與紅對聯"
+               width="618" height="618">
+        </div>
+
+        <div class="story-hero-card__body">
+          <h2 class="story-hero-card__title">元朗 <span aria-hidden="true">・</span> 村落晨光</h2>
+          <p class="story-hero-card__meta">Boris Lau <span aria-hidden="true">・</span> <span data-demo-duration>00:51</span></p>
+          <p class="story-hero-card__role">角色扮演示範故事</p>
+
+          <span class="story-hero-card__tag">社區變遷 <span aria-hidden="true">・</span> 鄉土記憶</span>
+
+          <p class="story-hero-card__note">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>音軌為 Boris Lau 真實示範錄音，並非合成人聲。</span>
+          </p>
+
+          <button type="button" class="open-story" id="openStoryBtn"
+                  data-demo-play aria-pressed="false"
+                  aria-label="播放示範故事《元朗・村落晨光》（真實示範錄音）">
+            <span class="open-story__label" data-demo-label>開啟故事</span>
+            <span class="open-story__play" aria-hidden="true">
+              <i class="fa-solid fa-play"></i>
+            </span>
+          </button>
+        </div>
+      </article>
+
+      <!-- ============ 模糊位置卡（FR-B5：約 800 米、非 GPS、指北針、比例尺） ============ -->
+      <section class="map-card" aria-labelledby="mapTitle">
+        <div class="map-card__head">
+          <span class="map-card__pin" aria-hidden="true">
+            <i class="fa-solid fa-location-dot"></i>
+          </span>
+          <div class="map-card__heading">
+            <h2 class="map-card__title" id="mapTitle">元朗 <span aria-hidden="true">・</span> 約 800 米模糊範圍</h2>
+            <p class="map-card__note">位置經模糊處理，並非 GPS 定位</p>
+          </div>
+        </div>
+        <div class="map-card__frame" id="mapFrame">
+          <!-- 離線／地圖載入失敗時嘅後備：原手繪示意圖 -->
+          <img class="map-card__fallback" src="assets/map-blurred.svg"
+               alt="手繪示意地圖：元朗一帶以虛線圓圈標示約 800 米模糊範圍，附指北針與 0 至 2 公里比例尺，只作示意並非 GPS 定位。">
+          <!-- 真地圖（Leaflet＋OpenStreetMap/CARTO）：由 js/vtn-map.js 初始化 -->
+          <div class="map-card__leaflet" id="vtnMap" role="application"
+               aria-label="元朗約 800 米模糊範圍真地圖（非 GPS 定位）"></div>
+          <div class="map-card__loading" id="mapLoading">
+            <span class="map-card__spinner" aria-hidden="true"></span>
+            正在載入真實地圖…
+          </div>
+          <span class="map-card__north" aria-hidden="true">N<span>↑</span></span>
+        </div>
+        <p class="map-card__tiles-note" id="mapTilesNote">
+          真實地圖由 OpenStreetMap 貢獻者提供・範圍經模糊處理，並非講者實際位置
+        </p>
+      </section>
+
+      <!-- ============ 強制披露（FR-B4，逐字聲明） ============ -->
+      <aside class="disclosure-card" role="note" aria-label="示範故事披露">
+        <span class="disclosure-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-circle-info"></i>
+        </span>
+        <div class="disclosure-card__body">
+          <p class="disclosure-card__en">Role-played demo story — created for hackathon demonstration purposes.</p>
+          <p class="disclosure-card__zh">示範音軌為佔位音訊，並非合成人聲。</p>
+        </div>
+      </aside>
+    </main>
+
+    <!-- ======== 分頁：me ======== -->
+<main class="page page--me vtn-view" data-view="me">
+
+      <!-- ============ Hero：頁標題 + 村落背景 ============ -->
+      <section class="hero hero--me" aria-labelledby="pageTitle-me">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/my-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <p class="hero__eyebrow">我的</p>
+          <h1 class="hero__title hero__title--xl" id="pageTitle-me">管理你的故事</h1>
+          <p class="hero__sub hero__sub--stack">
+            分享範圍由你決定，<br>
+            故事亦可按需要更新。
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ 管理入口清單 ============ -->
+      <section class="me-list" aria-label="個人內容與私隱管理">
+
+        <!-- 入口一：我的錄音與故事（FR-MY2 → 真實跳轉錄音管理頁） -->
+        <a class="me-item" href="recording.html" id="meEntryRecordings">
+          <span class="me-item__icon" aria-hidden="true">
+            <i class="fa-solid fa-microphone"></i>
+          </span>
+          <span class="me-item__text">
+            <span class="me-item__title">我的錄音與故事</span>
+            <span class="me-item__sub">查看草稿、待轉寫與已完成內容</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true">
+            <i class="fa-solid fa-chevron-right"></i>
+          </span>
+        </a>
+
+        <!-- 入口二：隱私與分享範圍（FR-MY3） -->
+        <button type="button" class="me-item" id="meEntryPrivacy">
+          <span class="me-item__icon" aria-hidden="true">
+            <i class="fa-solid fa-shield-halved"></i>
+          </span>
+          <span class="me-item__text">
+            <span class="me-item__title">隱私與分享範圍</span>
+            <span class="me-item__sub me-item__sub--oneline">私人<span aria-hidden="true">・</span>家人<span aria-hidden="true">・</span>社區<span aria-hidden="true">・</span>公開</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true">
+            <i class="fa-solid fa-chevron-right"></i>
+          </span>
+        </button>
+
+        <!-- 入口三：更正或撤回故事（FR-MY4） -->
+        <button type="button" class="me-item" id="meEntryCorrection">
+          <span class="me-item__icon" aria-hidden="true">
+            <i class="fa-solid fa-file-pen"></i>
+          </span>
+          <span class="me-item__text">
+            <span class="me-item__title">更正或撤回故事</span>
+            <span class="me-item__sub">提出內容修正、隱私變更或撤回要求</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true">
+            <i class="fa-solid fa-chevron-right"></i>
+          </span>
+        </button>
+
+        <!-- 入口四：語言（FR-MY7 延伸：介面語言選擇） -->
+        <button type="button" class="me-item" id="meEntryLanguage"
+                aria-haspopup="dialog" aria-controls="langSheet">
+          <span class="me-item__icon" aria-hidden="true">
+            <i class="fa-solid fa-language"></i>
+          </span>
+          <span class="me-item__text">
+            <span class="me-item__title">語言 Language</span>
+            <span class="me-item__sub" id="meLanguageCurrent">繁體中文（香港）</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true">
+            <i class="fa-solid fa-chevron-right"></i>
+          </span>
+        </button>
+
+        <!-- 模糊地點說明條（FR-MY5，逐字聲明） -->
+        <div class="me-note" role="note" aria-label="模糊地點說明">
+          <span class="me-note__pin" aria-hidden="true">
+            <i class="fa-solid fa-location-dot"></i>
+          </span>
+          <span class="me-note__divider" aria-hidden="true"></span>
+          <p class="me-note__text">故事地點以模糊範圍呈現，保護講述者私隱。</p>
+        </div>
+
+        <!-- 關於（FR-MY6） -->
+        <button type="button" class="me-item me-item--about" id="meEntryAbout">
+          <span class="me-item__icon me-item__icon--gold" aria-hidden="true">
+            <i class="fa-solid fa-info"></i>
+          </span>
+          <span class="me-item__divider" aria-hidden="true"></span>
+          <span class="me-item__text">
+            <span class="me-item__title me-item__title--about">關於 Voices of the North</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true">
+            <i class="fa-solid fa-chevron-right"></i>
+          </span>
+        </button>
+      </section>
+    </main>
+
+    <!-- ============ 底部固定導航：四項（單檔內切換分頁） ============ -->
+    <nav class="bottom-nav" aria-label="主導航">
+      <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label">主頁</span>
+      </a>
+      <a class="bottom-nav__item" href="#recording" data-nav="record">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-microphone" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label">錄音</span>
+      </a>
+      <a class="bottom-nav__item" href="#stories" data-nav="stories">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label">故事</span>
+      </a>
+      <a class="bottom-nav__item" href="#me" data-nav="me">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label">我的</span>
+      </a>
+    </nav>
+
+    <div class="toast" id="appToast" role="status" aria-live="polite" aria-atomic="true">
+      <i class="fa-solid fa-circle-info toast__icon" aria-hidden="true"></i>
+      <span class="toast__text" id="appToastText"></span>
+    </div>
   </div>
 
-  <!-- 主页 View -->
-  <main id="view-home" class="vtn-view is-active">
-    <div class="content-box">
-      <h2 style="font-family:var(--font-serif); font-size:20px; color:var(--forest);">留住村落嘅聲音</h2>
-      <p style="font-size:13px; color:var(--ink-muted);">原音為本 · 即時粵語轉寫 · 自動出處時間戳</p>
-      <div style="background:var(--ivory-deep); padding:14px; border-radius:12px; margin-top:10px;">
-        <div style="font-weight:bold; font-size:14px;">元朗 · 村落晨光</div>
-        <div style="font-size:12px; color:var(--ink-muted); margin-bottom:8px;">真實訪談錄音示範</div>
-        <audio id="demoAudio" controls style="width:100%; height:36px;">
-          <source src="assets/interview-story.mp4" type="audio/mp4">
-          <source src="assets/demo-story.m4a" type="audio/mp4">
-          <source src="Demo Story.wav" type="audio/wav">
-          瀏覽器不支援音訊播放
-        </audio>
-        <button class="btn btn-sm btn-outline-success mt-2 w-100" onclick="runDemoPipeline()">
-          <i class="fa-solid fa-play me-1"></i>用示範音訊試跑完整整理流程
-        </button>
-      </div>
-    </div>
-
-    <div class="content-box text-center">
-      <h3 style="font-size:16px;">立即現場記錄口述歷史</h3>
-      <p style="font-size:12px; color:var(--ink-muted);">支持即錄即轉，不添枝加葉，忠實呈現長者原聲。</p>
-      <button class="btn btn-success px-4 py-2" onclick="switchToView('record')">
-        <i class="fa-solid fa-microphone me-2"></i>前往錄音室
-      </button>
-    </div>
-  </main>
-
-  <!-- 录音 View -->
-  <section id="view-record" class="vtn-view">
-    <div class="content-box text-center">
-      <h2 style="font-size:18px; font-family:var(--font-serif);">現場故事採集</h2>
-      <div id="recTimer" style="font-size:28px; font-family:monospace; margin:10px 0; color:var(--forest);">00:00</div>
-      
-      <button id="mainRecBtn" class="rec-btn" onclick="toggleRecording()">
-        <i class="fa-solid fa-microphone"></i>
-      </button>
-      
-      <div id="recStatus" style="font-size:13px; color:var(--ink-muted);">點擊按鈕開始講述</div>
-
-      <div class="mt-3 d-flex gap-2 justify-content-center">
-        <button id="uploadBtn" class="btn btn-primary btn-sm px-3" style="display:none;" onclick="uploadCurrentAudio()">
-          <i class="fa-solid fa-cloud-arrow-up me-1"></i>上傳並轉寫
-        </button>
-        <button id="cancelBtn" class="btn btn-outline-secondary btn-sm px-3" style="display:none;" onclick="resetRecording()">
-          重錄
-        </button>
-      </div>
-    </div>
-
-    <!-- 转写结果展示区 -->
-    <div id="resultBox" class="content-box" style="display:none;">
-      <h3 style="font-size:15px; border-bottom:1px solid var(--frame); padding-bottom:6px;">整理後文字稿</h3>
-      <div id="formalText" style="font-size:14px; line-height:1.7; margin:10px 0; color:var(--ink);"></div>
-
-      <h4 style="font-size:13px; color:var(--ink-muted); margin-top:14px;">原始粵語逐詞辨識</h4>
-      <div id="rawWords" style="font-size:12px; color:var(--ink-subtle); line-height:1.6; word-break:break-all;"></div>
-
-      <div id="qaContainer" class="mt-3">
-        <h4 style="font-size:13px; color:var(--forest);"><i class="fa-solid fa-circle-question me-1"></i>提煉問答索引</h4>
-        <div id="qaList"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 底部固定导航 -->
-  <nav class="bottom-bar">
-    <a href="#home" class="bottom-nav-item active" onclick="switchToView('home')">
-      <i class="fa-solid fa-house"></i>主頁
-    </a>
-    <a href="#record" class="bottom-nav-item" onclick="switchToView('record')">
-      <i class="fa-solid fa-microphone"></i>錄音
-    </a>
-  </nav>
-</div>
-
 <script>
-  var mediaRecorder = null;
-  var audioChunks = [];
-  var recTimerInterval = null;
-  var recSeconds = 0;
-  var currentAudioBlob = null;
+/* ===== lib/storyCorpus.js ===== */
+/* =============================================================================
+ * Voices of the North — 已錄製故事語料庫（同構模組）
+ * -----------------------------------------------------------------------------
+ * 本檔不含 'use client'，可同時被：
+ *   - 瀏覽器端 Mock（lib/askVillageApi.js）
+ *   - 服務端 API 路由（app/api/ask-village/route.js）
+ * 引用，確保「前端 Mock 答案」與「後端正式答案」永遠由同一套規則產生。
+ *
+ * 誠實性紅線：
+ *  1. retrieveAnswer() 只可由 RECORDED_STORIES 的文字稿組合答案；
+ *  2. 每條在範圍答案必須附至少一個時間戳引用；
+ *  3. 無命中即回 inScope:false，調用方必須直出 OUT_OF_SCOPE_MESSAGE。
+ *
+ * RAG 接入點：
+ *  未來接入真實 RAG 時，只需把 retrieveSegments() 換成向量檢索，
+ *  但輸出形狀（segments + citations）不變，路由與元件無需改動。
+ * ========================================================================== */
 
-  function switchToView(viewName) {
-    document.querySelectorAll('.vtn-view').forEach(function(el) { el.classList.remove('is-active'); });
-    document.querySelectorAll('.bottom-nav-item').forEach(function(el) { el.classList.remove('active'); });
+/* 超出範圍時的標準誠實回覆（繁體香港用語） */
+const OUT_OF_SCOPE_MESSAGE = '抱歉，錄製故事中未包含此資訊。';
 
-    var target = document.getElementById('view-' + viewName);
-    if (target) target.classList.add('is-active');
+/* 前端推薦問題（只由已錄製故事內容產生，不引導至無答案話題） */
+const SUGGESTED_QUESTIONS = [
+  '細個元朗周邊係點㗎？',
+  '以前居民主要用咩出行？',
+  '大學時同朋友散步會做啲咩？',
+  '近年元朗有咩轉變？'
+];
 
-    var navTarget = document.querySelector('a[href="#' + viewName + '"]');
-    if (navTarget) navTarget.classList.add('active');
-  }
-
-  // 监听 Hash 路由变化，防止直接访问或空白
-  window.addEventListener('hashchange', function() {
-    var h = (location.hash || '#home').replace('#', '');
-    switchToView(h);
-  });
-  if (location.hash) {
-    switchToView(location.hash.replace('#', ''));
-  }
-
-  // 录音逻辑
-  async function toggleRecording() {
-    var btn = document.getElementById('mainRecBtn');
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      clearInterval(recTimerInterval);
-      btn.classList.remove('recording');
-      btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-      document.getElementById('recStatus').innerText = '錄音完畢，請確認上傳';
-      document.getElementById('uploadBtn').style.display = 'inline-block';
-      document.getElementById('cancelBtn').style.display = 'inline-block';
-    } else {
-      try {
-        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
-        var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/mp4';
-        mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-
-        mediaRecorder.ondataavailable = function(e) {
-          if (e.data.size > 0) audioChunks.push(e.data);
-        };
-        mediaRecorder.onstop = function() {
-          currentAudioBlob = new Blob(audioChunks, { type: mime });
-        };
-
-        mediaRecorder.start();
-        recSeconds = 0;
-        document.getElementById('recTimer').innerText = '00:00';
-        recTimerInterval = setInterval(function() {
-          recSeconds++;
-          var m = String(Math.floor(recSeconds / 60)).padStart(2, '0');
-          var s = String(recSeconds % 60).padStart(2, '0');
-          document.getElementById('recTimer').innerText = m + ':' + s;
-        }, 1000);
-
-        btn.classList.add('recording');
-        btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
-        document.getElementById('recStatus').innerText = '正在傾聽長者講述...';
-        document.getElementById('uploadBtn').style.display = 'none';
-        document.getElementById('cancelBtn').style.display = 'none';
-      } catch (err) {
-        alert('請允許麥克風權限以進行錄音：' + err.message);
+/* -----------------------------------------------------------------------------
+ * 已錄製故事清單
+ * ⚠ 與 stories.html 披露一致 —— 唯一一則角色扮演示範故事；
+ *   音訊為真實示範錄音 assets/demo-story.m4a（Boris Lau，約 50.7 秒）。
+ *   以下段落為依該錄音整理嘅文字稿（與 tools/server.py 離線示範內容一致）。
+ *   接入正式長者內容時，在這裡加入獲授權的故事與逐字稿。
+ * --------------------------------------------------------------------------- */
+const RECORDED_STORIES = [
+  {
+    id: 'YL-001',
+    title: '元朗・村落晨光',
+    teller: 'Boris Lau',
+    rolePlayed: true,
+    durationSec: 51,
+    // 靜態原型對應 assets/demo-story.m4a；#t= 可讓播放器跳到該秒
+    audioUrl: '#story-YL-001',
+    // 私隱設計：只存「約 800 米模糊範圍」中心，唔係講者 GPS 定位
+    location: { area: '元朗', lat: 22.4445, lng: 114.015, radiusM: 800 },
+    segments: [
+      {
+        start: 0,
+        end: 17.5,
+        text: '細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。'
+      },
+      {
+        start: 17.5,
+        end: 33,
+        text: '大學畢業之後，我有時會同朋友返去附近散步，同佢哋介紹樹上雀鳥嘅叫聲，同草叢入面嘅蟲鳴。'
+      },
+      {
+        start: 33,
+        end: 50.7,
+        text: '近年好多農田同空地都起咗密集樓宇，昔日寧靜自然嘅鄉郊環境慢慢消失，呢個係我印象最深嘅轉變。'
       }
+    ]
+  }
+];
+
+/* 全部採用「兩字以上」詞條：中文無空格分詞，單字（田／米／水／井…）
+   會誤命中地名等無關詞語（例：「錦田」絕不可命中稻米段），故一律不收。 */
+const KEYWORD_GROUPS = [
+  {
+    storyId: 'YL-001',
+    segmentIndex: 0,
+    keywords: [
+      '細個', '童年', '細路', '舊時', '舊陣', '周邊',
+      '農田', '田野', '鄉村', '鄉下', '鄉郊',
+      '出行', '交通', '單車', '踩車', '腳踏車', '代步'
+    ]
+  },
+  {
+    storyId: 'YL-001',
+    segmentIndex: 1,
+    keywords: [
+      '大學', '畢業', '朋友', '散步', '漫遊', '雀鳥', '雀仔', '小鳥',
+      '鳥叫', '鳥聲', '啼鳴', '叫聲', '蟲鳴', '昆蟲', '草叢', '樹木',
+      '樹上', '介紹', '辨認'
+    ]
+  },
+  {
+    storyId: 'YL-001',
+    segmentIndex: 2,
+    keywords: [
+      '近年', '近排', '而家', '轉變', '變化', '改變', '發展',
+      '起樓', '樓宇', '建築', '大廈', '密集', '空地', '消失', '寧靜',
+      '環境變遷', '鄉郊'
+    ]
+  }
+];
+
+/* ---------- 工具 ---------- */
+
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+/** 秒數 → mm:ss（例：83 → '01:23'） */
+function formatTimestamp(sec) {
+  const safe = Math.max(0, Math.floor(sec));
+  return pad2(Math.floor(safe / 60)) + ':' + pad2(safe % 60);
+}
+
+function normalize(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[？?！!。，,、\s]/g, '');
+}
+
+function findStory(storyId) {
+  return RECORDED_STORIES.find(function (s) { return s.id === storyId; }) ||
+         RECORDED_STORIES[0];
+}
+
+function makeCitation(story, segment) {
+  return {
+    storyId: story.id,
+    title: story.title,
+    teller: story.teller,
+    start: segment.start,
+    end: segment.end,
+    audioUrl: story.audioUrl + '#t=' + segment.start,
+    label: 'Source: [' + story.id + '] at ' + formatTimestamp(segment.start)
+  };
+}
+
+/* -----------------------------------------------------------------------------
+ * 檢索（RAG 取代點）
+ * 現階段以透明的「詞群命中」代替語義檢索：
+ * 回傳命中的 { story, segment } 清單（依故事、時間序）。
+ * 日後接入向量庫時，保持這個回傳形狀即可。
+ * --------------------------------------------------------------------------- */
+function retrieveSegments(question) {
+  const q = normalize(question);
+  if (!q) return [];
+
+  const hitKeys = new Set();
+  const hits = [];
+
+  KEYWORD_GROUPS.forEach(function (group) {
+    const matched = group.keywords.some(function (kw) {
+      return q.indexOf(normalize(kw)) !== -1;
+    });
+    if (!matched) return;
+
+    const key = group.storyId + '#' + group.segmentIndex;
+    if (hitKeys.has(key)) return;
+    hitKeys.add(key);
+
+    const story = findStory(group.storyId);
+    hits.push({
+      story: story,
+      segment: story.segments[group.segmentIndex]
+    });
+  });
+
+  hits.sort(function (a, b) {
+    if (a.story.id !== b.story.id) return a.story.id < b.story.id ? -1 : 1;
+    return a.segment.start - b.segment.start;
+  });
+
+  return hits;
+}
+
+/* -----------------------------------------------------------------------------
+ * 組裝正式答案
+ * 答案正文只由命中段落原文構成；講者提問（segment 4）補一句可核對身份說明。
+ * 無任何命中 → inScope:false（由調用方直出標準拒答句）。
+ * --------------------------------------------------------------------------- */
+function retrieveAnswer(question) {
+  const hits = retrieveSegments(question);
+
+  if (hits.length === 0) {
+    return {
+      inScope: false,
+      answer: OUT_OF_SCOPE_MESSAGE,
+      sources: [],
+      demo: RECORDED_STORIES.some(function (s) { return s.rolePlayed; }),
+      storyId: null
+    };
+  }
+
+  const answerParts = hits.map(function (h) { return h.segment.text; });
+  const sources = hits.map(function (h) { return makeCitation(h.story, h.segment); });
+
+  return {
+    inScope: true,
+    answer: answerParts.join(' '),
+    sources: sources,
+    demo: hits.some(function (h) { return h.story.rolePlayed; }),
+    storyId: hits[0].story.id
+  };
+}
+
+
+/* ===== js/demo-audio.js ===== */
+/* =============================================================================
+ * Voices of the North — 示範故事真實音訊播放（主頁／故事頁共用）
+ * -----------------------------------------------------------------------------
+ * 音軌：assets/demo-story.m4a（Boris Lau 真實示範錄音，約 50.7 秒，非合成人聲）。
+ * 職責：
+ *   1. 全頁單一 <audio> 單例，[data-demo-play] 按鈕播放／暫停，圖標同步切換
+ *   2. [data-demo-duration] 元素在 metadata 載入後顯示真實時長
+ *   3. 支援 ?t=17.5 自動跳秒（助手出處膠囊／錄音整理 QA 跳入）
+ *   4. 對外 API：window.VTNDemoAudio.play(sec) / pause() / toggle()
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var AUDIO_SRC = 'assets/demo-story.m4a';
+  var audio = null;
+  var toggles = Array.prototype.slice.call(document.querySelectorAll('[data-demo-play]'));
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function fmt(sec) {
+    var s = Math.max(0, Math.floor(sec || 0));
+    return pad(Math.floor(s / 60)) + ':' + pad(s % 60);
+  }
+
+  function ensureAudio() {
+    if (audio) return audio;
+    audio = new Audio(AUDIO_SRC);
+    audio.preload = 'metadata';
+    audio.addEventListener('loadedmetadata', function () {
+      document.querySelectorAll('[data-demo-duration]').forEach(function (el) {
+        if (isFinite(audio.duration)) el.textContent = fmt(audio.duration);
+      });
+    });
+    audio.addEventListener('play', syncIcons);
+    audio.addEventListener('pause', syncIcons);
+    audio.addEventListener('ended', function () {
+      try { audio.currentTime = 0; } catch (e) { /* ignore */ }
+      syncIcons();
+    });
+    return audio;
+  }
+
+  function syncIcons() {
+    var playing = !!(audio && !audio.paused);
+    toggles.forEach(function (btn) {
+      var icon = btn.querySelector('i.fa-solid');
+      if (icon) {
+        icon.classList.toggle('fa-play', !playing);
+        icon.classList.toggle('fa-pause', playing);
+      }
+      var label = btn.querySelector('[data-demo-label]');
+      if (label) label.textContent = playing ? '暫停故事' : '開啟故事';
+      btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+    });
+  }
+
+  function play(sec) {
+    var a = ensureAudio();
+    if (typeof sec === 'number' && isFinite(sec)) {
+      try { a.currentTime = sec; } catch (e) { /* metadata 未到時忽略 */ }
     }
+    var pr = a.play();
+    if (pr && pr.catch) pr.catch(function () { /* 自動播放被瀏覽器擋下：保持暫停 */ });
   }
 
-  function resetRecording() {
-    currentAudioBlob = null;
-    recSeconds = 0;
-    document.getElementById('recTimer').innerText = '00:00';
-    document.getElementById('recStatus').innerText = '點擊按鈕開始講述';
-    document.getElementById('uploadBtn').style.display = 'none';
-    document.getElementById('cancelBtn').style.display = 'none';
+  function pause() { if (audio) audio.pause(); }
+
+  function toggle(sec) {
+    var a = ensureAudio();
+    if (!a.paused) { a.pause(); return; }
+    play(typeof sec === 'number' ? sec : undefined);
   }
 
-  // 上传并转写真实音频
-  async function uploadCurrentAudio() {
-    if (!currentAudioBlob) return;
-    document.getElementById('recStatus').innerText = '語音轉寫及書面整理中...';
-    var fd = new FormData();
-    fd.append('file', currentAudioBlob, 'recording.mp4');
+  toggles.forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var t = btn.getAttribute('data-demo-play');
+      toggle(t ? parseFloat(t) : undefined);
+    });
+  });
 
-    try {
-      var res = await fetch('/api/process', { method: 'POST', body: fd });
-      if (!res.ok) throw new Error('伺服器處理失敗 (HTTP ' + res.status + ')');
-      var data = await res.json();
-      renderResult(data);
-      document.getElementById('recStatus').innerText = '轉寫完成！';
-    } catch (e) {
-      alert('處理失敗：' + e.message);
-      document.getElementById('recStatus').innerText = '出現狀況，請重試';
+  /* ?t=17.5#story-YL-001：從助手出處膠囊跳來時，定位＋跳秒播放 */
+  function maybeAutostart() {
+    var params = new URLSearchParams(location.search);
+    var wantHash = /#story-YL-001/.test(location.hash);
+    var t = params.get('t');
+    if (!wantHash && t === null) return;
+
+    var card = document.querySelector('.story-hero-card');
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('is-highlight');
+      setTimeout(function () { card.classList.remove('is-highlight'); }, 2600);
     }
+    if (t !== null) play(parseFloat(t) || 0);
   }
 
-  // 运行示范故事试跑
-  async function runDemoPipeline() {
-    switchToView('record');
-    document.getElementById('recStatus').innerText = '正在處理示範故事音訊...';
-    try {
-      var res = await fetch('/api/process', { method: 'POST' });
-      if (!res.ok) throw new Error('示範流程伺服器回應異常');
-      var data = await res.json();
-      renderResult(data);
-      document.getElementById('recStatus').innerText = '示範轉寫完成！';
-    } catch (e) {
-      alert('試跑失敗：' + e.message);
-      document.getElementById('recStatus').innerText = '請先確認後端服務是否已就緒';
-    }
-  }
+  window.VTNDemoAudio = { play: play, pause: pause, toggle: toggle };
 
-  function renderResult(data) {
-    document.getElementById('resultBox').style.display = 'block';
-    document.getElementById('formalText').innerText = (data.llm_result && data.llm_result.formal_text) || data.raw_text || '（無內容）';
-    
-    // 渲染逐词时间戳
-    if (data.words && data.words.length > 0) {
-      var wordsHtml = data.words.map(function(w) {
-        return '<span class="badge bg-light text-dark me-1 mb-1 border" title="' + w.start + 's - ' + w.end + 's">' + w.word + '</span>';
-      }).join('');
-      document.getElementById('rawWords').innerHTML = wordsHtml;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', maybeAutostart);
+  } else {
+    maybeAutostart();
+  }
+})();
+
+
+/* ===== js/main.js ===== */
+/* =============================================================================
+ * Voices of the North — 主頁互動（Home）
+ * 職責：
+ *  1. 按裝置時段更新歡迎語（早晨／午安／晚安）
+ *  2. 開始錄音 → js/record.js 真實錄音流程
+ *  3. 示範故事播放 → js/demo-audio.js 真實示範錄音
+ * 本檔只保留時段問候與底導航；轉寫/問答邏輯分見 record.js／ask-assistant.js。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  /* ---------- 1. 時段問候 ---------- */
+  function updateGreeting() {
+    var el = document.getElementById('greeting');
+    if (!el) return;
+    var h = new Date().getHours();
+    var word;
+    if (h >= 5 && h < 12) {
+      word = '早晨，歡迎返嚟';
+    } else if (h >= 12 && h < 18) {
+      word = '午安，歡迎返嚟';
     } else {
-      document.getElementById('rawWords').innerText = data.raw_text || '無逐詞數據';
+      word = '晚安，歡迎返嚟';
+    }
+    el.textContent = word;
+  }
+
+  /* ---------- 2. 輕提示 Toast ---------- */
+  var toastEl = document.getElementById('appToast');
+  var toastText = document.getElementById('appToastText');
+  var toastTimer = null;
+
+  function showToast(message) {
+    if (!toastEl || !toastText) return;
+    toastText.textContent = message;
+    // 重置計時，容許連續點擊
+    toastEl.classList.remove('is-show');
+    // 強制 reflow，確保 class 切換能重新觸發過渡
+    void toastEl.offsetWidth;
+    toastEl.classList.add('is-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('is-show');
+    }, 3200);
+  }
+
+  /* ---------- 3. 事件綁定 ---------- */
+  function bind() {
+    // 開始錄音 CTA：由 js/record.js 綁定真實錄音抽屜
+    // 示範故事播放／封面：由 js/demo-audio.js 綁定真實音訊
+
+    // 底部導航：四頁均已建成（真實連結）；主頁為當前頁不跳轉
+    var navItems = document.querySelectorAll('.bottom-nav__item');
+
+    navItems.forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (item.getAttribute('data-nav') === 'home') {
+          e.preventDefault(); // 已在主頁
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    updateGreeting();
+    bind();
+  });
+})();
+
+
+/* ===== js/record.js ===== */
+/* =============================================================================
+ * Voices of the North — 真實錄音 → 上傳轉寫流程（主頁「開始錄音」）
+ * -----------------------------------------------------------------------------
+ * 流程：
+ *   準備（健康檢查 8000 服務）→ MediaRecorder 現場收音 → 試聽 →
+ *   POST http://127.0.0.1:8000/api/process（multipart）→
+ *   逐詞時間戳／書面稿／時間戳 QA → 存入 localStorage → 跳「我的錄音・已完成」。
+ *
+ * 誠實模式：
+ *   - 服務回 mode="offline-demo"（無 GCP 憑證）：只可跑內置示範故事，
+ *     卡片會明確標示「離線示範」，绝不把現場錄音冒充成已轉寫。
+ *   - 現場錄音上傳遇到 503 STT_UNCONFIGURED：錄音會存為「待轉寫」，
+ *     可保留稍後重試，並提供「用示範故事試跑」睇完整效果。
+ *
+ * 對外 API：window.VTNRecords（record.js 與 recording.js／助手共用）
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var API_BASE = (window.VTN_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, '');
+  var STORE_KEY = 'vtn-records-v1';
+  var MAX_RECORD_SEC = 180;
+  var AUDIO_QUOTA_BYTES = 6 * 1024 * 1024;
+
+  /* =========================================================================
+   * 1. 儲存層
+   * ======================================================================= */
+  function loadAll() {
+    try {
+      var arr = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+  function persistAll(arr) {
+    // 音訊總量超配额時，由最舊開始丟棄音訊 dataURL，但保留文字結果
+    var audioBytes = 0;
+    arr.slice().reverse().forEach(function (r) {
+      var len = r.audioDataURL ? r.audioDataURL.length : 0;
+      if (audioBytes + len > AUDIO_QUOTA_BYTES) { r.audioDataURL = undefined; }
+      audioBytes += len;
+    });
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(arr));
+      return true;
+    } catch (e) {
+      // 配额仍爆：再清一次全部音訊
+      arr.forEach(function (r) { r.audioDataURL = undefined; });
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); return true; }
+      catch (e2) { return false; }
+    }
+  }
+  function saveRecord(rec) {
+    var arr = loadAll();
+    var idx = -1;
+    arr.forEach(function (r, i) { if (r.id === rec.id) idx = i; });
+    if (idx >= 0) arr[idx] = rec; else arr.unshift(rec);
+    persistAll(arr);
+    return rec;
+  }
+  function removeRecord(id) {
+    persistAll(loadAll().filter(function (r) { return r.id !== id; }));
+  }
+  function getRecord(id) {
+    return loadAll().filter(function (r) { return r.id === id; })[0] || null;
+  }
+
+  var VTNRecords = {
+    list: loadAll,
+    get: getRecord,
+    save: saveRecord,
+    remove: removeRecord,
+    API_BASE: API_BASE
+  };
+  window.VTNRecords = VTNRecords;
+
+  /* =========================================================================
+   * 2. 小工具
+   * ======================================================================= */
+  function h(tag, cls, text) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function fmtTime(sec) {
+    var s = Math.max(0, Math.floor(sec || 0));
+    return pad(Math.floor(s / 60)) + ':' + pad(s % 60);
+  }
+  function fmtDate(ts) {
+    var d = new Date(ts);
+    return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function recordTitle(rec) {
+    var t = (rec.formalText || rec.rawText || '').trim();
+    if (!t) return rec.source === 'demo' ? '示範故事・元朗・村落晨光' : '未命名錄音';
+    return t.length > 26 ? t.slice(0, 26) + '…' : t;
+  }
+  function makeId() {
+    return 'REC-' + Date.now().toString(36).toUpperCase() +
+           Math.random().toString(36).slice(2, 5).toUpperCase();
+  }
+
+  /* =========================================================================
+   * 3. 錄音抽屜（只在主頁掛載）
+   * ======================================================================= */
+  var startBtn = document.getElementById('startRecordBtn');
+  if (startBtn) {
+    /* ---------- 骨架 ---------- */
+    var overlay = h('div', 'vtn-rec-overlay');
+    overlay.setAttribute('aria-hidden', 'true');
+    var sheet = h('div', 'vtn-rec-sheet');
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-label', '錄音與語音轉寫');
+
+    var head = h('div', 'vtn-rec-sheet__head');
+    var headTitles = h('div', 'vtn-rec-sheet__titles');
+    headTitles.appendChild(h('p', 'vtn-rec-sheet__title', '開始錄音'));
+    headTitles.appendChild(h('p', 'vtn-rec-sheet__sub', '原音為本・即時粵語轉寫・自動出處時間戳'));
+    var btnClose = h('button', 'vtn-rec-sheet__close');
+    btnClose.type = 'button';
+    btnClose.setAttribute('aria-label', '關閉');
+    btnClose.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    head.appendChild(headTitles);
+    head.appendChild(btnClose);
+
+    var body = h('div', 'vtn-rec-body');
+
+    // 準備步
+    var stepPrep = h('div', 'vtn-rec-step');
+    var statusPill = h('span', 'vtn-rec-status vtn-rec-status--checking');
+    statusPill.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>正在連接轉寫服務…</span>';
+    stepPrep.appendChild(statusPill);
+    stepPrep.appendChild(h('p', 'vtn-rec-lead', '講一段你記得嘅村落故事'));
+    stepPrep.appendChild(h('p', 'vtn-rec-desc',
+      '錄音會即場上傳到你電腦嘅轉寫服務（127.0.0.1:8000），用粵語語音辨識整理成文字，並自動標出時間戳出處。現場錄音只作暫時處理，唔會永久儲存。'));
+    var micBtn = h('button', 'vtn-rec-mic');
+    micBtn.type = 'button';
+    micBtn.setAttribute('aria-label', '開始錄音');
+    micBtn.innerHTML = '<i class="fa-solid fa-microphone" aria-hidden="true"></i>';
+    stepPrep.appendChild(micBtn);
+    var btnDemo = h('button', 'vtn-rec-btn vtn-rec-btn--ghost');
+    btnDemo.type = 'button';
+    btnDemo.innerHTML = '<i class="fa-solid fa-headphones" aria-hidden="true"></i>先聽示範故事';
+    stepPrep.appendChild(btnDemo);
+    var btnPrepDemo = h('button', 'vtn-rec-btn vtn-rec-btn--ghost');
+    btnPrepDemo.type = 'button';
+    btnPrepDemo.hidden = true;
+    btnPrepDemo.innerHTML =
+      '<i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>用示範故事試跑完整流程';
+    stepPrep.appendChild(btnPrepDemo);
+    btnPrepDemo.addEventListener('click', function () { runDemoStory(); });
+    var prepNote = h('p', 'vtn-rec-note');
+    prepNote.innerHTML = '<i class="fa-solid fa-shield-halved" aria-hidden="true"></i>' +
+      '<span>未設定 Google Cloud 憑證時，服務進入「離線示範模式」：可試跑內置示範故事，現場錄音會先存為「待轉寫」，唔會冒充辨識結果。</span>';
+    stepPrep.appendChild(prepNote);
+
+    // 錄音步
+    var stepRec = h('div', 'vtn-rec-step');
+    stepRec.hidden = true;
+    var liveMic = h('button', 'vtn-rec-mic is-live');
+    liveMic.type = 'button';
+    liveMic.setAttribute('aria-label', '停止錄音');
+    liveMic.innerHTML = '<i class="fa-solid fa-stop" aria-hidden="true"></i>';
+    stepRec.appendChild(liveMic);
+    stepRec.appendChild(h('p', 'vtn-rec-timer', '00:00'));
+    stepRec.appendChild(h('p', 'vtn-rec-hint-live', '正在收聽你嘅故事…輕觸圓鈕停止（最長 3 分鐘）'));
+    var wave = h('div', 'vtn-rec-wave');
+    for (var wi = 0; wi < 11; wi++) wave.appendChild(h('i'));
+    stepRec.appendChild(wave);
+    var btnCancelRec = h('button', 'vtn-rec-btn vtn-rec-btn--ghost', '取消錄音');
+    btnCancelRec.type = 'button';
+    stepRec.appendChild(btnCancelRec);
+
+    // 試聽步
+    var stepReview = h('div', 'vtn-rec-step');
+    stepReview.hidden = true;
+    stepReview.appendChild(h('p', 'vtn-rec-lead', '試聽確認'));
+    stepReview.appendChild(h('p', 'vtn-rec-desc', '上傳前可以先聽一次，確認聲音清楚。'));
+    var reviewAudio = h('audio', 'vtn-rec-audio');
+    reviewAudio.controls = true;
+    stepReview.appendChild(reviewAudio);
+    var reviewMeta = h('div', 'vtn-rec-meta-row');
+    reviewMeta.appendChild(h('span', 'vtn-rec-pill', '現場錄音'));
+    var pillDur = h('span', 'vtn-rec-pill');
+    reviewMeta.appendChild(pillDur);
+    stepReview.appendChild(reviewMeta);
+    var btnUpload = h('button', 'vtn-rec-btn vtn-rec-btn--primary');
+    btnUpload.type = 'button';
+    btnUpload.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>上傳並轉寫';
+    stepReview.appendChild(btnUpload);
+    var btnRerecord = h('button', 'vtn-rec-btn vtn-rec-btn--ghost', '重新錄一段');
+    btnRerecord.type = 'button';
+    stepReview.appendChild(btnRerecord);
+
+    // 處理步
+    var stepProcessing = h('div', 'vtn-rec-step');
+    stepProcessing.hidden = true;
+    stepProcessing.appendChild(h('p', 'vtn-rec-lead', '正在整理你嘅故事'));
+    var stepsList = h('ul', 'vtn-rec-steps');
+    [
+      ['fa-link', '連接本地轉寫服務'],
+      ['fa-language', '粵語語音辨識（逐詞時間戳）'],
+      ['fa-wand-magic-sparkles', '書面化整理與問答萃取']
+    ].forEach(function (s, i) {
+      var li = h('li');
+      var ico = h('span', 'step-ico');
+      ico.innerHTML = '<i class="fa-solid ' + s[0] + '" aria-hidden="true"></i>';
+      li.appendChild(ico);
+      li.appendChild(h('span', null, s[1]));
+      li._ico = ico;
+      li._icoHtml = '<i class="fa-solid ' + s[0] + '" aria-hidden="true"></i>';
+      stepsList.appendChild(li);
+    });
+    stepProcessing.appendChild(stepsList);
+
+    // 結果步
+    var stepResult = h('div', 'vtn-rec-step');
+    stepResult.hidden = true;
+
+    body.appendChild(stepPrep);
+    body.appendChild(stepRec);
+    body.appendChild(stepReview);
+    body.appendChild(stepProcessing);
+    body.appendChild(stepResult);
+    sheet.appendChild(head);
+    sheet.appendChild(body);
+    overlay.appendChild(sheet);
+
+    /* ---------- 狀態 ---------- */
+    var health = { checked: false, online: false, reason: '' };
+    var mediaRecorder = null;
+    var chunks = [];
+    var blobUrl = null;
+    var blobMime = '';
+    var recDuration = 0;
+    var recTimer = null;
+    var recStartAt = 0;
+    var currentBlob = null;
+    var lastRecordId = null;
+
+    function showStep(name) {
+      [stepPrep, stepRec, stepReview, stepProcessing, stepResult]
+        .forEach(function (s) { s.hidden = true; });
+      ({
+        prep: stepPrep,
+        rec: stepRec,
+        review: stepReview,
+        processing: stepProcessing,
+        result: stepResult
+      })[name].hidden = false;
+      if (name === 'prep') resetPrepDemoBtn();
     }
 
-    // 渲染提炼问答
-    var qaList = (data.llm_result && data.llm_result.qa_list) || [];
-    var qaBox = document.getElementById('qaList');
-    qaBox.innerHTML = '';
-    if (qaList.length === 0) {
-      qaBox.innerHTML = '<div style="font-size:12px; color:var(--ink-subtle);">（口述內容較短，未提煉問答）</div>';
-    } else {
-      qaList.forEach(function(item) {
-        var card = document.createElement('div');
-        card.className = 'qa-card';
-        card.innerHTML = '<div class="qa-time"><i class="fa-regular fa-clock me-1"></i>' + (item.timestamp || 0) + 's</div>' +
-                         '<div style="font-weight:bold; font-size:13px; margin:2px 0;">' + item.question + '</div>' +
-                         '<div style="font-size:12px; color:var(--ink-muted);">' + item.answer + '</div>';
-        qaBox.appendChild(card);
+    /* 彈層掛喺 App 手機框（.app-shell）入面：以手機框做定位參照，
+       絕對唔可以 append 去 body——否則桌面睇會變成覆蓋整個瀏覽器視窗。 */
+    var shell = document.getElementById('appShell') || document.body;
+
+    function syncNavHeight() {
+      var navEl = shell.querySelector('.bottom-nav');
+      if (!navEl) return;
+      var h = navEl.getBoundingClientRect().height;
+      if (h > 0) shell.style.setProperty('--vtn-nav-h', h + 'px');
+    }
+
+    function openSheet() {
+      syncNavHeight();                        // 以導航實際高度留位
+      shell.appendChild(overlay);
+      shell.classList.add('is-modal-open');   // 鎖定背景頁滾動
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      showStep('prep');
+      if (!health.checked) checkHealth();
+    }
+    function closeSheet() {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      shell.classList.remove('is-modal-open');
+      stopRecording(true);
+      setTimeout(function () {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 260);
+    }
+
+    function setPill(mode, html) {
+      statusPill.className = 'vtn-rec-status vtn-rec-status--' + mode;
+      statusPill.innerHTML = html;
+    }
+
+    function checkHealth() {
+      setPill('checking',
+        '<i class="fa-solid fa-circle-notch fa-spin"></i><span>正在連接轉寫服務…</span>');
+      fetch(API_BASE + '/api/health', { signal: AbortSignal.timeout(4000) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          health.checked = true;
+          health.online = !!j.stt_ready;
+          health.reason = j.stt_reason || '';
+          if (j.stt_ready) {
+            setPill('online',
+              '<i class="fa-solid fa-circle-check"></i><span>線上模式・Google 粵語語音辨識已就緒</span>');
+            btnPrepDemo.hidden = true;
+          } else {
+            setPill('offline',
+              '<i class="fa-solid fa-triangle-exclamation"></i><span>離線示範模式・現場錄音將存為待轉寫</span>');
+            btnPrepDemo.hidden = false;
+          }
+        })
+        .catch(function () {
+          health.checked = true;
+          health.online = false;
+          health.reason = 'server-down';
+          setPill('offline',
+            '<i class="fa-solid fa-plug-circle-xmark"></i><span>未偵測到轉寫服務（請先啟動 python tools/server.py）</span>');
+        });
+    }
+
+    /* ---------- MediaRecorder ---------- */
+    function pickMime() {
+      var cands = [
+        'audio/webm;codecs=opus', 'audio/webm',
+        'audio/ogg;codecs=opus', 'audio/mp4'
+      ];
+      for (var i = 0; i < cands.length; i++) {
+        if (window.MediaRecorder && MediaRecorder.isTypeSupported(cands[i])) {
+          return cands[i];
+        }
+      }
+      return '';
+    }
+    function extOfMime(mime) {
+      if (/webm/.test(mime)) return '.webm';
+      if (/ogg/.test(mime)) return '.ogg';
+      if (/mp4|aac/.test(mime)) return '.m4a';
+      return '.audio';
+    }
+
+    function startRecording() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+        setPill('offline',
+          '<i class="fa-solid fa-triangle-exclamation"></i><span>此瀏覽器不支援現場錄音，請用最新版 Chrome／Edge，並以 http://127.0.0.1 開啟</span>');
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({ audio: {
+        echoCancellation: true,
+        noiseSuppression: true
+      } }).then(function (stream) {
+        chunks = [];
+        var mime = pickMime();
+        mediaRecorder = mime ? new MediaRecorder(stream, { mimeType: mime })
+                             : new MediaRecorder(stream);
+        blobMime = mediaRecorder.mimeType || mime || 'audio/webm';
+        mediaRecorder.addEventListener('dataavailable', function (e) {
+          if (e.data && e.data.size > 0) chunks.push(e.data);
+        });
+        mediaRecorder.addEventListener('stop', function () {
+          stream.getTracks().forEach(function (t) { t.stop(); });
+          currentBlob = new Blob(chunks, { type: blobMime });
+          recDuration = (Date.now() - recStartAt) / 1000;
+          enterReview();
+        });
+        mediaRecorder.start(250);
+        recStartAt = Date.now();
+        runTimer();
+        showStep('rec');
+      }).catch(function (err) {
+        var msg = /denied|NotAllowed/.test(String(err))
+          ? '麥克風權限被拒絕，請按瀏覽器網址列圖示允許麥克風。'
+          : '未能啟動麥克風：' + (err && err.message ? err.message : err);
+        setPill('offline',
+          '<i class="fa-solid fa-triangle-exclamation"></i><span></span>');
+        statusPill.querySelector('span').textContent = msg;
       });
     }
+
+    function runTimer() {
+      var el = stepRec.querySelector('.vtn-rec-timer');
+      clearInterval(recTimer);
+      recTimer = setInterval(function () {
+        var t = (Date.now() - recStartAt) / 1000;
+        el.textContent = fmtTime(t);
+        if (t >= MAX_RECORD_SEC) stopRecording(false);
+      }, 250);
+    }
+
+    function stopRecording(silent) {
+      clearInterval(recTimer);
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        try { mediaRecorder.stop(); } catch (e) { /* ignore */ }
+      }
+      if (silent) { mediaRecorder = null; chunks = []; currentBlob = null; }
+    }
+
+    function enterReview() {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      blobUrl = URL.createObjectURL(currentBlob);
+      reviewAudio.src = blobUrl;
+      pillDur.textContent = '長度 ' + fmtTime(recDuration);
+      showStep('review');
+    }
+
+    /* ---------- 上傳 ---------- */
+    function setStepState(idx, state) {
+      var li = stepsList.children[idx];
+      if (!li) return;
+      li.classList.remove('is-active', 'is-done');
+      if (state === 'active') li.classList.add('is-active');
+      else if (state === 'done') li.classList.add('is-done');
+      if (state === 'active') {
+        li._ico.innerHTML = '<span class="vtn-rec-spinner" aria-hidden="true"></span>';
+      } else if (state === 'done') {
+        li._ico.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i>';
+      } else if (li._icoHtml) {
+        li._ico.innerHTML = li._icoHtml;
+      }
+    }
+
+    function buildRecord(extra) {
+      var rec = {
+        id: extra.id || makeId(),
+        createdAt: extra.createdAt || Date.now(),
+        durationSec: extra.durationSec || 0,
+        mime: extra.mime || '',
+        source: extra.source || 'live',
+        mode: extra.mode || 'online',
+        status: extra.status || 'done',
+        audioDataURL: extra.audioDataURL,
+        audioUrl: extra.audioUrl,
+        rawText: extra.rawText || '',
+        words: extra.words || [],
+        formalText: extra.formalText || '',
+        qaList: extra.qaList || []
+      };
+      rec.title = recordTitle(rec);
+      return rec;
+    }
+
+    function blobToDataURL(blob) {
+      return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = function () { resolve(null); };
+      reader.readAsDataURL(blob);
+      });
+    }
+
+    function uploadAndSave() {
+      showStep('processing');
+      setStepState(0, 'active');
+
+      var fd = new FormData();
+      var filename = 'recording' + extOfMime(blobMime);
+      fd.append('file', currentBlob, filename);
+
+      fetch(API_BASE + '/api/process', { method: 'POST', body: fd })
+        .then(function (r) {
+          setStepState(0, 'done');
+          setStepState(1, 'active');
+          if (!r.ok) {
+            return r.json().catch(function () { return null; }).then(function (j) {
+              var err = new Error('HTTP ' + r.status);
+              err.status = r.status;
+              err.detail = j && j.detail ? j.detail : null;
+              throw err;
+            });
+          }
+          return r.json();
+        })
+        .then(function (data) {
+          setStepState(1, 'done');
+          setStepState(2, 'active');
+          return blobToDataURL(currentBlob).then(function (dataUrl) {
+            var rec = buildRecord({
+              durationSec: recDuration,
+              mime: blobMime,
+              source: 'live',
+              mode: data.mode || 'online',
+              audioDataURL: dataUrl || undefined,
+              rawText: data.raw_text || '',
+              words: data.words || [],
+              formalText: (data.llm_result && data.llm_result.formal_text) || '',
+              qaList: (data.llm_result && data.llm_result.qa_list) || []
+            });
+            saveRecord(rec);
+            lastRecordId = rec.id;
+            setStepState(2, 'done');
+            renderResult(rec, true);
+          });
+        })
+        .catch(function (err) {
+          // 503：STT 未設定 → 誠實存為待轉寫，提供示範試跑
+          if (err.status === 503 || health.reason === 'server-down') {
+            return blobToDataURL(currentBlob).then(function (dataUrl) {
+              var rec = buildRecord({
+                status: 'pending',
+                durationSec: recDuration,
+                mime: blobMime,
+                source: 'live',
+                mode: 'offline',
+                audioDataURL: dataUrl || undefined,
+                rawText: '',
+                formalText: '',
+                qaList: []
+              });
+              saveRecord(rec);
+              lastRecordId = rec.id;
+              renderOffline(rec);
+            });
+          }
+          setStepState(1, '');
+          renderError('網絡唔太順利，轉寫未完成。你嘅錄音未被保存，請重試。',
+            function () { showStep('review'); });
+        });
+    }
+
+    function runDemoStory() {
+      // 按鈕 loading 回饋（請求完進入處理步，返回準備頁時復原）
+      btnPrepDemo.disabled = true;
+      btnPrepDemo.innerHTML =
+        '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>示範故事整理中…';
+      showStep('processing');
+      setStepState(0, 'active');
+      fetch(API_BASE + '/api/process', { method: 'POST' })
+        .then(function (r) {
+          setStepState(0, 'done');
+          setStepState(1, 'active');
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (data) {
+          setStepState(1, 'done');
+          setStepState(2, 'active');
+          var existing = loadAll().filter(function (r) { return r.source === 'demo'; })[0];
+          var rec = buildRecord({
+            id: existing ? existing.id : undefined,
+            source: 'demo',
+            mode: data.mode || 'offline-demo',
+            audioUrl: 'assets/demo-story.m4a',
+            durationSec: 50.7,
+            rawText: data.raw_text || '',
+            words: data.words || [],
+            formalText: (data.llm_result && data.llm_result.formal_text) || '',
+            qaList: (data.llm_result && data.llm_result.qa_list) || []
+          });
+          saveRecord(rec);
+          lastRecordId = rec.id;
+          setStepState(2, 'done');
+          renderResult(rec, false);
+        })
+        .catch(function () {
+          setStepState(0, '');
+          resetPrepDemoBtn();
+          renderError('轉寫服務未啟動。請先喺專案執行：python tools\\server.py（埠號 8000）。',
+            function () { showStep('prep'); });
+        });
+    }
+
+    function resetPrepDemoBtn() {
+      btnPrepDemo.disabled = false;
+      btnPrepDemo.innerHTML =
+        '<i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>用示範故事試跑完整流程';
+    }
+
+    /* ---------- 結果畫面 ---------- */
+    function resetSteps() {
+      for (var i = 0; i < 3; i++) setStepState(i, '');
+    }
+
+    function renderResult(rec, isLive) {
+      resetSteps();
+      stepResult.textContent = '';
+
+      var head2 = h('div', 'vtn-rec-result-head');
+      head2.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#2C5742"></i><span></span>';
+      head2.querySelector('span').textContent =
+        isLive ? '轉寫完成・已存入「我的錄音」' : '示範故事整理完成';
+      stepResult.appendChild(head2);
+
+      var tags = h('div', 'vtn-rec-meta-row');
+      tags.appendChild(h('span', 'vtn-rec-pill',
+        rec.source === 'demo' ? '示範故事' : '現場錄音'));
+      tags.appendChild(h('span', 'vtn-rec-pill',
+        '模式：' + (rec.mode === 'online' ? '線上語音辨識' : '離線示範稿')));
+      tags.appendChild(h('span', 'vtn-rec-pill', fmtTime(rec.durationSec)));
+      stepResult.appendChild(tags);
+
+      if (rec.formalText) {
+        stepResult.appendChild(h('p', 'vtn-rec-subhead', '整理後文字稿'));
+        stepResult.appendChild(h('p', 'vtn-rec-formal', rec.formalText));
+      }
+
+      if (rec.qaList.length) {
+        stepResult.appendChild(h('p', 'vtn-rec-subhead', '時間戳問答（按時間可跳聽原音）'));
+        var qaBox = h('div', 'vtn-rec-qa');
+        rec.qaList.forEach(function (qa) {
+          (function (qa) {
+            var b = h('button');
+            b.type = 'button';
+            var q = h('span', 'qa-q', qa.question);
+            var t = h('span', 'qa-t', fmtTime(qa.timestamp));
+            b.appendChild(q);
+            b.appendChild(t);
+            b.addEventListener('click', function () {
+              location.href = 'recording.html?t=' +
+                encodeURIComponent(qa.timestamp) + '#rec-' + rec.id;
+            });
+            qaBox.appendChild(b);
+          })(qa);
+        });
+        stepResult.appendChild(qaBox);
+      }
+
+      if (rec.words.length) {
+        stepResult.appendChild(h('p', 'vtn-rec-subhead', '逐詞辨識（紅框為低置信度，可跳聽核對）'));
+        var words = h('div', 'vtn-rec-words');
+        rec.words.forEach(function (w) {
+          (function (w) {
+            var s = h('button', 'vtn-rec-word' + (w.confidence < 0.75 ? ' is-low' : ''));
+            s.type = 'button';
+            s.textContent = w.word;
+            s.appendChild(h('span', 'w-t', fmtTime(w.start)));
+            s.addEventListener('click', function () {
+              location.href = 'recording.html?t=' +
+                encodeURIComponent(w.start) + '#rec-' + rec.id;
+            });
+            words.appendChild(s);
+          })(w);
+        });
+        stepResult.appendChild(words);
+      }
+
+      var go = h('button', 'vtn-rec-btn vtn-rec-btn--primary');
+      go.type = 'button';
+      go.innerHTML = '<i class="fa-solid fa-folder-open"></i>去「我的錄音」查看';
+      go.addEventListener('click', function () {
+        closeSheet();
+        location.href = 'recording.html?done=' + encodeURIComponent(rec.id) + '#rec-' + rec.id;
+      });
+      stepResult.appendChild(go);
+
+      var again = h('button', 'vtn-rec-btn vtn-rec-btn--ghost');
+      again.type = 'button';
+      again.textContent = isLive ? '再錄一段' : '返準備頁錄我嘅故事';
+      again.addEventListener('click', function () { showStep('prep'); });
+      stepResult.appendChild(again);
+
+      var note = h('p', 'vtn-rec-note');
+      note.innerHTML = '<i class="fa-solid fa-shield-halved"></i><span></span>';
+      note.querySelector('span').textContent =
+        '呢段文字已成為 Ask the Village 助手嘅可回答內容，答案只會引述呢段錄音並附時間戳出處。';
+      stepResult.appendChild(note);
+
+      showStep('result');
+    }
+
+    function renderOffline(pendingRec) {
+      resetSteps();
+      stepResult.textContent = '';
+
+      var head2 = h('div', 'vtn-rec-result-head');
+      head2.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#B55443"></i>' +
+        '<span>錄音已保存為「待轉寫」</span>';
+      stepResult.appendChild(head2);
+
+      stepResult.appendChild(h('p', 'vtn-rec-desc',
+        '而家未設定 Google Cloud 語音辨識憑證，系統唔會臆測你講咗啲乜。' +
+        '設定憑證並重啟服務後，可於「我的錄音・待轉寫」一按重試；而家可以先用內置示範故事體驗完整效果。'));
+
+      var tags = h('div', 'vtn-rec-meta-row');
+      tags.appendChild(h('span', 'vtn-rec-pill--red vtn-rec-pill', '待轉寫'));
+      tags.appendChild(h('span', 'vtn-rec-pill', fmtTime(pendingRec.durationSec)));
+      stepResult.appendChild(tags);
+
+      var demo = h('button', 'vtn-rec-btn vtn-rec-btn--gold');
+      demo.type = 'button';
+      demo.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i>用示範故事試跑完整流程';
+      demo.addEventListener('click', runDemoStory);
+      stepResult.appendChild(demo);
+
+      var go = h('button', 'vtn-rec-btn vtn-rec-btn--ghost');
+      go.type = 'button';
+      go.textContent = '去「待轉寫」睇我嘅錄音';
+      go.addEventListener('click', function () {
+        closeSheet();
+        location.href = 'recording.html?done=' + encodeURIComponent(pendingRec.id) +
+          '&tab=pending#rec-' + pendingRec.id;
+      });
+      stepResult.appendChild(go);
+
+      showStep('result');
+    }
+
+    function renderError(message, onBack) {
+      resetSteps();
+      stepResult.textContent = '';
+      var head2 = h('div', 'vtn-rec-result-head');
+      head2.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#B55443"></i>' +
+        '<span>出現少少狀況</span>';
+      stepResult.appendChild(head2);
+      stepResult.appendChild(h('p', 'vtn-rec-desc', message));
+      var b = h('button', 'vtn-rec-btn vtn-rec-btn--primary', '返轉頭');
+      b.type = 'button';
+      b.addEventListener('click', onBack);
+      stepResult.appendChild(b);
+      showStep('result');
+    }
+
+    /* ---------- 事件 ---------- */
+    startBtn.addEventListener('click', openSheet);
+    btnClose.addEventListener('click', closeSheet);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeSheet();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeSheet();
+    });
+    micBtn.addEventListener('click', startRecording);
+    liveMic.addEventListener('click', function () { stopRecording(false); });
+    btnCancelRec.addEventListener('click', function () {
+      stopRecording(true);
+      showStep('prep');
+    });
+    btnUpload.addEventListener('click', uploadAndSave);
+    btnRerecord.addEventListener('click', function () {
+      currentBlob = null;
+      startRecording();
+    });
+    btnDemo.addEventListener('click', function () {
+      if (btnDemo.disabled) return;
+      if (!window.VTNDemoAudio) return;
+      // 播放中狀態回饋，先俾長者見到「播放緊」先關彈窗
+      btnDemo.disabled = true;
+      btnDemo.innerHTML =
+        '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>播放緊示範故事…';
+      window.VTNDemoAudio.play(0);
+      setTimeout(function () {
+        closeSheet();
+        btnDemo.disabled = false;
+        btnDemo.innerHTML =
+          '<i class="fa-solid fa-headphones" aria-hidden="true"></i>先聽示範故事';
+      }, 500);
+    });
   }
+})();
+
+
+/* ===== js/recording.js ===== */
+/* =============================================================================
+ * Voices of the North — 錄音管理頁（我的錄音）
+ * 職責：
+ *  1. 草稿／待轉寫／已完成三個分頁的切換（ARIA tabs，鍵盤可達）
+ *  2. 渲染 record.js 存入 localStorage 嘅真實錄音（VTNRecords）：
+ *     - 已完成：試聽原音、整理稿、時間戳 QA／逐詞跳聽、刪除
+ *     - 待轉寫：離線模式保存嘅現場錄音，可一按重試上傳或移除
+ *  3. 深鏈：?done=ID、?tab=pending、#rec-ID、?t=17.5（助手出處跳入即時播放）
+ * 草稿維持誠實空狀態（唔自動生成）。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  /* ---------- 小工具 ---------- */
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function h(tag, cls, text) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function fmtTime(sec) {
+    var s = Math.max(0, Math.floor(sec || 0));
+    return pad(Math.floor(s / 60)) + ':' + pad(s % 60);
+  }
+  function fmtDate(ts) {
+    var d = new Date(ts);
+    return (d.getMonth() + 1) + ' 月 ' + d.getDate() + '日 ' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  var toastEl = $('#appToast');
+  var toastText = $('#appToastText');
+  var toastTimer = null;
+  function showToast(message) {
+    if (!toastEl || !toastText) return;
+    toastText.textContent = message;
+    toastEl.classList.remove('is-show');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('is-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('is-show'); }, 3200);
+  }
+
+  /* ---------- 分頁 ---------- */
+  var tablist = $('.tabs[role="tablist"]');
+  var tabs = tablist ? Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]')) : [];
+  var selectTab = function () {};
+
+  function initTabs() {
+    if (!tablist) return;
+    selectTab = function (tab, shouldFocus) {
+      tabs.forEach(function (t) {
+        var selected = t === tab;
+        t.classList.toggle('is-active', selected);
+        t.setAttribute('aria-selected', selected ? 'true' : 'false');
+        t.tabIndex = selected ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) {
+          if (selected) {
+            panel.hidden = false;
+            requestAnimationFrame(function () { panel.classList.add('is-show'); });
+          } else {
+            panel.classList.remove('is-show');
+            panel.hidden = true;
+          }
+        }
+      });
+      if (shouldFocus) tab.focus();
+    };
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { selectTab(tab, false); });
+      tab.addEventListener('keydown', function (e) {
+        var next = null;
+        if (e.key === 'ArrowRight' || e.key === 'Down') next = tabs[(i + 1) % tabs.length];
+        else if (e.key === 'ArrowLeft' || e.key === 'Up') next = tabs[(i - 1 + tabs.length) % tabs.length];
+        else if (e.key === 'Home') next = tabs[0];
+        else if (e.key === 'End') next = tabs[tabs.length - 1];
+        if (next) { e.preventDefault(); selectTab(next, true); }
+      });
+    });
+  }
+
+  /* =========================================================================
+   * 錄音卡片
+   * ======================================================================= */
+  function audioSrc(rec) {
+    return rec.audioDataURL || rec.audioUrl || '';
+  }
+
+  function seekPlay(audioEl, sec) {
+    function go() {
+      try { audioEl.currentTime = sec || 0; } catch (e) { /* ignore */ }
+      var pr = audioEl.play();
+      if (pr && pr.catch) pr.catch(function () {});
+    }
+    if (audioEl.readyState >= 1) go();
+    else audioEl.addEventListener('loadedmetadata', go, { once: true });
+  }
+
+  function buildCard(rec, state) {
+    var card = h('article', 'vtn-rec-card' + (state === 'pending' ? ' is-pending' : ''));
+    card.id = 'rec-' + rec.id;
+
+    var head = h('button', 'vtn-rec-card__head');
+    head.type = 'button';
+    head.setAttribute('aria-expanded', 'false');
+    var icon = h('span', 'vtn-rec-card__icon' + (state === 'pending' ? ' vtn-rec-card__icon--pending' : ''));
+    icon.innerHTML = '<i class="fa-solid ' +
+      (state === 'pending' ? 'fa-hourglass-half' : 'fa-file-lines') + '" aria-hidden="true"></i>';
+    var main = h('span', 'vtn-rec-card__main');
+    main.appendChild(h('p', 'vtn-rec-card__title', rec.title || '未命名錄音'));
+    var metaBits = [fmtDate(rec.createdAt)];
+    if (rec.durationSec) metaBits.push(fmtTime(rec.durationSec));
+    metaBits.push(rec.source === 'demo' ? '示範故事' : '我的現場錄音');
+    if (state === 'done' && rec.mode === 'offline-demo') metaBits.push('離線示範稿');
+    main.appendChild(h('p', 'vtn-rec-card__meta', metaBits.join('　・　')));
+    var chev = h('span', 'vtn-rec-card__chevron');
+    chev.innerHTML = '<i class="fa-solid fa-chevron-down" aria-hidden="true"></i>';
+    head.appendChild(icon);
+    head.appendChild(main);
+    head.appendChild(chev);
+    card.appendChild(head);
+
+    var body = h('div', 'vtn-rec-card__body');
+    body.hidden = true;
+    card.appendChild(body);
+
+    if (state === 'pending') {
+      body.appendChild(h('p', 'vtn-rec-desc',
+        '呢段錄音喺離線示範模式下保存，未經語音辨識。啟動轉寫服務並設定 Google Cloud 憑證後，可一按重試。'));
+      var pa = h('audio', 'vtn-rec-audio');
+      pa.controls = true;
+      pa.src = audioSrc(rec);
+      body.appendChild(pa);
+      var actions = h('div', 'vtn-rec-card__actions');
+      var retry = h('button', 'vtn-rec-card__retry', '重試上傳轉寫');
+      retry.type = 'button';
+      var remove = h('button', 'vtn-rec-card__remove', '移除');
+      remove.type = 'button';
+      actions.appendChild(retry);
+      actions.appendChild(remove);
+      body.appendChild(actions);
+
+      retry.addEventListener('click', function () { retryUpload(rec, retry); });
+      remove.addEventListener('click', function () {
+        VTNRecords.remove(rec.id);
+        renderAll();
+        showToast('已移除該段待轉寫錄音。');
+      });
+    } else {
+      var tags = h('div', 'vtn-rec-card__tags');
+      tags.appendChild(h('span', 'vtn-rec-pill', rec.source === 'demo' ? '示範故事' : '現場錄音'));
+      tags.appendChild(h('span', 'vtn-rec-pill' +
+        (rec.mode === 'online' ? '' : ' vtn-rec-pill--gold'),
+        rec.mode === 'online' ? '線上語音辨識' : '離線示範稿'));
+      if (rec.durationSec) tags.appendChild(h('span', 'vtn-rec-pill', fmtTime(rec.durationSec)));
+      body.appendChild(tags);
+
+      var au = h('audio', 'vtn-rec-audio');
+      au.controls = true;
+      au.preload = 'none';
+      au.src = audioSrc(rec);
+      body.appendChild(au);
+
+      if (rec.formalText) {
+        body.appendChild(h('p', 'vtn-rec-subhead', '整理後文字稿'));
+        body.appendChild(h('p', 'vtn-rec-formal', rec.formalText));
+      }
+
+      if (rec.qaList && rec.qaList.length) {
+        body.appendChild(h('p', 'vtn-rec-subhead', '時間戳問答（按時間跳聽原音）'));
+        var qaBox = h('div', 'vtn-rec-qa');
+        rec.qaList.forEach(function (qa) {
+          var b = h('button');
+          b.type = 'button';
+          b.appendChild(h('span', 'qa-q', qa.question));
+          b.appendChild(h('span', 'qa-t', fmtTime(qa.timestamp)));
+          b.addEventListener('click', function () {
+            au.preload = 'metadata';
+            au.src = audioSrc(rec);
+            seekPlay(au, qa.timestamp);
+          });
+          qaBox.appendChild(b);
+        });
+        body.appendChild(qaBox);
+      }
+
+      if (rec.words && rec.words.length) {
+        body.appendChild(h('p', 'vtn-rec-subhead', '逐詞辨識（紅字為低置信度）'));
+        var words = h('div', 'vtn-rec-words');
+        rec.words.slice(0, 120).forEach(function (w) {
+          var s = h('button', 'vtn-rec-word' + (w.confidence < 0.75 ? ' is-low' : ''));
+          s.type = 'button';
+          s.textContent = w.word;
+          s.appendChild(h('span', 'w-t', fmtTime(w.start)));
+          s.addEventListener('click', function () {
+            au.preload = 'metadata';
+            au.src = audioSrc(rec);
+            seekPlay(au, w.start);
+          });
+          words.appendChild(s);
+        });
+        body.appendChild(words);
+      }
+
+      var act2 = h('div', 'vtn-rec-card__actions');
+      var del = h('button', 'vtn-rec-card__remove', '刪除呢段錄音');
+      del.type = 'button';
+      del.addEventListener('click', function () {
+        VTNRecords.remove(rec.id);
+        renderAll();
+        showToast('已刪除錄音及其文字稿。');
+      });
+      act2.appendChild(del);
+      body.appendChild(act2);
+    }
+
+    head.addEventListener('click', function () {
+      var open = body.hidden;
+      body.hidden = !open;
+      card.classList.toggle('is-open', open);
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open && !au_loadStarted(au || pa)) {
+        (au || pa).preload = 'metadata';
+      }
+    });
+
+    card._body = body;
+    card._head = head;
+    card._audio = au || pa;
+    return card;
+  }
+
+  function au_loadStarted(audioEl) {
+    return audioEl && audioEl.getAttribute('data-loaded') === '1';
+  }
+
+  /* ---------- 待轉寫重試 ---------- */
+  function retryUpload(rec, btn) {
+    if (!rec.audioDataURL) {
+      showToast('音訊本體已被瀏覽器清理，請重新錄製。');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = '上傳中…';
+    fetch(VTNRecords.API_BASE + '/api/health')
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.stt_ready) {
+          var e = new Error('STT offline'); e.status = 503; throw e;
+        }
+        return fetch(rec.audioDataURL).then(function (r) { return r.blob(); });
+      })
+      .then(function (blob) {
+        var fd = new FormData();
+        fd.append('file', blob, 'retry' + (/webm/.test(rec.mime) ? '.webm' : '.m4a'));
+        return fetch(VTNRecords.API_BASE + '/api/process', { method: 'POST', body: fd })
+          .then(function (r) {
+            if (!r.ok) { var e2 = new Error('HTTP ' + r.status); e2.status = r.status; throw e2; }
+            return r.json();
+          })
+          .then(function (data) {
+            var updated = {
+              ...rec,
+              status: 'done',
+              mode: data.mode || 'online',
+              rawText: data.raw_text || '',
+              words: data.words || [],
+              formalText: (data.llm_result && data.llm_result.formal_text) || '',
+              qaList: (data.llm_result && data.llm_result.qa_list) || []
+            };
+            updated.title = (updated.formalText || '').slice(0, 26) +
+              ((updated.formalText || '').length > 26 ? '…' : '');
+            VTNRecords.save(updated);
+            renderAll();
+            showToast('轉寫完成，已移至「已完成」。');
+          });
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = '重試上傳轉寫';
+        if (err.status === 503) {
+          showToast('轉寫服務仍係離線示範模式，啟用憑證後再試。');
+        } else {
+          showToast('連唔到轉寫服務，請確認 python tools/server.py 已啟動。');
+        }
+      });
+  }
+
+  /* ---------- 渲染 ---------- */
+  function renderAll() {
+    var records = (window.VTNRecords ? VTNRecords.list() : []);
+    var pending = records.filter(function (r) { return r.status === 'pending'; });
+    var done = records.filter(function (r) { return r.status !== 'pending'; });
+
+    var listP = $('#recListPending');
+    var listD = $('#recListDone');
+    listP.textContent = '';
+    listD.textContent = '';
+    pending.forEach(function (r) { listP.appendChild(buildCard(r, 'pending')); });
+    done.forEach(function (r) { listD.appendChild(buildCard(r, 'done')); });
+
+    $('#emptyPending').hidden = pending.length > 0;
+    $('#emptyDone').hidden = done.length > 0;
+    var pp = $('#panel-pending');
+    var pd = $('#panel-done');
+    pp.classList.toggle('has-list', pending.length > 0);
+    pd.classList.toggle('has-list', done.length > 0);
+
+    var cP = $('#countPending');
+    var cD = $('#countDone');
+    cP.hidden = pending.length === 0; cP.textContent = pending.length;
+    cD.hidden = done.length === 0; cD.textContent = done.length;
+
+    return { pending: pending, done: done };
+  }
+
+  /* ---------- 深鏈：?done / ?tab / #rec-ID / ?t= ---------- */
+  function handleDeepLink(groups) {
+    var params = new URLSearchParams(location.search);
+    var wantTab = params.get('tab');
+    var doneId = params.get('done');
+    var m = (location.hash || '').match(/#rec-(.+)$/);
+    var recId = doneId || (m ? decodeURIComponent(m[1]) : null);
+    var t = params.get('t');
+
+    var targetGroup = null;
+    if (recId) {
+      targetGroup = groups.pending.some(function (r) { return r.id === recId; }) ? 'pending'
+                  : groups.done.some(function (r) { return r.id === recId; }) ? 'done' : null;
+    } else if (wantTab === 'pending') {
+      targetGroup = 'pending';
+    }
+    if (targetGroup === 'pending') selectTab($('#tab-pending'), false);
+    else if (targetGroup === 'done' || doneId) selectTab($('#tab-done'), false);
+
+    if (recId) {
+      setTimeout(function () {
+        var card = document.getElementById('rec-' + recId);
+        if (card) {
+          if (card._body.hidden) card._head.click();
+          card.classList.add('is-new');
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(function () { card.classList.remove('is-new'); }, 2600);
+          if (t !== null && card._audio) {
+            card._audio.preload = 'metadata';
+            seekPlay(card._audio, parseFloat(t) || 0);
+          }
+        }
+      }, 250);
+    }
+  }
+
+  /* ---------- 底導航 ---------- */
+  function initNav() {
+    document.querySelectorAll('.bottom-nav__item').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (item.getAttribute('data-nav') === 'record') e.preventDefault();
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initTabs();
+    initNav();
+    var groups = renderAll();
+    handleDeepLink(groups);
+    // 喺其他分頁完成轉寫（或同一頁程式化更新儲存）後自動刷新清單
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'vtn-records-v1') renderAll();
+    });
+    window.addEventListener('vtn:records-changed', function () { renderAll(); });
+  });
+})();
+
+
+/* ===== js/stories.js ===== */
+/* =============================================================================
+ * Voices of the North — 村落故事頁
+ * 職責：
+ *  1. 地點／主題篩選：僅一張真實存在的示範故事卡；篩選值全部來自它的真實屬性。
+ *     跨類別為 AND；同類別多選為 OR；全部取消時等同不篩選（顯示全部）。
+ *  2. 「開啟故事」：由 js/demo-audio.js 播放真實示範錄音 assets/demo-story.m4a。
+ *  3. 底部導航：已建成頁真實跳轉，未建成頁以 Toast 標示「準備中」。
+ * 不編造更多故事。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  /* ---------- 1. 輕提示 Toast ---------- */
+  var toastEl = document.getElementById('appToast');
+  var toastText = document.getElementById('appToastText');
+  var toastTimer = null;
+
+  function showToast(message) {
+    if (!toastEl || !toastText) return;
+    toastText.textContent = message;
+    toastEl.classList.remove('is-show');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('is-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('is-show');
+    }, 3600);
+  }
+
+  /* ---------- 2. 篩選 ---------- */
+  function initFilters() {
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.story-hero-card'));
+    if (!chips.length) return;
+
+    function activeValues(type) {
+      var values = [];
+      chips.forEach(function (chip) {
+        if (chip.getAttribute('data-filter-type') === type &&
+            chip.classList.contains('is-active')) {
+          values.push(chip.getAttribute('data-filter-value'));
+        }
+      });
+      return values;
+    }
+
+    function applyFilters() {
+      var locations = activeValues('location');
+      var topics = activeValues('topic');
+
+      cards.forEach(function (card) {
+        var locOk = locations.length === 0 ||
+                    locations.indexOf(card.getAttribute('data-location')) !== -1;
+        var topicOk = topics.length === 0 ||
+                      topics.indexOf(card.getAttribute('data-topic')) !== -1;
+        card.classList.toggle('is-hidden', !(locOk && topicOk));
+      });
+    }
+
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var pressed = chip.classList.toggle('is-active');
+        chip.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+        applyFilters();
+      });
+    });
+  }
+
+  /* 「開啟故事」播放由 js/demo-audio.js 統一處理（真實示範錄音）。 */
+
+  /* ---------- 4. 底部導航（四頁均已建成，真實連結；當前頁不跳轉） ---------- */
+  function initNav() {
+    document.querySelectorAll('.bottom-nav__item').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (item.getAttribute('data-nav') === 'stories') {
+          e.preventDefault(); // 已在故事頁
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initFilters();
+    initNav();
+  });
+})();
+
+
+/* ===== js/my.js ===== */
+/* =============================================================================
+ * Voices of the North — 我的（管理中心）
+ * 職責：
+ *  1. 「我的錄音與故事」為真實連結，跳轉錄音管理頁（FR-MY2）。
+ *  2. 隱私分享範圍、更正/撤回、關於頁尚未建成：以 Toast 誠實標示「準備中」，
+ *     並在提示中保留已確立的私隱承諾（預設私人、撤回後音訊仍歸講述者）。
+ *  3. 語言選擇：開啟底部彈層；當前版本僅「繁體中文（香港）」可用，
+ *     English 與簡體中文誠實標示「準備中」，點擊只提示、不切換。
+ *  4. 不設帳戶、姓名或統計功能（FR-MY7），故本頁無任何假資料。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  /* ---------- 1. 輕提示 Toast ---------- */
+  var toastEl = document.getElementById('appToast');
+  var toastText = document.getElementById('appToastText');
+  var toastTimer = null;
+
+  function showToast(message) {
+    if (!toastEl || !toastText) return;
+    toastText.textContent = message;
+    toastEl.classList.remove('is-show');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('is-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('is-show');
+    }, 3800);
+  }
+
+  /* ---------- 2. 尚未建成的管理入口 ---------- */
+  function initEntries() {
+    var pending = {
+      meEntryPrivacy:
+        '分享範圍設定準備中。預設為最私密的「私人」，日後可隨時更改。',
+      meEntryCorrection:
+        '更正與撤回功能準備中。撤回後故事會離開共享面，音訊仍保留在你手中。',
+      meEntryAbout:
+        '「關於 Voices of the North」頁面準備中。'
+    };
+
+    Object.keys(pending).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', function () {
+        showToast(pending[id]);
+      });
+    });
+  }
+
+  /* ---------- 3. 語言選擇底部彈層 ---------- */
+  function initLanguageSheet() {
+    var entry = document.getElementById('meEntryLanguage');
+    var sheet = document.getElementById('langSheet');
+    var overlay = document.getElementById('langOverlay');
+    var closeBtn = document.getElementById('langSheetClose');
+    var cancelBtn = document.getElementById('langSheetCancel');
+    var options = Array.prototype.slice.call(
+      document.querySelectorAll('.lang-option'));
+    if (!entry || !sheet || !overlay) return;
+
+    var lastFocused = null;
+    var closeTimer = null;
+
+    var SOON_MESSAGES = {
+      en: 'English 介面準備中，當前版本提供繁體中文（香港）。',
+      'zh-CN': '簡體中文介面準備中，當前版本提供繁體中文（香港）。'
+    };
+
+    function openSheet() {
+      clearTimeout(closeTimer);
+      lastFocused = document.activeElement;
+      sheet.hidden = false;
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+      // 下一幀再加 class，確保滑入過渡生效
+      requestAnimationFrame(function () {
+        sheet.classList.add('is-show');
+        overlay.classList.add('is-show');
+      });
+      var selected = document.querySelector('.lang-option.is-selected');
+      if (selected) selected.focus();
+    }
+
+    function closeSheet() {
+      sheet.classList.remove('is-show');
+      overlay.classList.remove('is-show');
+      document.body.style.overflow = '';
+      // 過渡結束後才真正隱藏（與 CSS --dur 380ms 對齊）
+      closeTimer = setTimeout(function () {
+        sheet.hidden = true;
+        overlay.hidden = true;
+      }, 380);
+      if (lastFocused && typeof lastFocused.focus === 'function') {
+        lastFocused.focus();
+      }
+    }
+
+    entry.addEventListener('click', openSheet);
+    closeBtn.addEventListener('click', closeSheet);
+    cancelBtn.addEventListener('click', closeSheet);
+    overlay.addEventListener('click', closeSheet);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !sheet.hidden) closeSheet();
+    });
+
+    options.forEach(function (option) {
+      option.addEventListener('click', function () {
+        if (option.dataset.available === 'true') {
+          // 唯一可用語言即當前語言：確認後關閉彈層
+          closeSheet();
+          return;
+        }
+        // 未建成語言：誠實提示，維持當前選擇不變
+        showToast(SOON_MESSAGES[option.dataset.lang] ||
+                  '該語言介面準備中，當前版本提供繁體中文（香港）。');
+      });
+    });
+  }
+
+  /* ---------- 4. 底部導航（當前頁不跳轉） ---------- */
+  function initNav() {
+    document.querySelectorAll('.bottom-nav__item').forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (item.getAttribute('data-nav') === 'me') {
+          e.preventDefault();  // 已在「我的」頁
+        }
+        // home / record / stories 為真實連結，不攔截
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initEntries();
+    initLanguageSheet();
+    initNav();
+  });
+})();
+
+
+/* ===== js/vtn-map.js ===== */
+/* =============================================================================
+ * Voices of the North — 真實地圖（故事頁專用）
+ *
+ * 私隱設計（FR-B5 不變）：
+ *  - 真實底圖：Leaflet + CARTO Voyager / OpenStreetMap 圖磚
+ *  - 唔放精確定位標記，只畫「約 800 米模糊範圍」圓圈，中心唔係講者 GPS
+ *  - 離線／圖磚載入失敗 → 自動降級 OSM → 再失敗顯示原手繪示意圖
+ *
+ * 故事地點統一由 lib/storyCorpus.js 嘅 location 欄位驅動。
+ * ========================================================================== */
+
+
+(function () {
+  'use strict';
+
+  var LEAFLET_VERSION = '1.9.4';
+  var CDN = 'https://cdn.jsdelivr.net/npm/leaflet@' + LEAFLET_VERSION + '/dist/';
+  var LOAD_TIMEOUT_MS = 12000;
+  var TILE_TIMEOUT_MS = 6500;
+
+  /* 兩級均為無需 API key 嘅公開圖磚（demo／輕量使用，附歸屬聲明）：
+     1. OSM 官方標準圖磚　2. Esri 街道圖後備 */
+  var TILE_SETS = [
+    {
+      name: 'osm',
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      options: {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      }
+    },
+    {
+      name: 'esri',
+      url:
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      options: {
+        maxZoom: 19,
+        attribution:
+          'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a> ' +
+          '&mdash; &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      }
+    }
+  ];
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function loadLeaflet() {
+    return new Promise(function (resolve, reject) {
+      if (window.L) { resolve(window.L); return; }
+
+      if (!document.querySelector('link[data-vtn-leaflet-css]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = CDN + 'leaflet.min.css';
+        link.dataset.vtnLeafletCss = '1';
+        document.head.appendChild(link);
+      }
+
+      var existing = document.querySelector('script[data-vtn-leaflet-js]');
+      if (existing) {
+        existing.addEventListener('load', function () { resolve(window.L); });
+        existing.addEventListener('error', reject);
+        return;
+      }
+
+      var s = document.createElement('script');
+      s.src = CDN + 'leaflet.min.js';
+      s.async = true;
+      s.dataset.vtnLeafletJs = '1';
+      var timer = setTimeout(function () {
+        reject(new Error('leaflet-load-timeout'));
+      }, LOAD_TIMEOUT_MS);
+      s.onload = function () { clearTimeout(timer); resolve(window.L); };
+      s.onerror = function () { clearTimeout(timer); reject(new Error('leaflet-load-error')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /** 逐級降級試圖源；第一塊圖成功即視為可用 */
+  function addTileLayerWithFallback(map, sets, onFirstTile) {
+    var idx = 0;
+    var revealed = false;
+    var current = null;
+    var timer = null;
+
+    function tryNext(reason) {
+      if (revealed) return;
+      if (current) { map.removeLayer(current); current = null; }
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (idx >= sets.length) { onFirstTile(false); return; }
+
+      var set = sets[idx++];
+      var gotTile = false;
+
+      current = window.L.tileLayer(set.url, Object.assign({}, set.options, {
+        detectRetina: true,
+        className: 'vtn-tiles-' + set.name
+      }));
+
+      current.on('tileload', function () {
+        if (gotTile || revealed) return;
+        gotTile = true;
+        revealed = true;
+        if (timer) { clearTimeout(timer); timer = null; }
+        onFirstTile(true);
+      });
+      // CARTO 部份地區會回 404 再由 OSM 補：連續錯誤視為該源不可用
+      var errCount = 0;
+      current.on('tileerror', function () {
+        if (gotTile || revealed) return;
+        errCount++;
+        if (errCount >= 6) tryNext('tile-errors');
+      });
+
+      current.addTo(map);
+      timer = setTimeout(function () { tryNext('tile-timeout:' + reason); }, TILE_TIMEOUT_MS);
+    }
+
+    tryNext('start');
+  }
+
+  function initMap(L) {
+    var frame = document.getElementById('mapFrame');
+    var el = document.getElementById('vtnMap');
+    var loading = document.getElementById('mapLoading');
+    var note = document.getElementById('mapTilesNote');
+    if (!frame || !el) return;
+
+    var stories = (RECORDED_STORIES || []).filter(function (s) {
+      return s.location && typeof s.location.lat === 'number' && typeof s.location.lng === 'number';
+    });
+    if (!stories.length) { fail('no-location'); return; }
+
+    var reduceMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var first = stories[0].location;
+    var map = L.map(el, {
+      center: [first.lat, first.lng],
+      zoom: 15,
+      zoomControl: true,
+      attributionControl: true,
+      zoomAnimation: !reduceMotion,
+      fadeAnimation: !reduceMotion,
+      markerZoomAnimation: !reduceMotion,
+      scrollWheelZoom: false,   // 避免喺手頁滑動時搶滾動；雙擊／＋−仍可縮放
+      tap: true
+    });
+    // 輕觸後先允許捲動縮放（手機常見模式）
+    map.once('focus click', function () { map.scrollWheelZoom.enable(); });
+
+    L.control.scale({ imperial: false, maxWidth: 110 }).addTo(map);
+
+    stories.forEach(function (story) {
+      var loc = story.location;
+      var circle = L.circle([loc.lat, loc.lng], {
+        radius: loc.radiusM || 800,
+        color: '#2C5742',
+        weight: 2.5,
+        dashArray: '6 8',
+        lineCap: 'round',
+        fillColor: '#5E8C70',
+        fillOpacity: 0.14
+      }).addTo(map);
+
+      circle.bindPopup(
+        '<strong>' + story.title + '</strong><br>' +
+        '故事地點大概喺呢一帶（方圓約 ' + (loc.radiusM || 800) +
+        ' 米嘅模糊範圍，唔係 GPS 定位）。',
+        { className: 'leaflet-vtn-popup', closeButton: true, offset: [0, -4] }
+      );
+      circle.bindTooltip(loc.area + '・約 ' + Math.round((loc.radiusM || 800) / 100) / 10 +
+        ' 公里模糊範圍', {
+        direction: 'top',
+        offset: [0, -6],
+        opacity: 0.96,
+        className: 'leaflet-vtn-popup'
+      });
+    });
+
+    // 視圖剛好包住第一個故事嘅模糊圈
+    var firstCircle = L.circle([first.lat, first.lng], { radius: first.radiusM || 800 });
+    function fitCircle() {
+      try {
+        map.fitBounds(firstCircle.getBounds(), { padding: [30, 30], animate: false });
+      } catch (e) {
+        map.setView([first.lat, first.lng], 14, { animate: false });
+      }
+    }
+    fitCircle();
+
+    addTileLayerWithFallback(map, TILE_SETS, function (ok) {
+      if (ok) {
+        // 等首批圖磚實際渲染先淡入；容器此時先有最終尺寸，要重新校正＋fit
+        requestAnimationFrame(function () {
+          map.invalidateSize();
+          fitCircle();
+          el.classList.add('is-ready');
+          if (loading) loading.classList.add('is-hidden');
+        });
+      } else {
+        fail('tiles-unavailable');
+      }
+    });
+
+    // 容器尺寸可能被 webfont／卡片動作改變，延遲再校正一次
+    setTimeout(function () { try { map.invalidateSize(); } catch (e) { /* ignore */ } }, 900);
+
+    function fail(reason) {
+      el.classList.add('is-failed');
+      if (loading) loading.classList.add('is-hidden');
+      if (note) {
+        note.textContent = reason === 'tiles-unavailable'
+          ? '未能連接真實地圖，顯示手繪示意圖・範圍只作示意，並非 GPS 定位。'
+          : '真實地圖暫不可用，顯示手繪示意圖・範圍只作示意，並非 GPS 定位。';
+      }
+      try { map.remove(); } catch (e) { /* ignore */ }
+    }
+  }
+
+  ready(function () {
+    var el = document.getElementById('vtnMap');
+    var loading = document.getElementById('mapLoading');
+    var note = document.getElementById('mapTilesNote');
+    if (!el) return;
+
+    loadLeaflet()
+      .then(function (L) {
+        try { initMap(L); }
+        catch (e) { showFallback('init-error'); }
+      })
+      .catch(function () { showFallback('leaflet-unavailable'); });
+
+    function showFallback() {
+      el.classList.add('is-failed');
+      if (loading) loading.classList.add('is-hidden');
+      if (note) note.textContent = '未能連接真實地圖，顯示手繪示意圖・範圍只作示意，並非 GPS 定位。';
+    }
+  });
+})();
+
+
+/* ===== js/ask-assistant.js ===== */
+/* =============================================================================
+ * Ask the Village — 懸浮村落問答助手（無框架版，四頁原型共用）
+ * -----------------------------------------------------------------------------
+ * 直接以 ES Module 引用 Next.js 同款語料庫 lib/storyCorpus.js，
+ * 與 app/api/ask-village（服務端）、components/FloatingAIAssistant.jsx
+ * 使用完全相同的段落／關鍵詞／出處規則，三端答案永不漂移。
+ *
+ * 誠實性紅線（與服務端一致）：
+ *   1. 答案只來自已錄製故事文字稿；
+ *   2. 每條在範圍答案附時間戳引用 Source: [YL-001] at 00:21；
+ *   3. 超範圍一律回標準拒答句，前端再做一次「無引用即拒答」校驗。
+ *
+ * 用法（四頁 </body> 前各一行）：
+ *   <link href="css/assistant.css" rel="stylesheet">
+ *   <script type="module" src="js/ask-assistant.js"><\/script>
+ * ========================================================================== */
+
+
+(function () {
+  'use strict';
+
+  /* ---------------- 常量 ---------------- */
+
+  var STORAGE_KEY = 'vtn-ask-village-chat-v1';
+  var HINT_KEY = 'vtn-ask-village-hint-v1';
+  var RECORDS_KEY = 'vtn-records-v1';
+  var MASCOT_SRC = 'assets/mascot.png';
+  var ANSWER_DELAY_MIN = 550;
+  var ANSWER_DELAY_MAX = 950;
+  var WELCOME_TEXT =
+    '你好！我會根據已經錄製嘅故事回答你，有記錄嘅內容我會直頭話你知。試下問：';
+
+  /* ---------------- 小工具 ---------------- */
+
+  function $(tag, className, text) {
+    var el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  function loadStore() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var data = raw ? JSON.parse(raw) : null;
+      if (data && Array.isArray(data.messages)) return data;
+    } catch (e) { /* 無儲存或損毀 → 全新開始 */ }
+    return { messages: [] };
+  }
+
+  function saveStore(store) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    } catch (e) { /* 隱私模式等：略過持久化 */ }
+  }
+
+  function hintDismissed() {
+    try { return localStorage.getItem(HINT_KEY) === '1'; } catch (e) { return false; }
+  }
+  function dismissHint() {
+    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* ignore */ }
+  }
+
+  function fakeDelay() {
+    return ANSWER_DELAY_MIN +
+      Math.random() * (ANSWER_DELAY_MAX - ANSWER_DELAY_MIN);
+  }
+
+  /* ---------- 第二語料層：用戶已轉寫錄音（record.js 存入 localStorage） ----------
+   * 後端從真實錄音抽出 qaList（每條附時間戳）；助手只可原樣引述，
+   * 命中方式與語料庫同級嚴格：需 ≥2 個共同二元詞，避免「有咩」之類通殺。 */
+  function normalizeQ(text) {
+    return String(text || '')
+      .toLowerCase()
+      .replace(/[？?！!。，,、：:；;（）()「」『』\s]/g, '');
+  }
+  function bigrams(text) {
+    var s = normalizeQ(text);
+    var out = [];
+    for (var i = 0; i < s.length - 1; i++) out.push(s.slice(i, i + 2));
+    return out;
+  }
+  function loadRecordEntries() {
+    var entries = [];
+    try {
+      var arr = JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]');
+      if (!Array.isArray(arr)) return entries;
+      arr.forEach(function (rec) {
+        if (rec.status === 'pending' || !rec.qaList) return;
+        rec.qaList.forEach(function (qa) {
+          entries.push({
+            recordId: rec.id,
+            recordTitle: rec.title || '我的錄音',
+            source: rec.source,
+            start: qa.timestamp || 0,
+            question: qa.question || '',
+            answer: qa.answer || '',
+            haystack: (qa.question || '') + ' ' + (qa.answer || '')
+          });
+        });
+      });
+    } catch (e) { /* 損毀儲存 → 略過 */ }
+    return entries;
+  }
+  function retrieveFromRecords(question) {
+    var q = normalizeQ(question);
+    if (q.length < 2) return null;
+    var qGrams = bigrams(q);
+    var best = null;
+    loadRecordEntries().forEach(function (e) {
+      var grams = bigrams(e.haystack);
+      var hit = 0;
+      qGrams.forEach(function (g) { if (grams.indexOf(g) !== -1) hit++; });
+      if (hit >= 2 && (!best || hit > best.hit)) {
+        best = {
+          entry: e,
+          hit: hit,
+          inScope: true,
+          answer: e.answer,
+          sources: [{
+            kind: 'record',
+            recordId: e.recordId,
+            recordTitle: e.recordTitle,
+            start: e.start,
+            label: 'Source: [' + e.recordId + '] at ' + fmtTs(e.start)
+          }],
+          demo: false
+        };
+      }
+    });
+    return best;
+  }
+  function fmtTs(sec) {
+    var s = Math.max(0, Math.floor(sec || 0));
+    function p(n) { return String(n).padStart(2, '0'); }
+    return p(Math.floor(s / 60)) + ':' + p(s % 60);
+  }
+
+  /* 前端最後防線：在範圍但無引用 → 強制轉標準拒答；
+   * 順序：已發布故事語料庫 → 用戶已轉寫錄音 → 誠實拒答 */
+  function honestAnswer(question) {
+    var res = retrieveAnswer(question);
+    if (res.inScope && (!res.sources || res.sources.length === 0)) {
+      res = { inScope: false, answer: OUT_OF_SCOPE_MESSAGE, sources: [] };
+    }
+    if (res.inScope) return res;
+    var recRes = retrieveFromRecords(question);
+    if (recRes) return recRes;
+    return { inScope: false, answer: OUT_OF_SCOPE_MESSAGE, sources: [], demo: false };
+  }
+
+  /* ---------------- DOM 骨架 ---------------- */
+
+  var root = $('div', 'vtn-ai-root');
+  root.setAttribute('data-vtn-ai', 'mounted');
+
+  /* 半透明黑色遮罩：點擊關閉 */
+  var mask = $('div', 'vtn-ai-mask');
+  mask.setAttribute('aria-hidden', 'true');
+
+  /* 預設態：提示氣泡 + FAB */
+  var launcher = $('div', 'vtn-ai-launcher');
+
+  var hint = $('div', 'vtn-ai-hint');
+  hint.hidden = hintDismissed();
+  hint.innerHTML =
+    '有咩需要幫忙？<small>How may I help you?</small>';
+  var hintClose = $('button', 'vtn-ai-hint-close', '×');
+  hintClose.type = 'button';
+  hintClose.setAttribute('aria-label', '關閉提示');
+  hint.appendChild(hintClose);
+
+  var fab = $('button', 'vtn-ai-fab');
+  fab.type = 'button';
+  fab.setAttribute('aria-label', '開啟 Ask the Village 村落問答助手');
+  fab.setAttribute('aria-expanded', 'false');
+  var fabImg = $('img');
+  fabImg.src = MASCOT_SRC;
+  fabImg.alt = '';
+  fabImg.setAttribute('aria-hidden', 'true');
+  fab.appendChild(fabImg);
+  var fabBadge = $('span', 'vtn-ai-fab-badge');
+  fabBadge.innerHTML = '<i class="fa-solid fa-sparkles" aria-hidden="true"></i>';
+  fab.appendChild(fabBadge);
+
+  launcher.appendChild(hint);
+  launcher.appendChild(fab);
+
+  /* 聊天面板（App 內全寬 BottomSheet，常駐 DOM、靠 root.is-open 滑出） */
+  var panel = $('section', 'vtn-ai-panel');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-label', 'Ask the Village 村落問答');
+  panel.setAttribute('aria-hidden', 'true');
+
+  /* 頭欄 */
+  var head = $('header', 'vtn-ai-head');
+  var headImg = $('img');
+  headImg.src = MASCOT_SRC;
+  headImg.alt = '';
+  var headTitles = $('div', 'vtn-ai-head-titles');
+  headTitles.appendChild($('p', 'vtn-ai-head-title', 'Ask the Village'));
+  headTitles.appendChild($('p', 'vtn-ai-head-sub', '答案只來自已錄製嘅故事'));
+  var btnClose = $('button', 'vtn-ai-head-btn');
+  btnClose.type = 'button';
+  btnClose.setAttribute('aria-label', '關閉助手');
+  btnClose.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+  head.appendChild(headImg);
+  head.appendChild(headTitles);
+  head.appendChild(btnClose);
+
+  /* 訊息區 */
+  var log = $('div', 'vtn-ai-log');
+  log.setAttribute('role', 'log');
+  log.setAttribute('aria-live', 'polite');
+  log.setAttribute('tabindex', '0');
+  log.setAttribute('aria-label', '對話內容');
+
+  /* 金色誠實底註 */
+  var pledge = $('div', 'vtn-ai-pledge');
+  pledge.innerHTML =
+    '<i class="fa-solid fa-shield-halved" aria-hidden="true"></i>' +
+    '<span>無來源引用嘅內容，唔會當成答案</span>';
+
+  /* 輸入列 */
+  var form = $('form', 'vtn-ai-form');
+  var input = $('input', 'vtn-ai-input');
+  input.type = 'text';
+  input.id = 'vtn-ask-input';
+  input.maxLength = 500;
+  input.autocomplete = 'off';
+  input.placeholder = '輸入問題，例如：以前村民耕種啲乜？';
+  input.setAttribute('aria-label', '輸入你嘅問題');
+  var send = $('button', 'vtn-ai-send');
+  send.type = 'submit';
+  send.setAttribute('aria-label', '發送問題');
+  send.innerHTML = '<i class="fa-solid fa-paper-plane" aria-hidden="true"></i>';
+  form.appendChild(input);
+  form.appendChild(send);
+
+  panel.appendChild(head);
+  panel.appendChild(log);
+  panel.appendChild(pledge);
+  panel.appendChild(form);
+
+  root.appendChild(mask);
+  root.appendChild(launcher);
+  root.appendChild(panel);
+
+  /* ---------------- 訊息渲染 ---------------- */
+
+  var store = loadStore();
+  var busy = false;
+  var typingRow = null;
+  var lastFallback = null;
+
+  function scrollLog() {
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function suggestRow() {
+    var row = $('div', 'vtn-ai-row');
+    var bubble = $('div', 'vtn-ai-bubble');
+    bubble.appendChild($('span', null, WELCOME_TEXT));
+    var chips = $('div', 'vtn-ai-suggests');
+    function addSuggest(q) {
+      var b = $('button', 'vtn-ai-suggest', q);
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        if (busy) return;
+        ask(q);
+      });
+      chips.appendChild(b);
+    }
+    SUGGESTED_QUESTIONS.forEach(addSuggest);
+
+    // 用戶最近已轉寫錄音嘅問題（最多 2 條，直接可問）
+    var recQs = [];
+    try {
+      var seen = {};
+      JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]').forEach(function (r) {
+        if (r.status === 'pending' || !r.qaList) return;
+        r.qaList.forEach(function (qa) {
+          var q = qa.question || '';
+          if (q && !seen[q] && recQs.length < 2) { seen[q] = 1; recQs.push(q); }
+        });
+      });
+    } catch (e) { /* ignore */ }
+    if (recQs.length) {
+      var cap = $('p', 'vtn-ai-corpus-note', '— 你最近嘅錄音 —');
+      cap.style.marginTop = '10px';
+      bubble.appendChild(cap);
+      recQs.forEach(addSuggest);
+    }
+
+    bubble.appendChild(chips);
+    row.appendChild(bubble);
+    return row;
+  }
+
+  function sourceChip(src) {
+    var a = $('a', 'vtn-ai-chip');
+
+    // —— 用戶自己嘅已轉寫錄音：跳到「我的錄音」並跳秒播放 ——
+    if (src.kind === 'record') {
+      var onRecordingPage = /recording\.html$/.test(location.pathname);
+      var href = 'recording.html?t=' + src.start + '#rec-' + src.recordId;
+      a.href = onRecordingPage ? '#rec-' + src.recordId + '?t=' + src.start : href;
+      a.title = src.recordTitle + ' — 跳到「我的錄音」' +
+        src.label.replace('Source: ', '');
+      a.innerHTML =
+        '<i class="fa-solid fa-file-audio" aria-hidden="true"></i><span></span>';
+      a.querySelector('span').textContent = src.label;
+      a.addEventListener('click', function (e) {
+        if (!onRecordingPage) return; // 普通跳轉
+        e.preventDefault();
+        var card = document.getElementById('rec-' + src.recordId);
+        if (card) {
+          if (card._body && card._body.hidden && card._head) card._head.click();
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (card._audio) {
+            card._audio.preload = 'metadata';
+            card._audio.addEventListener('loadedmetadata', function () {
+              try { card._audio.currentTime = src.start; } catch (err) { /* ignore */ }
+              var pr = card._audio.play();
+              if (pr && pr.catch) pr.catch(function () {});
+            }, { once: true });
+            try { card._audio.currentTime = src.start; } catch (err) { /* ignore */ }
+            var pr2 = card._audio.play();
+            if (pr2 && pr2.catch) pr2.catch(function () {});
+          }
+        }
+      });
+      return a;
+    }
+
+    // —— 已發布示範故事：故事頁原地播放，其他頁跳轉 ——
+    var onStoriesPage = /stories\.html$/.test(location.pathname);
+    a.href = (onStoriesPage
+      ? '?t=' + (src.start || 0) + '#story-' + src.storyId
+      : 'stories.html?t=' + (src.start || 0) + '#story-' + src.storyId);
+    a.title = src.title + ' — ' + src.teller + '（跳到故事 ' +
+      src.label.replace('Source: ', '') + '）';
+    a.innerHTML =
+      '<i class="fa-solid fa-quote-left" aria-hidden="true"></i>' +
+      '<span></span>';
+    a.querySelector('span').textContent = src.label;
+    a.addEventListener('click', function (e) {
+      if (onStoriesPage && window.VTNDemoAudio) {
+        e.preventDefault();
+        var card = document.querySelector('.story-hero-card');
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.VTNDemoAudio.play(src.start || 0);
+      }
+    });
+    return a;
+  }
+
+  function assistantRow(msg) {
+    var row = $('div', 'vtn-ai-row');
+    var av = $('img', 'vtn-ai-avatar');
+    av.src = MASCOT_SRC;
+    av.alt = '村落小幫手';
+    var bubble = $('div', 'vtn-ai-bubble');
+    if (msg.error) bubble.classList.add('is-error');
+    bubble.appendChild($('span', null, msg.content));
+
+    if (msg.sources && msg.sources.length > 0) {
+      if (msg.demo) {
+        bubble.appendChild($('p', 'vtn-ai-disclosure',
+          '角色演示示範答案・依據真實示範錄音之文字稿'));
+      }
+      bubble.appendChild($('div', 'vtn-ai-sources-label',
+        ''));
+      var label = bubble.querySelector('.vtn-ai-sources-label');
+      label.innerHTML =
+        '<i class="fa-solid fa-circle-check" aria-hidden="true"></i>' +
+        '<span>來源引用（已錄製故事）</span>';
+      var chips = $('div', 'vtn-ai-chips');
+      msg.sources.forEach(function (s) { chips.appendChild(sourceChip(s)); });
+      bubble.appendChild(chips);
+    }
+
+    if (msg.error) {
+      var retry = $('button', 'vtn-ai-retry');
+      retry.type = 'button';
+      retry.innerHTML =
+        '<i class="fa-solid fa-rotate-right" aria-hidden="true"></i>重試';
+      retry.addEventListener('click', function () {
+        if (lastFallback) ask(lastFallback);
+      });
+      bubble.appendChild(retry);
+    }
+
+    row.appendChild(av);
+    row.appendChild(bubble);
+    return row;
+  }
+
+  function userRow(text) {
+    var row = $('div', 'vtn-ai-row vtn-ai-row--user');
+    row.appendChild($('div', 'vtn-ai-bubble', text));
+    return row;
+  }
+
+  function typingNode() {
+    var row = $('div', 'vtn-ai-row');
+    var av = $('img', 'vtn-ai-avatar');
+    av.src = MASCOT_SRC;
+    av.alt = '村落小幫手輸入中';
+    var bubble = $('div', 'vtn-ai-bubble');
+    var dots = $('span', 'vtn-ai-typing');
+    dots.setAttribute('aria-label', '村落小幫手正在思考');
+    dots.appendChild($('span'));
+    dots.appendChild($('span'));
+    dots.appendChild($('span'));
+    bubble.appendChild(dots);
+    row.appendChild(av);
+    row.appendChild(bubble);
+    return row;
+  }
+
+  function renderHistory() {
+    log.textContent = '';
+    if (store.messages.length === 0) {
+      log.appendChild(suggestRow());
+      return;
+    }
+    store.messages.forEach(function (m) {
+      log.appendChild(m.role === 'user' ? userRow(m.content) : assistantRow(m));
+    });
+    scrollLog();
+  }
+
+  /* ---------------- 開合 ---------------- */
+
+  /* 掛載目標：優先 App 手機框，彈層先會被限制喺視口內 */
+  var shell = document.getElementById('appShell') || document.body;
+
+  function openPanel(focus) {
+    root.classList.add('is-open');
+    shell.classList.add('is-modal-open');
+    panel.setAttribute('aria-hidden', 'false');
+    mask.setAttribute('aria-hidden', 'false');
+    fab.setAttribute('aria-expanded', 'true');
+    if (!hint.hidden) { hint.hidden = true; dismissHint(); }
+    renderHistory();
+    if (focus !== false) setTimeout(function () { input.focus(); }, 60);
+  }
+
+  function closePanel() {
+    root.classList.remove('is-open');
+    shell.classList.remove('is-modal-open');
+    root.style.bottom = '';                 // 還原鍵盤托起偏移
+    panel.setAttribute('aria-hidden', 'true');
+    mask.setAttribute('aria-hidden', 'true');
+    fab.setAttribute('aria-expanded', 'false');
+    if (document.activeElement && document.activeElement !== document.body) {
+      try { document.activeElement.blur(); } catch (e) { /* ignore */ }
+    }
+    fab.focus();
+  }
+
+  function setBusy(on) {
+    busy = on;
+    input.disabled = on;
+    send.disabled = on;
+    if (on) {
+      send.innerHTML = '<span class="vtn-ai-spinner" aria-hidden="true"></span>';
+    } else {
+      send.innerHTML = '<i class="fa-solid fa-paper-plane" aria-hidden="true"></i>';
+    }
+    log.querySelectorAll('.vtn-ai-suggest').forEach(function (b) {
+      b.disabled = on;
+    });
+  }
+
+  /* ---------------- 問答 ---------------- */
+
+  function ask(question) {
+    var q = String(question || '').trim();
+    if (!q || busy) return;
+
+    lastFallback = q;
+
+    // 移除歡迎列（只在首次發問時）
+    if (store.messages.length === 0) log.textContent = '';
+
+    store.messages.push({ role: 'user', content: q });
+    saveStore(store);
+    log.appendChild(userRow(q));
+    scrollLog();
+
+    setBusy(true);
+    typingRow = typingNode();
+    log.appendChild(typingRow);
+    scrollLog();
+    input.value = '';
+
+    setTimeout(function () {
+      var msg;
+      try {
+        var res = honestAnswer(q);
+        var hasCorpusSource = res.inScope &&
+          res.sources.some(function (s) { return !s.kind; });
+        msg = {
+          role: 'assistant',
+          content: res.answer,
+          sources: res.inScope ? res.sources : [],
+          demo: hasCorpusSource && !!res.demo
+        };
+      } catch (e) {
+        msg = {
+          role: 'assistant',
+          content: '網絡唔太順利，請再試一次。',
+          sources: [],
+          error: true
+        };
+      }
+
+      if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
+      typingRow = null;
+
+      store.messages.push(msg);
+      saveStore(store);
+      log.appendChild(assistantRow(msg));
+      setBusy(false);
+      scrollLog();
+      input.focus();
+    }, fakeDelay());
+  }
+
+  /* ---------------- 事件 ---------------- */
+
+  fab.addEventListener('click', function () { openPanel(true); });
+  btnClose.addEventListener('click', closePanel);
+  mask.addEventListener('click', closePanel);
+  hintClose.addEventListener('click', function (e) {
+    e.stopPropagation();
+    hint.hidden = true;
+    dismissHint();
+  });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    ask(input.value);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && root.classList.contains('is-open')) closePanel();
+  });
+
+  /* 從引用膠囊跳來故事頁時，定位到故事卡 */
+  if (/stories\.html$/.test(location.pathname) &&
+      location.hash === '#story-YL-001') {
+    function jumpOnce() {
+      var card = document.querySelector('.story-hero-card');
+      if (card) card.scrollIntoView({ block: 'center' });
+    }
+    if (document.readyState === 'complete') jumpOnce();
+    else window.addEventListener('load', jumpOnce);
+  }
+
+  /* ---------------- 掛載 ---------------- */
+
+  /* 量度底導航實際高度，寫入 --vtn-nav-h（標籤換行／字體載入後高度可能
+     同 CSS fallback 77px 有出入；彈層同 FAB 全部依賴呢個變數留位） */
+  function syncNavHeight() {
+    var shellEl = document.getElementById('appShell');
+    var navEl = shellEl && shellEl.querySelector('.bottom-nav');
+    if (!shellEl || !navEl) return;
+    var h = navEl.getBoundingClientRect().height;
+    if (h > 0) shellEl.style.setProperty('--vtn-nav-h', h + 'px');
+  }
+
+  function mount() {
+    if (document.querySelector('.vtn-ai-root')) return; // 自檢：防重複注入
+    /* 必須掛入 .app-shell：position:absolute 先會以手機框為參照，
+       桌面視窗下都唔會溢出 App 範圍 */
+    (document.getElementById('appShell') || document.body).appendChild(root);
+    syncNavHeight();
+  }
+  if (document.body) mount();
+  else document.addEventListener('DOMContentLoaded', mount);
+  window.addEventListener('resize', syncNavHeight);
+  window.addEventListener('load', syncNavHeight);
+
+  /* 手機鍵盤彈起：visualViewport 會縮細，將整個助手層（含輸入列）一齊托起，
+     並把訊息捲到最新；鍵盤收起還原。只喺面板打開時生效。 */
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function () {
+      if (!root.parentNode) return;
+      var kb = window.innerHeight - window.visualViewport.height;
+      var lifted = kb > 80 && root.classList.contains('is-open');
+      root.style.bottom = lifted
+        ? 'calc(var(--vtn-nav-h, 77px) + ' + kb + 'px)'
+        : '';
+      if (lifted) log.scrollTop = log.scrollHeight;
+    });
+  }
+})();
+
+</script>
+<script>
+
+/* ===== 單檔分頁路由：底導航唔再跳頁，切換 .vtn-view ===== */
+(function () {
+  'use strict';
+  var NAV_TO_VIEW = { home: 'home', record: 'recording', stories: 'stories', me: 'me' };
+  var views = {};
+  document.querySelectorAll('.vtn-view').forEach(function (v) { views[v.dataset.view] = v; });
+
+  function go(name) {
+    if (!views[name]) return;
+    Object.keys(views).forEach(function (k) {
+      views[k].classList.toggle('is-active', k === name);
+    });
+    document.querySelectorAll('.bottom-nav__item').forEach(function (a) {
+      var on = NAV_TO_VIEW[a.dataset.nav] === name;
+      a.classList.toggle('is-active', on);
+      if (on) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    views[name].scrollTop = 0;
+    /* Leaflet 喺 display:none 容器初始化尺寸為 0，顯示後靠 window resize 重校 */
+    setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 60);
+    if (location.hash.slice(1) !== name) {
+      history.replaceState ? history.replaceState(null, '', '#' + name) : (location.hash = name);
+    }
+  }
+
+  document.querySelectorAll('.bottom-nav__item').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      go(NAV_TO_VIEW[a.dataset.nav]);
+    });
+  });
+
+  window.addEventListener('hashchange', function () { go(location.hash.slice(1)); });
+
+  /* 深鏈：#recording / #stories / #me 直接開對應分頁 */
+  var h = location.hash.slice(1);
+  if (views[h]) go(h);
+})();
+
 </script>
 </body>
 </html>
