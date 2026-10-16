@@ -3698,10 +3698,42 @@ function retrieveAnswer(question) {
     stepProcessing.appendChild(stepsList);
 
     // 結果步
+    // 結果步
     var stepResult = h('div', 'vtn-rec-step');
     stepResult.hidden = true;
 
+    // 知情同意步（每次點擊咪頭必先展示）
+    var stepConsent = h('div', 'vtn-rec-step');
+    stepConsent.hidden = true;
+    var consentCard = h('div', null);
+    consentCard.innerHTML =
+      '<div style="background:#fff; border:1.5px solid #B9CDB6; border-radius:18px; padding:18px; margin-bottom:16px;">' +
+        '<h3 style="margin:0 0 10px; font-size:1.15rem; font-weight:900; color:#21453A; display:flex; align-items:center; gap:8px;">' +
+          '<i class="fa-solid fa-shield-halved" style="color:#2C5742;"></i>長者口述歷史知情同意書' +
+        '</h3>' +
+        '<p style="font-size:0.9rem; color:#4a5a4e; line-height:1.6; margin:0 0 10px;">' +
+          '喺開始錄音之前，請確認以下保障長者權益與私隱嘅承諾：' +
+        '</p>' +
+        '<ul style="font-size:0.86rem; color:#2E4A3B; line-height:1.65; padding-left:20px; margin:0 0 12px;">' +
+          '<li><strong>原音保留</strong>：錄音以真實原音為本，絕不進行 AI 聲音替換或偽造。</li>' +
+          '<li><strong>非永久儲存</strong>：未經確認發布的錄音僅作即場整理，隨時可撤回或移除。</li>' +
+          '<li><strong>自主授權</strong>：你擁有隨時更正、變更分享範圍或完全撤回故事嘅全部權利。</li>' +
+        '</ul>' +
+        '<div style="background:#F6F1E6; padding:10px 12px; border-radius:10px; font-size:0.8rem; color:#6d5326;">' +
+          '<i class="fa-solid fa-circle-info me-1"></i> 每次錄製新故事均會出示此承諾，以確保完全知情。' +
+        '</div>' +
+      '</div>';
+    stepConsent.appendChild(consentCard);
+    var btnAgreeAndRecord = h('button', 'vtn-rec-btn vtn-rec-btn--primary');
+    btnAgreeAndRecord.type = 'button';
+    btnAgreeAndRecord.innerHTML = '<i class="fa-solid fa-check"></i>我知情並同意講述';
+    stepConsent.appendChild(btnAgreeAndRecord);
+    var btnConsentBack = h('button', 'vtn-rec-btn vtn-rec-btn--ghost', '稍後再講（返回）');
+    btnConsentBack.type = 'button';
+    stepConsent.appendChild(btnConsentBack);
+
     body.appendChild(stepPrep);
+    body.appendChild(stepConsent); // 注入同意步驟
     body.appendChild(stepRec);
     body.appendChild(stepReview);
     body.appendChild(stepProcessing);
@@ -3723,10 +3755,11 @@ function retrieveAnswer(question) {
     var lastRecordId = null;
 
     function showStep(name) {
-      [stepPrep, stepRec, stepReview, stepProcessing, stepResult]
+      [stepPrep, stepConsent, stepRec, stepReview, stepProcessing, stepResult]
         .forEach(function (s) { s.hidden = true; });
       ({
         prep: stepPrep,
+        consent: stepConsent,
         rec: stepRec,
         review: stepReview,
         processing: stepProcessing,
@@ -3734,7 +3767,6 @@ function retrieveAnswer(question) {
       })[name].hidden = false;
       if (name === 'prep') resetPrepDemoBtn();
     }
-
     /* 彈層掛喺 App 手機框（.app-shell）入面：以手機框做定位參照，
        絕對唔可以 append 去 body——否則桌面睇會變成覆蓋整個瀏覽器視窗。 */
     var shell = document.getElementById('appShell') || document.body;
@@ -4197,7 +4229,21 @@ function retrieveAnswer(question) {
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeSheet();
     });
-    micBtn.addEventListener('click', startRecording);
+   // 每次點擊綠色大咪頭，強制先彈出知情同意書
+    micBtn.addEventListener('click', function () {
+      showStep('consent');
+    });
+
+    // 只有在同意書中點擊「我知情並同意講述」，才真正調用麥克風開始錄音
+    btnAgreeAndRecord.addEventListener('click', function () {
+      startRecording();
+    });
+
+    // 點擊「稍後再講」返回準備步
+    btnConsentBack.addEventListener('click', function () {
+      showStep('prep');
+    });
+
     liveMic.addEventListener('click', function () { stopRecording(false); });
     btnCancelRec.addEventListener('click', function () {
       stopRecording(true);
