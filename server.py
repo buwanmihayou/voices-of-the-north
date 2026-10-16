@@ -5,8 +5,6 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from google.cloud import speech_v1p1beta1 as speech
-from google import genai
-from google.genai import types
 
 app = FastAPI(title="Voices of the North API")
 
@@ -30,9 +28,15 @@ gemini_client = None
 gemini_api_key = os.environ.get("GEMINI_API_KEY")
 if gemini_api_key:
     try:
+        from google import genai
         gemini_client = genai.Client(api_key=gemini_api_key)
     except Exception:
-        gemini_client = None
+        try:
+            import google.generativeai as gai
+            gai.configure(api_key=gemini_api_key)
+            gemini_client = gai.GenerativeModel("gemini-1.5-flash")
+        except Exception:
+            gemini_client = None
 
 @app.get("/api/health")
 async def health_check():
@@ -127,7 +131,7 @@ async def process_audio(file: UploadFile = File(None)):
 
 請嚴格遵守以下誠實性原則進行處理：
 1. formal_text：將上面的口述文字進行標點修整及適度書面化，但【絕對嚴禁添加、編造、擴寫】任何原文未提及的情節、地點、時間或人物。原文只有一句話，整理結果也必須只有一句話！
-2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
+2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短（例如少於10個字）無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
 3. 請直接輸出 JSON 格式：
 {{
   "formal_text": "整理後文字",
@@ -139,12 +143,18 @@ async def process_audio(file: UploadFile = File(None)):
     llm_result = {"formal_text": raw_text, "qa_list": []}
     if gemini_client:
         try:
-            res = gemini_client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt,
-                config=types.GenerateContentConfig(response_mime_type="application/json")
-            )
-            llm_result = json.loads(res.text)
+            if hasattr(gemini_client, "models"):
+                res = gemini_client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
+                )
+                txt = res.text
+            else:
+                res = gemini_client.generate_content(prompt)
+                txt = res.text
+            
+            clean_txt = txt.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+            llm_result = json.loads(clean_txt)
         except Exception:
             llm_result = {"formal_text": raw_text, "qa_list": []}
 
