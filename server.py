@@ -55,6 +55,8 @@ async def process_audio(file: UploadFile = File(None)):
         content = await file.read()
         if not content or len(content) == 0:
             raise HTTPException(status_code=400, detail="未收到有效的現場音訊內容。")
+        filename = file.filename or ""
+        content_type = file.content_type or ""
     else:
         demo_paths = ["Demo Story.wav", "assets/demo-story.m4a", "frontend/assets/demo-story.m4a"]
         content = None
@@ -62,6 +64,8 @@ async def process_audio(file: UploadFile = File(None)):
             if os.path.exists(p):
                 with open(p, "rb") as f:
                     content = f.read()
+                filename = p
+                content_type = "audio/wav"
                 break
         if not content:
             raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在。")
@@ -72,29 +76,49 @@ async def process_audio(file: UploadFile = File(None)):
             detail="STT_UNCONFIGURED: 未設定 Google Cloud 憑證，現場音訊已保存為待轉寫。"
         )
 
-    pcm_data = content
-    try:
-        from pydub import AudioSegment
-        audio_seg = AudioSegment.from_file(io.BytesIO(content))
-        audio_seg = audio_seg.set_frame_rate(16000).set_channels(1)
-        out_buf = io.BytesIO()
-        audio_seg.export(out_buf, format="wav")
-        pcm_data = out_buf.getvalue()
-    except Exception:
-        pcm_data = content
+    # 自动推断浏览器音频编码（无需 ffmpeg / pydub）
+    encoding = speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED
+    sample_rate = 16000
+    fn_lower = filename.lower()
+
+    if "webm" in fn_lower or "webm" in content_type:
+        encoding = speech.RecognitionConfig.AudioEncoding.WEBM_OPUS
+        sample_rate = 48000
+    elif "ogg" in fn_lower or "ogg" in content_type:
+        encoding = speech.RecognitionConfig.AudioEncoding.OGG_OPUS
+        sample_rate = 48000
+    elif "mp3" in fn_lower or "mp3" in content_type:
+        encoding = speech.RecognitionConfig.AudioEncoding.MP3
+        sample_rate = 16000
+    elif "wav" in fn_lower or "wav" in content_type:
+        encoding = speech.RecognitionConfig.AudioEncoding.LINEAR16
+        sample_rate = 16000
 
     try:
-        recognition_audio = speech.RecognitionAudio(content=pcm_data)
-        config = speech.RecognitionConfig(
-            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-            sample_rate_hertz=16000,
-            language_code="yue-Hant-HK",
-            enable_word_time_offsets=True,
-            enable_automatic_punctuation=True,
-        )
+        recognition_audio = speech.RecognitionAudio(content=content)
+        
+        config_kwargs = {
+            "language_code": "yue-Hant-HK",
+            "enable_word_time_offsets": True,
+            "enable_automatic_punctuation": True,
+        }
+        if encoding != speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED:
+            config_kwargs["encoding"] = encoding
+            config_kwargs["sample_rate_hertz"] = sample_rate
+
+        config = speech.RecognitionConfig(**config_kwargs)
         response = stt_client.recognize(config=config, audio=recognition_audio)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"語音辨識服務異常: {str(e)}")
+        # 如果特定编码识别失败，尝试让 Google STT 纯自动探测一次
+        try:
+            config_fallback = speech.RecognitionConfig(
+                language_code="yue-Hant-HK",
+                enable_word_time_offsets=True,
+                enable_automatic_punctuation=True,
+            )
+            response = stt_client.recognize(config=config_fallback, audio=recognition_audio)
+        except Exception as e2:
+            raise HTTPException(status_code=500, detail=f"語音辨識服務異常: {str(e2)}")
 
     raw_text = ""
     words = []
