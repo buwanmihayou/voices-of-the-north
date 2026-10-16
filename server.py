@@ -59,11 +59,11 @@ async def process_audio(file: UploadFile = File(None)):
         content_type = file.content_type or ""
     else:
         demo_paths = [
-            "frontend/assets/demo-story.mp4",
-            "assets/demo-story.mp4",
-            "WhatsApp Video 2026-10-11 at 15.25.40.mp4",
+            "frontend/assets/interview-story.mp4",
+            "assets/interview-story.mp4",
             "Demo Story.wav",
-            "assets/demo-story.m4a"
+            "assets/demo-story.m4a",
+            "frontend/assets/demo-story.m4a"
         ]
         content = None
         filename = ""
