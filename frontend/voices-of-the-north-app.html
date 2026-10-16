@@ -3312,7 +3312,7 @@ function retrieveAnswer(question) {
 (function () {
   'use strict';
 
-  var AUDIO_SRC = 'assets/demo-story.m4a';
+  var AUDIO_SRC = 'assets/interview-story.mp4';
   var audio = null;
   var toggles = Array.prototype.slice.call(document.querySelectorAll('[data-demo-play]'));
 
@@ -4018,7 +4018,7 @@ function retrieveAnswer(question) {
             id: existing ? existing.id : undefined,
             source: 'demo',
             mode: data.mode || 'offline-demo',
-            audioUrl: 'assets/demo-story.m4a',
+            audioUrl: 'assets/interview-story.mp4',
             durationSec: 50.7,
             rawText: data.raw_text || '',
             words: data.words || [],
