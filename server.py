@@ -3,6 +3,7 @@ import json
 import os
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from google.cloud import speech_v1p1beta1 as speech
 
@@ -16,6 +17,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 1. 根路径重定向：彻底解决访问主域名出现 {"detail":"Not Found"}
+@app.get("/")
+async def root_redirect():
+    return RedirectResponse(url="/voices-of-the-north-app.html")
+
+# 2. 初始化 Google Cloud Speech-to-Text 客户端
 stt_client = None
 stt_reason = ""
 try:
@@ -24,6 +31,7 @@ except Exception as e:
     stt_client = None
     stt_reason = str(e)
 
+# 3. 初始化 Gemini 模型客户端（兼容容错）
 gemini_client = None
 gemini_api_key = os.environ.get("GEMINI_API_KEY")
 if gemini_api_key:
@@ -58,31 +66,37 @@ async def process_audio(file: UploadFile = File(None)):
         filename = file.filename or ""
         content_type = file.content_type or ""
     else:
+        # 示範音訊優先級清單：優先使用你的 interview-story.mp4
         demo_paths = [
             "frontend/assets/interview-story.mp4",
             "assets/interview-story.mp4",
+            "WhatsApp Video 2026-10-11 at 15.25.40.mp4",
+            "WhatsApp Video 2026-10-11-at-15.25.40.wav",
             "Demo Story.wav",
-            "assets/demo-story.m4a",
-            "frontend/assets/demo-story.m4a"
+            "frontend/assets/demo-story.m4a",
+            "assets/demo-story.m4a"
         ]
         content = None
         filename = ""
-        content_type = "video/mp4"
+        content_type = ""
         for p in demo_paths:
             if os.path.exists(p):
                 with open(p, "rb") as f:
                     content = f.read()
                 filename = p
+                content_type = "audio/mp4" if p.endswith(".mp4") else "audio/wav"
                 break
         if not content:
-            raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在。")
+            raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在，請確認已上傳 interview-story.mp4。")
 
+    # 誠實原則：無憑證時絕不冒充已轉寫
     if not stt_client:
         raise HTTPException(
             status_code=503,
             detail="STT_UNCONFIGURED: 未設定 Google Cloud 憑證，現場音訊已保存為待轉寫。"
         )
 
+    # 推斷音訊編碼格式，杜絕 ffmpeg 缺失導致的 500 錯誤
     encoding = speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED
     sample_rate = 16000
     fn_lower = filename.lower()
@@ -114,6 +128,7 @@ async def process_audio(file: UploadFile = File(None)):
         config = speech.RecognitionConfig(**config_kwargs)
         response = stt_client.recognize(config=config, audio=recognition_audio)
     except Exception:
+        # 如果特定格式報錯，採用自動探測兜底
         try:
             config_fallback = speech.RecognitionConfig(
                 language_code="yue-Hant-HK",
@@ -153,13 +168,14 @@ async def process_audio(file: UploadFile = File(None)):
             }
         }
 
+    # 嚴謹的 Prompt，防幻覺防捏造
     prompt = f"""你是一位嚴謹的口述歷史檔案整理員。
 以下是用戶現場口述的原始粵語辨識結果（raw_text）：
 「{raw_text}」
 
 請嚴格遵守以下誠實性原則進行處理：
 1. formal_text：將上面的口述文字進行標點修整及適度書面化，但【絕對嚴禁添加、編造、擴寫】任何原文未提及的情節、地點、時間或人物。原文只有一句話，整理結果也必須只有一句話！
-2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
+2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短（例如少於10個字）無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
 3. 請直接輸出 JSON 格式：
 {{
   "formal_text": "整理後文字",
@@ -194,5 +210,6 @@ async def process_audio(file: UploadFile = File(None)):
         "llm_result": llm_result
     }
 
+# 掛載前端靜態目錄
 if os.path.exists("frontend"):
     app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
