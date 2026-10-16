@@ -4,734 +4,364 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#F6F1E6">
-  <meta name="description" content="Voices of the North 北部都會區・鄉村故事館 —— 聽見長者故事，保存地方記憶。">
-  <title>Voices of the North・北部都會區鄉村故事館（單檔演示）</title>
+  <meta name="description" content="Voices of the North 北部都會區·鄉村故事館 — 聽見長者故事，保存地方記憶。">
+  <title>Voices of the North · 北部都會區鄉村故事館</title>
 
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="apple-touch-icon" href="assets/app-icon.png">
 
-  <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-  <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-  <link href="[https://fonts.googleapis.com/css2?...](https://fonts.googleapis.com/css2?...)" ...>
-  <link href="[https://cdn.jsdelivr.net/...](https://cdn.jsdelivr.net/...)" ...>
-  <link href="[https://cdn.jsdelivr.net/...](https://cdn.jsdelivr.net/...)" ...>
+  <!-- 清洁 CDN 引用，杜绝 Markdown 转义错误 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" rel="stylesheet">
 
-<style>
-:root {
-  --ivory:        #F6F1E6;
-  --ivory-deep:   #EFE8D7;
-  --cream:        #FDFBF4;
-  --frame:        #E4DECE;
+  <style>
+    :root {
+      --ivory: #F6F1E6;
+      --ivory-deep: #EFE8D7;
+      --cream: #FDFBF4;
+      --frame: #E4DECE;
+      --forest: #2C5742;
+      --forest-deep: #21453A;
+      --forest-rich: #31604A;
+      --jade: #7FA68C;
+      --terracotta: #B65D3A;
+      --terracotta-dark: #9E4A28;
+      --gold: #C98A2C;
+      --ink: #1F2922;
+      --ink-muted: #526357;
+      --ink-subtle: #839488;
+      --card-bg: rgba(253, 251, 244, 0.94);
+      --font-serif: "Noto Serif TC", serif;
+      --font-sans: "Noto Sans TC", sans-serif;
+    }
 
-  --forest:       #2C5742;
-  --forest-deep:  #21453A;
-  --forest-rich:  #31604A;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 0;
+      background-color: #D8D2C2;
+      font-family: var(--font-sans);
+      color: var(--ink);
+      display: flex; justify-content: center; min-height: 100vh;
+    }
 
-  --jade:         #7FA68C;
-  --jade-strong:  #5E8C70;
-  --jade-pale:    #DCE9DC;
-  --sage-line:    #B9CDB6;
-  --sage-wash:    #EAF0E5;
+    .app-viewport {
+      width: 100%; max-width: 440px; min-height: 100vh;
+      background-color: var(--ivory);
+      position: relative; display: flex; flex-direction: column;
+      box-shadow: 0 0 40px rgba(0,0,0,0.12);
+      padding-bottom: 70px;
+    }
 
-  --gold:         #83632B;
-  --gold-pale:    #F1E3C1;
+    .vtn-view { display: none !important; }
+    .vtn-view.is-active { display: block !important; }
 
-  --ink:          #24483A;
-  --ink-body:     #2E4A3B;
-  --muted:        #5D7063;
-  --muted-soft:   #6E7B6E;
+    /* 顶部导航 */
+    .top-header {
+      background: var(--forest);
+      color: #FFF;
+      padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .top-header h1 {
+      font-size: 16px; margin: 0; font-family: var(--font-serif);
+      letter-spacing: 0.5px;
+    }
 
-  --hairline:     rgba(112, 102, 74, 0.16);
-  --shadow-card:  0 16px 32px -22px rgba(52, 72, 55, 0.38),
-                  0 2px 6px rgba(52, 72, 55, 0.05);
-  --shadow-cta:   0 20px 38px -18px rgba(30, 62, 47, 0.65),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    /* 卡片通用样式 */
+    .content-box {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 14px;
+      border: 1px solid var(--frame);
+      box-shadow: 0 4px 16px rgba(44,87,66,0.06);
+    }
 
-  --ease-slow:    cubic-bezier(0.33, 1, 0.68, 1);
-  --dur:          380ms;
+    /* 录音与控制台 */
+    .rec-btn {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      border: none; outline: none;
+      background: var(--terracotta);
+      color: #FFF; font-size: 26px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 20px auto;
+      box-shadow: 0 6px 20px rgba(182,93,58,0.4);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .rec-btn.recording {
+      background: #D9383A;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
 
-  --nav-h: 74px;
-  --vtn-nav-h: calc(77px + env(safe-area-inset-bottom));
-}
+    .qa-card {
+      background: var(--cream);
+      border-radius: 10px;
+      padding: 12px; margin-bottom: 10px;
+      border-left: 4px solid var(--forest);
+    }
+    .qa-time {
+      font-size: 11px; color: var(--gold); font-weight: bold;
+    }
 
-*,
-*::before,
-*::after { box-sizing: border-box; }
+    /* 底部导航栏 */
+    .bottom-bar {
+      position: fixed; bottom: 0; width: 100%; max-width: 440px;
+      height: 64px; background: #FFF;
+      display: flex; border-top: 1px solid var(--frame);
+      z-index: 100;
+    }
+    .bottom-nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--ink-subtle); text-decoration: none; font-size: 11px;
+    }
+    .bottom-nav-item i { font-size: 18px; margin-bottom: 3px; }
+    .bottom-nav-item.active { color: var(--forest); font-weight: bold; }
+  </style>
+</head>
+<body>
 
-html {
-  font-size: clamp(16px, 14.2px + 0.884vw, 18px);
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
+<div class="app-viewport">
+  <div class="top-header">
+    <h1><i class="fa-solid fa-landmark me-2"></i>北部都會區 · 鄉村故事館</h1>
+    <span class="badge bg-light text-dark" id="statusBadge" style="font-size:10px;">在線</span>
+  </div>
 
-body {
-  margin: 0;
-  min-height: 100dvh;
-  display: flex;
-  justify-content: center;
-  background: var(--frame);
-  color: var(--ink-body);
-  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", system-ui, sans-serif;
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
+  <!-- 主页 View -->
+  <main id="view-home" class="vtn-view is-active">
+    <div class="content-box">
+      <h2 style="font-family:var(--font-serif); font-size:20px; color:var(--forest);">留住村落嘅聲音</h2>
+      <p style="font-size:13px; color:var(--ink-muted);">原音為本 · 即時粵語轉寫 · 自動出處時間戳</p>
+      <div style="background:var(--ivory-deep); padding:14px; border-radius:12px; margin-top:10px;">
+        <div style="font-weight:bold; font-size:14px;">元朗 · 村落晨光</div>
+        <div style="font-size:12px; color:var(--ink-muted); margin-bottom:8px;">真實訪談錄音示範</div>
+        <audio id="demoAudio" controls style="width:100%; height:36px;">
+          <source src="assets/interview-story.mp4" type="audio/mp4">
+          <source src="assets/demo-story.m4a" type="audio/mp4">
+          <source src="Demo Story.wav" type="audio/wav">
+          瀏覽器不支援音訊播放
+        </audio>
+        <button class="btn btn-sm btn-outline-success mt-2 w-100" onclick="runDemoPipeline()">
+          <i class="fa-solid fa-play me-1"></i>用示範音訊試跑完整整理流程
+        </button>
+      </div>
+    </div>
 
-img { display: block; max-width: 100%; }
+    <div class="content-box text-center">
+      <h3 style="font-size:16px;">立即現場記錄口述歷史</h3>
+      <p style="font-size:12px; color:var(--ink-muted);">支持即錄即轉，不添枝加葉，忠實呈現長者原聲。</p>
+      <button class="btn btn-success px-4 py-2" onclick="switchToView('record')">
+        <i class="fa-solid fa-microphone me-2"></i>前往錄音室
+      </button>
+    </div>
+  </main>
 
-a { text-decoration: none; }
+  <!-- 录音 View -->
+  <section id="view-record" class="vtn-view">
+    <div class="content-box text-center">
+      <h2 style="font-size:18px; font-family:var(--font-serif);">現場故事採集</h2>
+      <div id="recTimer" style="font-size:28px; font-family:monospace; margin:10px 0; color:var(--forest);">00:00</div>
+      
+      <button id="mainRecBtn" class="rec-btn" onclick="toggleRecording()">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+      
+      <div id="recStatus" style="font-size:13px; color:var(--ink-muted);">點擊按鈕開始講述</div>
 
-:where(a, button):focus-visible {
-  outline: 3px solid var(--jade-strong);
-  outline-offset: 2px;
-}
+      <div class="mt-3 d-flex gap-2 justify-content-center">
+        <button id="uploadBtn" class="btn btn-primary btn-sm px-3" style="display:none;" onclick="uploadCurrentAudio()">
+          <i class="fa-solid fa-cloud-arrow-up me-1"></i>上傳並轉寫
+        </button>
+        <button id="cancelBtn" class="btn btn-outline-secondary btn-sm px-3" style="display:none;" onclick="resetRecording()">
+          重錄
+        </button>
+      </div>
+    </div>
 
-.app-shell {
-  position: relative;
-  width: 100%;
-  max-width: 430px;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--ivory);
-}
+    <!-- 转写结果展示区 -->
+    <div id="resultBox" class="content-box" style="display:none;">
+      <h3 style="font-size:15px; border-bottom:1px solid var(--frame); padding-bottom:6px;">整理後文字稿</h3>
+      <div id="formalText" style="font-size:14px; line-height:1.7; margin:10px 0; color:var(--ink);"></div>
 
-@media (min-width: 480px) {
-  .app-shell {
-    height: calc(100dvh - 48px);
-    margin: 24px 0;
-    border-radius: 30px;
-    box-shadow: 0 30px 80px -30px rgba(50, 60, 45, 0.45),
-                0 0 0 1px rgba(120, 110, 80, 0.18);
+      <h4 style="font-size:13px; color:var(--ink-muted); margin-top:14px;">原始粵語逐詞辨識</h4>
+      <div id="rawWords" style="font-size:12px; color:var(--ink-subtle); line-height:1.6; word-break:break-all;"></div>
+
+      <div id="qaContainer" class="mt-3">
+        <h4 style="font-size:13px; color:var(--forest);"><i class="fa-solid fa-circle-question me-1"></i>提煉問答索引</h4>
+        <div id="qaList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 底部固定导航 -->
+  <nav class="bottom-bar">
+    <a href="#home" class="bottom-nav-item active" onclick="switchToView('home')">
+      <i class="fa-solid fa-house"></i>主頁
+    </a>
+    <a href="#record" class="bottom-nav-item" onclick="switchToView('record')">
+      <i class="fa-solid fa-microphone"></i>錄音
+    </a>
+  </nav>
+</div>
+
+<script>
+  var mediaRecorder = null;
+  var audioChunks = [];
+  var recTimerInterval = null;
+  var recSeconds = 0;
+  var currentAudioBlob = null;
+
+  function switchToView(viewName) {
+    document.querySelectorAll('.vtn-view').forEach(function(el) { el.classList.remove('is-active'); });
+    document.querySelectorAll('.bottom-nav-item').forEach(function(el) { el.classList.remove('active'); });
+
+    var target = document.getElementById('view-' + viewName);
+    if (target) target.classList.add('is-active');
+
+    var navTarget = document.querySelector('a[href="#' + viewName + '"]');
+    if (navTarget) navTarget.classList.add('active');
   }
-}
 
-.topbar {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: calc(18px + env(safe-area-inset-top)) 22px 4px;
-}
+  // 监听 Hash 路由变化，防止直接访问或空白
+  window.addEventListener('hashchange', function() {
+    var h = (location.hash || '#home').replace('#', '');
+    switchToView(h);
+  });
+  if (location.hash) {
+    switchToView(location.hash.replace('#', ''));
+  }
 
-.topbar__logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
-  object-fit: contain;
-}
+  // 录音逻辑
+  async function toggleRecording() {
+    var btn = document.getElementById('mainRecBtn');
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      clearInterval(recTimerInterval);
+      btn.classList.remove('recording');
+      btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+      document.getElementById('recStatus').innerText = '錄音完畢，請確認上傳';
+      document.getElementById('uploadBtn').style.display = 'inline-block';
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+    } else {
+      try {
+        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/mp4';
+        mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
 
-.topbar__title {
-  font-size: 1.02rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-}
+        mediaRecorder.ondataavailable = function(e) {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = function() {
+          currentAudioBlob = new Blob(audioChunks, { type: mime });
+        };
 
-.topbar__dot { color: #9AAB9C; font-weight: 400; }
+        mediaRecorder.start();
+        recSeconds = 0;
+        document.getElementById('recTimer').innerText = '00:00';
+        recTimerInterval = setInterval(function() {
+          recSeconds++;
+          var m = String(Math.floor(recSeconds / 60)).padStart(2, '0');
+          var s = String(recSeconds % 60).padStart(2, '0');
+          document.getElementById('recTimer').innerText = m + ':' + s;
+        }, 1000);
 
-.hero {
-  position: relative;
-  padding: 52px 24px 0;
-  min-height: 224px;
-}
+        btn.classList.add('recording');
+        btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+        document.getElementById('recStatus').innerText = '正在傾聽長者講述...';
+        document.getElementById('uploadBtn').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'none';
+      } catch (err) {
+        alert('請允許麥克風權限以進行錄音：' + err.message);
+      }
+    }
+  }
 
-.hero__art {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
+  function resetRecording() {
+    currentAudioBlob = null;
+    recSeconds = 0;
+    document.getElementById('recTimer').innerText = '00:00';
+    document.getElementById('recStatus').innerText = '點擊按鈕開始講述';
+    document.getElementById('uploadBtn').style.display = 'none';
+    document.getElementById('cancelBtn').style.display = 'none';
+  }
 
-.hero__art img {
-  position: absolute;
-  top: -46px;
-  right: -46px;
-  width: 112%;
-  height: calc(100% + 40px);
-  object-fit: cover;
-  object-position: right center;
-}
+  // 上传并转写真实音频
+  async function uploadCurrentAudio() {
+    if (!currentAudioBlob) return;
+    document.getElementById('recStatus').innerText = '語音轉寫及書面整理中...';
+    var fd = new FormData();
+    fd.append('file', currentAudioBlob, 'recording.mp4');
 
-.hero__fade {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
+    try {
+      var res = await fetch('/api/process', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error('伺服器處理失敗 (HTTP ' + res.status + ')');
+      var data = await res.json();
+      renderResult(data);
+      document.getElementById('recStatus').innerText = '轉寫完成！';
+    } catch (e) {
+      alert('處理失敗：' + e.message);
+      document.getElementById('recStatus').innerText = '出現狀況，請重試';
+    }
+  }
 
-.hero__fade--corner {
-  background:
-    linear-gradient(to left,
-      rgba(246, 241, 230, 0.55) 0%,
-      rgba(246, 241, 230, 0.15) 5%,
-      rgba(246, 241, 230, 0) 11%),
-    linear-gradient(to right,
-      var(--ivory) 6%,
-      rgba(246, 241, 230, 0.92) 22%,
-      rgba(246, 241, 230, 0.66) 46%,
-      rgba(246, 241, 230, 0.28) 62%,
-      rgba(246, 241, 230, 0) 74%);
-}
+  // 运行示范故事试跑
+  async function runDemoPipeline() {
+    switchToView('record');
+    document.getElementById('recStatus').innerText = '正在處理示範故事音訊...';
+    try {
+      var res = await fetch('/api/process', { method: 'POST' });
+      if (!res.ok) throw new Error('示範流程伺服器回應異常');
+      var data = await res.json();
+      renderResult(data);
+      document.getElementById('recStatus').innerText = '示範轉寫完成！';
+    } catch (e) {
+      alert('試跑失敗：' + e.message);
+      document.getElementById('recStatus').innerText = '請先確認後端服務是否已就緒';
+    }
+  }
 
-.hero__fade--bottom {
-  background: linear-gradient(to top,
-    var(--ivory) 8%,
-    rgba(246, 241, 230, 0.97) 24%,
-    rgba(246, 241, 230, 0.62) 44%,
-    rgba(246, 241, 230, 0) 66%);
-}
-
-.hero__copy {
-  position: relative;
-  z-index: 2;
-}
-
-.hero__greeting {
-  margin: 0 0 8px;
-  font-size: 1.14rem;
-  font-weight: 500;
-  color: var(--muted);
-  text-shadow: 0 1px 10px rgba(246, 241, 230, 0.9),
-               0 0 3px rgba(246, 241, 230, 0.85);
-}
-
-.hero__title {
-  margin: 0 0 12px;
-  font-family: "Noto Serif TC", "Songti TC", serif;
-  font-weight: 900;
-  font-size: clamp(2rem, 1.1rem + 3.6vw, 2.55rem);
-  line-height: 1.2;
-  letter-spacing: 0.03em;
-  color: var(--ink);
-  text-shadow: 0 2px 14px rgba(246, 241, 230, 0.85);
-}
-
-.hero__sub {
-  margin: 0;
-  font-size: 1.05rem;
-  color: var(--muted);
-  text-shadow: 0 1px 10px rgba(246, 241, 230, 0.9),
-               0 0 3px rgba(246, 241, 230, 0.85);
-}
-
-.cta-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: calc(100% - 44px);
-  margin: 2px 22px 0;
-  padding: 26px 24px 24px;
-  border: 0;
-  border-radius: 24px;
-  color: #fff;
-  text-align: center;
-  cursor: pointer;
-  background: linear-gradient(150deg,
-    var(--forest-rich) 0%,
-    #28503D 55%,
-    var(--forest-deep) 100%);
-  box-shadow: var(--shadow-cta);
-  transition: transform var(--dur) var(--ease-slow),
-              box-shadow var(--dur) var(--ease-slow);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.cta-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 26px 44px -18px rgba(30, 62, 47, 0.7),
-              inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-.cta-card:active { transform: translateY(0) scale(0.985); }
-
-.cta-card__visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 13px;
-}
-
-.cta-card__mic {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1.5px solid rgba(255, 255, 255, 0.30);
-}
-.cta-card__mic i { font-size: 1.55rem; }
-
-.cta-card__title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.cta-card__sub {
-  margin-top: 4px;
-  font-size: 0.97rem;
-  color: rgba(255, 255, 255, 0.74);
-}
-
-.eq {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 28px;
-}
-.eq i {
-  width: 4px;
-  height: var(--h, 16px);
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.52);
-  transform-origin: center;
-  animation: eq-breathe 1.7s ease-in-out var(--d, 0ms) infinite;
-}
-@keyframes eq-breathe {
-  0%, 100% { transform: scaleY(0.45); opacity: 0.55; }
-  50%      { transform: scaleY(1);    opacity: 0.95; }
-}
-
-.featured { padding: 32px 20px 0; }
-
-.featured__head {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.featured__title {
-  margin: 0;
-  font-size: 1.42rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.featured__rule {
-  flex: 1;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(to right, var(--sage-line), rgba(185, 205, 182, 0));
-}
-
-.story-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 14px;
-  background: var(--cream);
-  border: 1px solid var(--hairline);
-  border-radius: 20px;
-  box-shadow: var(--shadow-card);
-}
-
-.story-card__main {
-  position: relative;
-  display: flex;
-  gap: 13px;
-  min-height: 130px;
-}
-
-.story-card__cover {
-  flex: none;
-  width: 112px;
-  align-self: stretch;
-  border-radius: 15px;
-  overflow: hidden;
-  background: var(--ivory-deep);
-}
-.story-card__cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 500ms var(--ease-slow);
-}
-.story-card__cover:hover img { transform: scale(1.03); }
-
-.story-card__body {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 4px 2px 6px;
-}
-
-.story-card__name {
-  margin: 0 0 4px;
-  font-size: 1.17rem;
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: 0.01em;
-}
-
-.story-card__meta {
-  margin: 0 0 10px;
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--muted-soft);
-  white-space: nowrap;
-}
-
-.story-card__tag {
-  align-self: flex-start;
-  margin-top: auto;
-  padding: 7px 16px;
-  border-radius: 999px;
-  background: var(--gold-pale);
-  color: var(--gold);
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
-
-.story-card__play {
-  position: absolute;
-  right: 2px;
-  bottom: 0;
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border: 0;
-  border-radius: 50%;
-  color: var(--forest);
-  background: var(--jade-pale);
-  box-shadow: 0 8px 16px -8px rgba(44, 87, 66, 0.5),
-              inset 0 0 0 1px rgba(255, 255, 255, 0.75);
-  cursor: pointer;
-  transition: transform var(--dur) var(--ease-slow),
-              background-color var(--dur) var(--ease-slow);
-  -webkit-tap-highlight-color: transparent;
-}
-.story-card__play i { font-size: 1.05rem; transform: translateX(1.5px); }
-.story-card__play:hover { transform: translateY(-2px); background: #D3E3D5; }
-.story-card__play:active { transform: scale(0.95); }
-
-.story-card__disclosure {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  margin: 0;
-  padding: 11px 12px 2px;
-  border-top: 1px dashed var(--hairline);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--muted);
-}
-.story-card__disclosure > i {
-  flex: none;
-  margin-top: 3px;
-  font-size: 0.95rem;
-  color: var(--forest);
-}
-.story-card__disclosure em {
-  font-style: normal;
-  color: var(--ink-body);
-}
-
-.trust-bar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 22px 20px 24px;
-  padding: 16px 18px;
-  border-radius: 17px;
-  background: var(--sage-wash);
-  border: 1px solid #DDE7D7;
-}
-
-.trust-bar__icon {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  color: var(--forest);
-}
-.trust-bar__icon svg { width: 34px; height: 34px; }
-
-.trust-bar__text {
-  margin: 0;
-  font-size: 0.97rem;
-  font-weight: 500;
-  line-height: 1.5;
-  color: #315542;
-}
-
-.bottom-nav {
-  position: relative;
-  z-index: 30;
-  flex: none;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
-  padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
-  background: rgba(253, 251, 244, 0.94);
-  border-top: 1px solid rgba(90, 110, 92, 0.16);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  box-shadow: 0 -10px 24px -16px rgba(31, 50, 38, 0.35);
-}
-
-.bottom-nav__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-height: 58px;
-  border-radius: 15px;
-  color: #7C8A80;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: color var(--dur) var(--ease-slow);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.bottom-nav__icon {
-  display: grid;
-  place-items: center;
-  height: 32px;
-  padding: 0 18px;
-  border-radius: 13px;
-  transition: background-color var(--dur) var(--ease-slow),
-              transform 180ms ease;
-}
-.bottom-nav__icon i { font-size: 1.26rem; }
-
-.bottom-nav__item:hover { color: var(--forest); }
-.bottom-nav__item:active .bottom-nav__icon { transform: scale(0.94); }
-
-.bottom-nav__item.is-active {
-  color: var(--forest);
-  font-weight: 700;
-}
-.bottom-nav__item.is-active .bottom-nav__icon {
-  background: var(--jade-pale);
-}
-
-.toast:not(.show) { display: flex; }
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(96px + env(safe-area-inset-bottom));
-  z-index: 80;
-  display: flex;
-  把示范故事彻底替换为你刚上传的这段真实的 WhatsApp 录像/音频（时长为 47 秒，原声朗读元朗村落晨光故事）。
-
-为了保证所有设备访问顺畅且不会因为空格转义报错，在代码里我们统一使用规范路径 **`assets/demo-story.mp4`**（你只需要在项目里把该视频文件复制一份到 `frontend/assets/` 并重命名为 `demo-story.mp4`，或者直接覆盖原有的 `demo-story.m4a`）。
-
-以下是修改后的两个核心文件的**完整无注释代码**：
-
----
-
-### 1. `server.py`（完整无注释代码）
-
-```python
-import io
-import json
-import os
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from google.cloud import speech_v1p1beta1 as speech
-
-app = FastAPI(title="Voices of the North API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-stt_client = None
-stt_reason = ""
-try:
-    stt_client = speech.SpeechClient()
-except Exception as e:
-    stt_client = None
-    stt_reason = str(e)
-
-gemini_client = None
-gemini_api_key = os.environ.get("GEMINI_API_KEY")
-if gemini_api_key:
-    try:
-        from google import genai
-        gemini_client = genai.Client(api_key=gemini_api_key)
-    except Exception:
-        try:
-            import google.generativeai as gai
-            gai.configure(api_key=gemini_api_key)
-            gemini_client = gai.GenerativeModel("gemini-1.5-flash")
-        except Exception:
-            gemini_client = None
-
-@app.get("/api/health")
-async def health_check():
-    return {
-        "status": "ok",
-        "stt_ready": stt_client is not None,
-        "stt_reason": stt_reason,
-        "gemini_ready": gemini_client is not None,
+  function renderResult(data) {
+    document.getElementById('resultBox').style.display = 'block';
+    document.getElementById('formalText').innerText = (data.llm_result && data.llm_result.formal_text) || data.raw_text || '（無內容）';
+    
+    // 渲染逐词时间戳
+    if (data.words && data.words.length > 0) {
+      var wordsHtml = data.words.map(function(w) {
+        return '<span class="badge bg-light text-dark me-1 mb-1 border" title="' + w.start + 's - ' + w.end + 's">' + w.word + '</span>';
+      }).join('');
+      document.getElementById('rawWords').innerHTML = wordsHtml;
+    } else {
+      document.getElementById('rawWords').innerText = data.raw_text || '無逐詞數據';
     }
 
-@app.post("/api/process")
-async def process_audio(file: UploadFile = File(None)):
-    is_live_upload = file is not None
-
-    if is_live_upload:
-        content = await file.read()
-        if not content or len(content) == 0:
-            raise HTTPException(status_code=400, detail="未收到有效的現場音訊內容。")
-        filename = file.filename or ""
-        content_type = file.content_type or ""
-    else:
-        demo_paths = [
-            "frontend/assets/demo-story.mp4",
-            "frontend/assets/demo-story.m4a",
-            "assets/demo-story.mp4",
-            "assets/demo-story.m4a",
-            "Demo Story.wav",
-        ]
-        content = None
-        for p in demo_paths:
-            if os.path.exists(p):
-                with open(p, "rb") as f:
-                    content = f.read()
-                filename = p
-                content_type = "audio/mp4" if p.endswith(".mp4") else "audio/wav"
-                break
-        if not content:
-            raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在。")
-
-    if not stt_client:
-        raise HTTPException(
-            status_code=503,
-            detail="STT_UNCONFIGURED: 未設定 Google Cloud 憑證，現場音訊已保存為待轉寫。"
-        )
-
-    encoding = speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED
-    sample_rate = 16000
-    fn_lower = filename.lower()
-
-    if "webm" in fn_lower or "webm" in content_type:
-        encoding = speech.RecognitionConfig.AudioEncoding.WEBM_OPUS
-        sample_rate = 48000
-    elif "ogg" in fn_lower or "ogg" in content_type:
-        encoding = speech.RecognitionConfig.AudioEncoding.OGG_OPUS
-        sample_rate = 48000
-    elif "mp3" in fn_lower or "mp3" in content_type:
-        encoding = speech.RecognitionConfig.AudioEncoding.MP3
-        sample_rate = 16000
-    elif "wav" in fn_lower or "wav" in content_type:
-        encoding = speech.RecognitionConfig.AudioEncoding.LINEAR16
-        sample_rate = 16000
-
-    try:
-        recognition_audio = speech.RecognitionAudio(content=content)
-        config_kwargs = {
-            "language_code": "yue-Hant-HK",
-            "enable_word_time_offsets": True,
-            "enable_automatic_punctuation": True,
-        }
-        if encoding != speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED:
-            config_kwargs["encoding"] = encoding
-            config_kwargs["sample_rate_hertz"] = sample_rate
-
-        config = speech.RecognitionConfig(**config_kwargs)
-        response = stt_client.recognize(config=config, audio=recognition_audio)
-    except Exception:
-        try:
-            config_fallback = speech.RecognitionConfig(
-                language_code="yue-Hant-HK",
-                enable_word_time_offsets=True,
-                enable_automatic_punctuation=True,
-            )
-            response = stt_client.recognize(config=config_fallback, audio=recognition_audio)
-        except Exception as e2:
-            raise HTTPException(status_code=500, detail=f"語音辨識服務異常: {str(e2)}")
-
-    raw_text = ""
-    words = []
-    for result in response.results:
-        alternative = result.alternatives[0]
-        raw_text += alternative.transcript
-        for word_info in alternative.words:
-            start_sec = word_info.start_time.total_seconds()
-            end_sec = word_info.end_time.total_seconds()
-            words.append({
-                "word": word_info.word,
-                "start": round(start_sec, 2),
-                "end": round(end_sec, 2),
-                "confidence": round(word_info.confidence, 2)
-            })
-
-    raw_text = raw_text.strip()
-
-    if not raw_text:
-        return {
-            "mode": "online",
-            "source": "live" if is_live_upload else "demo",
-            "raw_text": "",
-            "words": [],
-            "llm_result": {
-                "formal_text": "（未偵測到清晰語音或錄音時長過短，請重新嘗試講述故事。）",
-                "qa_list": []
-            }
-        }
-
-    prompt = f"""你是一位嚴謹的口述歷史檔案整理員。
-以下是用戶現場口述的原始粵語辨識結果（raw_text）：
-「{raw_text}」
-
-請嚴格遵守以下誠實性原則進行處理：
-1. formal_text：將上面的口述文字進行標點修整及適度書面化，但【絕對嚴禁添加、編造、擴寫】任何原文未提及的情節、地點、時間或人物。原文只有一句話，整理結果也必須只有一句話！
-2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短（例如少於10個字）無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
-3. 請直接輸出 JSON 格式：
-{{
-  "formal_text": "整理後文字",
-  "qa_list": [
-    {{"question": "問題", "answer": "回答", "timestamp": 0.0}}
-  ]
-}}"""
-
-    llm_result = {"formal_text": raw_text, "qa_list": []}
-    if gemini_client:
-        try:
-            if hasattr(gemini_client, "models"):
-                res = gemini_client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt
-                )
-                txt = res.text
-            else:
-                res = gemini_client.generate_content(prompt)
-                txt = res.text
-            
-            clean_txt = txt.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-            llm_result = json.loads(clean_txt)
-        except Exception:
-            llm_result = {"formal_text": raw_text, "qa_list": []}
-
-    return {
-        "mode": "online",
-        "source": "live" if is_live_upload else "demo",
-        "raw_text": raw_text,
-        "words": words,
-        "llm_result": llm_result
+    // 渲染提炼问答
+    var qaList = (data.llm_result && data.llm_result.qa_list) || [];
+    var qaBox = document.getElementById('qaList');
+    qaBox.innerHTML = '';
+    if (qaList.length === 0) {
+      qaBox.innerHTML = '<div style="font-size:12px; color:var(--ink-subtle);">（口述內容較短，未提煉問答）</div>';
+    } else {
+      qaList.forEach(function(item) {
+        var card = document.createElement('div');
+        card.className = 'qa-card';
+        card.innerHTML = '<div class="qa-time"><i class="fa-regular fa-clock me-1"></i>' + (item.timestamp || 0) + 's</div>' +
+                         '<div style="font-weight:bold; font-size:13px; margin:2px 0;">' + item.question + '</div>' +
+                         '<div style="font-size:12px; color:var(--ink-muted);">' + item.answer + '</div>';
+        qaBox.appendChild(card);
+      });
     }
-
-if os.path.exists("frontend"):
-    app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+  }
+</script>
+</body>
+</html>
