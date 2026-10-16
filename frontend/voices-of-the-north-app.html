@@ -7,89 +7,59 @@
   <meta name="description" content="Voices of the North 北部都會區・鄉村故事館 —— 聽見長者故事，保存地方記憶。">
   <title>Voices of the North・北部都會區鄉村故事館（單檔演示）</title>
 
-  <!-- App icon -->
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="apple-touch-icon" href="assets/app-icon.png">
 
-  <!-- Fonts：繁體中文（香港）排版，Noto Serif TC 標題 + Noto Sans TC 內文 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap"
-        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5.3 + Font Awesome 6（團隊技術棧） -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous">
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css"
-        rel="stylesheet">
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" rel="stylesheet">
 
 <style>
-/* ===== css/styles.css ===== */
-/* ==========================================================================
-   Voices of the North — 主頁（Home）
-   Direction B「Oat × Sage」：象牙米白 / 森林綠 / 柔玉綠 / 暖金
-   設計不變量：正文 ≥18px（任何文字硬底線 14px）、按鈕高 ≥58px、
-   觸控間距 ≥12px、全部 rem/em、對比度 ≥4.5:1、尊重 reduced-motion。
-   ========================================================================== */
-
-/* ---------- 設計令牌 ---------- */
 :root {
-  /* 底色 / 卡片 */
-  --ivory:        #F6F1E6;   /* app 米白底 */
+  --ivory:        #F6F1E6;
   --ivory-deep:   #EFE8D7;
-  --cream:        #FDFBF4;   /* 卡片米白 */
-  --frame:        #E4DECE;   /* 桌面外框底 */
+  --cream:        #FDFBF4;
+  --frame:        #E4DECE;
 
-  /* 森林綠主色 */
   --forest:       #2C5742;
   --forest-deep:  #21453A;
   --forest-rich:  #31604A;
 
-  /* 玉綠輔色 */
   --jade:         #7FA68C;
   --jade-strong:  #5E8C70;
   --jade-pale:    #DCE9DC;
   --sage-line:    #B9CDB6;
   --sage-wash:    #EAF0E5;
 
-  /* 暖金 */
-  --gold:         #83632B;   /* 標籤文字（保對比） */
+  --gold:         #83632B;
   --gold-pale:    #F1E3C1;
 
-  /* 文字 */
   --ink:          #24483A;
   --ink-body:     #2E4A3B;
-  --muted:        #5D7063;  /* 米白底上對比 ≥4.5:1 */
+  --muted:        #5D7063;
   --muted-soft:   #6E7B6E;
 
-  /* 線條 / 陰影 */
   --hairline:     rgba(112, 102, 74, 0.16);
   --shadow-card:  0 16px 32px -22px rgba(52, 72, 55, 0.38),
                   0 2px 6px rgba(52, 72, 55, 0.05);
   --shadow-cta:   0 20px 38px -18px rgba(30, 62, 47, 0.65),
                   inset 0 1px 0 rgba(255, 255, 255, 0.10);
 
-  /* 節奏：Direction B 刻意放慢 */
   --ease-slow:    cubic-bezier(0.33, 1, 0.68, 1);
   --dur:          380ms;
 
   --nav-h: 74px;
-
-  /* 底導航實際佔高：8px 上 padding + 58px 項目 + 10px 下 padding + 1px 邊框
-     + iPhone 底部安全區。彈層／FAB 一律用呢個變數留位，唔好硬編碼。 */
   --vtn-nav-h: calc(77px + env(safe-area-inset-bottom));
 }
 
-/* ---------- 基礎 ---------- */
 *,
 *::before,
 *::after { box-sizing: border-box; }
 
 html {
-  /* 320px 時約 17px、430px 時 18px，全程不小於 16px（14px 硬底線由此保證） */
   font-size: clamp(16px, 14.2px + 0.884vw, 18px);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -117,9 +87,6 @@ a { text-decoration: none; }
   outline-offset: 2px;
 }
 
-/* ---------- App 外殼（固定手機框：頂欄／滾動頁／底導航三段式） ----------
-   外殼本身唔再做滾動容器（overflow:hidden，高度鎖定 100dvh）；
-   縱向滾動交俾內層 .page —— 底導航做 flex 尾列固定，唔會跟內容走。 */
 .app-shell {
   position: relative;
   width: 100%;
@@ -141,9 +108,6 @@ a { text-decoration: none; }
   }
 }
 
-/* ==========================================================================
-   頂部品牌列
-   ========================================================================== */
 .topbar {
   flex: none;
   display: flex;
@@ -168,9 +132,6 @@ a { text-decoration: none; }
 
 .topbar__dot { color: #9AAB9C; font-weight: 400; }
 
-/* ==========================================================================
-   Hero
-   ========================================================================== */
 .hero {
   position: relative;
   padding: 52px 24px 0;
@@ -192,7 +153,6 @@ a { text-decoration: none; }
   width: 112%;
   height: calc(100% + 40px);
   object-fit: cover;
-  /* 官方 16:9 水墨圖：村落重心在右，右錨定裁切保留村屋與太陽 */
   object-position: right center;
 }
 
@@ -202,8 +162,7 @@ a { text-decoration: none; }
   z-index: 1;
   pointer-events: none;
 }
-/* 左側融入象牙白，保證文字區乾淨（官方水墨圖山色較豐富，漸層加闊）；
-   右緣柔光消除 16:9 橫圖的直邊裁切 */
+
 .hero__fade--corner {
   background:
     linear-gradient(to left,
@@ -217,7 +176,7 @@ a { text-decoration: none; }
       rgba(246, 241, 230, 0.28) 62%,
       rgba(246, 241, 230, 0) 74%);
 }
-/* 底部融入下一區塊（消融前景草木與河岸的硬邊） */
+
 .hero__fade--bottom {
   background: linear-gradient(to top,
     var(--ivory) 8%,
@@ -259,9 +218,6 @@ a { text-decoration: none; }
                0 0 3px rgba(246, 241, 230, 0.85);
 }
 
-/* ==========================================================================
-   主 CTA：開始錄音（全頁唯一主操作）
-   ========================================================================== */
 .cta-card {
   position: relative;
   display: flex;
@@ -323,7 +279,6 @@ a { text-decoration: none; }
   color: rgba(255, 255, 255, 0.74);
 }
 
-/* 聲波 */
 .eq {
   display: inline-flex;
   align-items: center;
@@ -343,9 +298,6 @@ a { text-decoration: none; }
   50%      { transform: scaleY(1);    opacity: 0.95; }
 }
 
-/* ==========================================================================
-   精選故事
-   ========================================================================== */
 .featured { padding: 32px 20px 0; }
 
 .featured__head {
@@ -370,7 +322,6 @@ a { text-decoration: none; }
   background: linear-gradient(to right, var(--sage-line), rgba(185, 205, 182, 0));
 }
 
-/* ---------- 故事卡 ---------- */
 .story-card {
   position: relative;
   display: flex;
@@ -403,9 +354,9 @@ a { text-decoration: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 500ms var(--ease-slow);
 }
 .story-card__cover:hover img { transform: scale(1.03); }
-.story-card__cover img { transition: transform 500ms var(--ease-slow); }
 
 .story-card__body {
   flex: 1 1 auto;
@@ -425,7 +376,7 @@ a { text-decoration: none; }
 
 .story-card__meta {
   margin: 0 0 10px;
-  font-size: 0.875rem;   /* 14px 硬底線 */
+  font-size: 0.875rem;
   line-height: 1.45;
   color: var(--muted-soft);
   white-space: nowrap;
@@ -438,7 +389,7 @@ a { text-decoration: none; }
   border-radius: 999px;
   background: var(--gold-pale);
   color: var(--gold);
-  font-size: 0.875rem;   /* =14px 硬底線 */
+  font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.04em;
 }
@@ -466,7 +417,6 @@ a { text-decoration: none; }
 .story-card__play:hover { transform: translateY(-2px); background: #D3E3D5; }
 .story-card__play:active { transform: scale(0.95); }
 
-/* FR-B4 強制披露（14px 硬底線；米白卡上對比 ≥4.5:1） */
 .story-card__disclosure {
   display: flex;
   align-items: flex-start;
@@ -489,9 +439,6 @@ a { text-decoration: none; }
   color: var(--ink-body);
 }
 
-/* ==========================================================================
-   信任承諾條
-   ========================================================================== */
 .trust-bar {
   display: flex;
   align-items: center;
@@ -521,12 +468,9 @@ a { text-decoration: none; }
   color: #315542;
 }
 
-/* ==========================================================================
-   底部導航（外殼 flex 尾列，喺滾動容器之外，永遠貼實屏幕底部）
-   ========================================================================== */
 .bottom-nav {
   position: relative;
-  z-index: 30;                 /* 高層級：展開嘅文字稿／問答都喺獨立滾動區內，唔會蓋住佢 */
+  z-index: 30;
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -560,14 +504,13 @@ a { text-decoration: none; }
   height: 32px;
   padding: 0 18px;
   border-radius: 13px;
-  transition: background-color var(--dur) var(--ease-slow);
+  transition: background-color var(--dur) var(--ease-slow),
+              transform 180ms ease;
 }
 .bottom-nav__icon i { font-size: 1.26rem; }
 
 .bottom-nav__item:hover { color: var(--forest); }
 .bottom-nav__item:active .bottom-nav__icon { transform: scale(0.94); }
-.bottom-nav__icon { transition: background-color var(--dur) var(--ease-slow),
-                                   transform 180ms ease; }
 
 .bottom-nav__item.is-active {
   color: var(--forest);
@@ -577,17 +520,13 @@ a { text-decoration: none; }
   background: var(--jade-pale);
 }
 
-/* ==========================================================================
-   Toast（原型階段：未建成頁面的誠實反饋）
-   ========================================================================== */
-/* 覆蓋 Bootstrap `.toast:not(.show){display:none}`：可見性統一由 .is-show 控制 */
 .toast:not(.show) { display: flex; }
 
 .toast {
   position: fixed;
   left: 50%;
   bottom: calc(96px + env(safe-area-inset-bottom));
-  z-index: 80;                    /* 高於語言底部彈層（70/71） */
+  z-index: 80;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -610,20 +549,11 @@ a { text-decoration: none; }
   opacity: 1;
   transform: translate(-50%, 0);
 }
-/* 語言彈層打開時，Toast 上移到彈層上方，避免被遮擋 */
 body:has(.sheet.is-show) .toast {
   bottom: calc(568px + env(safe-area-inset-bottom));
 }
 .toast__icon { color: #9FC7AC; font-size: 1rem; }
 
-/* ==========================================================================
-   第二頁：錄音管理（我的錄音）
-   ========================================================================== */
-
-/* ---------- 頁面主體：外殼內唯一嘅縱向滾動容器 ----------
-   flex-1＋min-height:0 食盡頂欄同底導航之間嘅空間；
-   內容多長都只喺呢度滾動，底導航維持喺外殼底部。
-   頁尾用各頁自帶 padding-bottom／承諾條留氣位，最後一項唔會被遮擋。 */
 .app-shell > .page {
   flex: 1 1 auto;
   min-width: 0;
@@ -636,7 +566,6 @@ body:has(.sheet.is-show) .toast {
 }
 .app-shell > .page::-webkit-scrollbar { display: none; }
 
-/* 彈層（錄音抽屜／AI 助手）打開期間鎖定背景滾動 */
 .app-shell.is-modal-open > .page {
   overflow: hidden;
 }
@@ -648,14 +577,12 @@ body:has(.sheet.is-show) .toast {
   min-height: 0;
 }
 
-/* 管理頁 Hero：無問候語，標題直接開始，緊接分頁欄 */
 .hero--manage {
   flex: none;
   padding: 36px 24px 0;
   min-height: 176px;
 }
 
-/* ---------- 狀態分頁（segmented tabs） ---------- */
 .rec-tabs {
   flex: none;
   padding: 4px 20px 0;
@@ -674,7 +601,7 @@ body:has(.sheet.is-show) .toast {
 
 .tabs__btn {
   position: relative;
-  min-height: 58px;          /* ≥58px 觸控底線 */
+  min-height: 58px;
   padding: 8px 6px 12px;
   border: 0;
   border-radius: 14px;
@@ -690,7 +617,6 @@ body:has(.sheet.is-show) .toast {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 非首個分頁左側細分隔線；相鄰任一側為選中態時隱藏 */
 .tabs__btn:not(:first-child)::before {
   content: "";
   position: absolute;
@@ -712,7 +638,6 @@ body:has(.sheet.is-show) .toast {
   font-weight: 700;
 }
 
-/* 選中態底部森林綠短劃線 */
 .tabs__btn.is-active::after {
   content: "";
   position: absolute;
@@ -725,9 +650,8 @@ body:has(.sheet.is-show) .toast {
   transform: translateX(-50%);
 }
 
-/* ---------- 面板與誠實空狀態 ---------- */
 .panels {
-  flex: 1 0 auto;   /* 內容超過一屏時讓外殼自然滾動，不與承諾條重疊 */
+  flex: 1 0 auto;
   display: flex;
   min-height: 0;
 }
@@ -747,9 +671,6 @@ body:has(.sheet.is-show) .toast {
   animation: panel-in var(--dur) var(--ease-slow) both;
 }
 
-/* 待轉寫／已完成分頁嘅空狀態內容包層：必須沿用 .empty 嘅置中契約。
-   否則普通 block 包層 shrink-to-fit（約標題闊），內裡 <img> 貼實左邊緣，
-   而標題文字居中——插畫就會相對標題偏左。 */
 .empty__inner {
   display: flex;
   flex: 1 1 auto;
@@ -768,7 +689,6 @@ body:has(.sheet.is-show) .toast {
   margin-bottom: 14px;
 }
 
-/* 草稿分頁使用官方橫向插畫：放大少許，四邊羽化融入米白底色 */
 .empty__art--drafts {
   width: min(300px, 82%);
   -webkit-mask-image:
@@ -803,36 +723,28 @@ body:has(.sheet.is-show) .toast {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 管理頁承諾條：單行陳列（14px 硬底線；緊湊間距確保一整行） */
 .page--manage .trust-bar {
   flex: none;
   gap: 9px;
-  /* 底部 safe-area 由底導航自身 padding 處理；呢度只留滾動尾氣位 */
   margin: 10px 12px 18px;
   padding: 11px 13px;
+  min-width: 0;
 }
 .page--manage .trust-bar__icon { width: 24px; height: 24px; }
 .page--manage .trust-bar__icon svg { width: 24px; height: 24px; }
 .page--manage .trust-bar__text {
-  font-size: 0.875rem;   /* 14px 硬底線 */
+  font-size: 0.875rem;
   line-height: 1.45;
-  min-width: 0;          /* 容許喺 flex 列內收窄換行，唔好撐破版面 */
+  min-width: 0;
 }
-.page--manage .trust-bar { min-width: 0; }
-
-/* ==========================================================================
-   第三頁：村落故事
-   ========================================================================== */
 
 .page--stories { padding-bottom: 18px; }
 
-/* Hero：需容納標題、副標與篩選膠囊（縮短標題至膠囊的垂直距離） */
 .hero--stories {
   padding: 36px 20px 0;
   min-height: 232px;
 }
 
-/* ---------- 篩選膠囊（FR-B2：僅真實存在的值） ---------- */
 .filter-chips {
   position: absolute;
   left: 20px;
@@ -846,7 +758,7 @@ body:has(.sheet.is-show) .toast {
 
 .chip {
   flex: 0 1 auto;
-  min-height: 58px;              /* ≥58px 觸控底線 */
+  min-height: 58px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -885,7 +797,6 @@ body:has(.sheet.is-show) .toast {
   box-shadow: 0 10px 22px -12px rgba(33, 69, 58, 0.7);
 }
 
-/* ---------- 唯一故事卡 ---------- */
 .story-hero-card {
   display: flex;
   gap: 16px;
@@ -951,17 +862,16 @@ body:has(.sheet.is-show) .toast {
   border-radius: 999px;
   background: var(--gold-pale);
   color: var(--gold);
-  font-size: 0.875rem;          /* 14px 硬底線 */
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
-/* 開啟故事：整列大按鈕，播放鍵置於右側圓形容器 */
 .open-story {
   position: relative;
   width: 100%;
-  min-height: 64px;              /* ≥58px 觸控底線 */
+  min-height: 64px;
   margin-top: 14px;
   display: flex;
   align-items: center;
@@ -1004,10 +914,9 @@ body:has(.sheet.is-show) .toast {
   color: var(--forest-deep);
   font-size: 0.95rem;
 }
-.open-story__play i { transform: translateX(2px); }  /* 視覺補償：play 三角形居中 */
+.open-story__play i { transform: translateX(2px); }
 .open-story:hover .open-story__play { background: var(--cream); }
 
-/* ---------- 模糊位置卡（FR-B5） ---------- */
 .map-card {
   margin: 16px 16px 0;
   padding: 18px 18px 20px;
@@ -1084,7 +993,6 @@ body:has(.sheet.is-show) .toast {
 .map-card__leaflet.is-ready { opacity: 1; }
 .map-card__leaflet.is-failed { display: none; }
 
-/* 地圖載入態 */
 .map-card__loading {
   position: absolute;
   z-index: 3;
@@ -1115,7 +1023,6 @@ body:has(.sheet.is-show) .toast {
 }
 @keyframes map-spin { to { transform: rotate(360deg); } }
 
-/* 指北針 */
 .map-card__north {
   position: absolute;
   z-index: 2;
@@ -1137,7 +1044,6 @@ body:has(.sheet.is-show) .toast {
 }
 .map-card__north span { margin-top: -1px; font-size: 0.95rem; }
 
-/* Leaflet 微調：配合米白風格＋長者字號 */
 .map-card__leaflet .leaflet-control-attribution {
   background: rgba(253, 251, 244, 0.82);
   font-size: 0.62rem;
@@ -1176,7 +1082,6 @@ body:has(.sheet.is-show) .toast {
   .map-card__spinner { animation: none; }
 }
 
-/* ---------- 強制披露卡（FR-B4） ---------- */
 .disclosure-card {
   display: flex;
   align-items: flex-start;
@@ -1204,7 +1109,7 @@ body:has(.sheet.is-show) .toast {
 
 .disclosure-card__en {
   margin: 0;
-  font-size: 0.875rem;             /* 14px 硬底線 */
+  font-size: 0.875rem;
   line-height: 1.55;
   color: #6B5326;
 }
@@ -1218,10 +1123,6 @@ body:has(.sheet.is-show) .toast {
 }
 @media (max-width: 360px) {
   .disclosure-card__zh { white-space: normal; }
-}
-
-/* ---------- 窄屏微調（≤360px）：封面收窄防擠壓，長文案安全換行 ---------- */
-@media (max-width: 360px) {
   .story-hero-card { gap: 12px; padding: 12px; }
   .story-hero-card__cover { flex-basis: 120px; }
   .story-hero-card__title { font-size: 1.04rem; }
@@ -1232,14 +1133,8 @@ body:has(.sheet.is-show) .toast {
   .chip { padding: 12px 18px; font-size: 0.95rem; }
 }
 
-/* ==========================================================================
-   第四頁：我的（管理中心）
-   ========================================================================== */
-
 .page--me { padding-bottom: 16px; }
 
-/* Hero：雙行標題較高，卡片輕疊於背景草叢之上。
-   底部保留 26px padding，確保任何字體渲染下副文都不被卡片遮擋。 */
 .hero--me {
   padding: 42px 22px 26px;
   min-height: 272px;
@@ -1265,25 +1160,23 @@ body:has(.sheet.is-show) .toast {
   line-height: 1.62;
 }
 
-/* ---------- 管理入口清單 ---------- */
 .me-list {
   position: relative;
   z-index: 3;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: -10px;               /* 只輕疊背景草叢，保留與副文的安全距離 */
+  margin-top: -10px;
   padding: 0 16px;
 }
 
-/* 整列可點的入口卡（<a> 或 <button> 共用） */
 .me-item {
   position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
-  min-height: 100px;              /* 遠高於 58px 觸控底線 */
+  min-height: 100px;
   padding: 16px;
   border: 1px solid var(--hairline);
   border-radius: 24px;
@@ -1304,7 +1197,6 @@ body:has(.sheet.is-show) .toast {
 }
 .me-item:active { transform: scale(0.99); }
 
-/* 左側 sage 圓底圖標 */
 .me-item__icon {
   flex: none;
   display: grid;
@@ -1340,10 +1232,8 @@ body:has(.sheet.is-show) .toast {
   line-height: 1.45;
   color: var(--muted);
 }
-/* 四檔私隱副標強制單行（其餘副文容許自然換行） */
 .me-item__sub--oneline { white-space: nowrap; }
 
-/* 右側箭頭圓鈕 */
 .me-item__chevron {
   flex: none;
   display: grid;
@@ -1355,9 +1245,8 @@ body:has(.sheet.is-show) .toast {
   color: var(--forest);
   font-size: 1.05rem;
 }
-.me-item__chevron i { transform: translateX(2px); }   /* 視覺補償居中 */
+.me-item__chevron i { transform: translateX(2px); }
 
-/* ---------- 模糊地點說明條（FR-MY5） ---------- */
 .me-note {
   display: flex;
   align-items: center;
@@ -1395,7 +1284,6 @@ body:has(.sheet.is-show) .toast {
   color: var(--forest);
 }
 
-/* ---------- 關於入口（FR-MY6） ---------- */
 .me-item--about {
   min-height: 88px;
   gap: 12px;
@@ -1430,10 +1318,8 @@ body:has(.sheet.is-show) .toast {
   text-overflow: clip;
 }
 
-/* 關於卡箭頭略縮，把寬度留給英文標題 */
 .me-item--about .me-item__chevron { width: 46px; height: 46px; font-size: 0.98rem; }
 
-/* ---------- 窄屏微調（≤360px） ---------- */
 @media (max-width: 360px) {
   .hero--me { min-height: 252px; }
   .hero__eyebrow { font-size: 1.6rem; }
@@ -1442,19 +1328,16 @@ body:has(.sheet.is-show) .toast {
   .me-item { gap: 10px; min-height: 92px; padding: 12px; }
   .me-item__icon { width: 50px; height: 50px; font-size: 1.3rem; }
   .me-item__title { font-size: 1.12rem; }
-  .me-item__sub { font-size: 0.88rem; }   /* ≥14px 硬底線 */
+  .me-item__sub { font-size: 0.88rem; }
   .me-item__chevron { width: 44px; height: 44px; font-size: 0.95rem; }
   .me-note { gap: 10px; padding: 12px; }
   .me-note__pin { width: 48px; height: 48px; font-size: 1.15rem; }
   .me-note__text { font-size: 0.9rem; }
   .me-item__icon--gold { width: 44px; height: 44px; font-size: 1.15rem; }
   .me-item--about .me-item__chevron { width: 42px; height: 42px; }
-  .me-item__title--about { font-size: 0.88rem; }   /* ≥14px 硬底線 */
+  .me-item__title--about { font-size: 0.88rem; }
 }
 
-/* ==========================================================================
-   語言選擇底部彈層（Bottom sheet）
-   ========================================================================== */
 .sheet-overlay {
   position: fixed;
   inset: 0;
@@ -1522,7 +1405,6 @@ body:has(.sheet.is-show) .toast {
 }
 .sheet__close:hover { background: var(--jade-pale); }
 
-/* ---------- 語言選項單選列 ---------- */
 .lang-list {
   display: flex;
   flex-direction: column;
@@ -1570,7 +1452,7 @@ body:has(.sheet.is-show) .toast {
   color: var(--forest);
 }
 .lang-option__sub {
-  font-size: 0.88rem;              /* ≥14px 硬底線 */
+  font-size: 0.88rem;
   color: var(--muted);
 }
 
@@ -1597,13 +1479,12 @@ body:has(.sheet.is-show) .toast {
 }
 .lang-option.is-selected .lang-option__check { color: var(--forest); }
 
-/* ---------- 彈層說明與關閉 ---------- */
 .sheet__hint {
   display: flex;
   align-items: flex-start;
   gap: 9px;
   margin: 16px 2px 14px;
-  font-size: 0.88rem;              /* ≥14px 硬底線 */
+  font-size: 0.88rem;
   line-height: 1.55;
   color: var(--muted);
 }
@@ -1614,7 +1495,7 @@ body:has(.sheet.is-show) .toast {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 58px;                /* ≥58px 觸控底線 */
+  min-height: 58px;
   border: 0;
   border-radius: 999px;
   background: var(--forest);
@@ -1630,7 +1511,6 @@ body:has(.sheet.is-show) .toast {
 }
 .sheet__cancel:hover { background: var(--forest-rich); }
 
-/* 鍵盤焦點可見性 */
 .lang-option:focus-visible,
 .sheet__close:focus-visible,
 .sheet__cancel:focus-visible {
@@ -1638,9 +1518,6 @@ body:has(.sheet.is-show) .toast {
   outline-offset: 2px;
 }
 
-/* ==========================================================================
-   無障礙：系統要求減少動態時，全部靜止
-   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *,
@@ -1651,16 +1528,6 @@ body:has(.sheet.is-show) .toast {
   }
 }
 
-
-/* ===== css/record-flow.css ===== */
-/* =============================================================================
- * Voices of the North — 真實錄音流程 + 我的錄音卡片（Direction B）
- * 載入於 index.html / recording.html / stories.html；class 一律 vtn-rec- 前綴。
- * ========================================================================== */
-
-/* =============================================================================
- * 1. 故事頁補充：真實錄音標記與高亮
- * ========================================================================== */
 .story-hero-card__note {
   display: flex;
   align-items: center;
@@ -1676,15 +1543,10 @@ body:has(.sheet.is-show) .toast {
   transition: outline 0.4s ease;
 }
 
-/* =============================================================================
- * 2. 錄音底部抽屜（全步驟共用容器）
- *    掛載於 .app-shell 內，position:absolute 以手機框為定位參照；
- *    bottom 預留底導航高度（--vtn-nav-h），遮罩／抽屜都唔會蓋住導航列。
- * ========================================================================== */
 .vtn-rec-overlay {
   position: absolute;
   inset: 0 0 var(--vtn-nav-h, 77px) 0;
-  z-index: 60;                      /* 高於底導航(30)／AI 助手層(50)，低於 toast(80) */
+  z-index: 60;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1710,13 +1572,12 @@ body:has(.sheet.is-show) .toast {
   font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
 }
 .vtn-rec-overlay.is-open .vtn-rec-sheet { transform: translateY(0); }
-/* sheet 頭欄固定，內容區獨立滾動，彈窗高度自適應但永不超出視口 */
+
 .vtn-rec-body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  /* 底導航已自帶 safe-area padding，sheet 喺導航上方，無需再重複留安全區 */
   padding: 18px 18px 20px;
 }
 @media (min-width: 560px) {
@@ -1770,7 +1631,6 @@ body:has(.sheet.is-show) .toast {
 
 .vtn-rec-step[hidden] { display: none; }
 
-/* ---------- 服務狀態膠囊 ---------- */
 .vtn-rec-status {
   display: inline-flex;
   align-items: center;
@@ -1786,7 +1646,6 @@ body:has(.sheet.is-show) .toast {
 .vtn-rec-status--offline { background: #F1E3C1; color: #6d5326; }
 .vtn-rec-status--checking { background: #EAF0E5; color: #5D7063; }
 
-/* ---------- 通用文案／按鈕 ---------- */
 .vtn-rec-lead {
   margin: 0 0 6px;
   text-align: center;
@@ -1831,7 +1690,6 @@ body:has(.sheet.is-show) .toast {
 .vtn-rec-btn + .vtn-rec-btn { margin-top: 10px; }
 .vtn-rec-btn:disabled { opacity: 0.5; cursor: default; }
 
-/* ---------- 準備步：大咪 ---------- */
 .vtn-rec-mic {
   display: grid;
   place-items: center;
@@ -1847,13 +1705,15 @@ body:has(.sheet.is-show) .toast {
   box-shadow: 0 18px 40px -14px rgba(33, 69, 58, 0.7);
   cursor: pointer;
 }
-.vtn-rec-mic.is-live { animation: vtn-rec-mic-pulse 1.6s ease-out infinite; }
+.vtn-rec-mic.is-live {
+  background: #B55443;
+  animation: vtn-rec-mic-pulse 1.6s ease-out infinite;
+}
 @keyframes vtn-rec-mic-pulse {
   0%   { box-shadow: 0 0 0 0 rgba(200, 92, 72, 0.45), 0 18px 40px -14px rgba(33,69,58,0.7); }
   70%  { box-shadow: 0 0 0 22px rgba(200, 92, 72, 0), 0 18px 40px -14px rgba(33,69,58,0.7); }
   100% { box-shadow: 0 0 0 0 rgba(200, 92, 72, 0), 0 18px 40px -14px rgba(33,69,58,0.7); }
 }
-.vtn-rec-mic.is-live { background: #B55443; }
 
 .vtn-rec-timer {
   margin: 0 0 4px;
@@ -1893,7 +1753,6 @@ body:has(.sheet.is-show) .toast {
   50% { height: 36px; }
 }
 
-/* ---------- 試聽／音訊 ---------- */
 .vtn-rec-audio {
   width: 100%;
   margin: 4px 0 14px;
@@ -1917,7 +1776,6 @@ body:has(.sheet.is-show) .toast {
 .vtn-rec-pill--gold { background: #F1E3C1; color: #6d5326; }
 .vtn-rec-pill--red { background: #f6e3df; color: #9c4637; }
 
-/* ---------- 處理步驟 ---------- */
 .vtn-rec-steps {
   list-style: none;
   margin: 4px 0 18px;
@@ -1959,7 +1817,6 @@ body:has(.sheet.is-show) .toast {
 }
 @keyframes vtn-rec-spin { to { transform: rotate(360deg); } }
 
-/* ---------- 結果 ---------- */
 .vtn-rec-result-head {
   display: flex;
   align-items: center;
@@ -1979,6 +1836,7 @@ body:has(.sheet.is-show) .toast {
   font-size: 0.97rem;
   line-height: 1.75;
   color: #2c3f33;
+  overflow-wrap: anywhere;
 }
 .vtn-rec-subhead {
   margin: 4px 0 8px;
@@ -1998,6 +1856,7 @@ body:has(.sheet.is-show) .toast {
   align-items: center;
   gap: 10px;
   width: 100%;
+  max-width: 100%;
   padding: 10px 13px;
   border: 1.5px solid #B9CDB6;
   border-radius: 14px;
@@ -2007,7 +1866,7 @@ body:has(.sheet.is-show) .toast {
   cursor: pointer;
 }
 .vtn-rec-qa button:hover { background: #F6F1E6; }
-.vtn-rec-qa .qa-q { flex: 1 1 auto; font-size: 0.92rem; font-weight: 700; color: #2c3f33; }
+.vtn-rec-qa .qa-q { flex: 1 1 auto; font-size: 0.92rem; font-weight: 700; color: #2c3f33; min-width: 0; overflow-wrap: anywhere; }
 .vtn-rec-qa .qa-a {
   flex-basis: 100%;
   font-size: 0.88rem;
@@ -2067,33 +1926,17 @@ body:has(.sheet.is-show) .toast {
 }
 .vtn-rec-note i { margin-top: 2px; }
 
-/* =============================================================================
- * 3. 我的錄音 — 已完成／待轉寫卡片
- * ========================================================================== */
-.vtn-rec-list { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 10px; }
+.vtn-rec-list { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 10px; width: 100%; min-width: 0; }
 
-/* 有真實錄音時，收起空狀態插畫（維持同一 section） */
 .empty.has-list { text-align: left; align-items: stretch; }
 .empty.has-list .empty__inner { display: none; }
 
-/* 防橫向溢出：截斷 flex 嘅 min-width:auto 鏈，
-   否則卡片標題 nowrap 嘅 max-content 會成個分頁撐闊並被外層裁掉 */
 .panels > .empty { min-width: 0; }
-.vtn-rec-list { width: 100%; min-width: 0; }
-.vtn-rec-card { min-width: 0; max-width: 100%; }
-.vtn-rec-card__body { min-width: 0; max-width: 100%; }
+.vtn-rec-card { min-width: 0; max-width: 100%; border: 1px solid #d9dfce; border-radius: 20px; background: var(--cream, #FDFBF4); box-shadow: 0 8px 24px -16px rgba(33, 69, 58, 0.5); overflow: hidden; }
+.vtn-rec-card__body { min-width: 0; max-width: 100%; padding: 0 15px 15px; }
+.vtn-rec-card__body[hidden] { display: none; }
 .vtn-rec-audio { max-width: 100%; min-width: 0; }
-.vtn-rec-qa button { max-width: 100%; }
-.vtn-rec-qa .qa-q { min-width: 0; overflow-wrap: anywhere; }
-.vtn-rec-formal { overflow-wrap: anywhere; }
 
-.vtn-rec-card {
-  border: 1px solid #d9dfce;
-  border-radius: 20px;
-  background: var(--cream, #FDFBF4);
-  box-shadow: 0 8px 24px -16px rgba(33, 69, 58, 0.5);
-  overflow: hidden;
-}
 .vtn-rec-card.is-new { outline: 3px solid rgba(94, 140, 112, 0.55); outline-offset: 2px; }
 .vtn-rec-card__head {
   display: flex;
@@ -2141,9 +1984,6 @@ body:has(.sheet.is-show) .toast {
 }
 .vtn-rec-card.is-open .vtn-rec-card__chevron { transform: rotate(180deg); }
 
-.vtn-rec-card__body { padding: 0 15px 15px; }
-.vtn-rec-card__body[hidden] { display: none; }
-
 .vtn-rec-card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 
 .vtn-rec-card__actions { display: flex; gap: 8px; margin-top: 12px; }
@@ -2187,33 +2027,19 @@ body:has(.sheet.is-show) .toast {
   }
 }
 
-
-/* ===== css/assistant.css ===== */
-/* =============================================================================
- * Ask the Village — 村落問答助手（無框架版，四頁原型共用）
- * 與 components/FloatingAIAssistant.jsx 視覺同源；Direction B「Oat × Sage」。
- * class 一律 vtn-ai- 前綴，避免與 Bootstrap 5 衝突。
- *
- * 定位模型（2026-06 改版）：
- *   根層 .vtn-ai-root 掛載於 .app-shell 內，position:absolute 覆蓋「底導航以上」
- *   成個 App 內容區（bottom: var(--vtn-nav-h)）——FAB、遮罩、全寬 BottomSheet
- *   一律限制喺手機框視口入面，桌面睇亦唔會溢出框外；底導航全程可見可點。
- * ========================================================================== */
-
 .vtn-ai-root {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: var(--vtn-nav-h, 77px);
-  z-index: 50;                          /* 高於底導航(30)，低於錄音彈層(60)／toast(80) */
-  overflow: hidden;                     /* 關閉滑走嘅面板只可喺根層內被裁走，唔可以喺導航區露頭 */
+  z-index: 50;
+  overflow: hidden;
   font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
-  pointer-events: none;                 /* 容器不擋操作，子元素各自開啟 */
+  pointer-events: none;
 }
 .vtn-ai-root * { box-sizing: border-box; }
 
-/* ---------- 半透明黑色遮罩（點擊關閉） ---------- */
 .vtn-ai-mask {
   position: absolute;
   inset: 0;
@@ -2227,7 +2053,6 @@ body:has(.sheet.is-show) .toast {
   pointer-events: auto;
 }
 
-/* ---------- 預設：提示氣泡 + FAB（錨於內容區右下角、底導航之上） ---------- */
 .vtn-ai-launcher {
   position: absolute;
   right: 14px;
@@ -2323,14 +2148,13 @@ body:has(.sheet.is-show) .toast {
   font-size: 0.7rem;
 }
 
-/* ---------- 聊天面板：App 內全寬 BottomSheet（底導航以上全屏覆蓋） ---------- */
 .vtn-ai-panel {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  pointer-events: none;              /* 關閉滑走後唔可以攔截底導航點擊 */
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -2349,7 +2173,6 @@ body:has(.sheet.is-show) .toast {
   pointer-events: auto;
 }
 
-/* 桌面手機框（≥560px）：留 12px 氣位嘅懸浮卡片，四邊圓角 */
 @media (min-width: 560px) {
   .vtn-ai-panel {
     top: 12px;
@@ -2413,7 +2236,6 @@ body:has(.sheet.is-show) .toast {
 }
 .vtn-ai-head-btn:hover { background: rgba(255, 255, 255, 0.14); }
 
-/* ---------- 訊息區（獨立滾動：訊息再多都唔會撐破彈窗） ---------- */
 .vtn-ai-log {
   flex: 1 1 auto;
   min-height: 0;
@@ -2524,7 +2346,6 @@ body:has(.sheet.is-show) .toast {
 .vtn-ai-chip:hover { background: #DCE9DC; }
 .vtn-ai-chip i { font-size: 0.78rem; }
 
-/* 推薦問題 */
 .vtn-ai-suggests {
   display: flex;
   flex-wrap: wrap;
@@ -2555,7 +2376,6 @@ body:has(.sheet.is-show) .toast {
   color: #7a8578;
 }
 
-/* 打字中三點 */
 .vtn-ai-typing { display: inline-flex; gap: 5px; align-items: center; padding: 3px 1px; }
 .vtn-ai-typing span {
   width: 8px;
@@ -2567,7 +2387,6 @@ body:has(.sheet.is-show) .toast {
 .vtn-ai-typing span:nth-child(2) { animation-delay: 0.18s; }
 .vtn-ai-typing span:nth-child(3) { animation-delay: 0.36s; }
 
-/* ---------- 底欄：誠實註 + 輸入 ---------- */
 .vtn-ai-pledge {
   flex: none;
   display: flex;
@@ -2635,7 +2454,6 @@ body:has(.sheet.is-show) .toast {
   animation: vtn-ai-spin 0.8s linear infinite;
 }
 
-/* ---------- 動畫 ---------- */
 @keyframes vtn-ai-bounce {
   0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
   40% { transform: translateY(-5px); opacity: 1; }
@@ -2660,14 +2478,11 @@ body:has(.sheet.is-show) .toast {
   }
 }
 
-/* 極窄機（≤340px）：FAB 同氣泡再收窄少少，確保唔貼邊／溢出 */
 @media (max-width: 340px) {
   .vtn-ai-launcher { right: 10px; }
   .vtn-ai-hint { max-width: calc(100vw - 96px); }
 }
 
-
-/* ===== 單檔 SPA 分頁切換（必須在三個樣式之後，覆寫 display） ===== */
 .vtn-view { display: none !important; }
 .vtn-view.is-active { display: block !important; }
 .page--manage.vtn-view.is-active { display: flex !important; flex-direction: column; }
@@ -2682,10 +2497,8 @@ body:has(.sheet.is-show) .toast {
       <span class="topbar__title">北部都會區 <span class="topbar__dot" aria-hidden="true">・</span> 鄉村故事館</span>
     </header>
 
-    <!-- ======== 分頁：home ======== -->
 <main class="page vtn-view is-active" data-view="home">
 
-      <!-- ============ Hero：歡迎 + 村落晨光插畫 ============ -->
       <section class="hero" aria-labelledby="heroTitle">
         <div class="hero__art" aria-hidden="true">
           <img src="assets/home-background.png" alt="">
@@ -2700,9 +2513,7 @@ body:has(.sheet.is-show) .toast {
         </div>
       </section>
 
-      <!-- ============ 唯一主操作：開始錄音 ============ -->
-      <button type="button" class="cta-card" id="startRecordBtn"
-              aria-label="開始錄音。首次錄音可以先聽示範。">
+      <button type="button" class="cta-card" id="startRecordBtn" aria-label="開始錄音。首次錄音可以先聽示範。">
         <span class="cta-card__visual" aria-hidden="true">
           <span class="eq">
             <i style="--h:11px;--d:0ms"></i><i style="--h:19px;--d:160ms"></i><i style="--h:27px;--d:320ms"></i>
@@ -2718,7 +2529,6 @@ body:has(.sheet.is-show) .toast {
         <span class="cta-card__sub">首次錄音可先聽示範</span>
       </button>
 
-      <!-- ============ 精選故事（全 app 僅一張） ============ -->
       <section class="featured" aria-labelledby="featuredTitle">
         <div class="featured__head">
           <h2 class="featured__title" id="featuredTitle">精選故事</h2>
@@ -2727,9 +2537,7 @@ body:has(.sheet.is-show) .toast {
 
         <article class="story-card" id="featuredStoryCard">
           <div class="story-card__main">
-            <a class="story-card__cover" href="#story-YL-001" id="storyCoverLink"
-               data-demo-play
-               aria-label="播放示範故事：元朗・村落晨光（真實示範錄音）">
+            <a class="story-card__cover" href="#story-YL-001" id="storyCoverLink" data-demo-play aria-label="播放示範故事：元朗・村落晨光（真實示範錄音）">
               <img src="assets/story-cover-village.png" alt="水彩插畫：晨光中的元朗村落，青磚瓦屋與紅對聯" width="618" height="618">
             </a>
 
@@ -2739,15 +2547,11 @@ body:has(.sheet.is-show) .toast {
               <span class="story-card__tag">示範故事</span>
             </div>
 
-            <button type="button" class="story-card__play" id="storyPlayBtn"
-                    data-demo-play
-                    aria-label="播放示範故事《元朗・村落晨光》（真實示範錄音，非合成人聲）"
-                    aria-pressed="false">
+            <button type="button" class="story-card__play" id="storyPlayBtn" data-demo-play aria-label="播放示範故事《元朗・村落晨光》（真實示範錄音，非合成人聲）" aria-pressed="false">
               <i class="fa-solid fa-play" aria-hidden="true"></i>
             </button>
           </div>
 
-          <!-- FR-B4 強制披露：逐字英文 + 繁中說明 -->
           <p class="story-card__disclosure">
             <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
             <span>
@@ -2758,14 +2562,11 @@ body:has(.sheet.is-show) .toast {
         </article>
       </section>
 
-      <!-- ============ 信任承諾條 ============ -->
       <div class="trust-bar" role="note" aria-label="我們的承諾">
         <span class="trust-bar__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
-                  stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-            <path d="M15.5 27.5v-7M21 27.5V21M27 27.5v-10M33 27.5v-6"
-                  stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M15.5 27.5v-7M21 27.5V21M27 27.5v-10M33 27.5v-6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
           </svg>
         </span>
         <p class="trust-bar__text">
@@ -2774,10 +2575,8 @@ body:has(.sheet.is-show) .toast {
       </div>
     </main>
 
-    <!-- ======== 分頁：recording ======== -->
 <main class="page page--manage vtn-view" data-view="recording">
 
-      <!-- ============ Hero：頁標題 + 村落背景 ============ -->
       <section class="hero hero--manage" aria-labelledby="pageTitle-recording">
         <div class="hero__art" aria-hidden="true">
           <img src="assets/recording-background.png" alt="">
@@ -2791,36 +2590,29 @@ body:has(.sheet.is-show) .toast {
         </div>
       </section>
 
-      <!-- ============ 狀態分頁（真實資料；目前全為空） ============ -->
       <section class="rec-tabs">
         <div class="tabs" role="tablist" aria-label="錄音狀態分類">
-          <button type="button" class="tabs__btn is-active" role="tab"
-                  id="tab-drafts" aria-controls="panel-drafts" aria-selected="true" tabindex="0">
+          <button type="button" class="tabs__btn is-active" role="tab" id="tab-drafts" aria-controls="panel-drafts" aria-selected="true" tabindex="0">
             草稿
           </button>
-          <button type="button" class="tabs__btn" role="tab"
-                  id="tab-pending" aria-controls="panel-pending" aria-selected="false" tabindex="-1">
+          <button type="button" class="tabs__btn" role="tab" id="tab-pending" aria-controls="panel-pending" aria-selected="false" tabindex="-1">
             待轉寫<span class="tab-count" id="countPending" hidden>0</span>
           </button>
-          <button type="button" class="tabs__btn" role="tab"
-                  id="tab-done" aria-controls="panel-done" aria-selected="false" tabindex="-1">
+          <button type="button" class="tabs__btn" role="tab" id="tab-done" aria-controls="panel-done" aria-selected="false" tabindex="-1">
             已完成<span class="tab-count" id="countDone" hidden>0</span>
           </button>
         </div>
       </section>
 
-      <!-- ============ 空狀態（誠實：不偽造任何錄音） ============ -->
       <div class="panels">
 
-        <section class="empty is-show" role="tabpanel"
-                 id="panel-drafts" aria-labelledby="tab-drafts" tabindex="0">
+        <section class="empty is-show" role="tabpanel" id="panel-drafts" aria-labelledby="tab-drafts" tabindex="0">
           <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
           <h2 class="empty__title">目前沒有錄音草稿</h2>
           <p class="empty__text">未完成的錄音會保存在這裡，<br>方便你稍後繼續核對。</p>
         </section>
 
-        <section class="empty" role="tabpanel"
-                 id="panel-pending" aria-labelledby="tab-pending" tabindex="0" hidden>
+        <section class="empty" role="tabpanel" id="panel-pending" aria-labelledby="tab-pending" tabindex="0" hidden>
           <div class="vtn-rec-list" id="recListPending"></div>
           <div class="empty__inner" id="emptyPending">
             <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
@@ -2829,9 +2621,7 @@ body:has(.sheet.is-show) .toast {
           </div>
         </section>
 
-        <section class="empty" role="tabpanel"
-                 id="panel-done"
-                 aria-labelledby="tab-done" tabindex="0" hidden>
+        <section class="empty" role="tabpanel" id="panel-done" aria-labelledby="tab-done" tabindex="0" hidden>
           <div class="vtn-rec-list" id="recListDone"></div>
           <div class="empty__inner" id="emptyDone">
             <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
@@ -2842,26 +2632,20 @@ body:has(.sheet.is-show) .toast {
 
       </div>
 
-      <!-- ============ 承諾提示條（FR-M4） ============ -->
       <div class="trust-bar" role="note" aria-label="私隱承諾">
         <span class="trust-bar__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
-                  stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-            <rect x="17" y="23" width="14" height="11" rx="2.4"
-                  stroke="currentColor" stroke-width="2.6"/>
-            <path d="M19.8 23v-3.2a4.2 4.2 0 0 1 8.4 0V23"
-                  stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <rect x="17" y="23" width="14" height="11" rx="2.4" stroke="currentColor" stroke-width="2.6"/>
+            <path d="M19.8 23v-3.2a4.2 4.2 0 0 1 8.4 0V23" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
           </svg>
         </span>
         <p class="trust-bar__text">現場錄音只作暫時處理，不會永久儲存；示範故事為範例媒體。</p>
       </div>
     </main>
 
-    <!-- ======== 分頁：stories ======== -->
 <main class="page page--stories vtn-view" data-view="stories">
 
-      <!-- ============ Hero：頁標題 + 篩選 + 村落背景 ============ -->
       <section class="hero hero--stories" aria-labelledby="pageTitle-stories">
         <div class="hero__art" aria-hidden="true">
           <img src="assets/stories-background.png" alt="">
@@ -2874,26 +2658,19 @@ body:has(.sheet.is-show) .toast {
           <p class="hero__sub">聽聽長者分享的地方記憶</p>
         </div>
 
-        <!-- 篩選：僅展示實際存在的值（FR-B2）；單一故事同時符合地點與主題 -->
         <div class="filter-chips" role="group" aria-label="按地點及主題篩選故事">
-          <button type="button" class="chip is-active" aria-pressed="true"
-                  data-filter-type="location" data-filter-value="yuen-long">
+          <button type="button" class="chip is-active" aria-pressed="true" data-filter-type="location" data-filter-value="yuen-long">
             元朗
           </button>
-          <button type="button" class="chip" aria-pressed="false"
-                  data-filter-type="topic" data-filter-value="community">
+          <button type="button" class="chip" aria-pressed="false" data-filter-type="topic" data-filter-value="community">
             社區變遷 <span class="chip__dot" aria-hidden="true">・</span> 鄉土記憶
           </button>
         </div>
       </section>
 
-      <!-- ============ 唯一故事卡（誠實：僅一張角色扮演示範故事，FR-B3） ============ -->
-      <article class="story-hero-card" id="story-YL-001"
-               data-location="yuen-long" data-topic="community">
+      <article class="story-hero-card" id="story-YL-001" data-location="yuen-long" data-topic="community">
         <div class="story-hero-card__cover">
-          <img src="assets/story-cover-village.png"
-               alt="水彩插畫：晨光中的元朗村落，青磚瓦屋與紅對聯"
-               width="618" height="618">
+          <img src="assets/story-cover-village.png" alt="水彩插畫：晨光中的元朗村落，青磚瓦屋與紅對聯" width="618" height="618">
         </div>
 
         <div class="story-hero-card__body">
@@ -2908,9 +2685,7 @@ body:has(.sheet.is-show) .toast {
             <span>音軌為 Boris Lau 真實示範錄音，並非合成人聲。</span>
           </p>
 
-          <button type="button" class="open-story" id="openStoryBtn"
-                  data-demo-play aria-pressed="false"
-                  aria-label="播放示範故事《元朗・村落晨光》（真實示範錄音）">
+          <button type="button" class="open-story" id="openStoryBtn" data-demo-play aria-pressed="false" aria-label="播放示範故事《元朗・村落晨光》（真實示範錄音）">
             <span class="open-story__label" data-demo-label>開啟故事</span>
             <span class="open-story__play" aria-hidden="true">
               <i class="fa-solid fa-play"></i>
@@ -2919,7 +2694,6 @@ body:has(.sheet.is-show) .toast {
         </div>
       </article>
 
-      <!-- ============ 模糊位置卡（FR-B5：約 800 米、非 GPS、指北針、比例尺） ============ -->
       <section class="map-card" aria-labelledby="mapTitle">
         <div class="map-card__head">
           <span class="map-card__pin" aria-hidden="true">
@@ -2931,12 +2705,8 @@ body:has(.sheet.is-show) .toast {
           </div>
         </div>
         <div class="map-card__frame" id="mapFrame">
-          <!-- 離線／地圖載入失敗時嘅後備：原手繪示意圖 -->
-          <img class="map-card__fallback" src="assets/map-blurred.svg"
-               alt="手繪示意地圖：元朗一帶以虛線圓圈標示約 800 米模糊範圍，附指北針與 0 至 2 公里比例尺，只作示意並非 GPS 定位。">
-          <!-- 真地圖（Leaflet＋OpenStreetMap/CARTO）：由 js/vtn-map.js 初始化 -->
-          <div class="map-card__leaflet" id="vtnMap" role="application"
-               aria-label="元朗約 800 米模糊範圍真地圖（非 GPS 定位）"></div>
+          <img class="map-card__fallback" src="assets/map-blurred.svg" alt="手繪示意地圖：元朗一帶以虛線圓圈標示約 800 米模糊範圍，附指北針與 0 至 2 公里比例尺，只作示意並非 GPS 定位。">
+          <div class="map-card__leaflet" id="vtnMap" role="application" aria-label="元朗約 800 米模糊範圍真地圖（非 GPS 定位）"></div>
           <div class="map-card__loading" id="mapLoading">
             <span class="map-card__spinner" aria-hidden="true"></span>
             正在載入真實地圖…
@@ -2948,7 +2718,6 @@ body:has(.sheet.is-show) .toast {
         </p>
       </section>
 
-      <!-- ============ 強制披露（FR-B4，逐字聲明） ============ -->
       <aside class="disclosure-card" role="note" aria-label="示範故事披露">
         <span class="disclosure-card__icon" aria-hidden="true">
           <i class="fa-solid fa-circle-info"></i>
@@ -2960,10 +2729,8 @@ body:has(.sheet.is-show) .toast {
       </aside>
     </main>
 
-    <!-- ======== 分頁：me ======== -->
 <main class="page page--me vtn-view" data-view="me">
 
-      <!-- ============ Hero：頁標題 + 村落背景 ============ -->
       <section class="hero hero--me" aria-labelledby="pageTitle-me">
         <div class="hero__art" aria-hidden="true">
           <img src="assets/my-background.png" alt="">
@@ -2981,10 +2748,8 @@ body:has(.sheet.is-show) .toast {
         </div>
       </section>
 
-      <!-- ============ 管理入口清單 ============ -->
       <section class="me-list" aria-label="個人內容與私隱管理">
 
-        <!-- 入口一：我的錄音與故事（FR-MY2 → 真實跳轉錄音管理頁） -->
         <a class="me-item" href="recording.html" id="meEntryRecordings">
           <span class="me-item__icon" aria-hidden="true">
             <i class="fa-solid fa-microphone"></i>
@@ -2998,7 +2763,6 @@ body:has(.sheet.is-show) .toast {
           </span>
         </a>
 
-        <!-- 入口二：隱私與分享範圍（FR-MY3） -->
         <button type="button" class="me-item" id="meEntryPrivacy">
           <span class="me-item__icon" aria-hidden="true">
             <i class="fa-solid fa-shield-halved"></i>
@@ -3012,7 +2776,6 @@ body:has(.sheet.is-show) .toast {
           </span>
         </button>
 
-        <!-- 入口三：更正或撤回故事（FR-MY4） -->
         <button type="button" class="me-item" id="meEntryCorrection">
           <span class="me-item__icon" aria-hidden="true">
             <i class="fa-solid fa-file-pen"></i>
@@ -3026,9 +2789,7 @@ body:has(.sheet.is-show) .toast {
           </span>
         </button>
 
-        <!-- 入口四：語言（FR-MY7 延伸：介面語言選擇） -->
-        <button type="button" class="me-item" id="meEntryLanguage"
-                aria-haspopup="dialog" aria-controls="langSheet">
+        <button type="button" class="me-item" id="meEntryLanguage" aria-haspopup="dialog" aria-controls="langSheet">
           <span class="me-item__icon" aria-hidden="true">
             <i class="fa-solid fa-language"></i>
           </span>
@@ -3041,7 +2802,6 @@ body:has(.sheet.is-show) .toast {
           </span>
         </button>
 
-        <!-- 模糊地點說明條（FR-MY5，逐字聲明） -->
         <div class="me-note" role="note" aria-label="模糊地點說明">
           <span class="me-note__pin" aria-hidden="true">
             <i class="fa-solid fa-location-dot"></i>
@@ -3050,7 +2810,6 @@ body:has(.sheet.is-show) .toast {
           <p class="me-note__text">故事地點以模糊範圍呈現，保護講述者私隱。</p>
         </div>
 
-        <!-- 關於（FR-MY6） -->
         <button type="button" class="me-item me-item--about" id="meEntryAbout">
           <span class="me-item__icon me-item__icon--gold" aria-hidden="true">
             <i class="fa-solid fa-info"></i>
@@ -3066,7 +2825,6 @@ body:has(.sheet.is-show) .toast {
       </section>
     </main>
 
-    <!-- ============ 底部固定導航：四項（單檔內切換分頁） ============ -->
     <nav class="bottom-nav" aria-label="主導航">
       <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
         <span class="bottom-nav__icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
@@ -3093,29 +2851,8 @@ body:has(.sheet.is-show) .toast {
   </div>
 
 <script>
-/* ===== lib/storyCorpus.js ===== */
-/* =============================================================================
- * Voices of the North — 已錄製故事語料庫（同構模組）
- * -----------------------------------------------------------------------------
- * 本檔不含 'use client'，可同時被：
- *   - 瀏覽器端 Mock（lib/askVillageApi.js）
- *   - 服務端 API 路由（app/api/ask-village/route.js）
- * 引用，確保「前端 Mock 答案」與「後端正式答案」永遠由同一套規則產生。
- *
- * 誠實性紅線：
- *  1. retrieveAnswer() 只可由 RECORDED_STORIES 的文字稿組合答案；
- *  2. 每條在範圍答案必須附至少一個時間戳引用；
- *  3. 無命中即回 inScope:false，調用方必須直出 OUT_OF_SCOPE_MESSAGE。
- *
- * RAG 接入點：
- *  未來接入真實 RAG 時，只需把 retrieveSegments() 換成向量檢索，
- *  但輸出形狀（segments + citations）不變，路由與元件無需改動。
- * ========================================================================== */
-
-/* 超出範圍時的標準誠實回覆（繁體香港用語） */
 const OUT_OF_SCOPE_MESSAGE = '抱歉，錄製故事中未包含此資訊。';
 
-/* 前端推薦問題（只由已錄製故事內容產生，不引導至無答案話題） */
 const SUGGESTED_QUESTIONS = [
   '細個元朗周邊係點㗎？',
   '以前居民主要用咩出行？',
@@ -3123,13 +2860,6 @@ const SUGGESTED_QUESTIONS = [
   '近年元朗有咩轉變？'
 ];
 
-/* -----------------------------------------------------------------------------
- * 已錄製故事清單
- * ⚠ 與 stories.html 披露一致 —— 唯一一則角色扮演示範故事；
- *   音訊為真實示範錄音 assets/demo-story.m4a（Boris Lau，約 50.7 秒）。
- *   以下段落為依該錄音整理嘅文字稿（與 tools/server.py 離線示範內容一致）。
- *   接入正式長者內容時，在這裡加入獲授權的故事與逐字稿。
- * --------------------------------------------------------------------------- */
 const RECORDED_STORIES = [
   {
     id: 'YL-001',
@@ -3137,9 +2867,7 @@ const RECORDED_STORIES = [
     teller: 'Boris Lau',
     rolePlayed: true,
     durationSec: 51,
-    // 靜態原型對應 assets/demo-story.m4a；#t= 可讓播放器跳到該秒
     audioUrl: '#story-YL-001',
-    // 私隱設計：只存「約 800 米模糊範圍」中心，唔係講者 GPS 定位
     location: { area: '元朗', lat: 22.4445, lng: 114.015, radiusM: 800 },
     segments: [
       {
@@ -3161,8 +2889,6 @@ const RECORDED_STORIES = [
   }
 ];
 
-/* 全部採用「兩字以上」詞條：中文無空格分詞，單字（田／米／水／井…）
-   會誤命中地名等無關詞語（例：「錦田」絕不可命中稻米段），故一律不收。 */
 const KEYWORD_GROUPS = [
   {
     storyId: 'YL-001',
@@ -3193,13 +2919,10 @@ const KEYWORD_GROUPS = [
   }
 ];
 
-/* ---------- 工具 ---------- */
-
 function pad2(n) {
   return String(n).padStart(2, '0');
 }
 
-/** 秒數 → mm:ss（例：83 → '01:23'） */
 function formatTimestamp(sec) {
   const safe = Math.max(0, Math.floor(sec));
   return pad2(Math.floor(safe / 60)) + ':' + pad2(safe % 60);
@@ -3228,12 +2951,6 @@ function makeCitation(story, segment) {
   };
 }
 
-/* -----------------------------------------------------------------------------
- * 檢索（RAG 取代點）
- * 現階段以透明的「詞群命中」代替語義檢索：
- * 回傳命中的 { story, segment } 清單（依故事、時間序）。
- * 日後接入向量庫時，保持這個回傳形狀即可。
- * --------------------------------------------------------------------------- */
 function retrieveSegments(question) {
   const q = normalize(question);
   if (!q) return [];
@@ -3266,11 +2983,6 @@ function retrieveSegments(question) {
   return hits;
 }
 
-/* -----------------------------------------------------------------------------
- * 組裝正式答案
- * 答案正文只由命中段落原文構成；講者提問（segment 4）補一句可核對身份說明。
- * 無任何命中 → inScope:false（由調用方直出標準拒答句）。
- * --------------------------------------------------------------------------- */
 function retrieveAnswer(question) {
   const hits = retrieveSegments(question);
 
@@ -3295,19 +3007,6 @@ function retrieveAnswer(question) {
     storyId: hits[0].story.id
   };
 }
-
-
-/* ===== js/demo-audio.js ===== */
-/* =============================================================================
- * Voices of the North — 示範故事真實音訊播放（主頁／故事頁共用）
- * -----------------------------------------------------------------------------
- * 音軌：assets/demo-story.m4a（Boris Lau 真實示範錄音，約 50.7 秒，非合成人聲）。
- * 職責：
- *   1. 全頁單一 <audio> 單例，[data-demo-play] 按鈕播放／暫停，圖標同步切換
- *   2. [data-demo-duration] 元素在 metadata 載入後顯示真實時長
- *   3. 支援 ?t=17.5 自動跳秒（助手出處膠囊／錄音整理 QA 跳入）
- *   4. 對外 API：window.VTNDemoAudio.play(sec) / pause() / toggle()
- * ========================================================================== */
 
 (function () {
   'use strict';
@@ -3334,7 +3033,7 @@ function retrieveAnswer(question) {
     audio.addEventListener('play', syncIcons);
     audio.addEventListener('pause', syncIcons);
     audio.addEventListener('ended', function () {
-      try { audio.currentTime = 0; } catch (e) { /* ignore */ }
+      try { audio.currentTime = 0; } catch (e) {}
       syncIcons();
     });
     return audio;
@@ -3357,10 +3056,10 @@ function retrieveAnswer(question) {
   function play(sec) {
     var a = ensureAudio();
     if (typeof sec === 'number' && isFinite(sec)) {
-      try { a.currentTime = sec; } catch (e) { /* metadata 未到時忽略 */ }
+      try { a.currentTime = sec; } catch (e) {}
     }
     var pr = a.play();
-    if (pr && pr.catch) pr.catch(function () { /* 自動播放被瀏覽器擋下：保持暫停 */ });
+    if (pr && pr.catch) pr.catch(function () {});
   }
 
   function pause() { if (audio) audio.pause(); }
@@ -3379,7 +3078,6 @@ function retrieveAnswer(question) {
     });
   });
 
-  /* ?t=17.5#story-YL-001：從助手出處膠囊跳來時，定位＋跳秒播放 */
   function maybeAutostart() {
     var params = new URLSearchParams(location.search);
     var wantHash = /#story-YL-001/.test(location.hash);
@@ -3404,21 +3102,9 @@ function retrieveAnswer(question) {
   }
 })();
 
-
-/* ===== js/main.js ===== */
-/* =============================================================================
- * Voices of the North — 主頁互動（Home）
- * 職責：
- *  1. 按裝置時段更新歡迎語（早晨／午安／晚安）
- *  2. 開始錄音 → js/record.js 真實錄音流程
- *  3. 示範故事播放 → js/demo-audio.js 真實示範錄音
- * 本檔只保留時段問候與底導航；轉寫/問答邏輯分見 record.js／ask-assistant.js。
- * ========================================================================== */
-
 (function () {
   'use strict';
 
-  /* ---------- 1. 時段問候 ---------- */
   function updateGreeting() {
     var el = document.getElementById('greeting');
     if (!el) return;
@@ -3434,7 +3120,6 @@ function retrieveAnswer(question) {
     el.textContent = word;
   }
 
-  /* ---------- 2. 輕提示 Toast ---------- */
   var toastEl = document.getElementById('appToast');
   var toastText = document.getElementById('appToastText');
   var toastTimer = null;
@@ -3442,9 +3127,7 @@ function retrieveAnswer(question) {
   function showToast(message) {
     if (!toastEl || !toastText) return;
     toastText.textContent = message;
-    // 重置計時，容許連續點擊
     toastEl.classList.remove('is-show');
-    // 強制 reflow，確保 class 切換能重新觸發過渡
     void toastEl.offsetWidth;
     toastEl.classList.add('is-show');
     clearTimeout(toastTimer);
@@ -3453,18 +3136,13 @@ function retrieveAnswer(question) {
     }, 3200);
   }
 
-  /* ---------- 3. 事件綁定 ---------- */
   function bind() {
-    // 開始錄音 CTA：由 js/record.js 綁定真實錄音抽屜
-    // 示範故事播放／封面：由 js/demo-audio.js 綁定真實音訊
-
-    // 底部導航：四頁均已建成（真實連結）；主頁為當前頁不跳轉
     var navItems = document.querySelectorAll('.bottom-nav__item');
 
     navItems.forEach(function (item) {
       item.addEventListener('click', function (e) {
         if (item.getAttribute('data-nav') === 'home') {
-          e.preventDefault(); // 已在主頁
+          e.preventDefault();
         }
       });
     });
@@ -3476,36 +3154,14 @@ function retrieveAnswer(question) {
   });
 })();
 
-
-/* ===== js/record.js ===== */
-/* =============================================================================
- * Voices of the North — 真實錄音 → 上傳轉寫流程（主頁「開始錄音」）
- * -----------------------------------------------------------------------------
- * 流程：
- *   準備（健康檢查 8000 服務）→ MediaRecorder 現場收音 → 試聽 →
- *   POST http://127.0.0.1:8000/api/process（multipart）→
- *   逐詞時間戳／書面稿／時間戳 QA → 存入 localStorage → 跳「我的錄音・已完成」。
- *
- * 誠實模式：
- *   - 服務回 mode="offline-demo"（無 GCP 憑證）：只可跑內置示範故事，
- *     卡片會明確標示「離線示範」，绝不把現場錄音冒充成已轉寫。
- *   - 現場錄音上傳遇到 503 STT_UNCONFIGURED：錄音會存為「待轉寫」，
- *     可保留稍後重試，並提供「用示範故事試跑」睇完整效果。
- *
- * 對外 API：window.VTNRecords（record.js 與 recording.js／助手共用）
- * ========================================================================== */
-
 (function () {
   'use strict';
 
-  var API_BASE = (window.VTN_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, '');
+  var API_BASE = (window.VTN_API_BASE || window.location.origin || 'http://127.0.0.1:8000').replace(/\/$/, '');
   var STORE_KEY = 'vtn-records-v1';
   var MAX_RECORD_SEC = 180;
   var AUDIO_QUOTA_BYTES = 6 * 1024 * 1024;
 
-  /* =========================================================================
-   * 1. 儲存層
-   * ======================================================================= */
   function loadAll() {
     try {
       var arr = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
@@ -3513,7 +3169,6 @@ function retrieveAnswer(question) {
     } catch (e) { return []; }
   }
   function persistAll(arr) {
-    // 音訊總量超配额時，由最舊開始丟棄音訊 dataURL，但保留文字結果
     var audioBytes = 0;
     arr.slice().reverse().forEach(function (r) {
       var len = r.audioDataURL ? r.audioDataURL.length : 0;
@@ -3524,7 +3179,6 @@ function retrieveAnswer(question) {
       localStorage.setItem(STORE_KEY, JSON.stringify(arr));
       return true;
     } catch (e) {
-      // 配额仍爆：再清一次全部音訊
       arr.forEach(function (r) { r.audioDataURL = undefined; });
       try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); return true; }
       catch (e2) { return false; }
@@ -3554,9 +3208,6 @@ function retrieveAnswer(question) {
   };
   window.VTNRecords = VTNRecords;
 
-  /* =========================================================================
-   * 2. 小工具
-   * ======================================================================= */
   function h(tag, cls, text) {
     var el = document.createElement(tag);
     if (cls) el.className = cls;
@@ -3583,12 +3234,8 @@ function retrieveAnswer(question) {
            Math.random().toString(36).slice(2, 5).toUpperCase();
   }
 
-  /* =========================================================================
-   * 3. 錄音抽屜（只在主頁掛載）
-   * ======================================================================= */
   var startBtn = document.getElementById('startRecordBtn');
   if (startBtn) {
-    /* ---------- 骨架 ---------- */
     var overlay = h('div', 'vtn-rec-overlay');
     overlay.setAttribute('aria-hidden', 'true');
     var sheet = h('div', 'vtn-rec-sheet');
@@ -3609,14 +3256,13 @@ function retrieveAnswer(question) {
 
     var body = h('div', 'vtn-rec-body');
 
-    // 準備步
     var stepPrep = h('div', 'vtn-rec-step');
     var statusPill = h('span', 'vtn-rec-status vtn-rec-status--checking');
     statusPill.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>正在連接轉寫服務…</span>';
     stepPrep.appendChild(statusPill);
     stepPrep.appendChild(h('p', 'vtn-rec-lead', '講一段你記得嘅村落故事'));
     stepPrep.appendChild(h('p', 'vtn-rec-desc',
-      '錄音會即場上傳到你電腦嘅轉寫服務（127.0.0.1:8000），用粵語語音辨識整理成文字，並自動標出時間戳出處。現場錄音只作暫時處理，唔會永久儲存。'));
+      '錄音會即場上傳到雲端轉寫服務，用粵語語音辨識整理成文字，並自動標出時間戳出處。現場錄音只作暫時處理，唔會永久儲存。'));
     var micBtn = h('button', 'vtn-rec-mic');
     micBtn.type = 'button';
     micBtn.setAttribute('aria-label', '開始錄音');
@@ -3638,7 +3284,6 @@ function retrieveAnswer(question) {
       '<span>未設定 Google Cloud 憑證時，服務進入「離線示範模式」：可試跑內置示範故事，現場錄音會先存為「待轉寫」，唔會冒充辨識結果。</span>';
     stepPrep.appendChild(prepNote);
 
-    // 錄音步
     var stepRec = h('div', 'vtn-rec-step');
     stepRec.hidden = true;
     var liveMic = h('button', 'vtn-rec-mic is-live');
@@ -3655,7 +3300,6 @@ function retrieveAnswer(question) {
     btnCancelRec.type = 'button';
     stepRec.appendChild(btnCancelRec);
 
-    // 試聽步
     var stepReview = h('div', 'vtn-rec-step');
     stepReview.hidden = true;
     stepReview.appendChild(h('p', 'vtn-rec-lead', '試聽確認'));
@@ -3676,13 +3320,12 @@ function retrieveAnswer(question) {
     btnRerecord.type = 'button';
     stepReview.appendChild(btnRerecord);
 
-    // 處理步
     var stepProcessing = h('div', 'vtn-rec-step');
     stepProcessing.hidden = true;
     stepProcessing.appendChild(h('p', 'vtn-rec-lead', '正在整理你嘅故事'));
     var stepsList = h('ul', 'vtn-rec-steps');
     [
-      ['fa-link', '連接本地轉寫服務'],
+      ['fa-link', '連接轉寫服務'],
       ['fa-language', '粵語語音辨識（逐詞時間戳）'],
       ['fa-wand-magic-sparkles', '書面化整理與問答萃取']
     ].forEach(function (s, i) {
@@ -3697,7 +3340,6 @@ function retrieveAnswer(question) {
     });
     stepProcessing.appendChild(stepsList);
 
-    // 結果步
     var stepResult = h('div', 'vtn-rec-step');
     stepResult.hidden = true;
 
@@ -3710,7 +3352,6 @@ function retrieveAnswer(question) {
     sheet.appendChild(body);
     overlay.appendChild(sheet);
 
-    /* ---------- 狀態 ---------- */
     var health = { checked: false, online: false, reason: '' };
     var mediaRecorder = null;
     var chunks = [];
@@ -3735,8 +3376,6 @@ function retrieveAnswer(question) {
       if (name === 'prep') resetPrepDemoBtn();
     }
 
-    /* 彈層掛喺 App 手機框（.app-shell）入面：以手機框做定位參照，
-       絕對唔可以 append 去 body——否則桌面睇會變成覆蓋整個瀏覽器視窗。 */
     var shell = document.getElementById('appShell') || document.body;
 
     function syncNavHeight() {
@@ -3747,9 +3386,9 @@ function retrieveAnswer(question) {
     }
 
     function openSheet() {
-      syncNavHeight();                        // 以導航實際高度留位
+      syncNavHeight();
       shell.appendChild(overlay);
-      shell.classList.add('is-modal-open');   // 鎖定背景頁滾動
+      shell.classList.add('is-modal-open');
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
       showStep('prep');
@@ -3798,7 +3437,6 @@ function retrieveAnswer(question) {
         });
     }
 
-    /* ---------- MediaRecorder ---------- */
     function pickMime() {
       var cands = [
         'audio/webm;codecs=opus', 'audio/webm',
@@ -3821,7 +3459,7 @@ function retrieveAnswer(question) {
     function startRecording() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
         setPill('offline',
-          '<i class="fa-solid fa-triangle-exclamation"></i><span>此瀏覽器不支援現場錄音，請用最新版 Chrome／Edge，並以 http://127.0.0.1 開啟</span>');
+          '<i class="fa-solid fa-triangle-exclamation"></i><span>此瀏覽器不支援現場錄音，請用最新版 Chrome／Edge 開啟</span>');
         return;
       }
       navigator.mediaDevices.getUserMedia({ audio: {
@@ -3869,7 +3507,7 @@ function retrieveAnswer(question) {
     function stopRecording(silent) {
       clearInterval(recTimer);
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        try { mediaRecorder.stop(); } catch (e) { /* ignore */ }
+        try { mediaRecorder.stop(); } catch (e) {}
       }
       if (silent) { mediaRecorder = null; chunks = []; currentBlob = null; }
     }
@@ -3882,7 +3520,6 @@ function retrieveAnswer(question) {
       showStep('review');
     }
 
-    /* ---------- 上傳 ---------- */
     function setStepState(idx, state) {
       var li = stepsList.children[idx];
       if (!li) return;
@@ -3920,10 +3557,10 @@ function retrieveAnswer(question) {
 
     function blobToDataURL(blob) {
       return new Promise(function (resolve) {
-      var reader = new FileReader();
-      reader.onload = function () { resolve(reader.result); };
-      reader.onerror = function () { resolve(null); };
-      reader.readAsDataURL(blob);
+        var reader = new FileReader();
+        reader.onload = function () { resolve(reader.result); };
+        reader.onerror = function () { resolve(null); };
+        reader.readAsDataURL(blob);
       });
     }
 
@@ -3971,7 +3608,6 @@ function retrieveAnswer(question) {
           });
         })
         .catch(function (err) {
-          // 503：STT 未設定 → 誠實存為待轉寫，提供示範試跑
           if (err.status === 503 || health.reason === 'server-down') {
             return blobToDataURL(currentBlob).then(function (dataUrl) {
               var rec = buildRecord({
@@ -3997,7 +3633,6 @@ function retrieveAnswer(question) {
     }
 
     function runDemoStory() {
-      // 按鈕 loading 回饋（請求完進入處理步，返回準備頁時復原）
       btnPrepDemo.disabled = true;
       btnPrepDemo.innerHTML =
         '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>示範故事整理中…';
@@ -4044,7 +3679,6 @@ function retrieveAnswer(question) {
         '<i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>用示範故事試跑完整流程';
     }
 
-    /* ---------- 結果畫面 ---------- */
     function resetSteps() {
       for (var i = 0; i < 3; i++) setStepState(i, '');
     }
@@ -4188,7 +3822,6 @@ function retrieveAnswer(question) {
       showStep('result');
     }
 
-    /* ---------- 事件 ---------- */
     startBtn.addEventListener('click', openSheet);
     btnClose.addEventListener('click', closeSheet);
     overlay.addEventListener('click', function (e) {
@@ -4211,7 +3844,6 @@ function retrieveAnswer(question) {
     btnDemo.addEventListener('click', function () {
       if (btnDemo.disabled) return;
       if (!window.VTNDemoAudio) return;
-      // 播放中狀態回饋，先俾長者見到「播放緊」先關彈窗
       btnDemo.disabled = true;
       btnDemo.innerHTML =
         '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>播放緊示範故事…';
@@ -4226,23 +3858,9 @@ function retrieveAnswer(question) {
   }
 })();
 
-
-/* ===== js/recording.js ===== */
-/* =============================================================================
- * Voices of the North — 錄音管理頁（我的錄音）
- * 職責：
- *  1. 草稿／待轉寫／已完成三個分頁的切換（ARIA tabs，鍵盤可達）
- *  2. 渲染 record.js 存入 localStorage 嘅真實錄音（VTNRecords）：
- *     - 已完成：試聽原音、整理稿、時間戳 QA／逐詞跳聽、刪除
- *     - 待轉寫：離線模式保存嘅現場錄音，可一按重試上傳或移除
- *  3. 深鏈：?done=ID、?tab=pending、#rec-ID、?t=17.5（助手出處跳入即時播放）
- * 草稿維持誠實空狀態（唔自動生成）。
- * ========================================================================== */
-
 (function () {
   'use strict';
 
-  /* ---------- 小工具 ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
   function h(tag, cls, text) {
     var el = document.createElement(tag);
@@ -4274,7 +3892,6 @@ function retrieveAnswer(question) {
     toastTimer = setTimeout(function () { toastEl.classList.remove('is-show'); }, 3200);
   }
 
-  /* ---------- 分頁 ---------- */
   var tablist = $('.tabs[role="tablist"]');
   var tabs = tablist ? Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]')) : [];
   var selectTab = function () {};
@@ -4314,16 +3931,13 @@ function retrieveAnswer(question) {
     });
   }
 
-  /* =========================================================================
-   * 錄音卡片
-   * ======================================================================= */
   function audioSrc(rec) {
     return rec.audioDataURL || rec.audioUrl || '';
   }
 
   function seekPlay(audioEl, sec) {
     function go() {
-      try { audioEl.currentTime = sec || 0; } catch (e) { /* ignore */ }
+      try { audioEl.currentTime = sec || 0; } catch (e) {}
       var pr = audioEl.play();
       if (pr && pr.catch) pr.catch(function () {});
     }
@@ -4347,7 +3961,7 @@ function retrieveAnswer(question) {
     if (rec.durationSec) metaBits.push(fmtTime(rec.durationSec));
     metaBits.push(rec.source === 'demo' ? '示範故事' : '我的現場錄音');
     if (state === 'done' && rec.mode === 'offline-demo') metaBits.push('離線示範稿');
-    main.appendChild(h('p', 'vtn-rec-card__meta', metaBits.join('　・　')));
+    main.appendChild(h('p', 'vtn-rec-card__meta', metaBits.join(' ・ ')));
     var chev = h('span', 'vtn-rec-card__chevron');
     chev.innerHTML = '<i class="fa-solid fa-chevron-down" aria-hidden="true"></i>';
     head.appendChild(icon);
@@ -4469,7 +4083,6 @@ function retrieveAnswer(question) {
     return audioEl && audioEl.getAttribute('data-loaded') === '1';
   }
 
-  /* ---------- 待轉寫重試 ---------- */
   function retryUpload(rec, btn) {
     if (!rec.audioDataURL) {
       showToast('音訊本體已被瀏覽器清理，請重新錄製。');
@@ -4521,7 +4134,6 @@ function retrieveAnswer(question) {
       });
   }
 
-  /* ---------- 渲染 ---------- */
   function renderAll() {
     var records = (window.VTNRecords ? VTNRecords.list() : []);
     var pending = records.filter(function (r) { return r.status === 'pending'; });
@@ -4549,7 +4161,6 @@ function retrieveAnswer(question) {
     return { pending: pending, done: done };
   }
 
-  /* ---------- 深鏈：?done / ?tab / #rec-ID / ?t= ---------- */
   function handleDeepLink(groups) {
     var params = new URLSearchParams(location.search);
     var wantTab = params.get('tab');
@@ -4585,7 +4196,6 @@ function retrieveAnswer(question) {
     }
   }
 
-  /* ---------- 底導航 ---------- */
   function initNav() {
     document.querySelectorAll('.bottom-nav__item').forEach(function (item) {
       item.addEventListener('click', function (e) {
@@ -4599,7 +4209,6 @@ function retrieveAnswer(question) {
     initNav();
     var groups = renderAll();
     handleDeepLink(groups);
-    // 喺其他分頁完成轉寫（或同一頁程式化更新儲存）後自動刷新清單
     window.addEventListener('storage', function (e) {
       if (e.key === 'vtn-records-v1') renderAll();
     });
@@ -4607,22 +4216,9 @@ function retrieveAnswer(question) {
   });
 })();
 
-
-/* ===== js/stories.js ===== */
-/* =============================================================================
- * Voices of the North — 村落故事頁
- * 職責：
- *  1. 地點／主題篩選：僅一張真實存在的示範故事卡；篩選值全部來自它的真實屬性。
- *     跨類別為 AND；同類別多選為 OR；全部取消時等同不篩選（顯示全部）。
- *  2. 「開啟故事」：由 js/demo-audio.js 播放真實示範錄音 assets/demo-story.m4a。
- *  3. 底部導航：已建成頁真實跳轉，未建成頁以 Toast 標示「準備中」。
- * 不編造更多故事。
- * ========================================================================== */
-
 (function () {
   'use strict';
 
-  /* ---------- 1. 輕提示 Toast ---------- */
   var toastEl = document.getElementById('appToast');
   var toastText = document.getElementById('appToastText');
   var toastTimer = null;
@@ -4639,7 +4235,6 @@ function retrieveAnswer(question) {
     }, 3600);
   }
 
-  /* ---------- 2. 篩選 ---------- */
   function initFilters() {
     var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
     var cards = Array.prototype.slice.call(document.querySelectorAll('.story-hero-card'));
@@ -4678,14 +4273,11 @@ function retrieveAnswer(question) {
     });
   }
 
-  /* 「開啟故事」播放由 js/demo-audio.js 統一處理（真實示範錄音）。 */
-
-  /* ---------- 4. 底部導航（四頁均已建成，真實連結；當前頁不跳轉） ---------- */
   function initNav() {
     document.querySelectorAll('.bottom-nav__item').forEach(function (item) {
       item.addEventListener('click', function (e) {
         if (item.getAttribute('data-nav') === 'stories') {
-          e.preventDefault(); // 已在故事頁
+          e.preventDefault();
         }
       });
     });
@@ -4697,23 +4289,9 @@ function retrieveAnswer(question) {
   });
 })();
 
-
-/* ===== js/my.js ===== */
-/* =============================================================================
- * Voices of the North — 我的（管理中心）
- * 職責：
- *  1. 「我的錄音與故事」為真實連結，跳轉錄音管理頁（FR-MY2）。
- *  2. 隱私分享範圍、更正/撤回、關於頁尚未建成：以 Toast 誠實標示「準備中」，
- *     並在提示中保留已確立的私隱承諾（預設私人、撤回後音訊仍歸講述者）。
- *  3. 語言選擇：開啟底部彈層；當前版本僅「繁體中文（香港）」可用，
- *     English 與簡體中文誠實標示「準備中」，點擊只提示、不切換。
- *  4. 不設帳戶、姓名或統計功能（FR-MY7），故本頁無任何假資料。
- * ========================================================================== */
-
 (function () {
   'use strict';
 
-  /* ---------- 1. 輕提示 Toast ---------- */
   var toastEl = document.getElementById('appToast');
   var toastText = document.getElementById('appToastText');
   var toastTimer = null;
@@ -4730,7 +4308,6 @@ function retrieveAnswer(question) {
     }, 3800);
   }
 
-  /* ---------- 2. 尚未建成的管理入口 ---------- */
   function initEntries() {
     var pending = {
       meEntryPrivacy:
@@ -4750,7 +4327,6 @@ function retrieveAnswer(question) {
     });
   }
 
-  /* ---------- 3. 語言選擇底部彈層 ---------- */
   function initLanguageSheet() {
     var entry = document.getElementById('meEntryLanguage');
     var sheet = document.getElementById('langSheet');
@@ -4775,7 +4351,6 @@ function retrieveAnswer(question) {
       sheet.hidden = false;
       overlay.hidden = false;
       document.body.style.overflow = 'hidden';
-      // 下一幀再加 class，確保滑入過渡生效
       requestAnimationFrame(function () {
         sheet.classList.add('is-show');
         overlay.classList.add('is-show');
@@ -4788,7 +4363,6 @@ function retrieveAnswer(question) {
       sheet.classList.remove('is-show');
       overlay.classList.remove('is-show');
       document.body.style.overflow = '';
-      // 過渡結束後才真正隱藏（與 CSS --dur 380ms 對齊）
       closeTimer = setTimeout(function () {
         sheet.hidden = true;
         overlay.hidden = true;
@@ -4810,25 +4384,21 @@ function retrieveAnswer(question) {
     options.forEach(function (option) {
       option.addEventListener('click', function () {
         if (option.dataset.available === 'true') {
-          // 唯一可用語言即當前語言：確認後關閉彈層
           closeSheet();
           return;
         }
-        // 未建成語言：誠實提示，維持當前選擇不變
         showToast(SOON_MESSAGES[option.dataset.lang] ||
                   '該語言介面準備中，當前版本提供繁體中文（香港）。');
       });
     });
   }
 
-  /* ---------- 4. 底部導航（當前頁不跳轉） ---------- */
   function initNav() {
     document.querySelectorAll('.bottom-nav__item').forEach(function (item) {
       item.addEventListener('click', function (e) {
         if (item.getAttribute('data-nav') === 'me') {
-          e.preventDefault();  // 已在「我的」頁
+          e.preventDefault();
         }
-        // home / record / stories 為真實連結，不攔截
       });
     });
   }
@@ -4840,20 +4410,6 @@ function retrieveAnswer(question) {
   });
 })();
 
-
-/* ===== js/vtn-map.js ===== */
-/* =============================================================================
- * Voices of the North — 真實地圖（故事頁專用）
- *
- * 私隱設計（FR-B5 不變）：
- *  - 真實底圖：Leaflet + CARTO Voyager / OpenStreetMap 圖磚
- *  - 唔放精確定位標記，只畫「約 800 米模糊範圍」圓圈，中心唔係講者 GPS
- *  - 離線／圖磚載入失敗 → 自動降級 OSM → 再失敗顯示原手繪示意圖
- *
- * 故事地點統一由 lib/storyCorpus.js 嘅 location 欄位驅動。
- * ========================================================================== */
-
-
 (function () {
   'use strict';
 
@@ -4862,8 +4418,6 @@ function retrieveAnswer(question) {
   var LOAD_TIMEOUT_MS = 12000;
   var TILE_TIMEOUT_MS = 6500;
 
-  /* 兩級均為無需 API key 嘅公開圖磚（demo／輕量使用，附歸屬聲明）：
-     1. OSM 官方標準圖磚　2. Esri 街道圖後備 */
   var TILE_SETS = [
     {
       name: 'osm',
@@ -4924,7 +4478,6 @@ function retrieveAnswer(question) {
     });
   }
 
-  /** 逐級降級試圖源；第一塊圖成功即視為可用 */
   function addTileLayerWithFallback(map, sets, onFirstTile) {
     var idx = 0;
     var revealed = false;
@@ -4952,7 +4505,6 @@ function retrieveAnswer(question) {
         if (timer) { clearTimeout(timer); timer = null; }
         onFirstTile(true);
       });
-      // CARTO 部份地區會回 404 再由 OSM 補：連續錯誤視為該源不可用
       var errCount = 0;
       current.on('tileerror', function () {
         if (gotTile || revealed) return;
@@ -4991,10 +4543,9 @@ function retrieveAnswer(question) {
       zoomAnimation: !reduceMotion,
       fadeAnimation: !reduceMotion,
       markerZoomAnimation: !reduceMotion,
-      scrollWheelZoom: false,   // 避免喺手頁滑動時搶滾動；雙擊／＋−仍可縮放
+      scrollWheelZoom: false,
       tap: true
     });
-    // 輕觸後先允許捲動縮放（手機常見模式）
     map.once('focus click', function () { map.scrollWheelZoom.enable(); });
 
     L.control.scale({ imperial: false, maxWidth: 110 }).addTo(map);
@@ -5026,7 +4577,6 @@ function retrieveAnswer(question) {
       });
     });
 
-    // 視圖剛好包住第一個故事嘅模糊圈
     var firstCircle = L.circle([first.lat, first.lng], { radius: first.radiusM || 800 });
     function fitCircle() {
       try {
@@ -5039,7 +4589,6 @@ function retrieveAnswer(question) {
 
     addTileLayerWithFallback(map, TILE_SETS, function (ok) {
       if (ok) {
-        // 等首批圖磚實際渲染先淡入；容器此時先有最終尺寸，要重新校正＋fit
         requestAnimationFrame(function () {
           map.invalidateSize();
           fitCircle();
@@ -5051,8 +4600,7 @@ function retrieveAnswer(question) {
       }
     });
 
-    // 容器尺寸可能被 webfont／卡片動作改變，延遲再校正一次
-    setTimeout(function () { try { map.invalidateSize(); } catch (e) { /* ignore */ } }, 900);
+    setTimeout(function () { try { map.invalidateSize(); } catch (e) {} }, 900);
 
     function fail(reason) {
       el.classList.add('is-failed');
@@ -5062,7 +4610,7 @@ function retrieveAnswer(question) {
           ? '未能連接真實地圖，顯示手繪示意圖・範圍只作示意，並非 GPS 定位。'
           : '真實地圖暫不可用，顯示手繪示意圖・範圍只作示意，並非 GPS 定位。';
       }
-      try { map.remove(); } catch (e) { /* ignore */ }
+      try { map.remove(); } catch (e) {}
     }
   }
 
@@ -5087,30 +4635,8 @@ function retrieveAnswer(question) {
   });
 })();
 
-
-/* ===== js/ask-assistant.js ===== */
-/* =============================================================================
- * Ask the Village — 懸浮村落問答助手（無框架版，四頁原型共用）
- * -----------------------------------------------------------------------------
- * 直接以 ES Module 引用 Next.js 同款語料庫 lib/storyCorpus.js，
- * 與 app/api/ask-village（服務端）、components/FloatingAIAssistant.jsx
- * 使用完全相同的段落／關鍵詞／出處規則，三端答案永不漂移。
- *
- * 誠實性紅線（與服務端一致）：
- *   1. 答案只來自已錄製故事文字稿；
- *   2. 每條在範圍答案附時間戳引用 Source: [YL-001] at 00:21；
- *   3. 超範圍一律回標準拒答句，前端再做一次「無引用即拒答」校驗。
- *
- * 用法（四頁 </body> 前各一行）：
- *   <link href="css/assistant.css" rel="stylesheet">
- *   <script type="module" src="js/ask-assistant.js"><\/script>
- * ========================================================================== */
-
-
 (function () {
   'use strict';
-
-  /* ---------------- 常量 ---------------- */
 
   var STORAGE_KEY = 'vtn-ask-village-chat-v1';
   var HINT_KEY = 'vtn-ask-village-hint-v1';
@@ -5120,8 +4646,6 @@ function retrieveAnswer(question) {
   var ANSWER_DELAY_MAX = 950;
   var WELCOME_TEXT =
     '你好！我會根據已經錄製嘅故事回答你，有記錄嘅內容我會直頭話你知。試下問：';
-
-  /* ---------------- 小工具 ---------------- */
 
   function $(tag, className, text) {
     var el = document.createElement(tag);
@@ -5135,21 +4659,21 @@ function retrieveAnswer(question) {
       var raw = localStorage.getItem(STORAGE_KEY);
       var data = raw ? JSON.parse(raw) : null;
       if (data && Array.isArray(data.messages)) return data;
-    } catch (e) { /* 無儲存或損毀 → 全新開始 */ }
+    } catch (e) {}
     return { messages: [] };
   }
 
   function saveStore(store) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-    } catch (e) { /* 隱私模式等：略過持久化 */ }
+    } catch (e) {}
   }
 
   function hintDismissed() {
     try { return localStorage.getItem(HINT_KEY) === '1'; } catch (e) { return false; }
   }
   function dismissHint() {
-    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) {}
   }
 
   function fakeDelay() {
@@ -5157,9 +4681,6 @@ function retrieveAnswer(question) {
       Math.random() * (ANSWER_DELAY_MAX - ANSWER_DELAY_MIN);
   }
 
-  /* ---------- 第二語料層：用戶已轉寫錄音（record.js 存入 localStorage） ----------
-   * 後端從真實錄音抽出 qaList（每條附時間戳）；助手只可原樣引述，
-   * 命中方式與語料庫同級嚴格：需 ≥2 個共同二元詞，避免「有咩」之類通殺。 */
   function normalizeQ(text) {
     return String(text || '')
       .toLowerCase()
@@ -5190,7 +4711,7 @@ function retrieveAnswer(question) {
           });
         });
       });
-    } catch (e) { /* 損毀儲存 → 略過 */ }
+    } catch (e) {}
     return entries;
   }
   function retrieveFromRecords(question) {
@@ -5227,8 +4748,6 @@ function retrieveAnswer(question) {
     return p(Math.floor(s / 60)) + ':' + p(s % 60);
   }
 
-  /* 前端最後防線：在範圍但無引用 → 強制轉標準拒答；
-   * 順序：已發布故事語料庫 → 用戶已轉寫錄音 → 誠實拒答 */
   function honestAnswer(question) {
     var res = retrieveAnswer(question);
     if (res.inScope && (!res.sources || res.sources.length === 0)) {
@@ -5240,16 +4759,12 @@ function retrieveAnswer(question) {
     return { inScope: false, answer: OUT_OF_SCOPE_MESSAGE, sources: [], demo: false };
   }
 
-  /* ---------------- DOM 骨架 ---------------- */
-
   var root = $('div', 'vtn-ai-root');
   root.setAttribute('data-vtn-ai', 'mounted');
 
-  /* 半透明黑色遮罩：點擊關閉 */
   var mask = $('div', 'vtn-ai-mask');
   mask.setAttribute('aria-hidden', 'true');
 
-  /* 預設態：提示氣泡 + FAB */
   var launcher = $('div', 'vtn-ai-launcher');
 
   var hint = $('div', 'vtn-ai-hint');
@@ -5277,14 +4792,12 @@ function retrieveAnswer(question) {
   launcher.appendChild(hint);
   launcher.appendChild(fab);
 
-  /* 聊天面板（App 內全寬 BottomSheet，常駐 DOM、靠 root.is-open 滑出） */
   var panel = $('section', 'vtn-ai-panel');
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
   panel.setAttribute('aria-label', 'Ask the Village 村落問答');
   panel.setAttribute('aria-hidden', 'true');
 
-  /* 頭欄 */
   var head = $('header', 'vtn-ai-head');
   var headImg = $('img');
   headImg.src = MASCOT_SRC;
@@ -5300,20 +4813,17 @@ function retrieveAnswer(question) {
   head.appendChild(headTitles);
   head.appendChild(btnClose);
 
-  /* 訊息區 */
   var log = $('div', 'vtn-ai-log');
   log.setAttribute('role', 'log');
   log.setAttribute('aria-live', 'polite');
   log.setAttribute('tabindex', '0');
   log.setAttribute('aria-label', '對話內容');
 
-  /* 金色誠實底註 */
   var pledge = $('div', 'vtn-ai-pledge');
   pledge.innerHTML =
     '<i class="fa-solid fa-shield-halved" aria-hidden="true"></i>' +
     '<span>無來源引用嘅內容，唔會當成答案</span>';
 
-  /* 輸入列 */
   var form = $('form', 'vtn-ai-form');
   var input = $('input', 'vtn-ai-input');
   input.type = 'text';
@@ -5337,8 +4847,6 @@ function retrieveAnswer(question) {
   root.appendChild(mask);
   root.appendChild(launcher);
   root.appendChild(panel);
-
-  /* ---------------- 訊息渲染 ---------------- */
 
   var store = loadStore();
   var busy = false;
@@ -5365,7 +4873,6 @@ function retrieveAnswer(question) {
     }
     SUGGESTED_QUESTIONS.forEach(addSuggest);
 
-    // 用戶最近已轉寫錄音嘅問題（最多 2 條，直接可問）
     var recQs = [];
     try {
       var seen = {};
@@ -5376,7 +4883,7 @@ function retrieveAnswer(question) {
           if (q && !seen[q] && recQs.length < 2) { seen[q] = 1; recQs.push(q); }
         });
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
     if (recQs.length) {
       var cap = $('p', 'vtn-ai-corpus-note', '— 你最近嘅錄音 —');
       cap.style.marginTop = '10px';
@@ -5392,7 +4899,6 @@ function retrieveAnswer(question) {
   function sourceChip(src) {
     var a = $('a', 'vtn-ai-chip');
 
-    // —— 用戶自己嘅已轉寫錄音：跳到「我的錄音」並跳秒播放 ——
     if (src.kind === 'record') {
       var onRecordingPage = /recording\.html$/.test(location.pathname);
       var href = 'recording.html?t=' + src.start + '#rec-' + src.recordId;
@@ -5403,7 +4909,7 @@ function retrieveAnswer(question) {
         '<i class="fa-solid fa-file-audio" aria-hidden="true"></i><span></span>';
       a.querySelector('span').textContent = src.label;
       a.addEventListener('click', function (e) {
-        if (!onRecordingPage) return; // 普通跳轉
+        if (!onRecordingPage) return;
         e.preventDefault();
         var card = document.getElementById('rec-' + src.recordId);
         if (card) {
@@ -5412,11 +4918,11 @@ function retrieveAnswer(question) {
           if (card._audio) {
             card._audio.preload = 'metadata';
             card._audio.addEventListener('loadedmetadata', function () {
-              try { card._audio.currentTime = src.start; } catch (err) { /* ignore */ }
+              try { card._audio.currentTime = src.start; } catch (err) {}
               var pr = card._audio.play();
               if (pr && pr.catch) pr.catch(function () {});
             }, { once: true });
-            try { card._audio.currentTime = src.start; } catch (err) { /* ignore */ }
+            try { card._audio.currentTime = src.start; } catch (err) {}
             var pr2 = card._audio.play();
             if (pr2 && pr2.catch) pr2.catch(function () {});
           }
@@ -5425,7 +4931,6 @@ function retrieveAnswer(question) {
       return a;
     }
 
-    // —— 已發布示範故事：故事頁原地播放，其他頁跳轉 ——
     var onStoriesPage = /stories\.html$/.test(location.pathname);
     a.href = (onStoriesPage
       ? '?t=' + (src.start || 0) + '#story-' + src.storyId
@@ -5461,8 +4966,7 @@ function retrieveAnswer(question) {
         bubble.appendChild($('p', 'vtn-ai-disclosure',
           '角色演示示範答案・依據真實示範錄音之文字稿'));
       }
-      bubble.appendChild($('div', 'vtn-ai-sources-label',
-        ''));
+      bubble.appendChild($('div', 'vtn-ai-sources-label', ''));
       var label = bubble.querySelector('.vtn-ai-sources-label');
       label.innerHTML =
         '<i class="fa-solid fa-circle-check" aria-hidden="true"></i>' +
@@ -5523,9 +5027,6 @@ function retrieveAnswer(question) {
     scrollLog();
   }
 
-  /* ---------------- 開合 ---------------- */
-
-  /* 掛載目標：優先 App 手機框，彈層先會被限制喺視口內 */
   var shell = document.getElementById('appShell') || document.body;
 
   function openPanel(focus) {
@@ -5542,12 +5043,12 @@ function retrieveAnswer(question) {
   function closePanel() {
     root.classList.remove('is-open');
     shell.classList.remove('is-modal-open');
-    root.style.bottom = '';                 // 還原鍵盤托起偏移
+    root.style.bottom = '';
     panel.setAttribute('aria-hidden', 'true');
     mask.setAttribute('aria-hidden', 'true');
     fab.setAttribute('aria-expanded', 'false');
     if (document.activeElement && document.activeElement !== document.body) {
-      try { document.activeElement.blur(); } catch (e) { /* ignore */ }
+      try { document.activeElement.blur(); } catch (e) {}
     }
     fab.focus();
   }
@@ -5566,15 +5067,12 @@ function retrieveAnswer(question) {
     });
   }
 
-  /* ---------------- 問答 ---------------- */
-
   function ask(question) {
     var q = String(question || '').trim();
     if (!q || busy) return;
 
     lastFallback = q;
 
-    // 移除歡迎列（只在首次發問時）
     if (store.messages.length === 0) log.textContent = '';
 
     store.messages.push({ role: 'user', content: q });
@@ -5621,8 +5119,6 @@ function retrieveAnswer(question) {
     }, fakeDelay());
   }
 
-  /* ---------------- 事件 ---------------- */
-
   fab.addEventListener('click', function () { openPanel(true); });
   btnClose.addEventListener('click', closePanel);
   mask.addEventListener('click', closePanel);
@@ -5639,7 +5135,6 @@ function retrieveAnswer(question) {
     if (e.key === 'Escape' && root.classList.contains('is-open')) closePanel();
   });
 
-  /* 從引用膠囊跳來故事頁時，定位到故事卡 */
   if (/stories\.html$/.test(location.pathname) &&
       location.hash === '#story-YL-001') {
     function jumpOnce() {
@@ -5650,10 +5145,6 @@ function retrieveAnswer(question) {
     else window.addEventListener('load', jumpOnce);
   }
 
-  /* ---------------- 掛載 ---------------- */
-
-  /* 量度底導航實際高度，寫入 --vtn-nav-h（標籤換行／字體載入後高度可能
-     同 CSS fallback 77px 有出入；彈層同 FAB 全部依賴呢個變數留位） */
   function syncNavHeight() {
     var shellEl = document.getElementById('appShell');
     var navEl = shellEl && shellEl.querySelector('.bottom-nav');
@@ -5663,9 +5154,7 @@ function retrieveAnswer(question) {
   }
 
   function mount() {
-    if (document.querySelector('.vtn-ai-root')) return; // 自檢：防重複注入
-    /* 必須掛入 .app-shell：position:absolute 先會以手機框為參照，
-       桌面視窗下都唔會溢出 App 範圍 */
+    if (document.querySelector('.vtn-ai-root')) return;
     (document.getElementById('appShell') || document.body).appendChild(root);
     syncNavHeight();
   }
@@ -5674,8 +5163,6 @@ function retrieveAnswer(question) {
   window.addEventListener('resize', syncNavHeight);
   window.addEventListener('load', syncNavHeight);
 
-  /* 手機鍵盤彈起：visualViewport 會縮細，將整個助手層（含輸入列）一齊托起，
-     並把訊息捲到最新；鍵盤收起還原。只喺面板打開時生效。 */
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', function () {
       if (!root.parentNode) return;
@@ -5691,8 +5178,6 @@ function retrieveAnswer(question) {
 
 </script>
 <script>
-
-/* ===== 單檔分頁路由：底導航唔再跳頁，切換 .vtn-view ===== */
 (function () {
   'use strict';
   var NAV_TO_VIEW = { home: 'home', record: 'recording', stories: 'stories', me: 'me' };
@@ -5711,7 +5196,6 @@ function retrieveAnswer(question) {
       else a.removeAttribute('aria-current');
     });
     views[name].scrollTop = 0;
-    /* Leaflet 喺 display:none 容器初始化尺寸為 0，顯示後靠 window resize 重校 */
     setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 60);
     if (location.hash.slice(1) !== name) {
       history.replaceState ? history.replaceState(null, '', '#' + name) : (location.hash = name);
@@ -5727,7 +5211,6 @@ function retrieveAnswer(question) {
 
   window.addEventListener('hashchange', function () { go(location.hash.slice(1)); });
 
-  /* 深鏈：#recording / #stories / #me 直接開對應分頁 */
   var h = location.hash.slice(1);
   if (views[h]) go(h);
 })();
