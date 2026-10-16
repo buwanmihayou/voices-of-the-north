@@ -58,14 +58,21 @@ async def process_audio(file: UploadFile = File(None)):
         filename = file.filename or ""
         content_type = file.content_type or ""
     else:
-        demo_paths = ["Demo Story.wav", "assets/demo-story.m4a", "frontend/assets/demo-story.m4a"]
+        demo_paths = [
+            "frontend/assets/demo-story.mp4",
+            "assets/demo-story.mp4",
+            "WhatsApp Video 2026-10-11 at 15.25.40.mp4",
+            "Demo Story.wav",
+            "assets/demo-story.m4a"
+        ]
         content = None
+        filename = ""
+        content_type = "video/mp4"
         for p in demo_paths:
             if os.path.exists(p):
                 with open(p, "rb") as f:
                     content = f.read()
                 filename = p
-                content_type = "audio/wav"
                 break
         if not content:
             raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在。")
@@ -76,7 +83,6 @@ async def process_audio(file: UploadFile = File(None)):
             detail="STT_UNCONFIGURED: 未設定 Google Cloud 憑證，現場音訊已保存為待轉寫。"
         )
 
-    # 自动推断浏览器音频编码（无需 ffmpeg / pydub）
     encoding = speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED
     sample_rate = 16000
     fn_lower = filename.lower()
@@ -96,7 +102,6 @@ async def process_audio(file: UploadFile = File(None)):
 
     try:
         recognition_audio = speech.RecognitionAudio(content=content)
-        
         config_kwargs = {
             "language_code": "yue-Hant-HK",
             "enable_word_time_offsets": True,
@@ -108,8 +113,7 @@ async def process_audio(file: UploadFile = File(None)):
 
         config = speech.RecognitionConfig(**config_kwargs)
         response = stt_client.recognize(config=config, audio=recognition_audio)
-    except Exception as e:
-        # 如果特定编码识别失败，尝试让 Google STT 纯自动探测一次
+    except Exception:
         try:
             config_fallback = speech.RecognitionConfig(
                 language_code="yue-Hant-HK",
@@ -155,7 +159,7 @@ async def process_audio(file: UploadFile = File(None)):
 
 請嚴格遵守以下誠實性原則進行處理：
 1. formal_text：將上面的口述文字進行標點修整及適度書面化，但【絕對嚴禁添加、編造、擴寫】任何原文未提及的情節、地點、時間或人物。原文只有一句話，整理結果也必須只有一句話！
-2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短（例如少於10個字）無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
+2. qa_list：根據口述內容提取最多 2~3 個問答。每個問答必須指定該內容在口述中大概出現的秒數 timestamp（秒）。如果口述內容過短無法提煉問答，qa_list 請直接返回空數組 []，嚴禁捏造問答！
 3. 請直接輸出 JSON 格式：
 {{
   "formal_text": "整理後文字",
