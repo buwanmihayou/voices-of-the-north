@@ -66,15 +66,16 @@ async def process_audio(file: UploadFile = File(None)):
         filename = file.filename or ""
         content_type = file.content_type or ""
     else:
-        # 示範音訊優先級清單：優先使用你的 interview-story.mp4
+        # 示範音訊優先級清單：優先讀取真實存在的 demo 音訊
         demo_paths = [
+            "frontend/assets/demo-story.m4a",
+            "assets/demo-story.m4a",
             "frontend/assets/interview-story.mp4",
             "assets/interview-story.mp4",
-            "WhatsApp Video 2026-10-11 at 15.25.40.mp4",
-            "WhatsApp Video 2026-10-11-at-15.25.40.wav",
             "Demo Story.wav",
-            "frontend/assets/demo-story.m4a",
-            "assets/demo-story.m4a"
+            "frontend/assets/Demo Story.wav",
+            "assets/Demo Story.wav",
+            "WhatsApp Video 2026-10-11 at 15.25.40.mp4"
         ]
         content = None
         filename = ""
@@ -84,10 +85,10 @@ async def process_audio(file: UploadFile = File(None)):
                 with open(p, "rb") as f:
                     content = f.read()
                 filename = p
-                content_type = "audio/mp4" if p.endswith(".mp4") else "audio/wav"
+                content_type = "audio/mp4" if p.endswith(".mp4") else ("audio/m4a" if p.endswith(".m4a") else "audio/wav")
                 break
         if not content:
-            raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在，請確認已上傳 interview-story.mp4。")
+            raise HTTPException(status_code=404, detail="示範故事音訊檔案不存在，請確認已上傳 demo 音訊。")
 
     # 誠實原則：無憑證時絕不冒充已轉寫
     if not stt_client:
@@ -139,7 +140,7 @@ async def process_audio(file: UploadFile = File(None)):
         except Exception as e2:
             raise HTTPException(status_code=500, detail=f"語音辨識服務異常: {str(e2)}")
 
-   raw_text = ""
+    raw_text = ""
     words = []
     for result in response.results:
         if not result.alternatives:
@@ -147,7 +148,7 @@ async def process_audio(file: UploadFile = File(None)):
         alternative = result.alternatives[0]
         raw_text += alternative.transcript
 
-        # 1. 优先提取整句的综合置信度；如果接口未给出则默认兜底为 0.92（保证为高置信度）
+        # 1. 优先提取整句置信度兜底
         alt_conf = getattr(alternative, "confidence", 0.0)
         sentence_conf = round(alt_conf, 2) if alt_conf and alt_conf > 0 else 0.92
 
@@ -155,7 +156,7 @@ async def process_audio(file: UploadFile = File(None)):
             start_sec = word_info.start_time.total_seconds()
             end_sec = word_info.end_time.total_seconds()
 
-            # 2. 检查单个单词是否有专属置信度；若为 0.0，则继承整句置信度
+            # 2. 单词级置信度为 0 时继承整句置信度，解决前端全 0 飘红
             w_conf = getattr(word_info, "confidence", 0.0)
             final_conf = round(w_conf, 2) if w_conf and w_conf > 0 else sentence_conf
 
