@@ -68,14 +68,11 @@ async def process_audio(file: UploadFile = File(None)):
     else:
         # 示範音訊優先級清單：優先讀取真實存在的 demo 音訊
         demo_paths = [
-            "frontend/assets/demo-story.m4a",
-            "assets/demo-story.m4a",
-            "frontend/assets/interview-story.mp4",
-            "assets/interview-story.mp4",
             "Demo Story.wav",
             "frontend/assets/Demo Story.wav",
             "assets/Demo Story.wav",
-            "WhatsApp Video 2026-10-11 at 15.25.40.mp4"
+            "frontend/assets/demo-story.m4a",
+            "frontend/assets/interview-story.mp4"
         ]
         content = None
         filename = ""
