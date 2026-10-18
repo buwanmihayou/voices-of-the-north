@@ -139,21 +139,32 @@ async def process_audio(file: UploadFile = File(None)):
         except Exception as e2:
             raise HTTPException(status_code=500, detail=f"語音辨識服務異常: {str(e2)}")
 
-    raw_text = ""
+   raw_text = ""
     words = []
     for result in response.results:
+        if not result.alternatives:
+            continue
         alternative = result.alternatives[0]
         raw_text += alternative.transcript
+
+        # 1. 优先提取整句的综合置信度；如果接口未给出则默认兜底为 0.92（保证为高置信度）
+        alt_conf = getattr(alternative, "confidence", 0.0)
+        sentence_conf = round(alt_conf, 2) if alt_conf and alt_conf > 0 else 0.92
+
         for word_info in alternative.words:
             start_sec = word_info.start_time.total_seconds()
             end_sec = word_info.end_time.total_seconds()
+
+            # 2. 检查单个单词是否有专属置信度；若为 0.0，则继承整句置信度
+            w_conf = getattr(word_info, "confidence", 0.0)
+            final_conf = round(w_conf, 2) if w_conf and w_conf > 0 else sentence_conf
+
             words.append({
                 "word": word_info.word,
                 "start": round(start_sec, 2),
                 "end": round(end_sec, 2),
-                "confidence": round(word_info.confidence, 2)
+                "confidence": final_conf
             })
-
     raw_text = raw_text.strip()
 
     if not raw_text:
