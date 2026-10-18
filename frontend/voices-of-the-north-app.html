@@ -2985,7 +2985,7 @@ body:has(.sheet.is-show) .toast {
       <section class="me-list" aria-label="個人內容與私隱管理">
 
         <!-- 入口一：我的錄音與故事（FR-MY2 → 真實跳轉錄音管理頁） -->
-        <a class="me-item" href="recording.html" id="meEntryRecordings">
+        <a class="me-item" href="#recording" id="meEntryRecordings" onclick="document.querySelector('[data-nav=\'record\']').click(); return false;">
           <span class="me-item__icon" aria-hidden="true">
             <i class="fa-solid fa-microphone"></i>
           </span>
@@ -4116,8 +4116,8 @@ function retrieveAnswer(question) {
             b.appendChild(q);
             b.appendChild(t);
             b.addEventListener('click', function () {
-              location.href = 'recording.html?t=' +
-                encodeURIComponent(qa.timestamp) + '#rec-' + rec.id;
+              var navBtn = document.querySelector('[data-nav="record"]');
+              if (navBtn) navBtn.click();
             });
             qaBox.appendChild(b);
           })(qa);
@@ -4135,8 +4135,8 @@ function retrieveAnswer(question) {
             s.textContent = w.word;
             s.appendChild(h('span', 'w-t', fmtTime(w.start)));
             s.addEventListener('click', function () {
-              location.href = 'recording.html?t=' +
-                encodeURIComponent(w.start) + '#rec-' + rec.id;
+              var navBtn = document.querySelector('[data-nav="record"]');
+              if (navBtn) navBtn.click();
             });
             words.appendChild(s);
           })(w);
@@ -4149,7 +4149,8 @@ function retrieveAnswer(question) {
       go.innerHTML = '<i class="fa-solid fa-folder-open"></i>去「我的錄音」查看';
       go.addEventListener('click', function () {
         closeSheet();
-        location.href = 'recording.html?done=' + encodeURIComponent(rec.id) + '#rec-' + rec.id;
+        var navBtn = document.querySelector('[data-nav="record"]');
+        if (navBtn) navBtn.click();
       });
       stepResult.appendChild(go);
 
@@ -4197,8 +4198,8 @@ function retrieveAnswer(question) {
       go.textContent = '去「待轉寫」睇我嘅錄音';
       go.addEventListener('click', function () {
         closeSheet();
-        location.href = 'recording.html?done=' + encodeURIComponent(pendingRec.id) +
-          '&tab=pending#rec-' + pendingRec.id;
+        var navBtn = document.querySelector('[data-nav="record"]');
+        if (navBtn) navBtn.click();
       });
       stepResult.appendChild(go);
 
