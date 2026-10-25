@@ -52,3 +52,6 @@ Thumbs.db
 desktop.ini
 
 *.log
+
+# Local AI assistant notes (kept local, never published)
+.workbuddy-ai/
