@@ -1,0 +1,83 @@
+{
+  "input": "docs/audit/2026-11-03/deployed-app.html",
+  "checks": [
+    {
+      "check": "script-1-syntax",
+      "passed": true
+    },
+    {
+      "check": "script-2-syntax",
+      "passed": true
+    },
+    {
+      "check": "published-story-count",
+      "value": 1
+    },
+    {
+      "check": "story-retrieval",
+      "question": "以前居民主要用咩出行？",
+      "result": {
+        "inScope": true,
+        "answer": "細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。",
+        "sources": [
+          {
+            "storyId": "YL-001",
+            "title": "元朗・村落晨光",
+            "teller": "Boris Lau",
+            "start": 0,
+            "end": 17.5,
+            "audioUrl": "#story-YL-001#t=0",
+            "label": "Source: [YL-001] at 00:00"
+          }
+        ],
+        "demo": true,
+        "storyId": "YL-001"
+      }
+    },
+    {
+      "check": "story-retrieval",
+      "question": "火星天氣如何？",
+      "result": {
+        "inScope": false,
+        "answer": "抱歉，錄製故事中未包含此資訊。",
+        "sources": [],
+        "demo": true,
+        "storyId": null
+      }
+    },
+    {
+      "check": "save-and-reopen",
+      "passed": true
+    },
+    {
+      "check": "delete-isolated-record",
+      "passed": true
+    },
+    {
+      "check": "quota-pruning",
+      "oldestAudioRetained": true,
+      "newestAudioRetained": false,
+      "note": "The implementation comment says oldest audio should be discarded first."
+    },
+    {
+      "check": "language-dialog-markup",
+      "id": "langSheet",
+      "present": false
+    },
+    {
+      "check": "language-dialog-markup",
+      "id": "langOverlay",
+      "present": false
+    },
+    {
+      "check": "language-dialog-markup",
+      "id": "langSheetClose",
+      "present": false
+    },
+    {
+      "check": "language-dialog-markup",
+      "id": "langSheetCancel",
+      "present": false
+    }
+  ]
+}

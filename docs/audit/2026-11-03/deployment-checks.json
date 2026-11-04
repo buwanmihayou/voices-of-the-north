@@ -1,0 +1,814 @@
+{
+  "checked_at_utc": "2026-11-03T07:37:31.134016+00:00",
+  "base_url": "https://voices-of-the-north.onrender.com",
+  "checks": [
+    {
+      "path": "/",
+      "method": "GET",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/voices-of-the-north-app.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/api/health",
+      "content_type": "application/json",
+      "response": {
+        "status": "ok",
+        "stt_ready": true,
+        "stt_reason": "",
+        "gemini_ready": false
+      }
+    },
+    {
+      "path": "/openapi.json",
+      "method": "GET",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/openapi.json",
+      "content_type": "application/json",
+      "routes": {
+        "/": [
+          "get"
+        ],
+        "/api/health": [
+          "get"
+        ],
+        "/api/process": [
+          "post"
+        ]
+      }
+    },
+    {
+      "path": "/voices-of-the-north-app.html",
+      "method": "GET",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/voices-of-the-north-app.html",
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 190364,
+      "sha256": "b3915c6a121cd5bed240cfd28781a936ada785f10f7e0162aae95073a133e9e2",
+      "local_sha256": "ea0b42da9424eb84b3b7d950039d7a6bb2403e5b999bd073be50449064866f5b",
+      "matches_local": false,
+      "matches_local_normalized": true
+    },
+    {
+      "path": "/assets/demo-story.m4a",
+      "method": "HEAD",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/assets/demo-story.m4a",
+      "content_type": "audio/mp4"
+    },
+    {
+      "path": "/assets/interview-story.mp4",
+      "method": "HEAD",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/assets/interview-story.mp4",
+      "content_type": "video/mp4"
+    },
+    {
+      "path": "/lib/storyCorpus.js",
+      "method": "HEAD",
+      "status": 404,
+      "error": ""
+    },
+    {
+      "path": "/api/process",
+      "method": "POST",
+      "status": 200,
+      "final_url": "https://voices-of-the-north.onrender.com/api/process",
+      "content_type": "application/json",
+      "response": {
+        "mode": "online",
+        "source": "demo",
+        "raw_text": "我細個嗰陣喺元朗附近時為仲有好多農田同埋成日都會見到啲人踩單車啦費事啦見到啦見到面都會大學之後有時都會同啲人去附近行下先嗰度呢就同佢講到啲雀仔叫添同埋啲床都會喺度明呀今年呀附近好多地方都起咗身有同埋公平嘅環境都慢慢變緊記得嘅就係大家以說以上",
+        "words": [
+          {
+            "word": "我",
+            "start": 0.0,
+            "end": 2.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "細",
+            "start": 2.4,
+            "end": 2.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "個",
+            "start": 2.7,
+            "end": 2.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "嗰",
+            "start": 2.8,
+            "end": 3.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "陣",
+            "start": 3.0,
+            "end": 3.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "喺",
+            "start": 3.2,
+            "end": 3.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "元",
+            "start": 3.8,
+            "end": 4.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "朗",
+            "start": 4.1,
+            "end": 4.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "附",
+            "start": 4.3,
+            "end": 4.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "近",
+            "start": 4.5,
+            "end": 4.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "時",
+            "start": 4.7,
+            "end": 6.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "為",
+            "start": 6.3,
+            "end": 7.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "仲",
+            "start": 7.4,
+            "end": 7.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "有",
+            "start": 7.6,
+            "end": 7.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "好",
+            "start": 7.7,
+            "end": 7.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "多",
+            "start": 7.9,
+            "end": 8.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "農",
+            "start": 8.0,
+            "end": 8.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "田",
+            "start": 8.3,
+            "end": 8.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "同",
+            "start": 8.6,
+            "end": 8.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "埋",
+            "start": 8.7,
+            "end": 8.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "成",
+            "start": 8.8,
+            "end": 10.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "日",
+            "start": 10.4,
+            "end": 10.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "都",
+            "start": 10.5,
+            "end": 10.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "會",
+            "start": 10.7,
+            "end": 10.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "見",
+            "start": 10.8,
+            "end": 11.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "到",
+            "start": 11.1,
+            "end": 11.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "啲",
+            "start": 11.3,
+            "end": 11.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "人",
+            "start": 11.6,
+            "end": 12.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "踩",
+            "start": 12.5,
+            "end": 12.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "單",
+            "start": 12.7,
+            "end": 12.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "車",
+            "start": 12.9,
+            "end": 13.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "啦",
+            "start": 13.1,
+            "end": 13.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "費",
+            "start": 13.5,
+            "end": 14.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "事",
+            "start": 14.6,
+            "end": 14.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "啦",
+            "start": 14.9,
+            "end": 15.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "見",
+            "start": 15.2,
+            "end": 15.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "到",
+            "start": 15.6,
+            "end": 15.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "啦",
+            "start": 15.8,
+            "end": 16.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "見",
+            "start": 16.6,
+            "end": 16.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "到",
+            "start": 16.8,
+            "end": 16.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "面",
+            "start": 16.9,
+            "end": 17.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "都",
+            "start": 17.1,
+            "end": 17.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "會",
+            "start": 17.3,
+            "end": 17.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "大",
+            "start": 17.5,
+            "end": 17.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "學",
+            "start": 17.7,
+            "end": 19.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "之",
+            "start": 19.5,
+            "end": 19.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "後",
+            "start": 19.8,
+            "end": 19.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "有",
+            "start": 19.9,
+            "end": 20.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "時",
+            "start": 20.5,
+            "end": 20.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "都",
+            "start": 20.8,
+            "end": 21.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "會",
+            "start": 21.1,
+            "end": 21.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "同",
+            "start": 21.2,
+            "end": 21.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "啲",
+            "start": 21.4,
+            "end": 21.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "人",
+            "start": 21.7,
+            "end": 22.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "去",
+            "start": 22.0,
+            "end": 22.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "附",
+            "start": 22.7,
+            "end": 23.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "近",
+            "start": 23.3,
+            "end": 23.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "行",
+            "start": 23.5,
+            "end": 25.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "下",
+            "start": 25.1,
+            "end": 25.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "先",
+            "start": 25.2,
+            "end": 25.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "嗰",
+            "start": 25.3,
+            "end": 25.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "度",
+            "start": 25.6,
+            "end": 25.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "呢",
+            "start": 25.9,
+            "end": 26.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "就",
+            "start": 26.0,
+            "end": 26.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "同",
+            "start": 26.2,
+            "end": 26.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "佢",
+            "start": 26.6,
+            "end": 26.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "講",
+            "start": 26.7,
+            "end": 27.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "到",
+            "start": 27.0,
+            "end": 27.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "啲",
+            "start": 27.6,
+            "end": 27.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "雀",
+            "start": 27.8,
+            "end": 27.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "仔",
+            "start": 27.9,
+            "end": 28.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "叫",
+            "start": 28.1,
+            "end": 28.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "添",
+            "start": 28.4,
+            "end": 29.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "同",
+            "start": 29.7,
+            "end": 30.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "埋",
+            "start": 30.5,
+            "end": 30.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "啲",
+            "start": 30.8,
+            "end": 30.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "床",
+            "start": 30.9,
+            "end": 31.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "都",
+            "start": 31.2,
+            "end": 31.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "會",
+            "start": 31.4,
+            "end": 31.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "喺",
+            "start": 31.5,
+            "end": 31.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "度",
+            "start": 31.7,
+            "end": 31.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "明",
+            "start": 31.8,
+            "end": 32.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "呀",
+            "start": 32.1,
+            "end": 32.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "今",
+            "start": 32.3,
+            "end": 33.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "年",
+            "start": 33.0,
+            "end": 33.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "呀",
+            "start": 33.0,
+            "end": 33.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "附",
+            "start": 33.4,
+            "end": 34.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "近",
+            "start": 34.9,
+            "end": 35.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "好",
+            "start": 35.1,
+            "end": 35.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "多",
+            "start": 35.3,
+            "end": 35.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "地",
+            "start": 35.3,
+            "end": 36.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "方",
+            "start": 36.8,
+            "end": 36.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "都",
+            "start": 36.9,
+            "end": 37.1,
+            "confidence": 0.94
+          },
+          {
+            "word": "起",
+            "start": 37.1,
+            "end": 37.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "咗",
+            "start": 37.6,
+            "end": 37.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "身",
+            "start": 37.7,
+            "end": 38.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "有",
+            "start": 38.0,
+            "end": 38.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "同",
+            "start": 38.3,
+            "end": 38.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "埋",
+            "start": 38.4,
+            "end": 38.6,
+            "confidence": 0.94
+          },
+          {
+            "word": "公",
+            "start": 38.6,
+            "end": 38.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "平",
+            "start": 38.7,
+            "end": 39.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "嘅",
+            "start": 39.2,
+            "end": 40.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "環",
+            "start": 40.5,
+            "end": 40.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "境",
+            "start": 40.8,
+            "end": 40.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "都",
+            "start": 40.9,
+            "end": 41.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "慢",
+            "start": 41.0,
+            "end": 41.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "慢",
+            "start": 41.3,
+            "end": 41.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "變",
+            "start": 41.5,
+            "end": 41.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "緊",
+            "start": 41.7,
+            "end": 42.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "記",
+            "start": 42.3,
+            "end": 43.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "得",
+            "start": 43.7,
+            "end": 43.9,
+            "confidence": 0.94
+          },
+          {
+            "word": "嘅",
+            "start": 43.9,
+            "end": 44.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "就",
+            "start": 44.0,
+            "end": 44.2,
+            "confidence": 0.94
+          },
+          {
+            "word": "係",
+            "start": 44.2,
+            "end": 44.3,
+            "confidence": 0.94
+          },
+          {
+            "word": "大",
+            "start": 44.3,
+            "end": 45.7,
+            "confidence": 0.94
+          },
+          {
+            "word": "家",
+            "start": 45.7,
+            "end": 45.8,
+            "confidence": 0.94
+          },
+          {
+            "word": "以",
+            "start": 45.8,
+            "end": 46.0,
+            "confidence": 0.94
+          },
+          {
+            "word": "說",
+            "start": 46.0,
+            "end": 46.4,
+            "confidence": 0.94
+          },
+          {
+            "word": "以",
+            "start": 46.4,
+            "end": 46.5,
+            "confidence": 0.94
+          },
+          {
+            "word": "上",
+            "start": 46.5,
+            "end": 46.7,
+            "confidence": 0.94
+          }
+        ],
+        "llm_result": {
+          "formal_text": "我細個嗰陣喺元朗附近時為仲有好多農田同埋成日都會見到啲人踩單車啦費事啦見到啦見到面都會大學之後有時都會同啲人去附近行下先嗰度呢就同佢講到啲雀仔叫添同埋啲床都會喺度明呀今年呀附近好多地方都起咗身有同埋公平嘅環境都慢慢變緊記得嘅就係大家以說以上",
+          "qa_list": []
+        }
+      }
+    }
+  ]
+}

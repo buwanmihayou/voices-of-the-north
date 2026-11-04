@@ -1,0 +1,47 @@
+Zheng deployed version audit for 3 November 2026
+
+The deployed prototype is reachable and demo Cantonese speech recognition works. It is not yet a complete recording, review, save, reopen and delete service. This audit separates working features, actual failures and demonstration data.
+
+Deployment
+https://voices-of-the-north.onrender.com/voices-of-the-north-app.html
+
+What I verified
+The root URL redirects to the app. All four navigation pages and three recording-status tabs open. Demo playback starts. The recording entry displays consent before requesting microphone access. Existing user recordings were not uploaded or deleted during this audit.
+
+The live health endpoint returns stt_ready=true and gemini_ready=false. Processing the server's built-in demo returns HTTP 200, 120 word entries and timestamps through 46.7 seconds. However, formal_text equals raw_text and qa_list is empty, so only STT is verified; Gemini normalization and Q&A generation are unavailable in this deployment.
+
+The assistant answers “以前居民主要用咩出行？” from the published story, labels the answer as a role-played demo and shows a timestamp citation. “火星天氣如何？” correctly receives “抱歉，錄製故事中未包含此資訊。”
+
+Both deployed inline scripts parse. Isolated synthetic-record checks confirm basic local save, reopen and delete functions. These are code checks, not a full microphone or phone test. The deployed HTML matches local HTML after normalizing line endings.
+
+Broken or incomplete
+P0 — Source links: clicking “Source: [YL-001] at 00:00” navigates to /stories.html?t=0#story-YL-001 and displays Not Found. The single-file deployment needs matching citation navigation. Personal-record links also reference recording.html in source and need testing.
+
+P0 — Gemini: health reports not ready; the actual demo response confirms fallback text and no generated Q&A. Do not claim the full STT-to-Gemini pipeline is working.
+
+P0 before user testing — Consent and privacy wording: UI promises temporary processing and correction/sharing controls, while recordings persist in browser localStorage and those controls are unfinished. Preparation text incorrectly says uploads go to the user's computer at 127.0.0.1:8000; code uses the deployment origin. Dat and the implementation team should align the wording on Nov 4.
+
+P1 — Language button: clicking has no effect. langSheet, langOverlay and their controls are missing from the deployed HTML, so the initialization exits early.
+
+P1 — Storage quota: isolated tests with two 4 MiB audio strings show old audio retained and new audio discarded under the nominal 6 MiB budget, contrary to the code comment. Save failures are also suppressed. Refresh usually preserves localStorage; clearing site data or changing browser/device does not.
+
+P1 — Backend storage/access/deletion: live OpenAPI lists only /, /api/health and /api/process. The local backend has no record database or recording APIs. Agree private ownership and deletion semantics before implementing storage; avoid a global public recording list.
+
+P1 — Demo media alignment: playback changes from 00:51 to 00:46 after metadata loads, while corpus segments extend to 50.7 seconds. Story playback uses demo-story.m4a, processing prefers Demo Story.wav, and reprocessed-demo records point to interview-story.mp4. Boris and Zheng should verify that audio, transcript and timestamps correspond.
+
+P1 — Confidence display: local backend code substitutes sentence confidence or 0.92 when word confidence is unavailable. All 120 returned demo words show 0.94. This is not verified independent word-level uncertainty.
+
+P2 — Sharing, correction/withdrawal and About buttons only show “準備中”, confirmed live. The separate storyCorpus.js file is locally ignored by the broad lib/ ignore rule and its deployed URL returns 404; the inline app embeds its own corpus. README setup and archive descriptions also need correction.
+
+What is still demo data
+There is exactly one published story, YL-001, role-played by Boris Lau. It uses a real voice recording but is not elder validation. Transcript segments, suggested questions, keyword groups and the approximate map area are embedded data. Assistant retrieval is client-side keyword/bigram matching, not vector search or Gemini generation. Its second layer can search eligible local-record Q&A, but this path was not validated end to end. Listening to demo audio works; full demo processing depends on the backend. Full map tile loading was not established.
+
+Next steps and limits
+For Nov 4, agree recording → transcript review → explicit save → reopen → delete with Steven, including access ownership, offline recovery and clear errors. Align consent with Dat. These are proposed discussion points, not commitments made on their behalf.
+
+Still pending: phone testing, real microphone recording, interrupted-upload recovery, browser persistence across an actual refresh, personal-record citation navigation, deletion of cached assistant history, and accuracy/timestamps against a manually checked recording. No personal test audio has been published. Existing uncommitted archive changes predate this session and were preserved; they are not claimed as newly deployed work.
+
+Evidence retained in the project under docs/audit/2026-11-03: live HTTP JSON, captured deployed HTML, isolated JavaScript checks, source-link 404 screenshot and consent screenshot. Reusable audit scripts are in tools/.
+
+Zheng's available time this week: 1 hour per day.
+Daily deadline: 23:00 Hong Kong time. Group update text is prepared but has not been sent.

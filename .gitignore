@@ -55,3 +55,29 @@ desktop.ini
 
 # Local AI assistant notes (kept local, never published)
 .workbuddy-ai/
+
+# Build artifacts
+frontend.zip
+*.zip
+
+# Archived React/Next.js code (kept for reference, not deployed)
+# frontend/_archived/ — intentionally tracked in git for team reference
+
+# Large media files — should use cloud storage or Git LFS
+# (already tracked: Demo Story.wav, Demo Story.m4a, interview-story.mp4, WhatsApp Video*.mp4/wav)
+# Moving forward, do not commit new large media files
+
+# SQLite database (runtime data, not source code)
+records.db
+*.sqlite
+*.sqlite3
+
+# Uploaded recordings (runtime data)
+records/
+
+# Node.js (if ever needed later)
+node_modules/
+
+# OS
+Thumbs.db
+desktop.ini
