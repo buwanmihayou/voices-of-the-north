@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voices of the North｜測試線・方案實驗室</title>
+<style>
+  :root{
+    --oat:#F6F1E6; --paper:#FFFDF7; --sage:#2C5742; --sage-soft:#DCE8DB;
+    --gold:#B55443; --ink:#243B30; --muted:#6B7B6E; --line:#DCE3D5;
+    --shadow:0 10px 28px rgba(44,87,66,.09);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--oat);color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  header{background:linear-gradient(135deg,#2C5742,#3C7055);color:#fff;padding:28px 20px 24px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:1.6rem;letter-spacing:.02em}
+  header p{margin:0;opacity:.9;font-size:.94rem}
+  .head-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between}
+  .head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .ghost-link{color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:999px;
+    padding:9px 16px;text-decoration:none;font-size:.9rem;min-height:44px;display:inline-flex;align-items:center}
+  .ghost-link:hover{background:rgba(255,255,255,.14)}
+  .status{font-size:.82rem;background:rgba(255,255,255,.16);border-radius:999px;padding:7px 13px}
+  main{padding:22px 20px 60px}
+  .notice{background:#FFF6E4;border:1.5px solid #E8D19B;border-left:6px solid #C9973B;
+    border-radius:14px;padding:14px 18px;margin-bottom:20px;font-size:.9rem}
+  .notice strong{color:#8A5B14}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+  .stat b{display:block;font-size:1.5rem;color:var(--sage)}
+  .stat span{font-size:.82rem;color:var(--muted)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .tab{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;
+    padding:10px 18px;min-height:44px;cursor:pointer;font-size:.92rem;font-weight:600;font-family:inherit}
+  .tab[aria-selected="true"]{background:var(--sage);border-color:var(--sage);color:#fff}
+  .tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+    outline:3px solid #C9973B;outline-offset:2px}
+  .panel{display:none;background:var(--paper);border:1px solid var(--line);border-radius:20px;
+    padding:22px;box-shadow:var(--shadow)}
+  .panel.is-active{display:block}
+  .panel h2{margin:0 0 4px;font-size:1.25rem;color:var(--sage)}
+  .panel .lead{margin:0 0 18px;color:var(--muted);font-size:.92rem}
+  .rule{background:#F1F6EF;border-radius:12px;padding:12px 16px;font-size:.86rem;margin:0 0 18px}
+  .rule ul{margin:8px 0 0;padding-left:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .card{border:1.5px solid var(--line);border-radius:16px;padding:15px;background:#fff;
+    cursor:pointer;text-align:left;min-height:130px;font-family:inherit;color:inherit;transition:.16s}
+  .card:hover{border-color:var(--sage);transform:translateY(-2px)}
+  .card.is-picked{border-color:var(--sage);background:#EDF5EB;box-shadow:0 0 0 3px rgba(44,87,66,.12)}
+  .card .cat{display:inline-block;font-size:.75rem;background:var(--sage-soft);color:var(--sage);
+    border-radius:999px;padding:3px 10px;margin-bottom:8px;font-weight:700}
+  .card .q{font-weight:700;display:block;margin-bottom:6px}
+  .card .hint{font-size:.82rem;color:var(--muted)}
+  .btn{border:0;border-radius:999px;padding:11px 20px;min-height:44px;cursor:pointer;
+    font-family:inherit;font-size:.9rem;font-weight:700;background:var(--sage);color:#fff}
+  .btn:hover{filter:brightness(1.12)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn--ghost{background:transparent;color:var(--sage);border:1.5px solid var(--sage)}
+  .btn--danger{background:transparent;color:var(--gold);border:1.5px solid var(--gold)}
+  .btn--sm{padding:7px 14px;min-height:38px;font-size:.82rem}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+  .picked{background:#EDF5EB;border:1.5px dashed var(--sage);border-radius:14px;padding:14px 16px;margin:14px 0}
+  .picked b{color:var(--sage)}
+  input,select,textarea{font-family:inherit;font-size:.92rem;color:var(--ink);background:#fff;
+    border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+  textarea{min-height:88px;resize:vertical}
+  label{display:block;font-size:.84rem;font-weight:700;margin-bottom:5px;color:var(--muted)}
+  .field{margin-bottom:12px}
+  .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+  .item{border:1.5px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:#fff}
+  .item h3{margin:0 0 4px;font-size:1rem}
+  .item .meta{font-size:.8rem;color:var(--muted);margin-bottom:10px}
+  .badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:700;
+    background:var(--sage-soft);color:var(--sage);margin-right:6px}
+  .badge--warn{background:#FFF0D9;color:#8A5B14}
+  .badge--ok{background:#E2F0E2;color:#2C5742}
+  .badge--grey{background:#ECEEE9;color:#6B7B6E}
+  .suggest{background:#FFF9EC;border:1px dashed #D9B86A;border-radius:12px;padding:12px;margin:10px 0;font-size:.88rem}
+  .warn{background:#FFF0EA;border:1.5px solid #E4B6A8;border-radius:14px;padding:14px 16px;
+    color:#8A3B2C;font-size:.9rem;margin-bottom:18px}
+  .empty{padding:26px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:14px}
+  footer{text-align:center;padding:0 20px 40px;color:var(--muted);font-size:.82rem}
+  footer a{color:var(--sage)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;
+    background:var(--sage);color:#fff;padding:12px 22px;border-radius:999px;font-size:.9rem;
+    box-shadow:var(--shadow);transition:.25s;pointer-events:none;max-width:90vw;text-align:center;z-index:50}
+  #toast.is-show{opacity:1;transform:translate(-50%,0)}
+  #toast.is-error{background:var(--gold)}
+  .timeline-box{border:1.5px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+  .timeline-box svg{width:100%;height:auto;display:block;border-radius:12px;background:#F4F7F0}
+  .slider{width:100%;accent-color:var(--sage);margin:16px 0 6px}
+  .phase-label{font-weight:700;color:var(--sage)}
+  .legend{font-size:.8rem;color:var(--muted);margin-top:8px}
+  @media(max-width:600px){header h1{font-size:1.3rem}.panel{padding:17px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head-row">
+    <div>
+      <h1>測試線・方案實驗室</h1>
+      <p>Voices of the North｜Google 文檔《準備好Techathon了嗎》4 條已指派方案嘅可操作原型</p>
+    </div>
+    <div class="head-actions">
+      <span class="status" id="connStatus">檢查後端連線中…</span>
+      <a class="ghost-link" href="voices-of-the-north-app.html">返回主應用</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="notice">
+    <strong>測試線聲明：</strong>本頁係 Dat 主線之外嘅支線原型，<strong>未匯流主線</strong>；所有資料只作團隊內部測試。
+    測試版無登入、無鑑權，請勿錄入真實長者資料。「清拆時鐘」為<strong>示意資料，未經核實</strong>，不可作官方依據。
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <nav class="tabs" role="tablist" aria-label="方案模組">
+    <button class="tab" role="tab" aria-selected="true" data-panel="cards">① 問題卡片</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="classify">② 故事細分・義工兜底</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="questions">③ 問答廣場</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="timeline">④ 清拆時鐘（示意）</button>
+  </nav>
+
+  <!-- 方案 3 -->
+  <section class="panel is-active" id="panel-cards" role="tabpanel">
+    <h2>問題卡片：長者唔使諗題目，唔使碰手機</h2>
+    <p class="lead">借鑑成熟產品嘅「每週一問」：一卡一問，由義工／青年持機引導，長者只係自然講嘢。</p>
+    <div class="rule"><strong>使用守則</strong><ul id="guardrails"></ul></div>
+    <div class="row" id="cardFilters"></div>
+    <div class="grid" id="cardGrid"></div>
+    <div class="picked" id="pickedCard">未選擇卡片。撳上面任何一張卡開始。</div>
+    <div class="row">
+      <button class="btn" id="btnRecordSelection" disabled>記錄選卡</button>
+      <button class="btn btn--ghost" id="btnGoRecord" disabled>帶呢張卡去主應用錄音</button>
+    </div>
+    <div id="selectionLog" class="meta"></div>
+  </section>
+
+  <!-- 方案 4 -->
+  <section class="panel" id="panel-classify" role="tabpanel">
+    <h2>故事細分：第 1 層自動匹配 → 第 2 層義工兜底</h2>
+    <p class="lead">故事一多，主題就好亂。機器只可以「建議」，義工確認後先可以成為可公開嘅分類。</p>
+    <div class="rule">
+      <strong>兩層紀律</strong>
+      <ul>
+        <li>第 1 層自動匹配結果一律標「機器猜測，未確認」；Gemini 未設定時用關鍵詞規則降級，並如實標明，絕不冒充 LLM。</li>
+        <li>第 2 層由義工／志願者修正主題、時間、地點，確認後回寫到主線錄音紀錄。</li>
+        <li>未確認嘅內容唔會變成可公開事實，亦唔會改寫原音或逐字稿。</li>
+      </ul>
+    </div>
+    <div class="row"><button class="btn btn--ghost btn--sm" id="btnReloadRecords">重新載入錄音</button></div>
+    <div id="recordList"></div>
+    <h3 style="margin-top:24px;font-size:1.05rem;color:var(--sage)">覆核紀錄</h3>
+    <div id="reviewList"></div>
+  </section>
+
+  <!-- 方案 1 -->
+  <section class="panel" id="panel-questions" role="tabpanel">
+    <h2>問答廣場：把「社交」收斂成代際對話</h2>
+    <p class="lead">訪客可以為村落留一個問題，由長者／義工用聲音回答，形成「提問 → 聲音回答 → 溯源存檔」。</p>
+    <div class="rule">
+      <strong>紅線不變</strong>
+      <ul>
+        <li>只有「問題」一種結構化互動；<strong>無資訊流、無點讚、無追蹤、無留言</strong>。</li>
+        <li>聲音回答必須關聯一條已保存嘅錄音，並附 <code>Source: [id] at mm:ss</code> 出處。</li>
+        <li>答案只由已錄製逐字稿組成，唔用外部知識補答案；不收集身份資料。</li>
+      </ul>
+    </div>
+    <div class="two">
+      <div class="field"><label for="qVillage">村落</label><input id="qVillage" placeholder="例如：元朗" maxlength="40"></div>
+      <div class="field" style="flex:2"><label for="qText">想問嘅問題</label><input id="qText" placeholder="例如：以前村口最熱鬧係咩時候？" maxlength="200"></div>
+    </div>
+    <button class="btn" id="btnAsk">留低一個問題</button>
+    <h3 style="margin-top:24px;font-size:1.05rem;color:var(--sage)">問題隊列</h3>
+    <div id="questionList"></div>
+  </section>
+
+  <!-- 方案 2 -->
+  <section class="panel" id="panel-timeline" role="tabpanel">
+    <h2>清拆時鐘：把「點解係而家」變成一屏可視化</h2>
+    <p class="lead">喺模糊地圖上疊一層時間維度，用顏色標示記憶採集優先度 —— 目前只係示意資料層。</p>
+    <div class="warn" id="timelineWarning"></div>
+    <div class="timeline-box">
+      <svg viewBox="0 0 600 260" role="img" aria-label="村落記憶採集優先度示意地圖">
+        <rect x="0" y="0" width="600" height="260" fill="#F4F7F0"/>
+        <g stroke="#DCE3D5" stroke-width="1">
+          <path d="M0 65H600M0 130H600M0 195H600M150 0V260M300 0V260M450 0V260"/>
+        </g>
+        <path d="M0 210 Q120 170 240 195 T480 160 T600 175" stroke="#C8DACD" stroke-width="10" fill="none" opacity=".7"/>
+        <circle id="villageCircle" cx="300" cy="130" r="58" fill="#8FB79A" fill-opacity=".28"
+                stroke="#2C5742" stroke-width="2" stroke-dasharray="7 6"/>
+        <circle cx="300" cy="130" r="5" fill="#2C5742"/>
+        <text x="300" y="205" text-anchor="middle" font-size="14" fill="#2C5742">元朗（示意）・約 800 米模糊範圍</text>
+        <text x="300" y="225" text-anchor="middle" font-size="11" fill="#6B7B6E">無門牌、無 GPS 精確標記</text>
+      </svg>
+      <input class="slider" type="range" id="yearSlider" min="0" max="3" value="0" step="1" aria-label="示意年份">
+      <div class="row" style="justify-content:space-between;margin:0">
+        <span class="phase-label" id="phaseYear">—</span>
+        <span id="phaseLabel">載入中…</span>
+      </div>
+      <div class="legend" id="timelineLegend"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>測試線／支線原型・主線仍為 <a href="voices-of-the-north-app.html">voices-of-the-north-app.html</a>・
+  目前只有一則角色扮演示範故事，並非真實長者驗證。</p>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var API = (window.VTN_API_BASE || window.location.origin).replace(/\/$/, '');
+  var allRecords = [];
+  var allCards = [];
+  var picked = null;
+  var suggestions = {};
+  var timeline = null;
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function toast(msg, isError) {
+    var el = $('toast');
+    el.textContent = msg;
+    el.className = 'is-show' + (isError ? ' is-error' : '');
+    setTimeout(function () { el.className = ''; }, 3600);
+  }
+  function api(path, opts) {
+    opts = opts || {};
+    var init = { method: opts.method || 'GET', headers: {} };
+    if (opts.body) {
+      init.headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(opts.body);
+    }
+    return fetch(API + path, init).then(function (r) {
+      if (!r.ok) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          throw new Error(j.detail || ('HTTP ' + r.status));
+        });
+      }
+      return r.json();
+    });
+  }
+  function fail(err) { toast('連線失敗：' + (err && err.message ? err.message : '未知錯誤'), true); }
+
+  /* ---------- tabs ---------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) {
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+        $('panel-' + t.dataset.panel).classList.toggle('is-active', t === tab);
+      });
+      if (tab.dataset.panel === 'classify') { loadRecords(); loadReviews(); }
+      if (tab.dataset.panel === 'questions') { loadQuestions(); loadRecords(); }
+    });
+  });
+
+  /* ---------- summary ---------- */
+  function loadSummary() {
+    return api('/api/lab/summary').then(function (s) {
+      var items = [
+        ['問題卡片', s.cardsAvailable + ' 張'],
+        ['待義工覆核', s.metadataPending + ' 條'],
+        ['已確認分類', s.metadataConfirmed + ' 條'],
+        ['待回答問題', s.questionsOpen + ' 條'],
+        ['時間軸狀態', s.timelineVerified ? '已核實' : '示意・未核實']
+      ];
+      $('stats').innerHTML = items.map(function (x) {
+        return '<div class="stat"><b>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></div>';
+      }).join('');
+    });
+  }
+
+  /* ---------- 方案 3：問題卡片 ---------- */
+  function loadCards() {
+    return api('/api/lab/cards').then(function (data) {
+      allCards = data.cards;
+      $('guardrails').innerHTML = data.guardrails.map(function (g) {
+        return '<li>' + esc(g) + '</li>';
+      }).join('');
+      var cats = ['全部'];
+      data.cards.forEach(function (c) { if (cats.indexOf(c.category) === -1) cats.push(c.category); });
+      $('cardFilters').innerHTML = cats.map(function (c, i) {
+        return '<button class="btn btn--ghost btn--sm" data-cat="' + esc(c) + '">' +
+          (i === 0 ? '全部卡片' : esc(c)) + '</button>';
+      }).join('');
+      Array.prototype.slice.call($('cardFilters').children).forEach(function (btn) {
+        btn.addEventListener('click', function () { renderCards(btn.dataset.cat); });
+      });
+      renderCards('全部');
+    });
+  }
+  function renderCards(cat) {
+    var list = allCards.filter(function (c) { return cat === '全部' || c.category === cat; });
+    $('cardGrid').innerHTML = list.map(function (c) {
+      return '<button type="button" class="card' + (picked && picked.id === c.id ? ' is-picked' : '') +
+        '" data-id="' + esc(c.id) + '">' +
+        '<span class="cat">' + esc(c.category) + '</span>' +
+        '<span class="q">' + esc(c.prompt) + '</span>' +
+        '<span class="hint">' + esc(c.hint) + '</span></button>';
+    }).join('');
+    Array.prototype.slice.call($('cardGrid').children).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        picked = allCards.filter(function (c) { return c.id === btn.dataset.id; })[0];
+        renderCards(cat);
+        $('pickedCard').innerHTML = '<b>已揀：' + esc(picked.category) + '・' + esc(picked.prompt) + '</b><br>' +
+          '<span style="font-size:.86rem;color:var(--muted)">' + esc(picked.hint) + '　｜　長者可以跳過或隨時停。</span>';
+        $('btnRecordSelection').disabled = false;
+        $('btnGoRecord').disabled = false;
+      });
+    });
+  }
+  $('btnRecordSelection').addEventListener('click', function () {
+    if (!picked) return;
+    api('/api/lab/cards/select', { method: 'POST', body: { cardId: picked.id, village: '測試線' } })
+      .then(function () { toast('已記錄選卡：' + picked.id); loadSummary(); })
+      .catch(fail);
+  });
+  $('btnGoRecord').addEventListener('click', function () {
+    if (!picked) return;
+    try { localStorage.setItem('vtn-selected-card', JSON.stringify(picked)); } catch (e) {}
+    location.href = 'voices-of-the-north-app.html#recording';
+  });
+
+  /* ---------- 方案 4：故事細分 ---------- */
+  function loadRecords() {
+    return api('/api/records').then(function (data) {
+      allRecords = (data.records || []).filter(function (r) { return r.status !== 'pending'; });
+      renderRecordList();
+      renderRecordOptions();
+    }).catch(function (err) { fail(err); });
+  }
+  function renderRecordList() {
+    if (!allRecords.length) {
+      $('recordList').innerHTML = '<div class="empty">仲未有已完成錄音。請先去主應用錄一段，或用示範故事試跑。</div>';
+      return;
+    }
+    $('recordList').innerHTML = allRecords.map(function (r) {
+      var sug = suggestions[r.id];
+      var meta = r.metadata || {};
+      var tags = (meta.topicTags || []).map(function (t) {
+        return '<span class="badge badge--ok">' + esc(t) + '</span>';
+      }).join('');
+      var statusBadge = meta.reviewStatus === 'human_confirmed'
+        ? '<span class="badge badge--ok">義工已確認</span>'
+        : '<span class="badge badge--grey">未分類</span>';
+      return '<div class="item" data-rec="' + esc(r.id) + '">' +
+        '<h3>' + esc(r.title || r.id) + '</h3>' +
+        '<div class="meta">' + esc(r.id) + '　' + statusBadge + ' ' + tags + '</div>' +
+        '<p style="font-size:.88rem;margin:0 0 10px">' + esc((r.formalText || r.rawText || '（無文字稿）').slice(0, 120)) + '</p>' +
+        '<button class="btn btn--sm" data-act="classify">第 1 層：自動建議</button>' +
+        '<div class="suggest" id="sug-' + esc(r.id) + '" style="' + (sug ? '' : 'display:none') + '">' +
+          (sug ? renderSuggestion(sug) : '') + '</div>' +
+        '<div class="two" style="margin-top:10px">' +
+          '<div class="field"><label>主題標籤（逗號分隔）</label>' +
+            '<input data-f="topics" value="' + esc((sug ? sug.suggested.topicTags : (meta.topicTags || [])).join(', ')) + '"></div>' +
+          '<div class="field"><label>地點</label><input data-f="place" value="' + esc(sug ? (sug.suggested.place || '') : (meta.place || '')) + '"></div>' +
+          '<div class="field"><label>時間／年代</label><input data-f="era" value="' + esc(sug ? (sug.suggested.eraOrYear || '') : (meta.eraOrYear || '')) + '"></div>' +
+          '<div class="field"><label>義工署名</label><input data-f="reviewer" value="義工 A"></div>' +
+        '</div>' +
+        '<button class="btn btn--ghost btn--sm" data-act="confirm">第 2 層：義工確認並回寫主線</button>' +
+        '</div>';
+    }).join('');
+
+    Array.prototype.slice.call($('recordList').querySelectorAll('[data-act]')).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('.item').dataset.rec;
+        if (btn.dataset.act === 'classify') classify(id);
+        else confirmReview(id);
+      });
+    });
+  }
+  function renderSuggestion(sug) {
+    return '<strong>機器猜測，未確認</strong>　<span class="badge badge--warn">' + esc(sug.classifier) + '</span>' +
+      '<div style="margin-top:6px">主題：' + esc((sug.suggested.topicTags || []).join('、') || '（無）') +
+      '　地點：' + esc(sug.suggested.place || '（無）') +
+      '　年代：' + esc(sug.suggested.eraOrYear || '（無）') + '</div>' +
+      '<div style="font-size:.82rem;color:#8A5B14;margin-top:6px">' + esc(sug.note) + '</div>';
+  }
+  function classify(id) {
+    var rec = allRecords.filter(function (r) { return r.id === id; })[0];
+    if (!rec) return;
+    var text = [rec.formalText, rec.rawText, rec.qaList && rec.qaList.map(function (q) { return q.answer; }).join(' ')].filter(Boolean).join(' ');
+    api('/api/lab/classify', { method: 'POST', body: { recordId: id, text: text } })
+      .then(function (sug) {
+        suggestions[id] = sug;
+        renderRecordList();
+        toast('已產生自動建議（' + sug.classifier + '），請義工覆核');
+        loadSummary();
+      }).catch(fail);
+  }
+  function confirmReview(id) {
+    var box = $('recordList').querySelector('[data-rec="' + id + '"]');
+    function val(f) { return box.querySelector('[data-f="' + f + '"]').value; }
+    api('/api/lab/confirm', {
+      method: 'POST',
+      body: {
+        recordId: id, topicTags: val('topics'), place: val('place'),
+        eraOrYear: val('era'), dialect: 'yue-Hant-HK', reviewer: val('reviewer') || '義工（未署名）'
+      }
+    }).then(function (res) {
+      return api('/api/records/' + encodeURIComponent(id)).then(function (rec) {
+        rec.metadata = {
+          topicTags: res.metadata.topicTags, place: res.metadata.place,
+          eraOrYear: res.metadata.eraOrYear, dialect: res.metadata.dialect,
+          reviewStatus: res.reviewStatus, reviewer: res.reviewer
+        };
+        rec.audioBase64 = '';
+        return api('/api/records', { method: 'POST', body: rec });
+      });
+    }).then(function () {
+      delete suggestions[id];
+      toast('義工已確認，標籤已回寫到主線錄音');
+      loadRecords(); loadReviews(); loadSummary();
+    }).catch(fail);
+  }
+  $('btnReloadRecords').addEventListener('click', function () { loadRecords(); loadReviews(); });
+  function loadReviews() {
+    return api('/api/lab/reviews').then(function (data) {
+      if (!data.reviews.length) {
+        $('reviewList').innerHTML = '<div class="empty">未有覆核紀錄。</div>';
+        return;
+      }
+      $('reviewList').innerHTML = data.reviews.map(function (r) {
+        return '<div class="item"><h3>' + esc(r.recordId) + '</h3>' +
+          '<div class="meta"><span class="badge ' + (r.status === 'human_confirmed' ? 'badge--ok' : 'badge--warn') + '">' +
+          esc(r.status) + '</span><span class="badge badge--grey">' + esc(r.classifier) + '</span>' +
+          esc(r.reviewer || '未署名') + '　' + esc(r.updatedAt) + '</div></div>';
+      }).join('');
+    }).catch(fail);
+  }
+
+  /* ---------- 方案 1：問答廣場 ---------- */
+  function renderRecordOptions() {
+    var selects = Array.prototype.slice.call(document.querySelectorAll('.answer-record-select'));
+    var html = '<option value="">請揀一條已保存錄音</option>' + allRecords.map(function (r) {
+      return '<option value="' + esc(r.id) + '">' + esc((r.title || r.id).slice(0, 40)) + '</option>';
+    }).join('');
+    selects.forEach(function (sel) { sel.innerHTML = html; });
+  }
+  $('btnAsk').addEventListener('click', function () {
+    var village = $('qVillage').value.trim();
+    var question = $('qText').value.trim();
+    if (question.length < 4) { toast('問題至少需要 4 個字', true); return; }
+    api('/api/lab/questions', { method: 'POST', body: { village: village, question: question } })
+      .then(function () { $('qText').value = ''; toast('問題已留低，等緊聲音回答'); loadQuestions(); loadSummary(); })
+      .catch(fail);
+  });
+  function loadQuestions() {
+    return api('/api/lab/questions').then(function (data) {
+      if (!data.questions.length) {
+        $('questionList').innerHTML = '<div class="empty">暫時冇問題。可以留低第一個問題。</div>';
+        return;
+      }
+      $('questionList').innerHTML = data.questions.map(function (q) {
+        var answered = q.status === 'answered';
+        return '<div class="item" data-q="' + esc(q.id) + '">' +
+          '<h3>' + esc(q.question) + '</h3>' +
+          '<div class="meta"><span class="badge badge--grey">' + esc(q.village) + '</span>' +
+          '<span class="badge ' + (answered ? 'badge--ok' : 'badge--warn') + '">' + esc(q.status) + '</span>' +
+          esc(String(q.createdAt).slice(0, 19).replace('T', ' ')) + '</div>' +
+          (answered ? '<p style="font-size:.88rem;color:var(--sage);margin:0 0 8px">聲音回答：' +
+            esc(q.answerCitation) + '</p>' :
+            '<div class="two" style="margin:8px 0">' +
+              '<div class="field" style="margin:0"><label>用已保存錄音回答</label>' +
+                '<select class="answer-record-select"></select></div>' +
+              '<div class="field" style="margin:0"><label>出處秒數</label>' +
+                '<input type="number" min="0" step="0.5" value="0" data-f="ts"></div>' +
+            '</div><button class="btn btn--sm" data-act="answer">關聯錄音並回答</button> ') +
+          '<button class="btn btn--danger btn--sm" data-act="del">移除問題</button>' +
+          '</div>';
+      }).join('');
+      renderRecordOptions();
+      Array.prototype.slice.call($('questionList').querySelectorAll('[data-act]')).forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.closest('.item').dataset.q;
+          if (btn.dataset.act === 'del') {
+            api('/api/lab/questions/' + encodeURIComponent(id), { method: 'DELETE' })
+              .then(function () { toast('問題已移除'); loadQuestions(); loadSummary(); }).catch(fail);
+          } else {
+            var box = btn.closest('.item');
+            var recId = box.querySelector('.answer-record-select').value;
+            if (!recId) { toast('請先揀一條已保存錄音', true); return; }
+            api('/api/lab/questions/' + encodeURIComponent(id) + '/answer', {
+              method: 'POST',
+              body: { recordId: recId, timestamp: parseFloat(box.querySelector('[data-f="ts"]').value) || 0 }
+            }).then(function () { toast('已關聯錄音並附出處'); loadQuestions(); loadSummary(); }).catch(fail);
+          }
+        });
+      });
+    }).catch(fail);
+  }
+
+  /* ---------- 方案 2：清拆時鐘 ---------- */
+  function loadTimeline() {
+    api('/api/lab/timeline').then(function (data) {
+      timeline = data;
+      $('timelineWarning').innerHTML = '<strong>' + esc(data.warning) + '</strong><br>' +
+        esc(data.source) + '<br>' + esc(data.licenseNote) + '<br>' + esc(data.privacy);
+      $('timelineLegend').textContent = '顏色＝記憶採集優先度（低／中／高），全部為示意分級，唔代表任何實際工程時間表或政府公布。';
+      var slider = $('yearSlider');
+      slider.min = 0;
+      slider.max = Math.max(0, data.years.length - 1);
+      slider.value = 0;
+      slider.addEventListener('input', renderPhase);
+      renderPhase();
+    }).catch(fail);
+  }
+  function renderPhase() {
+    if (!timeline) return;
+    var idx = parseInt($('yearSlider').value, 10) || 0;
+    var year = timeline.years[idx];
+    var phase = timeline.villages[0].phases[idx] || timeline.villages[0].phases[0];
+    $('phaseYear').textContent = year + ' 年（示意年份）';
+    $('phaseLabel').textContent = phase.label + '　・　優先度：' + phase.urgency;
+    var colors = { low: '#8FB79A', medium: '#D9B86A', high: '#C97B62' };
+    $('villageCircle').setAttribute('fill', colors[phase.urgency] || '#8FB79A');
+  }
+
+  /* ---------- boot ---------- */
+  api('/api/health').then(function (h) {
+    $('connStatus').textContent = '後端已連線・' +
+      (h.storage_ready ? '儲存可用' : '儲存不可用') +
+      '・' + (h.gemini_ready ? 'Gemini 可用' : 'Gemini 未設定（自動建議走規則降級）');
+    return Promise.all([loadSummary(), loadCards(), loadTimeline()]);
+  }).then(function () {
+    return Promise.all([loadRecords(), loadReviews(), loadQuestions()]);
+  }).catch(function (err) {
+    $('connStatus').textContent = '後端連線失敗';
+    fail(err);
+  });
+})();
+</script>
+</body>
+</html>
