@@ -69,6 +69,7 @@ frontend.zip
 
 # SQLite database (runtime data, not source code)
 records.db
+lab.db
 *.sqlite
 *.sqlite3
 

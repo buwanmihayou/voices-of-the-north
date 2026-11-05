@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK" data-theme="system" data-font-size="md" data-contrast="normal" data-reduce-motion="false">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F6F1E6">
+  <meta name="description" content="Voices of the North 北部都會區・鄉村故事館 —— 聽見長者故事，保存地方記憶。">
+  <title>Voices of the North・北部都會區鄉村故事館</title>
+
+  <!-- App icon -->
+  <link rel="icon" type="image/png" href="assets/app-icon.png">
+  <link rel="apple-touch-icon" href="assets/app-icon.png">
+
+  <!-- Fonts：繁體中文（香港）排版，Noto Serif TC 標題 + Noto Sans TC 內文 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap"
+        rel="stylesheet">
+
+  <!-- Bootstrap 5.3 + Font Awesome 6（團隊技術棧） -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css"
+        rel="stylesheet">
+
+  <style>
+<!--@@CSS@@-->
+  </style>
+</head>
+<body data-app-version="2026.11.05">
+<div class="app-shell" id="appShell">
+
+    <header class="topbar">
+      <img class="topbar__logo" src="assets/app-icon.png" alt="Voices of the North 標誌" width="40" height="40">
+      <span class="topbar__title">北部都會區 <span class="topbar__dot" aria-hidden="true">・</span> 鄉村故事館</span>
+      <span class="topbar__spacer" aria-hidden="true"></span>
+      <button type="button" class="ai-status ai-status--offline" id="aiStatusBtn"
+              aria-haspopup="dialog" data-i18n-aria="status.aria">
+        <span class="ai-status__dot" aria-hidden="true"></span>
+        <span class="ai-status__text" id="aiStatusText">檢查中</span>
+      </button>
+    </header>
+
+    <!-- ======================= 分頁：home ======================= -->
+    <main class="page vtn-view is-active" data-view="home">
+
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/home-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <p class="hero__greeting" id="greeting">早晨，歡迎返嚟</p>
+          <h1 class="hero__title" id="heroTitle" data-i18n="home.title">留住村落嘅聲音</h1>
+          <p class="hero__sub" data-i18n="home.sub">聽見長者故事，保存地方記憶</p>
+        </div>
+      </section>
+
+      <button type="button" class="cta-card" id="startRecordBtn" data-i18n-aria="home.ctaAria">
+        <span class="cta-card__visual" aria-hidden="true">
+          <span class="eq">
+            <i style="--h:11px;--d:0ms"></i><i style="--h:19px;--d:160ms"></i><i style="--h:27px;--d:320ms"></i>
+            <i style="--h:17px;--d:480ms"></i><i style="--h:11px;--d:640ms"></i>
+          </span>
+          <span class="cta-card__mic"><i class="fa-solid fa-microphone"></i></span>
+          <span class="eq">
+            <i style="--h:11px;--d:640ms"></i><i style="--h:17px;--d:480ms"></i><i style="--h:27px;--d:320ms"></i>
+            <i style="--h:19px;--d:160ms"></i><i style="--h:11px;--d:0ms"></i>
+          </span>
+        </span>
+        <span class="cta-card__title" data-i18n="home.cta">開始錄音</span>
+        <span class="cta-card__sub" data-i18n="home.ctaSub">首次錄音可先聽示範</span>
+      </button>
+
+      <section class="featured" aria-labelledby="featuredTitle">
+        <div class="featured__head">
+          <h2 class="featured__title" id="featuredTitle" data-i18n="home.featured">精選故事</h2>
+          <span class="featured__rule" aria-hidden="true"></span>
+        </div>
+        <div id="featuredStory"></div>
+      </section>
+
+      <div class="trust-bar" role="note" aria-label="我們的承諾">
+        <span class="trust-bar__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
+                  stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M15.5 27.5v-7M21 27.5V21M27 27.5v-10M33 27.5v-6"
+                  stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <p class="trust-bar__text" data-i18n="home.trust">原音為本・不確定內容會標示・分享範圍由你選擇</p>
+      </div>
+    </main>
+
+    <!-- ======================= 分頁：recording ======================= -->
+    <main class="page page--manage vtn-view" data-view="recording">
+
+      <section class="hero hero--manage" aria-labelledby="pageTitle-recording">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/recording-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <h1 class="hero__title" id="pageTitle-recording" data-i18n="rec.title">我的錄音</h1>
+          <p class="hero__sub" data-i18n="rec.sub">整理你的草稿、待轉寫與已完成內容</p>
+        </div>
+      </section>
+
+      <section class="rec-tabs">
+        <div class="tabs" role="tablist" aria-label="錄音狀態分類">
+          <button type="button" class="tabs__btn is-active" role="tab"
+                  id="tab-drafts" aria-controls="panel-drafts" aria-selected="true" tabindex="0">
+            <span data-i18n="rec.tabDraft">草稿</span><span class="tab-count" id="countDrafts" hidden>0</span>
+          </button>
+          <button type="button" class="tabs__btn" role="tab"
+                  id="tab-pending" aria-controls="panel-pending" aria-selected="false" tabindex="-1">
+            <span data-i18n="rec.tabPending">待轉寫</span><span class="tab-count" id="countPending" hidden>0</span>
+          </button>
+          <button type="button" class="tabs__btn" role="tab"
+                  id="tab-done" aria-controls="panel-done" aria-selected="false" tabindex="-1">
+            <span data-i18n="rec.tabDone">已完成</span><span class="tab-count" id="countDone" hidden>0</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="panels">
+        <section class="empty is-show" role="tabpanel" id="panel-drafts" aria-labelledby="tab-drafts" tabindex="0">
+          <div class="vtn-rec-list" id="recListDrafts"></div>
+          <div class="empty__inner" id="emptyDrafts">
+            <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
+            <h2 class="empty__title" data-i18n="rec.emptyDraftTitle">目前沒有錄音草稿</h2>
+            <p class="empty__text" data-i18n="rec.emptyDraftText">未完成的錄音會保存在這裡，方便你稍後繼續核對。</p>
+          </div>
+        </section>
+
+        <section class="empty" role="tabpanel" id="panel-pending" aria-labelledby="tab-pending" tabindex="0" hidden>
+          <div class="vtn-rec-list" id="recListPending"></div>
+          <div class="empty__inner" id="emptyPending">
+            <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
+            <h2 class="empty__title" data-i18n="rec.emptyPendingTitle">目前沒有待轉寫的錄音</h2>
+            <p class="empty__text" data-i18n="rec.emptyPendingText">上傳未成功的錄音會完整保存在這裡，可以隨時重試。</p>
+          </div>
+        </section>
+
+        <section class="empty" role="tabpanel" id="panel-done" aria-labelledby="tab-done" tabindex="0" hidden>
+          <div class="vtn-rec-list" id="recListDone"></div>
+          <div class="empty__inner" id="emptyDone">
+            <img class="empty__art empty__art--drafts" src="assets/empty-recording-drafts.png" alt="" width="1060" height="660">
+            <h2 class="empty__title" data-i18n="rec.emptyDoneTitle">目前沒有已完成的故事</h2>
+            <p class="empty__text" data-i18n="rec.emptyDoneText">經過核對並確認分享範圍的故事，會保存在這裡。</p>
+          </div>
+        </section>
+      </div>
+
+      <p class="settings-foot" id="recStorageNote" hidden></p>
+
+      <div class="trust-bar" role="note" aria-label="私隱承諾">
+        <span class="trust-bar__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
+                  stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+            <rect x="17" y="23" width="14" height="11" rx="2.4" stroke="currentColor" stroke-width="2.6"/>
+            <path d="M19.8 23v-3.2a4.2 4.2 0 0 1 8.4 0V23"
+                  stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <p class="trust-bar__text" data-i18n="rec.trust">錄音先存喺呢部裝置；登入後可同步到測試伺服器。預設私人，撤回會一併清除。</p>
+      </div>
+    </main>
+
+    <!-- ======================= 分頁：stories ======================= -->
+    <main class="page page--stories vtn-view" data-view="stories">
+
+      <section class="hero hero--stories" aria-labelledby="pageTitle-stories">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/stories-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <h1 class="hero__title" id="pageTitle-stories" data-i18n="stories.title">村落故事</h1>
+          <p class="hero__sub" data-i18n="stories.sub">聽聽長者分享的地方記憶</p>
+        </div>
+
+        <div class="stories-toolbar">
+          <input type="search" id="storySearch" autocomplete="off"
+                 data-i18n-ph="stories.searchPh" data-i18n-aria="stories.searchAria">
+          <button type="button" class="vtn-btn" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i><span data-i18n="stories.filter">篩選</span><span class="filter-toggle-badge" id="filterBadge" hidden>0</span>
+          </button>
+        </div>
+        <div class="filter-summary" id="filterSummary"></div>
+      </section>
+
+      <section class="filter-panel" id="filterPanel" hidden aria-label="篩選故事">
+        <div class="filter-group">
+          <p class="filter-group__label" data-i18n="filter.location">地點</p>
+          <div class="chip-row" id="filterLocation"></div>
+        </div>
+        <div class="filter-group">
+          <p class="filter-group__label" data-i18n="filter.topic">主題</p>
+          <div class="chip-row" id="filterTopic"></div>
+        </div>
+        <div class="filter-group">
+          <p class="filter-group__label" data-i18n="filter.era">年代</p>
+          <div class="chip-row" id="filterEra"></div>
+        </div>
+        <div class="filter-group">
+          <p class="filter-group__label" data-i18n="filter.language">語言</p>
+          <div class="chip-row" id="filterLanguage"></div>
+        </div>
+        <div class="filter-sort">
+          <label for="filterSort" data-i18n="filter.sort">排序</label>
+          <select id="filterSort">
+            <option value="newest" data-i18n="sort.newest">最新發佈</option>
+            <option value="oldest" data-i18n="sort.oldest">最早發佈</option>
+            <option value="duration" data-i18n="sort.duration">時長（長至短）</option>
+            <option value="era" data-i18n="sort.era">年代（早至晚）</option>
+            <option value="title" data-i18n="sort.title">名稱</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="vtn-btn vtn-btn--quiet" id="filterClear" data-i18n="filter.clear">清除全部</button>
+          <button type="button" class="vtn-btn vtn-btn--solid" id="filterDone" data-i18n="filter.done">完成</button>
+        </div>
+      </section>
+
+      <p class="result-count" id="resultCount" role="status" aria-live="polite"></p>
+      <div class="story-list" id="storyList" role="list"></div>
+      <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
+
+      <section class="empty" id="storiesEmpty" hidden>
+        <div class="empty__inner">
+          <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
+          <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
+        </div>
+        <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
+      </section>
+
+      <section class="map-card" aria-labelledby="mapTitle">
+        <div class="map-card__head">
+          <span class="map-card__pin" aria-hidden="true">
+            <i class="fa-solid fa-location-dot"></i>
+          </span>
+          <div class="map-card__heading">
+            <h2 class="map-card__title" id="mapTitle">元朗 <span aria-hidden="true">・</span> 約 800 米模糊範圍</h2>
+            <p class="map-card__note" id="mapNote" data-i18n="map.note">位置經模糊處理，並非 GPS 定位</p>
+          </div>
+          <button type="button" class="map-mode-btn" id="mapModeBtn" aria-pressed="false" data-i18n="map.overview">總覽</button>
+        </div>
+        <div class="map-card__frame" id="mapFrame">
+          <img class="map-card__fallback" src="assets/map-blurred.svg"
+               alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，附指北針與比例尺，只作示意並非 GPS 定位。">
+          <div class="map-card__leaflet" id="vtnMap" role="application" aria-label="約 800 米模糊範圍真地圖（非 GPS 定位）"></div>
+          <div class="map-card__loading" id="mapLoading">
+            <span class="map-card__spinner" aria-hidden="true"></span>
+            <span data-i18n="map.loading">正在載入真實地圖…</span>
+          </div>
+          <div class="map-card__empty" id="mapEmpty" hidden>
+            <span><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i></span>
+            <span data-i18n="map.empty">沒有符合的故事</span>
+          </div>
+          <span class="map-card__north" aria-hidden="true">N<span>↑</span></span>
+        </div>
+        <p class="map-card__tiles-note" id="mapTilesNote">真實地圖由 OpenStreetMap 貢獻者提供・範圍經模糊處理，並非講者實際位置</p>
+        <p class="map-card__hint" id="mapHint" data-i18n="map.hint">只顯示所選故事嘅模糊範圍；切到「總覽」可一次睇全部並點圈切換。</p>
+      </section>
+
+      <aside class="disclosure-card" role="note" aria-label="示範故事披露">
+        <span class="disclosure-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-circle-info"></i>
+        </span>
+        <div class="disclosure-card__body">
+          <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
+          <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
+        </div>
+      </aside>
+    </main>
+
+    <!-- ======================= 分頁：me ======================= -->
+    <main class="page page--me vtn-view" data-view="me">
+
+      <section class="hero hero--me" aria-labelledby="pageTitle-me">
+        <div class="hero__art" aria-hidden="true">
+          <img src="assets/my-background.png" alt="">
+        </div>
+        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
+        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <p class="hero__eyebrow" data-i18n="me.eyebrow">我的</p>
+          <h1 class="hero__title hero__title--xl" id="pageTitle-me" data-i18n="me.title">管理你的故事</h1>
+          <p class="hero__sub hero__sub--stack" data-i18n="me.sub">分享範圍由你決定，故事亦可按需要更新。</p>
+        </div>
+      </section>
+
+      <section class="account-card" aria-label="帳戶">
+        <span class="account-card__avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+        <div class="account-card__body">
+          <p class="account-card__role" id="accountRole">訪客</p>
+          <p class="account-card__id" id="accountId">錄音只存喺呢部裝置</p>
+        </div>
+        <button type="button" class="vtn-btn vtn-btn--sm" id="accountAction">登入</button>
+      </section>
+
+      <div class="stat-row">
+        <div class="stat"><span class="stat__num" id="statSaved">0</span><span class="stat__label" data-i18n="me.statSaved">已保存</span></div>
+        <div class="stat"><span class="stat__num" id="statPending">0</span><span class="stat__label" data-i18n="me.statPending">待轉寫</span></div>
+        <div class="stat"><span class="stat__num" id="statShared">0</span><span class="stat__label" data-i18n="me.statShared">已分享</span></div>
+      </div>
+
+      <section class="me-list" aria-label="個人內容與私隱管理">
+        <button type="button" class="me-item" id="meEntryRecordings">
+          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-microphone"></i></span>
+          <span class="me-item__text">
+            <span class="me-item__title" data-i18n="me.recordings">我的錄音與故事</span>
+            <span class="me-item__sub" data-i18n="me.recordingsSub">查看草稿、待轉寫與已完成內容</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+
+        <button type="button" class="me-item" id="meEntryPrivacy">
+          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span>
+          <span class="me-item__text">
+            <span class="me-item__title" data-i18n="me.privacy">隱私與分享範圍</span>
+            <span class="me-item__sub" data-i18n="me.privacySub">私人・家人・社區・公開（預設私人）</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+
+        <button type="button" class="me-item" id="meEntryCorrection">
+          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-file-pen"></i></span>
+          <span class="me-item__text">
+            <span class="me-item__title" data-i18n="me.correction">更正或撤回故事</span>
+            <span class="me-item__sub" data-i18n="me.correctionSub">申請更正（審核後成新版本）或整則撤回</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+
+        <button type="button" class="me-item" id="meEntryExport">
+          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-download"></i></span>
+          <span class="me-item__text">
+            <span class="me-item__title" data-i18n="me.export">匯出我的音訊與逐字稿</span>
+            <span class="me-item__sub" data-i18n="me.exportSub">隨時取回原音、逐字稿與時間戳</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+
+        <button type="button" class="me-item" id="meEntryLanguage" aria-haspopup="dialog">
+          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-language"></i></span>
+          <span class="me-item__text">
+            <span class="me-item__title" data-i18n="me.language">語言 Language</span>
+            <span class="me-item__sub" id="meLanguageCurrent">繁體中文（香港）</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+
+        <button type="button" class="me-item" id="meEntrySettings">
+          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-sliders"></i></span>
+          <span class="me-item__text">
+            <span class="me-item__title" data-i18n="me.settings">設定</span>
+            <span class="me-item__sub" data-i18n="me.settingsSub">字級、音量、速度、主題與無障礙</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+
+        <div class="me-note" role="note" aria-label="模糊地點說明">
+          <span class="me-note__pin" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+          <span class="me-note__divider" aria-hidden="true"></span>
+          <p class="me-note__text" data-i18n="me.locationNote">故事地點以模糊範圍呈現，保護講述者私隱。</p>
+        </div>
+
+        <button type="button" class="me-item me-item--about" id="meEntryAbout">
+          <span class="me-item__icon me-item__icon--gold" aria-hidden="true"><i class="fa-solid fa-info"></i></span>
+          <span class="me-item__divider" aria-hidden="true"></span>
+          <span class="me-item__text">
+            <span class="me-item__title me-item__title--about" data-i18n="me.about">關於 Voices of the North</span>
+          </span>
+          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+        </button>
+      </section>
+    </main>
+
+    <!-- ======================= 分頁：settings ======================= -->
+    <main class="page vtn-view" data-view="settings">
+      <div class="page-head">
+        <button type="button" class="page-head__back" data-back="me" data-i18n-aria="common.back">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="page-head__title" data-i18n="settings.title">設定</h1>
+      </div>
+
+      <section class="settings-group" aria-labelledby="setDisplay">
+        <h2 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h2>
+
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.fontSize">字級</span>
+            <span class="setting-row__hint" data-i18n="settings.fontSizeHint">正文最小 18px，照顧長者閱讀</span>
+          </div>
+          <div class="setting-row__control">
+            <div class="seg" role="group" aria-label="字級">
+              <button type="button" class="seg__btn" data-font-size="md" data-i18n="settings.fontMd">標準</button>
+              <button type="button" class="seg__btn" data-font-size="lg" data-i18n="settings.fontLg">大</button>
+              <button type="button" class="seg__btn" data-font-size="xl" data-i18n="settings.fontXl">特大</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.theme">主題</span>
+            <span class="setting-row__hint" data-i18n="settings.themeHint">淺色、深色或跟隨系統</span>
+          </div>
+          <div class="setting-row__control">
+            <select id="setTheme" aria-label="主題">
+              <option value="system" data-i18n="settings.themeSystem">跟隨系統</option>
+              <option value="light" data-i18n="settings.themeLight">淺色</option>
+              <option value="dark" data-i18n="settings.themeDark">深色</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.contrast">高對比</span>
+            <span class="setting-row__hint" data-i18n="settings.contrastHint">加強邊框與文字對比</span>
+          </div>
+          <div class="setting-row__control">
+            <button type="button" class="vtn-btn vtn-btn--sm" id="setContrast" aria-pressed="false">關</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.motion">減少動態</span>
+            <span class="setting-row__hint" data-i18n="settings.motionHint">停止過場與脈動動畫</span>
+          </div>
+          <div class="setting-row__control">
+            <button type="button" class="vtn-btn vtn-btn--sm" id="setMotion" aria-pressed="false">關</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-group" aria-labelledby="setPlayback">
+        <h2 class="settings-group__title" id="setPlayback" data-i18n="settings.playback">播放</h2>
+
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.volume">播放音量</span>
+            <span class="setting-row__hint" data-i18n="settings.volumeHint">套用到所有故事與錄音</span>
+          </div>
+          <div class="setting-row__control">
+            <input type="range" id="setVolume" min="0" max="100" step="5" value="100" aria-label="播放音量">
+            <output id="setVolumeOut" for="setVolume">100%</output>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.speed">播放速度</span>
+            <span class="setting-row__hint" data-i18n="settings.speedHint">慢速有助聽清長者口音</span>
+          </div>
+          <div class="setting-row__control">
+            <select id="setSpeed" aria-label="播放速度">
+              <option value="0.75">0.75×</option>
+              <option value="1">1.00×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.50×</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-group">
+        <div class="setting-row">
+          <div class="setting-row__text">
+            <span class="setting-row__label" data-i18n="settings.reset">恢復預設</span>
+            <span class="setting-row__hint" data-i18n="settings.resetHint">字級、音量、速度、主題全部還原</span>
+          </div>
+          <div class="setting-row__control">
+            <button type="button" class="vtn-btn vtn-btn--sm vtn-btn--danger" id="setReset" data-i18n="settings.resetBtn">還原</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px；深色模式文字對比不低於 4.5:1。</p>
+    </main>
+
+    <!-- ======================= 分頁：about ======================= -->
+    <main class="page vtn-view" data-view="about">
+      <div class="page-head">
+        <button type="button" class="page-head__back" data-back="me" data-i18n-aria="common.back">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="page-head__title" data-i18n="about.title">關於</h1>
+      </div>
+
+      <p class="about-banner" data-i18n="about.banner">黑客松演示，含角色扮演故事，非真實長者訪談。所有示範內容均清楚標示，不會冒充真實口述歷史。</p>
+
+      <section class="about-section">
+        <h2 data-i18n="about.positionTitle">項目定位</h2>
+        <p data-i18n="about.positionBody">Voices of the North（北區之聲）喺北部都會區發展入面，用生成式 AI 同適老化設計，保存新界鄉村長者嘅粵語口述歷史。目標唔係做百科，而係做一座「可以問、可以核對」的村落聲音檔案館。</p>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.problemTitle">問題背景</h2>
+        <p data-i18n="about.problemBody">北部都會區多條鄉村面對收地、搬村同人口老化。長者嘅生活記憶往往只存在口耳相傳，一旦長者離世或搬走，地方知識就無處可尋。現有語音轉寫工具對粵語長者口音支援不足，亦少有工具願意為「答唔到」負責。</p>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.teamTitle">團隊</h2>
+        <ul>
+          <li data-i18n="about.team1">Zheng — 後端、資料儲存與部署</li>
+          <li data-i18n="about.team2">Steven — 前端與互動設計</li>
+          <li data-i18n="about.team3">Boris — 粵語示範錄音與內容</li>
+          <li data-i18n="about.team4">Douglas — 業務發展與社區聯絡</li>
+          <li data-i18n="about.team5">Dat — 用戶測試與合規審視</li>
+        </ul>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.dataTitle">數據來源與授權</h2>
+        <p data-i18n="about.dataBody">本演示收錄 8 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。唯一真實音軌為 Boris Lau 的示範錄音（約 46.7 秒），其餘故事只有逐字稿，介面會如實標示「未附音檔」。</p>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.aiTitle">AI 做什麼、不做什麼</h2>
+        <p data-i18n="about.aiDoes">做：將已授權的粵語錄音轉成逐字稿、標出逐詞時間戳、按你嘅問題檢索相關段落，並附上可核對的來源時間戳。</p>
+        <p data-i18n="about.aiDoesNot">不做：不替長者發言、不補寫錄音以外嘅內容、不用外部知識回答、不在無來源時亂答。範圍外一律回答「錄製的故事中未包含此資訊」。</p>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.privacyTitle">私隱與模糊定位</h2>
+        <p data-i18n="about.privacyBody">故事只以約 800 米模糊範圍呈現，並非講者 GPS 位置；不設精確標記。分享範圍分私人、家人、社區、公開四級，預設私人，每則故事可獨立設定。伺服器會按分享範圍過濾，唔止喺前端隱藏。</p>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.redlineTitle">五條誠實紅線</h2>
+        <ol class="about-redlines">
+          <li data-i18n="about.redline1">答案只來自已錄製並獲授權的內容。</li>
+          <li data-i18n="about.redline2">在範圍內的答案必須附時間戳出處。</li>
+          <li data-i18n="about.redline3">超出範圍一律如實拒答，不猜、不補。</li>
+          <li data-i18n="about.redline4">未轉寫的錄音只標為「待轉寫」，不偽造結果。</li>
+          <li data-i18n="about.redline5">無法取得逐詞置信度時顯示「未能取得置信度」，不寫死數值。</li>
+        </ol>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.ossTitle">開源與第三方資源</h2>
+        <p data-i18n="about.ossBody">程式碼以 MIT 授權釋出；地圖圖磚由 OpenStreetMap 貢獻者提供（ODbL），後備圖磚由 Esri 提供；字體為 Noto Sans TC 與 Noto Serif TC（SIL Open Font License）；圖示為 Font Awesome Free（CC BY 4.0）。</p>
+      </section>
+
+      <section class="about-section">
+        <h2 data-i18n="about.versionTitle">版本資訊</h2>
+        <p class="about-meta" id="aboutVersion">—</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主導航">
+      <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label" data-i18n="nav.home">主頁</span>
+      </a>
+      <a class="bottom-nav__item" href="#recording" data-nav="record">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-microphone" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label" data-i18n="nav.record">錄音</span>
+      </a>
+      <a class="bottom-nav__item" href="#stories" data-nav="stories">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label" data-i18n="nav.stories">故事</span>
+      </a>
+      <a class="bottom-nav__item" href="#me" data-nav="me">
+        <span class="bottom-nav__icon"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+        <span class="bottom-nav__label" data-i18n="nav.me">我的</span>
+      </a>
+    </nav>
+
+    <div class="toast" id="appToast" role="status" aria-live="polite" aria-atomic="true">
+      <i class="fa-solid fa-circle-info toast__icon" aria-hidden="true"></i>
+      <span class="toast__text" id="appToastText"></span>
+    </div>
+</div>
+
+<script>
+<!--@@JS@@-->
+</script>
+</body>
+</html>
