@@ -3253,6 +3253,1204 @@ html[data-reduce-motion="true"] *::after {
   .ai-status { padding: 0 10px; min-width: 44px; justify-content: center; }
 }
 
+/* ===== src/css/story-map.css ===== */
+/* =============================================================================
+ * story-map.css — 故事 Tab「地圖優先」重構
+ * -----------------------------------------------------------------------------
+ * 設計原則：
+ *   1. 地圖是主視圖，列表與詳情都是它的二級層；
+ *   2. 一級資訊＝故事類型（顏色＋圖標）＋心情（小角標），不做 30 種組合轟炸；
+ *   3. 所有浮層都用米白／森林綠／暖金，與 Direction B 一致；
+ *   4. 尊重 prefers-reduced-motion；觸控目標 ≥44px。
+ * ========================================================================== */
+
+/* 故事頁改為滿版地圖容器（覆寫 .vtn-view.is-active 的 display:block） */
+.page--stories.vtn-view.is-active {
+  display: flex !important;
+  flex-direction: column;
+}
+.page--stories {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  background: var(--ivory-deep);
+}
+
+/* ---------- 地圖畫布 ---------- */
+.atlas {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #E7E2D3;
+}
+.atlas__fallback,
+.atlas__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.atlas__fallback {
+  object-fit: cover;
+  opacity: 0.9;
+  z-index: 0;
+}
+.atlas__canvas {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: #E7E2D3;
+}
+.atlas__canvas .maplibregl-canvas,
+.atlas__canvas .leaflet-tile-pane {
+  filter: saturate(0.82) contrast(0.97) sepia(0.06);
+}
+.atlas__canvas.is-ready { opacity: 1; }
+.atlas__canvas.is-failed { display: none; }
+
+/* 宣紙質感：只做加法，不改地圖圖層 */
+.atlas__tint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(246, 241, 230, 0.18) 0%, rgba(246, 241, 230, 0) 55%),
+    linear-gradient(to bottom, rgba(36, 60, 47, 0.10) 0%, rgba(36, 60, 47, 0) 22%),
+    radial-gradient(140% 110% at 50% 105%, rgba(33, 69, 58, 0.26) 0%, rgba(33, 69, 58, 0) 58%);
+  mix-blend-mode: multiply;
+}
+
+/* ---------- 頂部浮層 ---------- */
+.atlas__top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 4px 10px;
+  padding: 14px 14px 6px;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    rgba(246, 241, 230, 0.97) 0%,
+    rgba(246, 241, 230, 0.9) 62%,
+    rgba(246, 241, 230, 0) 100%);
+}
+.atlas__top > * { pointer-events: auto; }
+
+.atlas__titles { min-width: 0; }
+.atlas__eyebrow {
+  margin: 0 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.atlas__live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3E8B60;
+  box-shadow: 0 0 0 4px rgba(62, 139, 96, 0.16);
+  animation: atlas-breathe 2.6s ease-in-out infinite;
+}
+@keyframes atlas-breathe {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(62, 139, 96, 0.12); }
+  50% { box-shadow: 0 0 0 7px rgba(62, 139, 96, 0.05); }
+}
+.atlas__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.atlas__tools { display: flex; gap: 8px; flex: none; }
+.atlas-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--hairline);
+  border-radius: 14px;
+  background: rgba(253, 251, 244, 0.94);
+  color: var(--forest);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px -12px rgba(33, 69, 58, 0.55);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.atlas-btn:hover { background: var(--cream); }
+.atlas-btn:active { transform: scale(0.94); }
+.atlas-btn[aria-pressed="true"] {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #F6F1E6;
+}
+.atlas-btn--3d span { font-size: 0.78rem; letter-spacing: 0.04em; }
+
+.atlas__searchrow { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 10px; }
+.atlas__search {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1.5px solid rgba(185, 205, 182, 0.9);
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.96);
+  box-shadow: 0 10px 24px -18px rgba(33, 69, 58, 0.65);
+  color: var(--muted);
+}
+.atlas__search i { font-size: 0.82rem; flex: none; }
+.atlas__search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink-body);
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+.atlas__search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.atlas__filter {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1.5px solid rgba(185, 205, 182, 0.9);
+  border-radius: 50%;
+  background: rgba(253, 251, 244, 0.96);
+  color: var(--forest);
+  font-size: 0.92rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -18px rgba(33, 69, 58, 0.65);
+}
+.atlas__filter[aria-expanded="true"] { background: var(--forest); color: #F6F1E6; }
+.atlas__filter .filter-toggle-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #B4552F;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 900;
+  box-shadow: 0 0 0 2px var(--ivory);
+}
+.atlas__top .filter-summary { grid-column: 1 / -1; margin: 8px 0 0; }
+.atlas__top .filter-summary__chip {
+  min-height: 30px;
+  background: rgba(253, 251, 244, 0.94);
+  font-size: 0.74rem;
+}
+
+/* ---------- 類型圖例（可點擊篩選） ---------- */
+.atlas__legend {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 7px;
+  margin: 8px -14px 0;
+  padding: 2px 14px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, #000 0, #000 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 88%, transparent 100%);
+}
+.atlas__legend::-webkit-scrollbar { display: none; }
+.legend-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 4px 12px 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.9);
+  color: var(--ink-body);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 16px -12px rgba(33, 69, 58, 0.7);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.legend-chip:hover { transform: translateY(-1px); }
+.legend-chip__icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #FDFBF4;
+  font-size: 0.66rem;
+}
+.legend-chip__count { font-size: 0.66rem; opacity: 0.62; font-variant-numeric: tabular-nums; }
+.legend-chip[aria-pressed="true"] {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #F6F1E6;
+}
+.legend-chip[aria-pressed="true"] .legend-chip__count { opacity: 0.8; }
+
+/* ---------- 右側控制 ---------- */
+.atlas__controls {
+  position: absolute;
+  z-index: 12;
+  right: 12px;
+  top: 46%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.atlas-ctl {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 13px;
+  background: rgba(253, 251, 244, 0.94);
+  color: var(--forest-deep);
+  font-size: 0.86rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px -14px rgba(33, 69, 58, 0.75);
+  transition: transform 0.16s ease, background-color 0.2s ease;
+}
+.atlas-ctl:active { transform: scale(0.92); }
+.atlas-ctl--reset { color: #8A5B2B; }
+
+/* ---------- 底部：年代軸、附近故事、私隱 ---------- */
+.atlas__bottom {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px 12px calc(10px + env(safe-area-inset-bottom));
+  pointer-events: none;
+  background: linear-gradient(to top,
+    rgba(28, 48, 38, 0.62) 0%,
+    rgba(28, 48, 38, 0.28) 46%,
+    rgba(28, 48, 38, 0) 100%);
+}
+.atlas__bottom > * { pointer-events: auto; }
+
+.atlas__timeline {
+  padding: 10px 14px 8px;
+  border-radius: 18px;
+  background: rgba(253, 251, 244, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 14px 30px -22px rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+}
+.atlas__timeline-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.atlas__timeline-head b {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--forest);
+  font-variant-numeric: tabular-nums;
+}
+#atlasEra {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  margin: 2px 0 0;
+  background: transparent;
+  cursor: pointer;
+}
+#atlasEra::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--jade-strong), var(--forest));
+  opacity: 0.35;
+}
+#atlasEra::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border-radius: 50%;
+  border: 3px solid var(--cream);
+  background: var(--forest);
+  box-shadow: 0 2px 8px -2px rgba(33, 69, 58, 0.8);
+}
+#atlasEra::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--jade-strong);
+  opacity: 0.35;
+}
+#atlasEra::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--cream);
+  border-radius: 50%;
+  background: var(--forest);
+}
+.atlas__ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.atlas__ticks span.is-active { color: var(--forest); font-weight: 900; }
+
+.atlas__peek {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.atlas__peek::-webkit-scrollbar { display: none; }
+.atlas__peek:empty { display: none; }
+.peek-card {
+  flex: 0 0 auto;
+  width: 168px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  background: rgba(253, 251, 244, 0.94);
+  color: var(--ink-body);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.8);
+  transition: transform 0.18s ease;
+}
+.peek-card:hover { transform: translateY(-2px); }
+.peek-card__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  color: #FDFBF4;
+  font-size: 0.78rem;
+}
+.peek-card__body { min-width: 0; }
+.peek-card__title {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.peek-card__meta {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.64rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.atlas__privacy {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(246, 241, 230, 0.86);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+.atlas__privacy i { font-size: 0.62rem; }
+
+.atlas__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 8px;
+}
+.atlas__tiles {
+  margin: 0;
+  max-width: 96%;
+  font-size: 0.5rem;
+  line-height: 1.35;
+  text-align: center;
+  color: rgba(246, 241, 230, 0.78);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+/* ---------- 載入 / 空狀態 ---------- */
+.atlas__loading {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.96);
+  border: 1px solid var(--hairline);
+  color: var(--forest-deep);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 12px 30px -18px rgba(33, 69, 58, 0.8);
+  transition: opacity 0.3s ease;
+}
+.atlas__loading.is-hidden { opacity: 0; pointer-events: none; }
+.atlas__spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid #c7d6c2;
+  border-top-color: var(--forest);
+  animation: atlas-spin 0.8s linear infinite;
+}
+@keyframes atlas-spin { to { transform: rotate(360deg); } }
+
+.atlas__empty {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  text-align: center;
+  background: rgba(246, 241, 230, 0.9);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  backdrop-filter: blur(2px);
+}
+.atlas__empty i { font-size: 1.6rem; color: var(--jade-strong); }
+
+/* ---------- 故事標記（DOM marker） ---------- */
+.vtn-pin {
+  position: relative;
+  display: block;
+  width: 40px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* 注意：不要在此元素上用 transform 做動畫 —— MapLibre 用 inline transform 定位
+     marker，CSS 動畫會覆蓋定位，令所有故事點疊在左上角。 */
+  animation: pin-fade 0.4s ease both;
+  transform-origin: bottom center;
+  scale: 1;
+  transition: scale 0.25s ease;
+}
+@keyframes pin-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.atlas--far .vtn-pin { scale: 0.78; }
+
+/* 地圖模式下收起助手 FAB 與提示氣泡，避免遮擋故事點與年代軸；
+   列表模式仍保留入口。 */
+body:has(.page--stories.is-map.is-active) .vtn-ai-launcher { display: none; }
+/* 故事頁以地圖／列表為主，提示氣泡會壓住卡片，收起但保留 FAB */
+body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
+.vtn-pin__ring {
+  position: absolute;
+  left: 50%;
+  top: 17px;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.16;
+  transform: scale(1);
+}
+.vtn-pin.is-selected .vtn-pin__ring {
+  animation: pin-pulse 2.2s ease-out infinite;
+}
+@keyframes pin-pulse {
+  0% { transform: scale(0.9); opacity: 0.28; }
+  70% { transform: scale(1.9); opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.vtn-pin__disc {
+  position: absolute;
+  left: 50%;
+  top: 15px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  display: grid;
+  place-items: center;
+  border-radius: 50% 50% 50% 6px;
+  transform: rotate(-45deg);
+  background: var(--pin-color, #6F7D70);
+  color: #FDFBF4;
+  border: 2px solid rgba(253, 251, 244, 0.92);
+  box-shadow: 0 8px 16px -8px rgba(22, 40, 30, 0.9);
+  transition: transform 0.18s var(--ease-slow);
+}
+.vtn-pin__disc i {
+  transform: rotate(45deg);
+  font-size: 0.82rem;
+}
+.vtn-pin:hover .vtn-pin__disc,
+.vtn-pin:focus-visible .vtn-pin__disc { transform: rotate(-45deg) translate(2px, -2px) scale(1.08); }
+.vtn-pin.is-selected .vtn-pin__disc {
+  transform: rotate(-45deg) scale(1.12);
+  border-color: #F6F1E6;
+  box-shadow: 0 10px 22px -8px rgba(22, 40, 30, 1);
+}
+.vtn-pin__mood {
+  position: absolute;
+  right: 2px;
+  top: 9px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #FDFBF4;
+  background: var(--mood-color, #8C7A5B);
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+}
+.vtn-pin__label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 2px);
+  transform: translate(-50%, 4px);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(28, 48, 38, 0.92);
+  color: #F6F1E6;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.9);
+}
+.vtn-pin:hover .vtn-pin__label,
+.vtn-pin:focus-visible .vtn-pin__label,
+.vtn-pin.is-selected .vtn-pin__label {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* 類型色板（同時用於圖例、抽屜、列表） */
+.vtn-type--festival { color: #B4552F; --pin-color: #B4552F; }
+.vtn-type--farming { color: #4F7A4A; --pin-color: #4F7A4A; }
+.vtn-type--migration { color: #3C6E8F; --pin-color: #3C6E8F; }
+.vtn-type--architecture { color: #8A6A3B; --pin-color: #8A6A3B; }
+.vtn-type--oral { color: #7A5C8F; --pin-color: #7A5C8F; }
+.vtn-type--market { color: #A8832C; --pin-color: #A8832C; }
+.vtn-type--other { color: #6F7D70; --pin-color: #6F7D70; }
+.vtn-bg--festival { background: #B4552F; }
+.vtn-bg--farming { background: #4F7A4A; }
+.vtn-bg--migration { background: #3C6E8F; }
+.vtn-bg--architecture { background: #8A6A3B; }
+.vtn-bg--oral { background: #7A5C8F; }
+.vtn-bg--market { background: #A8832C; }
+.vtn-bg--other { background: #6F7D70; }
+
+.vtn-mood--wistful { --mood-color: #8C7A5B; }
+.vtn-mood--joyful { --mood-color: #C9873A; }
+.vtn-mood--reflective { --mood-color: #5E8C70; }
+.vtn-mood--heavy { --mood-color: #6B6F7A; }
+.vtn-mood--proud { --mood-color: #B4552F; }
+
+/* ---------- 列表模式 ---------- */
+.atlas-listview {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: 12px 0 24px;
+  background: var(--ivory);
+}
+.atlas-listview[hidden] { display: none !important; }
+.atlas-listview__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top)) 18px 2px;
+}
+.atlas-listview__back {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--forest);
+  cursor: pointer;
+}
+.atlas-listview__heading { min-width: 0; }
+.atlas-listview__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti SC", serif;
+  font-size: 1.24rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+.atlas-listview__sub { margin: 2px 0 0; font-size: 0.76rem; color: var(--muted); }
+.atlas-listview .result-count { margin: 8px 20px 0; }
+.atlas-listview .story-list { margin-top: 10px; }
+.atlas-listview .disclosure-card { margin-top: 18px; }
+
+/* 列表卡片：類型色塊與心情角標，和地圖保持同一套語言 */
+.story-item__cover--festival { background: #F6E4DA; color: #B4552F; }
+.story-item__cover--farming { background: #E6EFE1; color: #4F7A4A; }
+.story-item__cover--migration { background: #E1EBF2; color: #3C6E8F; }
+.story-item__cover--architecture { background: #F0E8DB; color: #8A6A3B; }
+.story-item__cover--oral { background: #ECE4F2; color: #7A5C8F; }
+.story-item__cover--market { background: #F5EBD3; color: #A8832C; }
+.story-item__cover--other { background: #E8ECE6; color: #6F7D70; }
+.story-item__cover i { font-size: 1.25rem; }
+.story-item .tag--type {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-color: currentColor;
+  color: var(--pin-color, #6F7D70);
+  background: rgba(255, 255, 255, 0.55);
+}
+.story-item .tag--type i { font-size: 0.66rem; }
+.story-item .mood-tag { font-size: 0.68rem; padding: 1px 8px; }
+
+/* ---------- 半拉抽屜 ---------- */
+.story-sheet__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(18, 32, 24, 0.28);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.story-sheet__scrim.is-open { opacity: 1; }
+
+.story-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px 26px 0 0;
+  background: var(--cream);
+  box-shadow: 0 -18px 46px -22px rgba(18, 36, 26, 0.75);
+  transform: translateY(100%);
+  transition: transform 0.42s var(--ease-slow);
+  touch-action: none;
+  will-change: transform;
+}
+.story-sheet.is-open { transform: translateY(52%); }
+.story-sheet.is-expanded { transform: translateY(0); }
+.story-sheet.is-dragging { transition: none; }
+.story-sheet__grab {
+  flex: none;
+  display: grid;
+  place-items: center;
+  height: 26px;
+  cursor: grab;
+  touch-action: none;
+}
+.story-sheet__grab span {
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: #CFC7B2;
+}
+.story-sheet__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: rgba(253, 251, 244, 0.9);
+  color: var(--muted);
+  cursor: pointer;
+}
+.story-sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 18px calc(26px + env(safe-area-inset-bottom));
+  touch-action: pan-y;
+}
+.story-sheet .story-detail {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 抽屜內容：標題區 */
+.sheet-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding-right: 34px;
+}
+.sheet-hero__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  color: #FDFBF4;
+  font-size: 1.2rem;
+  box-shadow: 0 12px 22px -14px rgba(24, 44, 32, 0.9);
+}
+.sheet-hero__body { min-width: 0; }
+.sheet-hero__kicker {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.sheet-hero__kicker .dot { opacity: 0.5; }
+.sheet-hero__title {
+  margin: 3px 0 0;
+  font-family: "Noto Serif TC", "Songti SC", serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.sheet-hero__sub {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.sheet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+}
+.sheet-tags .tag { min-height: 24px; display: inline-flex; align-items: center; gap: 5px; }
+.mood-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mood-color, #8C7A5B);
+  background: rgba(255, 255, 255, 0.5);
+  color: #5A4A30;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.mood-tag__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mood-color, #8C7A5B);
+}
+
+/* 抽屜內容：播放器（音檔實測振幅波形 ＋ 逐字稿時間戳刻度） */
+.player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background: linear-gradient(160deg, #F4EFE0 0%, #FDFBF4 60%);
+}
+.player__btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--forest);
+  color: #F6F1E6;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 12px 24px -14px rgba(33, 69, 58, 0.95);
+  transition: transform 0.18s ease, background-color 0.2s ease;
+}
+.player__btn:hover { transform: scale(1.04); }
+.player__btn:active { transform: scale(0.95); }
+.player__btn.is-playing { background: #B4552F; }
+.player__main { flex: 1 1 auto; min-width: 0; }
+.player__track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: #E3DDCB;
+  cursor: pointer;
+}
+.player__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--jade-strong), var(--forest));
+  transition: width 0.12s linear;
+}
+.player__tick {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 12px;
+  border-radius: 2px;
+  background: rgba(44, 87, 66, 0.42);
+  transform: translateX(-1px);
+}
+
+/* 波形：只有解碼到真實振幅才加上 .player--wave；失敗時沿用上面的細進度條 */
+.player__wave { display: none; position: absolute; inset: 0; }
+.player--wave .player__wave { display: block; }
+.player--wave .player__track { height: 34px; border-radius: 8px; background: transparent; }
+.player__waveSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #B7AC95;
+  fill: currentColor;
+}
+.player__waveSvg--played {
+  color: var(--forest);
+  clip-path: inset(0 calc(100% - var(--played, 0%)) 0 0);
+}
+.player--wave .player__fill {
+  top: auto;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--forest);
+}
+.player--wave .player__tick {
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: rgba(181, 85, 47, 0.42);
+}
+.player--wave .player__track::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--played, 0%);
+  width: 2px;
+  background: #B4552F;
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+.player__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
+  font-size: 0.66rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.player__now { font-weight: 800; color: var(--forest); }
+.player__note { font-size: 0.64rem; color: var(--muted); }
+.player--noaudio {
+  display: block;
+  padding: 12px 14px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted);
+  background: var(--sage-wash);
+  border-color: transparent;
+}
+
+/* 抽屜內容：動作 */
+.story-sheet .story-detail__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+.story-sheet .story-detail__actions .vtn-btn {
+  min-height: 42px;
+  font-size: 0.78rem;
+  padding: 0 10px;
+}
+.story-sheet .story-detail__actions .vtn-btn--solid { grid-column: span 2; }
+.story-sheet .story-detail__actions .vtn-btn--quiet,
+.story-sheet .story-detail__actions .vtn-btn--danger {
+  grid-column: span 1;
+}
+
+/* 逐字稿 */
+.story-sheet__section {
+  margin-top: 16px;
+}
+.story-sheet__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.story-sheet__section-title {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.story-sheet__toggle {
+  border: 0;
+  background: transparent;
+  color: var(--forest);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.story-sheet .segments { gap: 7px; }
+.story-sheet .segment {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.story-sheet .segment__text { font-size: 0.86rem; line-height: 1.7; }
+.story-sheet .segment__t { font-size: 0.64rem; }
+.story-sheet .segment.is-collapsed { display: none; }
+.story-sheet .story-detail__note {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--gold-pale);
+  color: #6B5326;
+  font-size: 0.72rem;
+}
+.story-sheet .story-detail__empty {
+  margin-top: 12px;
+  font-size: 0.78rem;
+}
+.story-sheet__note {
+  margin: 14px 0 0;
+  font-size: 0.68rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- 篩選面板改為地圖上的浮層 ---------- */
+.page--stories .filter-panel {
+  position: absolute;
+  z-index: 70;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  max-height: 70%;
+  overflow-y: auto;
+  margin: 0;
+  padding: 16px 16px 8px;
+  border-radius: 22px;
+  background: var(--cream);
+  box-shadow: 0 -16px 40px -20px rgba(20, 38, 28, 0.7);
+}
+.page--stories .filter-panel .chip {
+  min-height: 38px;
+  padding: 6px 13px;
+  font-size: 0.84rem;
+}
+.filter-panel__head {
+  position: sticky;
+  top: -16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -16px -16px 8px;
+  padding: 12px 14px 8px 16px;
+  background: var(--cream);
+  border-radius: 22px 22px 0 0;
+}
+.filter-panel__title {
+  margin: 0;
+  font-family: "Noto Serif TC", "Songti SC", serif;
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+.filter-panel__close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
+  cursor: pointer;
+}
+.page--stories .filter-actions {
+  position: sticky;
+  bottom: -8px;
+  z-index: 3;
+  margin: 4px -16px -8px;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--cream) 72%, rgba(253, 251, 244, 0));
+}
+
+/* ---------- MapLibre / Leaflet 微調 ---------- */
+.atlas__canvas .maplibregl-ctrl-attrib,
+.atlas__canvas .leaflet-control-attribution {
+  background: rgba(253, 251, 244, 0.72);
+  font-size: 0.52rem;
+  color: #6f7d70;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.atlas__canvas .leaflet-control-scale-line {
+  background: rgba(253, 251, 244, 0.72);
+  border-color: var(--forest-deep);
+  color: var(--forest-deep);
+}
+.atlas__canvas .leaflet-bar a { color: var(--forest-deep); }
+.atlas__canvas .leaflet-container { background: transparent; }
+.atlas-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+
+/* 800 米模糊圈（MapLibre）呼吸感 */
+@keyframes fuzz-breathe {
+  0%, 100% { fill-opacity: 0.10; }
+  50% { fill-opacity: 0.22; }
+}
+.atlas__canvas.is-at-3d { cursor: grab; }
+
+/* ---------- 暗色主題 ---------- */
+html[data-theme="dark"] .atlas__top {
+  background: linear-gradient(to bottom, rgba(22, 34, 27, 0.94) 0%, rgba(22, 34, 27, 0.7) 60%, rgba(22, 34, 27, 0) 100%);
+}
+html[data-theme="dark"] .atlas__title,
+html[data-theme="dark"] .sheet-hero__title,
+html[data-theme="dark"] .atlas-listview__title { color: #EAF0E5; }
+html[data-theme="dark"] .atlas__eyebrow,
+html[data-theme="dark"] .atlas-listview__sub { color: #A9B8A9; }
+html[data-theme="dark"] .atlas__search,
+html[data-theme="dark"] .atlas__filter,
+html[data-theme="dark"] .atlas-btn,
+html[data-theme="dark"] .legend-chip,
+html[data-theme="dark"] .peek-card,
+html[data-theme="dark"] .atlas-ctl {
+  background: rgba(30, 44, 35, 0.94);
+  color: #E7EFE4;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+html[data-theme="dark"] .atlas__search input { color: #EAF0E5; }
+html[data-theme="dark"] .atlas__timeline { background: rgba(30, 44, 35, 0.94); }
+html[data-theme="dark"] .atlas__timeline-head { color: #A9B8A9; }
+html[data-theme="dark"] .atlas__timeline-head b { color: #CFE0CF; }
+html[data-theme="dark"] .atlas__ticks { color: #A9B8A9; }
+html[data-theme="dark"] .story-sheet,
+html[data-theme="dark"] .atlas-listview { background: #1D2A22; }
+html[data-theme="dark"] .sheet-hero__sub,
+html[data-theme="dark"] .player__meta { color: #A9B8A9; }
+html[data-theme="dark"] .player { background: #24352B; border-color: rgba(255, 255, 255, 0.1); }
+html[data-theme="dark"] .player__track { background: #3A4A3E; }
+html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 0.06); color: #E7EFE4; }
+
+/* ---------- 減少動態 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .vtn-pin,
+  .atlas__live,
+  .vtn-pin.is-selected .vtn-pin__ring,
+  .atlas__spinner { animation: none !important; }
+  .story-sheet,
+  .story-sheet__scrim,
+  .atlas__canvas,
+  .atlas__loading { transition: none !important; }
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 400px) {
+  .topbar__title { font-size: 0.92rem; letter-spacing: 0; }
+}
+@media (max-width: 360px) {
+  .atlas__title { font-size: 1.34rem; }
+  .player__btn { width: 46px; height: 46px; }
+}
+
   </style>
 </head>
 <body data-app-version="2026.11.05">
@@ -3404,29 +4602,101 @@ html[data-reduce-motion="true"] *::after {
     <!-- ======================= 分頁：stories ======================= -->
     <main class="page page--stories vtn-view" data-view="stories">
 
-      <section class="hero hero--stories" aria-labelledby="pageTitle-stories">
-        <div class="hero__art" aria-hidden="true">
-          <img src="assets/stories-background.png" alt="">
-        </div>
-        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
-        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+      <!-- 地圖主視圖：故事點＝一級資訊，列表降級為模式切換 -->
+      <div class="atlas" id="storyAtlas">
+        <img class="atlas__fallback" src="assets/map-blurred.svg"
+             alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，只作示意並非 GPS 定位。">
+        <div class="atlas__canvas" id="vtnMap" role="application"
+             aria-label="故事地圖：顯示約 800 米模糊範圍內的故事，並非講者精確位置"></div>
+        <div class="atlas__tint" aria-hidden="true"></div>
 
-        <div class="hero__copy">
-          <h1 class="hero__title" id="pageTitle-stories" data-i18n="stories.title">村落故事</h1>
-          <p class="hero__sub" data-i18n="stories.sub">聽聽長者分享的地方記憶</p>
-        </div>
+        <header class="atlas__top">
+          <div class="atlas__titles">
+            <p class="atlas__eyebrow">
+              <span class="atlas__live" aria-hidden="true"></span>
+              <span data-i18n="atlas.eyebrow">北區聲音地圖</span>
+            </p>
+            <h1 class="atlas__title" id="pageTitle-stories" data-i18n="atlas.title">故事，响邊度？</h1>
+          </div>
+          <div class="atlas__tools">
+            <button type="button" class="atlas-btn" id="atlasViewBtn" aria-pressed="false"
+                    aria-label="切換列表模式" data-i18n-aria="atlas.listAria" title="列表模式">
+              <i class="fa-solid fa-list" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="atlas-btn atlas-btn--3d" id="atlas3dBtn" aria-pressed="false"
+                    aria-label="切換 3D 立體地圖" data-i18n-aria="atlas.3dAria" title="3D 立體">
+              <span>3D</span>
+            </button>
+          </div>
 
-        <div class="stories-toolbar">
-          <input type="search" id="storySearch" autocomplete="off"
-                 data-i18n-ph="stories.searchPh" data-i18n-aria="stories.searchAria">
-          <button type="button" class="vtn-btn" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">
-            <i class="fa-solid fa-sliders" aria-hidden="true"></i><span data-i18n="stories.filter">篩選</span><span class="filter-toggle-badge" id="filterBadge" hidden>0</span>
+          <div class="atlas__searchrow">
+            <label class="atlas__search" for="storySearch">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <input type="search" id="storySearch" autocomplete="off"
+                     data-i18n-ph="atlas.searchPh" data-i18n-aria="stories.searchAria">
+            </label>
+            <button type="button" class="atlas__filter" id="filterToggle"
+                    aria-expanded="false" aria-controls="filterPanel">
+              <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+              <span class="filter-toggle-badge" id="filterBadge" hidden>0</span>
+            </button>
+          </div>
+          <div class="filter-summary" id="filterSummary"></div>
+
+          <div class="atlas__legend" id="atlasLegend" role="group"
+               aria-label="故事類型圖例" data-i18n-aria="atlas.legendAria"></div>
+        </header>
+
+        <div class="atlas__controls">
+          <button type="button" class="atlas-ctl" id="atlasZoomIn" aria-label="放大" data-i18n-aria="atlas.zoomIn">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="atlas-ctl" id="atlasZoomOut" aria-label="縮小" data-i18n-aria="atlas.zoomOut">
+            <i class="fa-solid fa-minus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="atlas-ctl atlas-ctl--reset" id="atlasRecenter"
+                  aria-label="重設視角" data-i18n-aria="atlas.reset">
+            <i class="fa-solid fa-compass" aria-hidden="true"></i>
           </button>
         </div>
-        <div class="filter-summary" id="filterSummary"></div>
-      </section>
+
+        <div class="atlas__loading" id="mapLoading">
+          <span class="atlas__spinner" aria-hidden="true"></span>
+          <span data-i18n="atlas.loading">正在打開故事地圖…</span>
+        </div>
+        <div class="atlas__empty" id="mapEmpty" hidden>
+          <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+          <span data-i18n="atlas.empty">這個範圍未有故事</span>
+        </div>
+
+        <div class="atlas__bottom">
+          <div class="atlas__timeline" id="atlasTimeline">
+            <div class="atlas__timeline-head">
+              <span data-i18n="atlas.era">故事年代</span>
+              <b id="atlasEraLabel">全部</b>
+            </div>
+            <input type="range" id="atlasEra" min="0" max="4" step="1" value="4"
+                   aria-label="故事年代" data-i18n-aria="atlas.eraAria">
+            <div class="atlas__ticks" id="atlasTicks" aria-hidden="true"></div>
+          </div>
+          <div class="atlas__meta">
+            <p class="atlas__privacy">
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              <span data-i18n="atlas.privacy">位置只顯示約 800 米模糊範圍，並非講者實際位置</span>
+            </p>
+            <p class="atlas__tiles" id="mapTilesNote"></p>
+          </div>
+        </div>
+      </div>
 
       <section class="filter-panel" id="filterPanel" hidden aria-label="篩選故事">
+        <div class="filter-panel__head">
+          <p class="filter-panel__title" data-i18n="stories.filter">篩選</p>
+          <button type="button" class="filter-panel__close" id="filterClose"
+                  aria-label="關閉" data-i18n-aria="common.close">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
         <div class="filter-group">
           <p class="filter-group__label" data-i18n="filter.location">地點</p>
           <div class="chip-row" id="filterLocation"></div>
@@ -3459,56 +4729,52 @@ html[data-reduce-motion="true"] *::after {
         </div>
       </section>
 
-      <p class="result-count" id="resultCount" role="status" aria-live="polite"></p>
-      <div class="story-list" id="storyList" role="list"></div>
-      <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
-
-      <section class="empty" id="storiesEmpty" hidden>
-        <div class="empty__inner">
-          <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
-          <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
+      <section class="atlas-listview" id="atlasList" hidden aria-label="故事列表">
+        <div class="atlas-listview__head">
+          <button type="button" class="atlas-listview__back" id="atlasListBack"
+                  aria-label="返回地圖" data-i18n-aria="atlas.backToMap">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          </button>
+          <div class="atlas-listview__heading">
+            <h2 class="atlas-listview__title" data-i18n="atlas.listTitle">故事列表</h2>
+            <p class="atlas-listview__sub" id="atlasListCount"></p>
+          </div>
         </div>
-        <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
-      </section>
+        <p class="result-count" id="resultCount" role="status" aria-live="polite"></p>
+        <div class="story-list" id="storyList" role="list"></div>
 
-      <section class="map-card" aria-labelledby="mapTitle">
-        <div class="map-card__head">
-          <span class="map-card__pin" aria-hidden="true">
-            <i class="fa-solid fa-location-dot"></i>
+        <section class="empty" id="storiesEmpty" hidden>
+          <div class="empty__inner">
+            <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
+            <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
+          </div>
+          <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
+        </section>
+
+        <aside class="disclosure-card" role="note" aria-label="示範故事披露">
+          <span class="disclosure-card__icon" aria-hidden="true">
+            <i class="fa-solid fa-circle-info"></i>
           </span>
-          <div class="map-card__heading">
-            <h2 class="map-card__title" id="mapTitle">元朗 <span aria-hidden="true">・</span> 約 800 米模糊範圍</h2>
-            <p class="map-card__note" id="mapNote" data-i18n="map.note">位置經模糊處理，並非 GPS 定位</p>
+          <div class="disclosure-card__body">
+            <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
+            <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
           </div>
-          <button type="button" class="map-mode-btn" id="mapModeBtn" aria-pressed="false" data-i18n="map.overview">總覽</button>
-        </div>
-        <div class="map-card__frame" id="mapFrame">
-          <img class="map-card__fallback" src="assets/map-blurred.svg"
-               alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，附指北針與比例尺，只作示意並非 GPS 定位。">
-          <div class="map-card__leaflet" id="vtnMap" role="application" aria-label="約 800 米模糊範圍真地圖（非 GPS 定位）"></div>
-          <div class="map-card__loading" id="mapLoading">
-            <span class="map-card__spinner" aria-hidden="true"></span>
-            <span data-i18n="map.loading">正在載入真實地圖…</span>
-          </div>
-          <div class="map-card__empty" id="mapEmpty" hidden>
-            <span><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i></span>
-            <span data-i18n="map.empty">沒有符合的故事</span>
-          </div>
-          <span class="map-card__north" aria-hidden="true">N<span>↑</span></span>
-        </div>
-        <p class="map-card__tiles-note" id="mapTilesNote">真實地圖由 OpenStreetMap 貢獻者提供・範圍經模糊處理，並非講者實際位置</p>
-        <p class="map-card__hint" id="mapHint" data-i18n="map.hint">只顯示所選故事嘅模糊範圍；切到「總覽」可一次睇全部並點圈切換。</p>
+        </aside>
       </section>
 
-      <aside class="disclosure-card" role="note" aria-label="示範故事披露">
-        <span class="disclosure-card__icon" aria-hidden="true">
-          <i class="fa-solid fa-circle-info"></i>
-        </span>
-        <div class="disclosure-card__body">
-          <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
-          <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
+      <!-- 二級故事頁：半拉抽屜（預設半開，可上拉全開） -->
+      <div class="story-sheet__scrim" id="sheetScrim" hidden></div>
+      <section class="story-sheet" id="storySheet" hidden role="dialog" aria-modal="false"
+               aria-label="故事詳情" data-i18n-aria="atlas.sheetAria">
+        <div class="story-sheet__grab" id="sheetGrab" aria-hidden="true"><span></span></div>
+        <button type="button" class="story-sheet__close" id="sheetClose"
+                aria-label="關閉" data-i18n-aria="common.close">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <div class="story-sheet__body" id="storySheetBody">
+          <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
         </div>
-      </aside>
+      </section>
     </main>
 
     <!-- ======================= 分頁：me ======================= -->
@@ -3817,7 +5083,7 @@ html[data-reduce-motion="true"] *::after {
 </div>
 
 <script>
-window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consentPolicyVersion":"CONSENT-2026-11-v2","outOfScopeMessage":{"zh-HK":"抱歉，錄製的故事中未包含此資訊。","zh-CN":"抱歉，录制的故事中未包含此信息。","en":"Sorry, the recorded stories do not contain this information."},"suggestedQuestions":["細個元朗周邊係點㗎？","以前村民用咩出行？","錦田天后誕會做啲咩？","聯和墟趁墟係點嘅？","石湖墟以前會水浸嗎？","沙頭角中英街係咩地方？","林村河以前可以游水嗎？","天水圍以前係魚塘嗎？"],"stories":[{"id":"YL-001","title":"元朗・村落晨光","titleEn":"Yuen Long · Village Morning","villageKey":"yuen-long","topicKeys":["community","agriculture"],"eraKey":"1960s","languageKey":"yue","teller":"Boris Lau","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-001","scope":"community","publishedAt":"2026-10-25","location":{"area":"元朗","lat":22.4445,"lng":114.015,"radiusM":800},"audio":"assets/Demo Story.wav","durationSec":46.7,"durationSource":"measured","cover":"assets/story-cover-village.png","segments":[{"start":0,"end":17.5,"text":"細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。","keywords":["細個","童年","元朗","農田","田野","鄉村","鄉郊","單車","踩車","出行","交通"]},{"start":17.5,"end":33,"text":"大學畢業之後，我有時會同朋友返去附近散步，同佢哋介紹樹上雀鳥嘅叫聲，同草叢入面嘅蟲鳴。","keywords":["大學","畢業","朋友","散步","雀鳥","雀仔","叫聲","蟲鳴","昆蟲","草叢","樹木","自然"]},{"start":33,"end":46.7,"text":"近年好多農田同空地都起咗密集樓宇，昔日寧靜自然嘅鄉郊環境慢慢消失，呢個係我印象最深嘅轉變。","keywords":["近年","近排","而家","轉變","變化","發展","起樓","樓宇","大廈","密集","消失","環境"]}]},{"id":"KT-002","title":"錦田・圍村天后誕","titleEn":"Kam Tin · Tin Hau Festival","villageKey":"kam-tin","topicKeys":["festival","clan"],"eraKey":"1950s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-002","scope":"community","publishedAt":"2026-10-26","location":{"area":"錦田","lat":22.4405,"lng":114.0635,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"我哋錦田圍村最重視天后誕，每年三月尾會搭戲棚、舞獅，仲有搶花炮，全村兄弟都會返嚟。","keywords":["錦田","圍村","天后誕","天后","戲棚","做大戲","舞獅","花炮","節慶","神功戲"]},{"start":16,"end":34,"text":"細個跟阿媽去天后廟上香，之後全村食盆菜，幾十圍擺喺祠堂前面，豬肉同蠔豉最香。","keywords":["細個","阿媽","天后廟","上香","拜神","盆菜","祠堂","豬肉","蠔豉","食"]},{"start":34,"end":50,"text":"近呢二十年儀式簡化咗好多，後生仔女肯返村幫手，已經算好難得，我哋最怕呢啲規矩失傳。","keywords":["近年","而家","儀式","簡化","後生","年輕人","返村","幫手","失傳","傳統","變化"]}]},{"id":"FL-003","title":"粉嶺・聯和墟趁墟日","titleEn":"Fanling · Luen Wo Market Day","villageKey":"fanling","topicKeys":["market","agriculture"],"eraKey":"1960s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-003","scope":"community","publishedAt":"2026-10-27","location":{"area":"粉嶺","lat":22.4965,"lng":114.1435,"radiusM":800},"audio":null,"durationSec":48,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"以前趁墟要天未光起身，擔住兩籮菜行去聯和墟，行到嗰陣個天啱啱光，街邊已經擺滿咗人。","keywords":["粉嶺","聯和墟","趁墟","墟市","天未光","擔菜","賣菜","菜農","街市","行路"]},{"start":15,"end":32,"text":"墟市有菜檔、魚檔、布檔，仲有火車站，啲人搭火車去九龍返工，我哋就喺度賣完菜先返屋企。","keywords":["菜檔","魚檔","布檔","火車","火車站","九龍","返工","賣菜","買賣","搭車"]},{"start":32,"end":48,"text":"而家聯和墟街市搬咗入冷氣大樓，乾淨係乾淨，但係以前嗰種人情味同叫賣聲，真係搵唔返。","keywords":["而家","聯和墟","街市","冷氣","大樓","人情味","叫賣","變化","以前","對比"]}]},{"id":"SS-004","title":"上水・石湖墟米舖","titleEn":"Sheung Shui · Shek Wu Hui Rice Shop","villageKey":"sheung-shui","topicKeys":["market","border"],"eraKey":"1940s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-004","scope":"community","publishedAt":"2026-10-28","location":{"area":"上水","lat":22.5025,"lng":114.1285,"radiusM":800},"audio":null,"durationSec":55,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":18,"text":"我阿爸喺石湖墟開米舖，啲米用麻包袋裝，一斗米賣幾個斗零，客人多數係附近鄉村嘅農民。","keywords":["上水","石湖墟","米舖","米","麻包袋","斗零","農民","買米","價錢","生意"]},{"start":18,"end":37,"text":"石湖墟以前成日水浸，一到雨季就要把米搬上閣樓，水退之後成條街都係泥，要好幾日先清得完。","keywords":["水浸","雨季","搬米","閣樓","水退","泥","清理","天災","石湖墟","街"]},{"start":37,"end":55,"text":"後來邊境愈來愈多人，火車運米落嚟，米舖生意好過以前，但係再過幾年，超級市場開張就唔同講法。","keywords":["邊境","火車","運米","生意","超級市場","開張","後來","變化","競爭","米舖"]}]},{"id":"STK-005","title":"沙頭角・中英街邊境","titleEn":"Sha Tau Kok · Chung Ying Street","villageKey":"sha-tau-kok","topicKeys":["border","migration"],"eraKey":"1970s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-005","scope":"community","publishedAt":"2026-10-29","location":{"area":"沙頭角","lat":22.5475,"lng":114.1495,"radiusM":800},"audio":null,"durationSec":47,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"沙頭角係禁區，入去要禁區紙，我哋細個跟大人去中英街，一條街一邊香港一邊深圳，好特別。","keywords":["沙頭角","禁區","禁區紙","中英街","香港","深圳","邊境","邊界","特別"]},{"start":15,"end":31,"text":"嗰陣去中英街主要係探親同買嘢，兩邊舖頭都做街坊生意，過關要排隊，但唔算好麻煩。","keywords":["探親","買嘢","舖頭","街坊","過關","排隊","中英街","購物","親戚"]},{"start":31,"end":47,"text":"後來邊境政策收緊，沙頭角墟愈來愈靜，年輕人都搬出去市區，剩返老人家守住間屋。","keywords":["後來","邊境政策","收緊","沙頭角墟","靜","年輕人","搬走","市區","老人家","變化"]}]},{"id":"TP-006","title":"大埔・林村河與荔枝園","titleEn":"Tai Po · Lam Tsuen River","villageKey":"tai-po","topicKeys":["ecology","agriculture"],"eraKey":"1950s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-006","scope":"community","publishedAt":"2026-10-30","location":{"area":"大埔","lat":22.4505,"lng":114.1645,"radiusM":800},"audio":null,"durationSec":51,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"細個喺林村河邊大，夏天成班細路落河游水捉魚，河水好清，洗衫、洗菜都係用河水。","keywords":["大埔","林村河","細個","游水","捉魚","河水","洗衫","洗菜","童年","夏天"]},{"start":16,"end":33,"text":"河兩邊以前係荔枝園同菜田，荔枝熟嘅時候，阿爸會擔去大埔墟賣，我哋就喺樹下執跌落地嘅。","keywords":["荔枝","荔枝園","菜田","果園","大埔墟","賣","擔","生果","務農","收成"]},{"start":33,"end":51,"text":"後來河流整治，石屎化咗，水冇以前咁清；村屋愈起愈多，不過每年端午仲有人扒龍舟。","keywords":["後來","河流整治","石屎","水質","村屋","起屋","端午","龍舟","變化","而家"]}]},{"id":"TSW-007","title":"天水圍・魚塘變高樓","titleEn":"Tin Shui Wai · Fish Ponds to High-rises","villageKey":"tin-shui-wai","topicKeys":["migration","community"],"eraKey":"1980s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-007","scope":"community","publishedAt":"2026-10-31","location":{"area":"天水圍","lat":22.4595,"lng":114.0045,"radiusM":800},"audio":null,"durationSec":53,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"以前天水圍全部係魚塘同基圍，我屋企養魚，朝早要落塘餵魚，收成季節就抽乾水捉魚去賣。","keywords":["天水圍","魚塘","基圍","養魚","餵魚","捉魚","收成","抽水","賣魚","漁業"]},{"start":17,"end":35,"text":"八十年代政府收地發展新市鎮，我哋條村搬去第二度，魚塘填平起樓，好多鄰居都唔捨得。","keywords":["八十年代","政府","收地","發展","新市鎮","搬村","填塘","起樓","鄰居","唔捨得"]},{"start":35,"end":53,"text":"而家天水圍高樓林立，住咗幾十萬人，交通方便咗，但係細個嗰種塘邊生活，只可以喺記憶度搵。","keywords":["而家","天水圍","高樓","人口","交通","方便","記憶","變化","以前","生活"]}]},{"id":"LFS-008","title":"流浮山・蠔田與鹹水歌","titleEn":"Lau Fau Shan · Oyster Beds","villageKey":"lau-fau-shan","topicKeys":["craft","ecology"],"eraKey":"1960s","languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-008","scope":"community","publishedAt":"2026-11-01","location":{"area":"流浮山","lat":22.4685,"lng":113.9835,"radiusM":800},"audio":null,"durationSec":49,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"流浮山最有名係蠔，我哋叫蠔田，潮退嘅時候落去撬蠔，潮水一漲就要即刻返上岸，好講究時間。","keywords":["流浮山","蠔","蠔田","養蠔","撬蠔","潮退","潮水","潮汐","上岸","海"]},{"start":16,"end":32,"text":"以前落蠔田會唱鹹水歌，一人一句咁對唱，講天氣、講收成，而家識唱嘅人已經好少。","keywords":["鹹水歌","唱歌","對唱","收成","天氣","漁民","歌謠","傳統","而家","失傳"]},{"start":32,"end":49,"text":"後來后海灣水質變差，蠔業慢慢式微，好多人轉做酒家生意，不過每年仲有蠔節，好熱鬧。","keywords":["后海灣","水質","蠔業","式微","酒家","生意","蠔節","熱鬧","轉行","變化"]}]}]};
+window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consentPolicyVersion":"CONSENT-2026-11-v2","storyMetaNote":"storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。","outOfScopeMessage":{"zh-HK":"抱歉，錄製的故事中未包含此資訊。","zh-CN":"抱歉，录制的故事中未包含此信息。","en":"Sorry, the recorded stories do not contain this information."},"suggestedQuestions":["細個元朗周邊係點㗎？","以前村民用咩出行？","錦田天后誕會做啲咩？","聯和墟趁墟係點嘅？","石湖墟以前會水浸嗎？","沙頭角中英街係咩地方？","林村河以前可以游水嗎？","天水圍以前係魚塘嗎？"],"stories":[{"id":"YL-001","title":"元朗・村落晨光","titleEn":"Yuen Long · Village Morning","villageKey":"yuen-long","topicKeys":["community","agriculture"],"eraKey":"1960s","storyType":"farming","mood":"wistful","year":1962,"languageKey":"yue","teller":"Boris Lau","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-001","scope":"community","publishedAt":"2026-10-25","location":{"area":"元朗","lat":22.4445,"lng":114.015,"radiusM":800},"audio":"assets/Demo Story.wav","durationSec":46.7,"durationSource":"measured","cover":"assets/story-cover-village.png","segments":[{"start":0,"end":17.5,"text":"細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。","keywords":["細個","童年","元朗","農田","田野","鄉村","鄉郊","單車","踩車","出行","交通"]},{"start":17.5,"end":33,"text":"大學畢業之後，我有時會同朋友返去附近散步，同佢哋介紹樹上雀鳥嘅叫聲，同草叢入面嘅蟲鳴。","keywords":["大學","畢業","朋友","散步","雀鳥","雀仔","叫聲","蟲鳴","昆蟲","草叢","樹木","自然"]},{"start":33,"end":46.7,"text":"近年好多農田同空地都起咗密集樓宇，昔日寧靜自然嘅鄉郊環境慢慢消失，呢個係我印象最深嘅轉變。","keywords":["近年","近排","而家","轉變","變化","發展","起樓","樓宇","大廈","密集","消失","環境"]}]},{"id":"KT-002","title":"錦田・圍村天后誕","titleEn":"Kam Tin · Tin Hau Festival","villageKey":"kam-tin","topicKeys":["festival","clan"],"eraKey":"1950s","storyType":"festival","mood":"joyful","year":1955,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-002","scope":"community","publishedAt":"2026-10-26","location":{"area":"錦田","lat":22.4405,"lng":114.0635,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"我哋錦田圍村最重視天后誕，每年三月尾會搭戲棚、舞獅，仲有搶花炮，全村兄弟都會返嚟。","keywords":["錦田","圍村","天后誕","天后","戲棚","做大戲","舞獅","花炮","節慶","神功戲"]},{"start":16,"end":34,"text":"細個跟阿媽去天后廟上香，之後全村食盆菜，幾十圍擺喺祠堂前面，豬肉同蠔豉最香。","keywords":["細個","阿媽","天后廟","上香","拜神","盆菜","祠堂","豬肉","蠔豉","食"]},{"start":34,"end":50,"text":"近呢二十年儀式簡化咗好多，後生仔女肯返村幫手，已經算好難得，我哋最怕呢啲規矩失傳。","keywords":["近年","而家","儀式","簡化","後生","年輕人","返村","幫手","失傳","傳統","變化"]}]},{"id":"FL-003","title":"粉嶺・聯和墟趁墟日","titleEn":"Fanling · Luen Wo Market Day","villageKey":"fanling","topicKeys":["market","agriculture"],"eraKey":"1960s","storyType":"market","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-003","scope":"community","publishedAt":"2026-10-27","location":{"area":"粉嶺","lat":22.4965,"lng":114.1435,"radiusM":800},"audio":null,"durationSec":48,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"以前趁墟要天未光起身，擔住兩籮菜行去聯和墟，行到嗰陣個天啱啱光，街邊已經擺滿咗人。","keywords":["粉嶺","聯和墟","趁墟","墟市","天未光","擔菜","賣菜","菜農","街市","行路"]},{"start":15,"end":32,"text":"墟市有菜檔、魚檔、布檔，仲有火車站，啲人搭火車去九龍返工，我哋就喺度賣完菜先返屋企。","keywords":["菜檔","魚檔","布檔","火車","火車站","九龍","返工","賣菜","買賣","搭車"]},{"start":32,"end":48,"text":"而家聯和墟街市搬咗入冷氣大樓，乾淨係乾淨，但係以前嗰種人情味同叫賣聲，真係搵唔返。","keywords":["而家","聯和墟","街市","冷氣","大樓","人情味","叫賣","變化","以前","對比"]}]},{"id":"SS-004","title":"上水・石湖墟米舖","titleEn":"Sheung Shui · Shek Wu Hui Rice Shop","villageKey":"sheung-shui","topicKeys":["market","border"],"eraKey":"1940s","storyType":"market","mood":"wistful","year":1948,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-004","scope":"community","publishedAt":"2026-10-28","location":{"area":"上水","lat":22.5025,"lng":114.1285,"radiusM":800},"audio":null,"durationSec":55,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":18,"text":"我阿爸喺石湖墟開米舖，啲米用麻包袋裝，一斗米賣幾個斗零，客人多數係附近鄉村嘅農民。","keywords":["上水","石湖墟","米舖","米","麻包袋","斗零","農民","買米","價錢","生意"]},{"start":18,"end":37,"text":"石湖墟以前成日水浸，一到雨季就要把米搬上閣樓，水退之後成條街都係泥，要好幾日先清得完。","keywords":["水浸","雨季","搬米","閣樓","水退","泥","清理","天災","石湖墟","街"]},{"start":37,"end":55,"text":"後來邊境愈來愈多人，火車運米落嚟，米舖生意好過以前，但係再過幾年，超級市場開張就唔同講法。","keywords":["邊境","火車","運米","生意","超級市場","開張","後來","變化","競爭","米舖"]}]},{"id":"STK-005","title":"沙頭角・中英街邊境","titleEn":"Sha Tau Kok · Chung Ying Street","villageKey":"sha-tau-kok","topicKeys":["border","migration"],"eraKey":"1970s","storyType":"migration","mood":"wistful","year":1972,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-005","scope":"community","publishedAt":"2026-10-29","location":{"area":"沙頭角","lat":22.5475,"lng":114.1495,"radiusM":800},"audio":null,"durationSec":47,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"沙頭角係禁區，入去要禁區紙，我哋細個跟大人去中英街，一條街一邊香港一邊深圳，好特別。","keywords":["沙頭角","禁區","禁區紙","中英街","香港","深圳","邊境","邊界","特別"]},{"start":15,"end":31,"text":"嗰陣去中英街主要係探親同買嘢，兩邊舖頭都做街坊生意，過關要排隊，但唔算好麻煩。","keywords":["探親","買嘢","舖頭","街坊","過關","排隊","中英街","購物","親戚"]},{"start":31,"end":47,"text":"後來邊境政策收緊，沙頭角墟愈來愈靜，年輕人都搬出去市區，剩返老人家守住間屋。","keywords":["後來","邊境政策","收緊","沙頭角墟","靜","年輕人","搬走","市區","老人家","變化"]}]},{"id":"TP-006","title":"大埔・林村河與荔枝園","titleEn":"Tai Po · Lam Tsuen River","villageKey":"tai-po","topicKeys":["ecology","agriculture"],"eraKey":"1950s","storyType":"farming","mood":"joyful","year":1958,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-006","scope":"community","publishedAt":"2026-10-30","location":{"area":"大埔","lat":22.4505,"lng":114.1645,"radiusM":800},"audio":null,"durationSec":51,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"細個喺林村河邊大，夏天成班細路落河游水捉魚，河水好清，洗衫、洗菜都係用河水。","keywords":["大埔","林村河","細個","游水","捉魚","河水","洗衫","洗菜","童年","夏天"]},{"start":16,"end":33,"text":"河兩邊以前係荔枝園同菜田，荔枝熟嘅時候，阿爸會擔去大埔墟賣，我哋就喺樹下執跌落地嘅。","keywords":["荔枝","荔枝園","菜田","果園","大埔墟","賣","擔","生果","務農","收成"]},{"start":33,"end":51,"text":"後來河流整治，石屎化咗，水冇以前咁清；村屋愈起愈多，不過每年端午仲有人扒龍舟。","keywords":["後來","河流整治","石屎","水質","村屋","起屋","端午","龍舟","變化","而家"]}]},{"id":"TSW-007","title":"天水圍・魚塘變高樓","titleEn":"Tin Shui Wai · Fish Ponds to High-rises","villageKey":"tin-shui-wai","topicKeys":["migration","community"],"eraKey":"1980s","storyType":"migration","mood":"heavy","year":1982,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-007","scope":"community","publishedAt":"2026-10-31","location":{"area":"天水圍","lat":22.4595,"lng":114.0045,"radiusM":800},"audio":null,"durationSec":53,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"以前天水圍全部係魚塘同基圍，我屋企養魚，朝早要落塘餵魚，收成季節就抽乾水捉魚去賣。","keywords":["天水圍","魚塘","基圍","養魚","餵魚","捉魚","收成","抽水","賣魚","漁業"]},{"start":17,"end":35,"text":"八十年代政府收地發展新市鎮，我哋條村搬去第二度，魚塘填平起樓，好多鄰居都唔捨得。","keywords":["八十年代","政府","收地","發展","新市鎮","搬村","填塘","起樓","鄰居","唔捨得"]},{"start":35,"end":53,"text":"而家天水圍高樓林立，住咗幾十萬人，交通方便咗，但係細個嗰種塘邊生活，只可以喺記憶度搵。","keywords":["而家","天水圍","高樓","人口","交通","方便","記憶","變化","以前","生活"]}]},{"id":"LFS-008","title":"流浮山・蠔田與鹹水歌","titleEn":"Lau Fau Shan · Oyster Beds","villageKey":"lau-fau-shan","topicKeys":["craft","ecology"],"eraKey":"1960s","storyType":"farming","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-008","scope":"community","publishedAt":"2026-11-01","location":{"area":"流浮山","lat":22.4685,"lng":113.9835,"radiusM":800},"audio":null,"durationSec":49,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"流浮山最有名係蠔，我哋叫蠔田，潮退嘅時候落去撬蠔，潮水一漲就要即刻返上岸，好講究時間。","keywords":["流浮山","蠔","蠔田","養蠔","撬蠔","潮退","潮水","潮汐","上岸","海"]},{"start":16,"end":32,"text":"以前落蠔田會唱鹹水歌，一人一句咁對唱，講天氣、講收成，而家識唱嘅人已經好少。","keywords":["鹹水歌","唱歌","對唱","收成","天氣","漁民","歌謠","傳統","而家","失傳"]},{"start":32,"end":49,"text":"後來后海灣水質變差，蠔業慢慢式微，好多人轉做酒家生意，不過每年仲有蠔節，好熱鬧。","keywords":["后海灣","水質","蠔業","式微","酒家","生意","蠔節","熱鬧","轉行","變化"]}]}]};
 
 
 /* ===== src/js/00-config.js ===== */
@@ -4312,6 +5578,54 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
       'map.tilesNote': '真實地圖由 OpenStreetMap 貢獻者提供・範圍經模糊處理，並非講者實際位置',
       'map.fallbackTiles': '地圖圖磚載入失敗，已改用示意圖；範圍與故事資料不受影響。',
       'map.fallback': '地圖元件載入失敗，已改用示意圖；範圍與故事資料不受影響。',
+      'atlas.eyebrow': '北區聲音地圖',
+      'atlas.title': '故事，响邊度？',
+      'atlas.listAria': '切換列表模式',
+      'atlas.3dAria': '切換 3D 立體地圖',
+      'atlas.3dUnavailable': '此裝置或網絡未能啟用 3D 地圖',
+      'atlas.searchPh': '搜村落、人物、關鍵詞',
+      'atlas.legendAria': '故事類型圖例，可點擊篩選',
+      'atlas.zoomIn': '放大',
+      'atlas.zoomOut': '縮小',
+      'atlas.reset': '重設視角',
+      'atlas.loading': '正在打開故事地圖…',
+      'atlas.empty': '這個範圍未有故事',
+      'atlas.era': '故事年代',
+      'atlas.eraAria': '用年代軸篩選故事',
+      'atlas.eraAll': '全部年代',
+      'atlas.eraBefore': '{y} 年或以前',
+      'atlas.privacy': '位置只顯示約 800 米模糊範圍，並非講者實際位置',
+      'atlas.teller': '講者：{name}',
+      'atlas.yearLabel': '{y} 年',
+      'atlas.playerMeta': '{n} 段逐字稿・{dur}',
+      'atlas.playerMetaWave': '{n} 段逐字稿・{dur}・实测音频波形',
+      'atlas.playerMetaWave': '{n} 段逐字稿・{dur}・實測音訊波形',
+      'atlas.playAria': '播放《{title}》',
+      'atlas.pauseAria': '暫停播放',
+      'atlas.seekAria': '點擊或拖動跳轉錄音',
+      'atlas.expandAll': '展開全部逐字稿',
+      'atlas.collapseAll': '收起逐字稿',
+      'atlas.sheetNote': '位置只顯示約 {r} 米模糊範圍；錄音與逐字稿均為已授權內容。',
+      'atlas.listTitle': '故事列表',
+      'atlas.listSub': '{n} 則故事・{villages} 個村落',
+      'atlas.backToMap': '返回地圖',
+      'atlas.sheetAria': '故事詳情',
+      'atlas.fuzz': '約 {r} 米模糊範圍',
+      'atlas.tiles.maplibre': '地圖資料 © OpenStreetMap 貢獻者・OpenFreeMap・3D 建築由 OSM 衍生',
+      'atlas.tiles.leaflet': '地圖由 OpenStreetMap 貢獻者提供・範圍經模糊處理，並非講者實際位置',
+      'atlas.tiles.fallback': '地圖服務未能連線，已改用手繪示意圖；可切換列表查看全部故事。',
+      'storyType.festival': '節慶習俗',
+      'storyType.farming': '農耕漁作',
+      'storyType.migration': '遷徙定居',
+      'storyType.architecture': '建築遺跡',
+      'storyType.oral': '人物口述',
+      'storyType.market': '墟市商貿',
+      'storyType.other': '其他',
+      'mood.wistful': '懷舊',
+      'mood.joyful': '歡喜',
+      'mood.reflective': '感慨',
+      'mood.heavy': '沉重',
+      'mood.proud': '自豪',
 
       'me.eyebrow': '我的',
       'me.title': '管理你的故事',
@@ -4805,6 +6119,52 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
       'map.tilesNote': '真实地图由 OpenStreetMap 贡献者提供・范围经模糊处理，并非讲者实际位置',
       'map.fallbackTiles': '地图图砖加载失败，已改用示意图；范围与故事资料不受影响。',
       'map.fallback': '地图组件加载失败，已改用示意图；范围与故事资料不受影响。',
+      'atlas.eyebrow': '北区声音地图',
+      'atlas.title': '故事，响边度？',
+      'atlas.listAria': '切换列表模式',
+      'atlas.3dAria': '切换 3D 立体地图',
+      'atlas.3dUnavailable': '此设备或网络未能启用 3D 地图',
+      'atlas.searchPh': '搜村落、人物、关键词',
+      'atlas.legendAria': '故事类型图例，可点击筛选',
+      'atlas.zoomIn': '放大',
+      'atlas.zoomOut': '缩小',
+      'atlas.reset': '重置视角',
+      'atlas.loading': '正在打开故事地图…',
+      'atlas.empty': '这个范围还没有故事',
+      'atlas.era': '故事年代',
+      'atlas.eraAria': '用年代轴筛选故事',
+      'atlas.eraAll': '全部年代',
+      'atlas.eraBefore': '{y} 年或以前',
+      'atlas.privacy': '位置只显示约 800 米模糊范围，并非讲述者实际位置',
+      'atlas.teller': '讲述者：{name}',
+      'atlas.yearLabel': '{y} 年',
+      'atlas.playerMeta': '{n} 段逐字稿・{dur}',
+      'atlas.playAria': '播放《{title}》',
+      'atlas.pauseAria': '暂停播放',
+      'atlas.seekAria': '点击或拖动跳转录音',
+      'atlas.expandAll': '展开全部逐字稿',
+      'atlas.collapseAll': '收起逐字稿',
+      'atlas.sheetNote': '位置只显示约 {r} 米模糊范围；录音与逐字稿均为已授权内容。',
+      'atlas.listTitle': '故事列表',
+      'atlas.listSub': '{n} 则故事・{villages} 个村落',
+      'atlas.backToMap': '返回地图',
+      'atlas.sheetAria': '故事详情',
+      'atlas.fuzz': '约 {r} 米模糊范围',
+      'atlas.tiles.maplibre': '地图数据 © OpenStreetMap 贡献者・OpenFreeMap・3D 建筑由 OSM 衍生',
+      'atlas.tiles.leaflet': '地图由 OpenStreetMap 贡献者提供・范围经模糊处理，并非讲述者实际位置',
+      'atlas.tiles.fallback': '地图服务未能连线，已改用手绘示意图；可切换列表查看全部故事。',
+      'storyType.festival': '节庆习俗',
+      'storyType.farming': '农耕渔作',
+      'storyType.migration': '迁徙定居',
+      'storyType.architecture': '建筑遗迹',
+      'storyType.oral': '人物口述',
+      'storyType.market': '墟市商贸',
+      'storyType.other': '其他',
+      'mood.wistful': '怀旧',
+      'mood.joyful': '欢喜',
+      'mood.reflective': '感慨',
+      'mood.heavy': '沉重',
+      'mood.proud': '自豪',
 
       'me.eyebrow': '我的',
       'me.title': '管理你的故事',
@@ -5298,6 +6658,53 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
       'map.tilesNote': 'Map tiles by OpenStreetMap contributors · Areas are blurred and are not the narrator’s actual location',
       'map.fallbackTiles': 'Map tiles failed to load; showing the illustrated map instead. Story data and areas are unaffected.',
       'map.fallback': 'The map component failed to load; showing the illustrated map instead.',
+      'atlas.eyebrow': 'SOUND MAP OF THE NORTH',
+      'atlas.title': 'Where do stories live?',
+      'atlas.listAria': 'Switch to list view',
+      'atlas.3dAria': 'Toggle 3D map',
+      'atlas.3dUnavailable': '3D map is unavailable on this device or network',
+      'atlas.searchPh': 'Search villages, narrators, keywords',
+      'atlas.legendAria': 'Story type legend; tap to filter',
+      'atlas.zoomIn': 'Zoom in',
+      'atlas.zoomOut': 'Zoom out',
+      'atlas.reset': 'Reset view',
+      'atlas.loading': 'Opening the story map…',
+      'atlas.empty': 'No stories in this area yet',
+      'atlas.era': 'Story era',
+      'atlas.eraAria': 'Filter stories by era',
+      'atlas.eraAll': 'All eras',
+      'atlas.eraBefore': 'Up to {y}',
+      'atlas.privacy': 'Locations are fuzzed to about 800 m — never the narrator’s exact position',
+      'atlas.teller': 'Narrator: {name}',
+      'atlas.yearLabel': '{y}',
+      'atlas.playerMeta': '{n} transcript passages · {dur}',
+      'atlas.playerMetaWave': '{n} passages · {dur} · measured waveform',
+      'atlas.playAria': 'Play “{title}”',
+      'atlas.pauseAria': 'Pause playback',
+      'atlas.seekAria': 'Tap or drag to seek the recording',
+      'atlas.expandAll': 'Show full transcript',
+      'atlas.collapseAll': 'Collapse transcript',
+      'atlas.sheetNote': 'Location is fuzzed to about {r} m. Audio and transcript are authorised content.',
+      'atlas.listTitle': 'All stories',
+      'atlas.listSub': '{n} stories · {villages} villages',
+      'atlas.backToMap': 'Back to map',
+      'atlas.sheetAria': 'Story details',
+      'atlas.fuzz': 'about {r} m fuzz zone',
+      'atlas.tiles.maplibre': 'Map data © OpenStreetMap contributors · OpenFreeMap · 3D buildings derived from OSM',
+      'atlas.tiles.leaflet': 'Map tiles by OpenStreetMap contributors · locations fuzzed, not the narrator’s exact position',
+      'atlas.tiles.fallback': 'Map service unreachable; showing the illustrated map. Switch to list view to browse every story.',
+      'storyType.festival': 'Festivals',
+      'storyType.farming': 'Farming & fishing',
+      'storyType.migration': 'Settling & migration',
+      'storyType.architecture': 'Built heritage',
+      'storyType.oral': 'Personal accounts',
+      'storyType.market': 'Market life',
+      'storyType.other': 'Other',
+      'mood.wistful': 'Nostalgic',
+      'mood.joyful': 'Joyful',
+      'mood.reflective': 'Reflective',
+      'mood.heavy': 'Heavy',
+      'mood.proud': 'Proud',
 
       'me.eyebrow': 'Me',
       'me.title': 'Manage your stories',
@@ -6638,6 +8045,9 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
         try { fn(hidden.currentTime, currentStoryId); } catch (e) { /* ignore */ }
       });
     });
+    hidden.addEventListener('ended', function () {
+      U.emit('vtn:audio-ended', { storyId: currentStoryId });
+    });
     return hidden;
   }
 
@@ -6989,6 +8399,121 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   };
 })();
 
+/* ===== src/js/28-waveform.js ===== */
+/* =============================================================================
+ * 28-waveform — 由真實音檔解出振幅，供故事播放器繪製波形
+ * -----------------------------------------------------------------------------
+ * 原則：只畫實測振幅。解碼失敗（檔案不存在、格式不支援、跨域被擋）時
+ *       回傳 null，播放器維持原本的細進度條，**不生成任何假波形**。
+ * 技術：fetch → AudioContext.decodeAudioData → 每柱 RMS → 歸一化 + 動態壓縮。
+ *       一個 url 只解碼一次，結果以 Promise 快取。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var VTN = window.VTN;
+  var BARS = 60;
+  var MAX_SAMPLES_PER_BAR = 240;
+  var cache = Object.create(null);
+  var context = null;
+
+  function getContext() {
+    if (context) return context;
+    var Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor) return null;
+    try { context = new Ctor(); } catch (e) { return null; }
+    return context;
+  }
+
+  function decodeArrayBuffer(buffer) {
+    var ctx = getContext();
+    if (!ctx) return Promise.reject(new Error('no AudioContext'));
+    return new Promise(function (resolve, reject) {
+      var result;
+      try {
+        /* 現代瀏覽器回傳 Promise；舊版 Safari 走第 2/3 個 callback 參數。
+           同一次呼叫同時相容兩者，避免對已 detach 的 ArrayBuffer 再解一次。 */
+        result = ctx.decodeAudioData(buffer, resolve, reject);
+      } catch (e) {
+        reject(e);
+        return;
+      }
+      if (result && typeof result.then === 'function') result.then(resolve, reject);
+    });
+  }
+
+  function peaks(audio) {
+    var channels = Math.min(audio.numberOfChannels || 1, 2);
+    var length = audio.length || 0;
+    if (!length || !channels) return null;
+
+    var perBar = Math.max(1, Math.floor(length / BARS));
+    var step = Math.max(1, Math.floor(perBar / MAX_SAMPLES_PER_BAR));
+    var out = new Array(BARS);
+    var max = 0;
+
+    for (var b = 0; b < BARS; b++) {
+      var start = b * perBar;
+      var end = Math.min(length, start + perBar);
+      var sum = 0;
+      var n = 0;
+      var peak = 0;
+      for (var c = 0; c < channels; c++) {
+        var data = audio.getChannelData(c);
+        for (var i = start; i < end; i += step) {
+          var v = data[i];
+          sum += v * v;
+          var av = v < 0 ? -v : v;
+          if (av > peak) peak = av;
+          n++;
+        }
+      }
+      var rms = n ? Math.sqrt(sum / n) : 0;
+      /* 純 RMS 會把語音壓成近等高柱；混入峰值後停頓與重音才看得出來 */
+      var value = 0.6 * rms + 0.4 * peak;
+      out[b] = value;
+      if (value > max) max = value;
+    }
+
+    if (!(max > 0)) return null; /* 全靜音視為無法判讀，不硬湊波形 */
+    for (var j = 0; j < BARS; j++) {
+      /* 0.85 次方：只做輕微動態壓縮，保留真實起伏 */
+      out[j] = Math.min(1, Math.pow(out[j] / max, 0.85));
+    }
+    return out;
+  }
+
+  /**
+   * 取得某個音檔的實測振幅（0..1，長度 BARS）。失敗 resolve(null)。
+   */
+  function get(url) {
+    if (!url) return Promise.resolve(null);
+    if (cache[url]) return cache[url];
+    if (typeof fetch !== 'function' || !(window.AudioContext || window.webkitAudioContext)) {
+      cache[url] = Promise.resolve(null);
+      return cache[url];
+    }
+    cache[url] = fetch(url)
+      .then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.arrayBuffer();
+      })
+      .then(decodeArrayBuffer)
+      .then(peaks)
+      .catch(function () { return null; });
+    return cache[url];
+  }
+
+  VTN.waveform = {
+    bars: BARS,
+    get: get,
+    debug: function () {
+      return { urls: Object.keys(cache), contextReady: !!context };
+    }
+  };
+})();
+
 /* ===== src/js/30-stories.js ===== */
 /* =============================================================================
  * 30-stories — 故事庫：組合篩選、故事詳情、地圖聯動、來源跳轉、分享網址
@@ -7008,8 +8533,24 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   var U = VTN.util;
   var DATA = window.VTN_STORY_DATA || { stories: [], suggestedQuestions: [] };
 
+  /* 年代軸：只做「故事年代」篩選，不假裝切換歷史底圖（LandsD 授權未核實前
+     不做會開天窗的演示）。最後一格＝全部。 */
+  var ERA_STOPS = [1950, 1970, 1990, 2010, 2026];
+  var STORY_TYPE_ORDER = ['festival', 'farming', 'migration', 'architecture', 'oral', 'market', 'other'];
+  var TYPE_ICON = {
+    festival: 'fa-fire',
+    farming: 'fa-wheat-awn',
+    migration: 'fa-route',
+    architecture: 'fa-building-columns',
+    oral: 'fa-microphone-lines',
+    market: 'fa-basket-shopping',
+    other: 'fa-feather-pointed'
+  };
+
   var state = {
-    filters: { location: [], topic: [], era: [], language: [], keyword: '', sort: 'newest' },
+    filters: { type: [], location: [], topic: [], era: [], language: [], keyword: '', sort: 'newest' },
+    mode: 'map',              // map | list
+    eraIndex: ERA_STOPS.length - 1,
     selectedId: null,
     overview: false,
     playingSegment: null,
@@ -7059,6 +8600,32 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     return story.durationSource === 'transcript' ? base + ' ' + t('story.transcriptLength') : base;
   }
 
+  function storyTypeOf(story) {
+    return story && story.storyType && TYPE_ICON[story.storyType] ? story.storyType : 'other';
+  }
+
+  function typeLabel(key) { return t('storyType.' + (key || 'other')); }
+  function moodLabel(key) { return t('mood.' + key); }
+  function typeIcon(key) { return TYPE_ICON[key] || TYPE_ICON.other; }
+
+  function yearOf(story) {
+    if (typeof story.year === 'number') return story.year;
+    var era = String(story.eraKey || '').replace(/s$/, '');
+    var parsed = parseInt(era, 10);
+    return isFinite(parsed) ? parsed + 5 : null;
+  }
+
+  function eraCutoff() {
+    return ERA_STOPS[U.clamp(state.eraIndex, 0, ERA_STOPS.length - 1)];
+  }
+
+  function eraLabelText() {
+    var cutoff = eraCutoff();
+    return cutoff >= ERA_STOPS[ERA_STOPS.length - 1]
+      ? t('atlas.eraAll')
+      : t('atlas.eraBefore', { y: cutoff });
+  }
+
   /* =========================================================================
    * 2. 篩選
    * ======================================================================= */
@@ -7071,10 +8638,28 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     render();
   }
 
-  function setKeyword(value) {
+  function setKeyword(value, options) {
+    var opts = options || {};
     state.filters.keyword = String(value || '').trim();
+    var list = filtered();
+
+    /* 搜尋結果直接在地圖定位：一則就飛過去，多則 fit 到全部結果 */
+    if (opts.locate && state.mode === 'map' && state.filters.keyword) {
+      state.selectedId = list.length === 1 ? list[0].id : null;
+    }
     syncUrl();
     render();
+
+    if (!opts.locate || !VTN.map) return;
+    if (!state.filters.keyword || state.mode !== 'map') {
+      VTN.map.fitAll();
+      return;
+    }
+    if (list.length === 1) {
+      VTN.map.focusStory(list[0].id);
+    } else if (list.length && VTN.map.fitStories) {
+      VTN.map.fitStories(list.map(function (s) { return s.id; }));
+    }
   }
 
   function setSort(value) {
@@ -7084,27 +8669,37 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   }
 
   function clearFilters() {
-    state.filters = { location: [], topic: [], era: [], language: [], keyword: '', sort: state.filters.sort };
+    state.filters = { type: [], location: [], topic: [], era: [], language: [], keyword: '', sort: state.filters.sort };
+    state.eraIndex = ERA_STOPS.length - 1;
     var search = document.getElementById('storySearch');
     if (search) search.value = '';
+    var era = document.getElementById('atlasEra');
+    if (era) era.value = String(state.eraIndex);
     syncUrl();
     render();
+    if (VTN.map) VTN.map.fitAll();
   }
 
   function activeCount() {
     var f = state.filters;
-    return f.location.length + f.topic.length + f.era.length + f.language.length + (f.keyword ? 1 : 0);
+    var count = f.type.length + f.location.length + f.topic.length + f.era.length +
+      f.language.length + (f.keyword ? 1 : 0);
+    if (state.eraIndex < ERA_STOPS.length - 1) count++;
+    return count;
   }
 
   function keywordHaystack(story) {
     var parts = [story.title, story.titleEn, story.teller, villageLabel(story.villageKey)];
     (story.topicKeys || []).forEach(function (k) { parts.push(topicLabel(k)); });
     parts.push(eraLabel(story.eraKey), languageLabel(story.languageKey));
+    parts.push(typeLabel(storyTypeOf(story)));
+    if (story.mood) parts.push(moodLabel(story.mood));
+    if (story.year) parts.push(String(story.year));
     (story.segments || []).forEach(function (seg) { parts.push(seg.text); });
     return parts.join(' ').toLowerCase();
   }
 
-  function matches(story) {
+  function matchesExceptType(story) {
     var f = state.filters;
     if (f.location.length && f.location.indexOf(story.villageKey) === -1) return false;
     if (f.era.length && f.era.indexOf(story.eraKey) === -1) return false;
@@ -7117,6 +8712,15 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
       var needle = f.keyword.toLowerCase();
       if (keywordHaystack(story).indexOf(needle) === -1) return false;
     }
+    var year = yearOf(story);
+    if (state.eraIndex < ERA_STOPS.length - 1 && year !== null && year > eraCutoff()) return false;
+    return true;
+  }
+
+  function matches(story) {
+    var f = state.filters;
+    if (f.type.length && f.type.indexOf(storyTypeOf(story)) === -1) return false;
+    if (!matchesExceptType(story)) return false;
     return true;
   }
 
@@ -7154,6 +8758,7 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   function currentParams() {
     var f = state.filters;
     var params = {};
+    if (f.type.length) params.storyType = f.type.join(',');
     if (f.location.length) params.loc = f.location.join(',');
     if (f.topic.length) params.topic = f.topic.join(',');
     if (f.era.length) params.era = f.era.join(',');
@@ -7161,7 +8766,8 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     if (f.keyword) params.q = f.keyword;
     if (f.sort && f.sort !== 'newest') params.sort = f.sort;
     if (state.selectedId) params.story = state.selectedId;
-    if (state.overview) params.map = 'overview';
+    if (state.mode === 'list') params.view = 'list';
+    if (state.eraIndex < ERA_STOPS.length - 1) params.since = ERA_STOPS[state.eraIndex];
     return params;
   }
 
@@ -7180,19 +8786,27 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
 
   function applyParams(params) {
     var f = state.filters;
+    f.type = params.storyType ? String(params.storyType).split(',') : [];
     f.location = params.loc ? String(params.loc).split(',') : [];
     f.topic = params.topic ? String(params.topic).split(',') : [];
     f.era = params.era ? String(params.era).split(',') : [];
     f.language = params.lang ? String(params.lang).split(',') : [];
     f.keyword = params.q || '';
     f.sort = params.sort || 'newest';
-    state.overview = params.map === 'overview';
+    state.mode = params.view === 'list' ? 'list' : 'map';
+    state.overview = false;
     state.selectedId = params.story || null;
+
+    var since = Number(params.since);
+    if (since && ERA_STOPS.indexOf(since) !== -1) state.eraIndex = ERA_STOPS.indexOf(since);
+    else state.eraIndex = ERA_STOPS.length - 1;
 
     var search = document.getElementById('storySearch');
     if (search && search.value !== f.keyword) search.value = f.keyword;
     var sortSelect = document.getElementById('filterSort');
     if (sortSelect) sortSelect.value = f.sort;
+    var era = document.getElementById('atlasEra');
+    if (era) era.value = String(state.eraIndex);
     if (params.story) VTN.router.go('stories', params, { replace: true, silent: true });
   }
 
@@ -7218,12 +8832,16 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     }
 
     render();
-    if (opts.focus !== false) {
-      setTimeout(function () {
-        var card = document.getElementById('storyDetail');
-        if (card && !card.hidden) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 40);
+
+    if (VTN.sheet) {
+      VTN.sheet.open({
+        onClose: handleSheetClosed,
+        expanded: opts.expanded === true,
+        focus: opts.focus !== false
+      });
     }
+    if (VTN.map) VTN.map.focusStory(storyId);
+
     if (opts.playAt !== undefined && opts.playAt !== null) {
       var ok = VTN.audio.playStory(storyId, opts.playAt);
       if (!ok) VTN.ui.toast(t('story.noAudio'), 'error');
@@ -7336,12 +8954,16 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
    * 6. 渲染：故事列表
    * ======================================================================= */
   function coverNode(story) {
-    var wrap = U.node('span', { class: 'story-item__cover' });
+    var type = storyTypeOf(story);
+    var wrap = U.node('span', { class: 'story-item__cover story-item__cover--' + type });
     if (story.cover) {
       var img = U.node('img', { src: story.cover, alt: '', width: '62', height: '62' });
       wrap.appendChild(img);
     } else {
-      wrap.appendChild(U.node('i', { class: 'fa-solid fa-book-open', 'aria-hidden': 'true' }));
+      wrap.appendChild(U.node('i', {
+        class: 'fa-solid ' + typeIcon(type),
+        'aria-hidden': 'true'
+      }));
     }
     return wrap;
   }
@@ -7363,7 +8985,14 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
         languageLabel(story.languageKey) + ' ・ ' + durationLabel(story)
     }));
     var tags = U.node('span', { class: 'story-item__tags' });
-    (story.topicKeys || []).slice(0, 2).forEach(function (key) {
+    var typeTag = U.node('span', {
+      class: 'tag tag--type vtn-type--' + storyTypeOf(story)
+    });
+    typeTag.innerHTML = '<i class="fa-solid ' + typeIcon(storyTypeOf(story)) + '" aria-hidden="true"></i>' +
+      U.escapeHtml(typeLabel(storyTypeOf(story)));
+    tags.appendChild(typeTag);
+    if (story.mood) tags.appendChild(moodTagOf(story.mood));
+    (story.topicKeys || []).slice(0, 1).forEach(function (key) {
       tags.appendChild(U.node('span', { class: 'tag', text: topicLabel(key) }));
     });
     if (story.rolePlayed) tags.appendChild(U.node('span', { class: 'tag tag--gold', text: t('story.rolePlayed') }));
@@ -7392,6 +9021,162 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     return U.node('span', { class: 'tag' + (kind ? ' tag--' + kind : ''), text: text });
   }
 
+  function moodTagOf(mood) {
+    if (!mood) return null;
+    var tag = U.node('span', { class: 'mood-tag vtn-mood--' + mood });
+    tag.appendChild(U.node('span', { class: 'mood-tag__dot', 'aria-hidden': 'true' }));
+    tag.appendChild(U.node('span', { text: moodLabel(mood) }));
+    return tag;
+  }
+
+  /* 波形只由實測振幅產生：兩層同一組 SVG 柱，上層用 clip-path 顯示已播放部分 */
+  function drawWave(player, track, amps, story) {
+    var bars = '';
+    amps.forEach(function (amp, i) {
+      var h = 2.5 + amp * 27;
+      bars += '<rect x="' + (i * 4 + 0.7).toFixed(2) +
+        '" y="' + ((30 - h) / 2).toFixed(2) +
+        '" width="2.6" height="' + h.toFixed(2) + '" rx="1.3"></rect>';
+    });
+    var open = '<svg class="player__waveSvg" viewBox="0 0 ' + (amps.length * 4) +
+      ' 30" preserveAspectRatio="none" focusable="false" aria-hidden="true">';
+    var playedOpen = open.replace(
+      'class="player__waveSvg"',
+      'class="player__waveSvg player__waveSvg--played"'
+    );
+    var wave = track.querySelector('[data-role="wave"]');
+    if (!wave) return;
+    wave.innerHTML = open + bars + '</svg>' + playedOpen + bars + '</svg>';
+    player.classList.add('player--wave');
+    track.setAttribute('data-wave', 'measured');
+    var note = player.querySelector('[data-role="note"]');
+    if (note) note.textContent = t('atlas.playerMetaWave', {
+      n: (story.segments || []).length,
+      dur: U.fmtTime(story.durationSec)
+    });
+  }
+
+  function playerNode(story) {
+    if (!story.audio) {
+      return U.node('div', {
+        class: 'player player--noaudio',
+        text: t('story.noAudioExplain')
+      });
+    }
+    var wrap = U.node('div', { class: 'player', 'data-player-story': story.id });
+    var btn = U.node('button', {
+      class: 'player__btn', type: 'button', 'data-role': 'play',
+      'aria-label': t('atlas.playAria', { title: story.title })
+    });
+    btn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
+
+    var main = U.node('div', { class: 'player__main' });
+    var track = U.node('div', {
+      class: 'player__track', 'data-role': 'track',
+      role: 'slider', 'aria-label': t('atlas.seekAria'),
+      'aria-valuemin': '0', 'aria-valuemax': String(Math.round(story.durationSec)),
+      'aria-valuenow': '0', tabindex: '0'
+    });
+    track.appendChild(U.node('div', { class: 'player__wave', 'data-role': 'wave', 'aria-hidden': 'true' }));
+    track.appendChild(U.node('div', { class: 'player__fill', 'data-role': 'fill' }));
+    (story.segments || []).forEach(function (seg) {
+      var pct = story.durationSec ? (seg.start / story.durationSec) * 100 : 0;
+      var tick = U.node('span', { class: 'player__tick', 'aria-hidden': 'true' });
+      tick.style.left = Math.max(0, Math.min(100, pct)) + '%';
+      track.appendChild(tick);
+    });
+
+    var meta = U.node('div', { class: 'player__meta' });
+    meta.appendChild(U.node('span', { class: 'player__now', 'data-role': 'now', text: '00:00' }));
+    meta.appendChild(U.node('span', {
+      class: 'player__note', 'data-role': 'note',
+      text: t('atlas.playerMeta', { n: (story.segments || []).length, dur: U.fmtTime(story.durationSec) })
+    }));
+
+    main.appendChild(track);
+    main.appendChild(meta);
+    wrap.appendChild(btn);
+    wrap.appendChild(main);
+
+    btn.addEventListener('click', function () {
+      if (VTN.audio.playingStoryId() === story.id) {
+        VTN.audio.pauseStory();
+        refreshPlayerUI();
+        return;
+      }
+      VTN.audio.playStory(story.id, 0);
+      setTimeout(refreshPlayerUI, 120);
+    });
+
+    track.addEventListener('click', function (event) {
+      var rect = track.getBoundingClientRect();
+      var ratio = U.clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+      VTN.audio.playStory(story.id, ratio * (story.durationSec || 0));
+      setTimeout(refreshPlayerUI, 120);
+    });
+
+    track.addEventListener('keydown', function (event) {
+      var dur = story.durationSec || 0;
+      var cur = Number(track.getAttribute('aria-valuenow')) || 0;
+      var next;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next = cur + 5;
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next = cur - 5;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = dur;
+      else return;
+      event.preventDefault();
+      VTN.audio.playStory(story.id, U.clamp(next, 0, dur));
+      setTimeout(refreshPlayerUI, 120);
+    });
+
+    /* 解碼成功才換成波形；失敗時維持細進度條，不畫假波形 */
+    if (VTN.waveform) {
+      VTN.waveform.get(story.audio).then(function (amps) {
+        if (!amps) return;
+        if (!wrap.isConnected || wrap.getAttribute('data-player-story') !== story.id) return;
+        drawWave(wrap, track, amps, story);
+      });
+    }
+
+    return wrap;
+  }
+
+  function refreshPlayerUI() {
+    var host = document.getElementById('storyDetail');
+    if (!host) return;
+    var player = host.querySelector('.player');
+    if (!player) return;
+    var storyId = player.getAttribute('data-player-story');
+    var story = storyId ? get(storyId) : null;
+    if (!story) return;
+    var playing = VTN.audio.playingStoryId() === storyId;
+    var btn = player.querySelector('[data-role="play"]');
+    if (btn) {
+      btn.classList.toggle('is-playing', playing);
+      btn.innerHTML = '<i class="fa-solid ' + (playing ? 'fa-pause' : 'fa-play') + '" aria-hidden="true"></i>';
+      btn.setAttribute('aria-label', playing ? t('atlas.pauseAria') : t('atlas.playAria', { title: story.title }));
+    }
+  }
+
+  function updatePlayerProgress(seconds, storyId) {
+    var host = document.getElementById('storyDetail');
+    if (!host) return;
+    var player = host.querySelector('.player');
+    if (!player || player.getAttribute('data-player-story') !== storyId) return;
+    var story = get(storyId);
+    if (!story) return;
+    var ratio = U.clamp(seconds / Math.max(1, story.durationSec), 0, 1);
+    var fill = player.querySelector('[data-role="fill"]');
+    var now = player.querySelector('[data-role="now"]');
+    var track = player.querySelector('[data-role="track"]');
+    if (fill) fill.style.width = (ratio * 100).toFixed(2) + '%';
+    if (now) now.textContent = U.fmtTime(seconds);
+    if (track) {
+      track.setAttribute('aria-valuenow', String(Math.round(seconds)));
+      track.style.setProperty('--played', (ratio * 100).toFixed(2) + '%');
+    }
+  }
+
   function renderDetail() {
     var host = document.getElementById('storyDetail');
     if (!host) return;
@@ -7399,30 +9184,49 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     if (!story || isWithdrawn(story) || !VTN.store.authorizedFor(story, VTN.store.role(), VTN.store.ownerId())) {
       host.hidden = true;
       host.textContent = '';
+      if (VTN.sheet && VTN.sheet.isOpen()) VTN.sheet.close('empty');
       return;
     }
 
     host.hidden = false;
     host.textContent = '';
 
-    var head = U.node('div', { class: 'story-detail__head' });
-    var titles = U.node('div', { class: 'story-detail__titles' });
-    titles.appendChild(U.node('h2', { class: 'story-detail__title', text: story.title }));
-    titles.appendChild(U.node('p', {
-      class: 'story-detail__meta',
-      text: story.teller + ' ・ ' + villageLabel(story.villageKey) + ' ・ ' +
-        eraLabel(story.eraKey) + ' ・ ' + languageLabel(story.languageKey) + ' ・ ' + durationLabel(story)
-    }));
-    head.appendChild(titles);
-    host.appendChild(head);
+    var type = storyTypeOf(story);
 
-    var badges = U.node('div', { class: 'story-detail__badges' });
-    if (story.rolePlayed) badges.appendChild(badge(t('story.rolePlayed'), 'gold'));
-    badges.appendChild(badge(story.authorized ? t('story.authorized') : t('story.unauthorized'),
-      story.authorized ? 'line' : 'red'));
-    badges.appendChild(badge(t('scope.label', { scope: t(VTN.SCOPE_META[VTN.store.scopeOf(story)].labelKey) }), 'line'));
-    if (story.consentRef) badges.appendChild(badge(story.consentRef, 'line'));
-    host.appendChild(badges);
+    /* 標題區：類型色塊 + 故事名 + 村落／年代／時長 */
+    var hero = U.node('div', { class: 'sheet-hero' });
+    hero.appendChild(U.node('span', {
+      class: 'sheet-hero__icon vtn-bg--' + type,
+      html: '<i class="fa-solid ' + typeIcon(type) + '" aria-hidden="true"></i>'
+    }));
+    var body = U.node('div', { class: 'sheet-hero__body' });
+    var kicker = U.node('p', { class: 'sheet-hero__kicker' });
+    kicker.appendChild(U.node('span', { text: typeLabel(type) }));
+    kicker.appendChild(U.node('span', { class: 'dot', text: '・' }));
+    kicker.appendChild(U.node('span', {
+      text: story.year ? t('atlas.yearLabel', { y: story.year }) : eraLabel(story.eraKey)
+    }));
+    body.appendChild(kicker);
+    body.appendChild(U.node('h2', { class: 'sheet-hero__title', text: story.title }));
+    body.appendChild(U.node('p', {
+      class: 'sheet-hero__sub',
+      text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story) + ' ・ ' +
+        t('atlas.teller', { name: story.teller })
+    }));
+    hero.appendChild(body);
+    host.appendChild(hero);
+
+    var tags = U.node('div', { class: 'sheet-tags' });
+    var mood = moodTagOf(story.mood);
+    if (mood) tags.appendChild(mood);
+    if (story.rolePlayed) tags.appendChild(badge(t('story.rolePlayed'), 'gold'));
+    if (!story.audio) tags.appendChild(badge(t('story.noAudioTag'), 'line'));
+    tags.appendChild(badge(t('scope.label', {
+      scope: t(VTN.SCOPE_META[VTN.store.scopeOf(story)].labelKey)
+    }), 'line'));
+    host.appendChild(tags);
+
+    host.appendChild(playerNode(story));
 
     if (story.correctedText) {
       var versionBox = U.node('div', { class: 'story-detail__empty' });
@@ -7438,40 +9242,60 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
       host.appendChild(versionBox);
     }
 
-    host.appendChild(U.node('p', {
-      class: 'story-detail__note',
-      html: '<i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>' +
-        U.escapeHtml(t('story.demoDisclosure')) + '</span>'
+    /* 錄音資訊：用逐字稿時間戳做真實刻度，不做假波形 */
+    var section = U.node('div', { class: 'story-sheet__section' });
+    var head = U.node('div', { class: 'story-sheet__section-head' });
+    head.appendChild(U.node('h3', {
+      class: 'story-sheet__section-title',
+      text: t('story.transcriptHint')
     }));
-
-    if (story.audio) {
-      var audio = U.node('audio', {
-        class: 'story-detail__audio',
-        id: 'storyAudio',
-        controls: 'controls',
-        preload: 'metadata',
-        src: story.audio
+    var segments = story.segments || [];
+    var expanded = false;
+    var toggle = null;
+    if (segments.length > 2) {
+      toggle = U.node('button', {
+        class: 'story-sheet__toggle', type: 'button', text: t('atlas.expandAll')
       });
-      audio.setAttribute('data-story', story.id);
-      host.appendChild(audio);
-      VTN.audio.applyPrefs(audio);
-    } else {
-      var noAudio = U.node('div', { class: 'story-detail__empty' });
-      noAudio.appendChild(U.node('p', { text: t('story.noAudioExplain') }));
-      host.appendChild(noAudio);
+      head.appendChild(toggle);
+    }
+    section.appendChild(head);
+
+    var list = U.node('div', { class: 'segments' });
+    segments.forEach(function (seg, index) {
+      var btn = U.node('button', { class: 'segment', type: 'button' });
+      if (index >= 2) btn.classList.add('is-collapsed');
+      btn.appendChild(U.node('span', { class: 'segment__t', text: U.fmtTime(seg.start) }));
+      btn.appendChild(U.node('span', { class: 'segment__text', text: seg.text }));
+      btn.setAttribute('data-start', seg.start);
+      btn.addEventListener('click', function () {
+        state.playingSegment = index;
+        highlightSegment(seg.start);
+        if (story.audio) {
+          VTN.audio.playStory(story.id, seg.start);
+          setTimeout(refreshPlayerUI, 120);
+        } else {
+          VTN.ui.toast(t('story.noAudio'), 'error');
+        }
+      });
+      list.appendChild(btn);
+    });
+    section.appendChild(list);
+    host.appendChild(section);
+
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        expanded = !expanded;
+        Array.prototype.forEach.call(list.querySelectorAll('.segment'), function (el, index) {
+          if (index < 2) return;
+          el.classList.toggle('is-collapsed', !expanded);
+        });
+        toggle.textContent = expanded ? t('atlas.collapseAll') : t('atlas.expandAll');
+      });
     }
 
     var actions = U.node('div', { class: 'story-detail__actions' });
 
-    if (story.audio) {
-      var playBtn = U.node('button', { class: 'vtn-btn vtn-btn--solid', type: 'button' });
-      playBtn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i><span>' +
-        U.escapeHtml(t('story.play')) + '</span>';
-      playBtn.addEventListener('click', function () { VTN.audio.playStory(story.id, 0); });
-      actions.appendChild(playBtn);
-    }
-
-    var shareBtn = U.node('button', { class: 'vtn-btn', type: 'button' });
+    var shareBtn = U.node('button', { class: 'vtn-btn vtn-btn--solid', type: 'button' });
     shareBtn.innerHTML = '<i class="fa-solid fa-link" aria-hidden="true"></i><span>' +
       U.escapeHtml(t('story.share')) + '</span>';
     shareBtn.addEventListener('click', function () {
@@ -7506,25 +9330,14 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     host.appendChild(actions);
 
     host.appendChild(U.node('p', {
-      class: 'story-detail__subhead',
-      text: t('story.transcriptHint')
+      class: 'story-detail__note',
+      html: '<i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>' +
+        U.escapeHtml(t('story.demoDisclosure')) + '</span>'
     }));
-
-    var list = U.node('div', { class: 'segments' });
-    (story.segments || []).forEach(function (seg, index) {
-      var btn = U.node('button', { class: 'segment', type: 'button' });
-      btn.appendChild(U.node('span', { class: 'segment__t', text: U.fmtTime(seg.start) }));
-      btn.appendChild(U.node('span', { class: 'segment__text', text: seg.text }));
-      btn.setAttribute('data-start', seg.end);
-      btn.addEventListener('click', function () {
-        state.playingSegment = index;
-        highlightSegment(seg.start);
-        if (story.audio) VTN.audio.playStory(story.id, seg.start);
-        else VTN.ui.toast(t('story.noAudio'), 'error');
-      });
-      list.appendChild(btn);
-    });
-    host.appendChild(list);
+    host.appendChild(U.node('p', {
+      class: 'story-sheet__note',
+      text: t('atlas.sheetNote', { r: (story.location && story.location.radiusM) || 800 })
+    }));
   }
 
   function highlightSegment(start) {
@@ -7641,7 +9454,143 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   }
 
   /* =========================================================================
-   * 10. 主渲染
+   * 10. 地圖 UI：模式、年代軸、圖例、附近故事
+   * ======================================================================= */
+  function setMode(next) {
+    state.mode = next === 'list' ? 'list' : 'map';
+    if (state.mode === 'list' && VTN.sheet && VTN.sheet.isOpen()) VTN.sheet.close('mode');
+    syncUrl();
+    render();
+    if (state.mode === 'map' && VTN.map) VTN.map.ensureVisible();
+  }
+
+  function updateEraUI() {
+    var label = document.getElementById('atlasEraLabel');
+    if (label) label.textContent = eraLabelText();
+    var ticks = document.getElementById('atlasTicks');
+    if (ticks) {
+      Array.prototype.forEach.call(ticks.children, function (node, index) {
+        node.classList.toggle('is-active', index === state.eraIndex);
+      });
+    }
+    var input = document.getElementById('atlasEra');
+    if (input && input.value !== String(state.eraIndex)) input.value = String(state.eraIndex);
+  }
+
+  function setEra(index, options) {
+    state.eraIndex = U.clamp(Number(index), 0, ERA_STOPS.length - 1);
+    if (state.selectedId) {
+      var selected = get(state.selectedId);
+      var year = selected ? yearOf(selected) : null;
+      if (year !== null && year > eraCutoff()) state.selectedId = null;
+    }
+    syncUrl();
+    render();
+    updateEraUI();
+    if (options && options.fit && VTN.map) VTN.map.fitAll();
+  }
+
+  function toggleType(type) {
+    var list = state.filters.type;
+    var index = list.indexOf(type);
+    if (index === -1) list.push(type);
+    else list.splice(index, 1);
+    syncUrl();
+    render();
+    if (VTN.map) VTN.map.fitAll();
+  }
+
+  function renderLegend() {
+    var host = document.getElementById('atlasLegend');
+    if (!host) return;
+    host.textContent = '';
+
+    /* 圖例計數只受其他篩選影響，讓使用者知道「點下去還剩幾則」 */
+    var counts = {};
+    visible().filter(matchesExceptType).forEach(function (story) {
+      var type = storyTypeOf(story);
+      counts[type] = (counts[type] || 0) + 1;
+    });
+
+    STORY_TYPE_ORDER.forEach(function (type) {
+      if (!counts[type] && state.filters.type.indexOf(type) === -1) return;
+      var pressed = state.filters.type.indexOf(type) !== -1;
+      var btn = U.node('button', {
+        class: 'legend-chip',
+        type: 'button',
+        'aria-pressed': pressed ? 'true' : 'false'
+      });
+      btn.appendChild(U.node('span', {
+        class: 'legend-chip__icon vtn-bg--' + type,
+        html: '<i class="fa-solid ' + typeIcon(type) + '" aria-hidden="true"></i>'
+      }));
+      btn.appendChild(U.node('span', { text: typeLabel(type) }));
+      btn.appendChild(U.node('span', {
+        class: 'legend-chip__count',
+        text: String(counts[type] || 0)
+      }));
+      btn.addEventListener('click', function () { toggleType(type); });
+      host.appendChild(btn);
+    });
+  }
+
+  function renderPeek(list) {
+    var host = document.getElementById('atlasPeek');
+    if (!host) return;
+    host.textContent = '';
+    list.slice(0, 6).forEach(function (story) {
+      var type = storyTypeOf(story);
+      var card = U.node('button', { class: 'peek-card', type: 'button', role: 'listitem' });
+      card.appendChild(U.node('span', {
+        class: 'peek-card__icon vtn-bg--' + type,
+        html: '<i class="fa-solid ' + typeIcon(type) + '" aria-hidden="true"></i>'
+      }));
+      var body = U.node('span', { class: 'peek-card__body' });
+      body.appendChild(U.node('span', { class: 'peek-card__title', text: story.title }));
+      body.appendChild(U.node('span', {
+        class: 'peek-card__meta',
+        text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story)
+      }));
+      card.appendChild(body);
+      card.addEventListener('click', function () { select(story.id); });
+      host.appendChild(card);
+    });
+  }
+
+  function updateChrome(list) {
+    var atlas = document.getElementById('storyAtlas');
+    var listView = document.getElementById('atlasList');
+    if (atlas) atlas.hidden = state.mode === 'list';
+    if (listView) listView.hidden = state.mode !== 'list';
+
+    var page = document.querySelector('.page--stories');
+    if (page) page.classList.toggle('is-map', state.mode === 'map');
+
+    var viewBtn = document.getElementById('atlasViewBtn');
+    if (viewBtn) viewBtn.setAttribute('aria-pressed', state.mode === 'list' ? 'true' : 'false');
+
+    var listCount = document.getElementById('atlasListCount');
+    if (listCount) {
+      listCount.textContent = t('atlas.listSub', {
+        n: list.length,
+        villages: Object.keys(list.reduce(function (acc, story) {
+          acc[story.villageKey] = 1;
+          return acc;
+        }, {})).length
+      });
+    }
+    updateEraUI();
+  }
+
+  function handleSheetClosed() {
+    if (!state.selectedId) return;
+    state.selectedId = null;
+    syncUrl();
+    render();
+  }
+
+  /* =========================================================================
+   * 11. 主渲染
    * ======================================================================= */
   function render() {
     var list = filtered();
@@ -7649,40 +9598,43 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
 
     if (state.selectedId) {
       var selectedAlive = list.some(function (s) { return s.id === state.selectedId; });
-      if (!selectedAlive) state.selectedId = null;
+      if (!selectedAlive) {
+        state.selectedId = null;
+        syncUrl();
+      }
     }
 
     renderFilterChips();
     renderSummary();
+    renderLegend();
+    renderPeek(list);
     renderCount(list);
     renderList(list);
     renderDetail();
     renderFeatured();
+    updateChrome(list);
 
     if (VTN.map) {
       VTN.map.update({
         stories: list,
         selectedId: state.selectedId,
-        overview: state.overview,
-        empty: list.length === 0,
-        titleStory: state.selectedId ? get(state.selectedId) : null
+        mode: state.mode,
+        eraYear: eraCutoff(),
+        empty: list.length === 0
       });
     }
   }
 
   function toggleOverview(force) {
-    state.overview = typeof force === 'boolean' ? force : !state.overview;
-    if (state.overview) state.selectedId = null;
-    syncUrl();
-    render();
+    setMode(typeof force === 'boolean' ? (force ? 'map' : 'list') : (state.mode === 'list' ? 'map' : 'list'));
   }
 
   function init() {
     var search = document.getElementById('storySearch');
     if (search) {
-      var onInput = U.debounce(function () { setKeyword(search.value); }, 220);
+      var onInput = U.debounce(function () { setKeyword(search.value, { locate: true }); }, 260);
       search.addEventListener('input', onInput);
-      search.addEventListener('search', function () { setKeyword(search.value); });
+      search.addEventListener('search', function () { setKeyword(search.value, { locate: true }); });
     }
 
     var toggleBtn = document.getElementById('filterToggle');
@@ -7698,14 +9650,18 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
         }
       });
     }
-    var doneBtn = document.getElementById('filterDone');
-    if (doneBtn && panel) {
-      doneBtn.addEventListener('click', function () {
-        panel.hidden = true;
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
-        if (toggleBtn) toggleBtn.focus();
-      });
+    function closePanel(refocus) {
+      if (!panel || panel.hidden) return;
+      panel.hidden = true;
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+      if (refocus && toggleBtn) toggleBtn.focus();
+      if (VTN.map) VTN.map.fitAll();
     }
+
+    var doneBtn = document.getElementById('filterDone');
+    if (doneBtn) doneBtn.addEventListener('click', function () { closePanel(true); });
+    var filterClose = document.getElementById('filterClose');
+    if (filterClose) filterClose.addEventListener('click', function () { closePanel(true); });
     var clearBtn = document.getElementById('filterClear');
     if (clearBtn) clearBtn.addEventListener('click', clearFilters);
     var emptyClear = document.getElementById('storiesEmptyClear');
@@ -7716,18 +9672,40 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
       sortSelect.addEventListener('change', function () { setSort(sortSelect.value); });
     }
 
-    var mapBtn = document.getElementById('mapModeBtn');
-    if (mapBtn) {
-      mapBtn.addEventListener('click', function () { toggleOverview(); });
+    /* 地圖／列表切換 */
+    var viewBtn = document.getElementById('atlasViewBtn');
+    if (viewBtn) viewBtn.addEventListener('click', function () {
+      setMode(state.mode === 'list' ? 'map' : 'list');
+    });
+    var backBtn = document.getElementById('atlasListBack');
+    if (backBtn) backBtn.addEventListener('click', function () { setMode('map'); });
+
+    /* 年代軸 */
+    var eraInput = document.getElementById('atlasEra');
+    if (eraInput) {
+      eraInput.addEventListener('input', function () { setEra(eraInput.value, { fit: false }); });
+      eraInput.addEventListener('change', function () { setEra(eraInput.value, { fit: true }); });
     }
 
+    /* 音訊：進度、段落高亮、播放鍵狀態 */
     VTN.audio.onTime(function (seconds, storyId) {
-      var story = storyId ? get(storyId) : null;
+      if (!storyId) return;
+      updatePlayerProgress(seconds, storyId);
+      var story = get(storyId);
       if (!story) return;
       (story.segments || []).forEach(function (seg) {
         if (seconds >= seg.start && seconds < seg.end) highlightSegment(seg.start);
       });
     });
+    document.addEventListener('play', function (event) {
+      if (event.target && event.target.tagName === 'AUDIO') refreshPlayerUI();
+    }, true);
+    document.addEventListener('pause', function (event) {
+      if (event.target && event.target.tagName === 'AUDIO') refreshPlayerUI();
+    }, true);
+    U.on('vtn:audio-ended', function () { refreshPlayerUI(); });
+
+    if (VTN.sheet) VTN.sheet.init();
 
     render();
   }
@@ -7745,30 +9723,227 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
     openSource: openSource,
     openScopeDialog: openScopeDialog,
     shareUrl: shareUrl,
+    setMode: setMode,
+    setEra: setEra,
+    toggleType: toggleType,
     toggleOverview: toggleOverview,
     durationLabel: durationLabel,
     villageLabel: villageLabel,
     topicLabel: topicLabel,
     eraLabel: eraLabel,
     languageLabel: languageLabel,
+    storyTypeOf: storyTypeOf,
+    typeLabel: typeLabel,
+    moodLabel: moodLabel,
+    typeIcon: typeIcon,
     lastList: function () { return state.lastList; },
     selectedId: function () { return state.selectedId; },
-    isOverview: function () { return state.overview; },
+    isOverview: function () { return state.mode === 'list'; },
     meta: function () { return DATA; },
     clearFilters: clearFilters
   };
 })();
 
+/* ===== src/js/32-sheet.js ===== */
+/* =============================================================================
+ * 32-sheet — 二級故事頁：半拉抽屜
+ * -----------------------------------------------------------------------------
+ * 行為：
+ *   * 預設半開（52%），可上拉全開、下拉收起；
+ *   * 點遮罩、按 Esc、按關閉鍵都會收起，並暫停播放；
+ *   * 收起後把焦點交回原本的故事點／列表項；
+ *   * 只負責「殼」，內容由 30-stories.js 渲染入 #storyDetail。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var VTN = window.VTN;
+
+  var el = null;
+  var scrim = null;
+  var grab = null;
+  var closeBtn = null;
+  var opened = false;
+  var expanded = false;
+  var dragging = null;
+  var suppressGrabClick = 0;
+  var hideTimer = null;
+  var previousFocus = null;
+  var onClose = null;
+
+  function byId(id) { return document.getElementById(id); }
+
+  function ensure() {
+    if (el) return true;
+    el = byId('storySheet');
+    scrim = byId('sheetScrim');
+    grab = byId('sheetGrab');
+    closeBtn = byId('sheetClose');
+    return !!(el && scrim);
+  }
+
+  function isOpen() { return opened; }
+  function isExpanded() { return expanded; }
+
+  function setExpanded(next) {
+    expanded = !!next;
+    if (!el) return;
+    el.classList.toggle('is-expanded', expanded);
+    el.classList.remove('is-dragging');
+    el.style.transform = '';
+  }
+
+  function open(options) {
+    if (!ensure()) return;
+    var opts = options || {};
+    onClose = opts.onClose || null;
+    previousFocus = document.activeElement;
+    clearTimeout(hideTimer);
+
+    if (!opened) {
+      el.hidden = false;
+      scrim.hidden = false;
+      el.style.transform = '';
+      /* 先讓 display 生效，再加 class 觸發動畫 */
+      requestAnimationFrame(function () {
+        el.classList.add('is-open');
+        scrim.classList.add('is-open');
+      });
+    } else {
+      el.classList.add('is-open');
+      scrim.classList.add('is-open');
+    }
+    opened = true;
+    setExpanded(!!opts.expanded);
+    if (closeBtn && opts.focus !== false) {
+      setTimeout(function () { try { closeBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 120);
+    }
+  }
+
+  function close(reason) {
+    if (!ensure() || !opened) return;
+    opened = false;
+    expanded = false;
+    el.classList.remove('is-open', 'is-expanded', 'is-dragging');
+    el.style.transform = '';
+    scrim.classList.remove('is-open');
+    if (VTN.audio && VTN.audio.pauseStory) VTN.audio.pauseStory();
+    hideTimer = setTimeout(function () {
+      el.hidden = true;
+      scrim.hidden = true;
+    }, 430);
+    if (previousFocus && previousFocus.focus) {
+      setTimeout(function () { try { previousFocus.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 60);
+    }
+    if (onClose) onClose(reason || 'close');
+  }
+
+  function onKeydown(event) {
+    if (!opened) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      close('escape');
+    }
+  }
+
+  function bindDrag() {
+    if (!grab || grab.dataset.bound) return;
+    grab.dataset.bound = '1';
+
+    grab.addEventListener('pointerdown', function (event) {
+      if (!opened) return;
+      dragging = {
+        y: event.clientY,
+        height: el.getBoundingClientRect().height,
+        expanded: expanded
+      };
+      el.classList.add('is-dragging');
+      try { grab.setPointerCapture(event.pointerId); } catch (e) { /* ignore */ }
+    });
+
+    grab.addEventListener('pointermove', function (event) {
+      if (!dragging) return;
+      var dy = event.clientY - dragging.y;
+      var base = dragging.expanded ? 0 : dragging.height * 0.52;
+      var next = base + dy;
+      var max = dragging.height;
+      next = Math.max(0, Math.min(max, next));
+      el.style.transform = 'translateY(' + Math.round(next) + 'px)';
+    });
+
+    function end(event) {
+      if (!dragging) return;
+      var dy = event.clientY - dragging.y;
+      var wasExpanded = dragging.expanded;
+      if (Math.abs(dy) > 6) suppressGrabClick = Date.now() + 450;
+      dragging = null;
+      el.classList.remove('is-dragging');
+      el.style.transform = '';
+      if (dy < -50) setExpanded(true);
+      else if (dy > 70) {
+        if (wasExpanded) setExpanded(false);
+        else close('swipe');
+      } else {
+        setExpanded(wasExpanded);
+      }
+    }
+
+    grab.addEventListener('pointerup', end);
+    grab.addEventListener('pointercancel', function () {
+      if (!dragging) return;
+      dragging = null;
+      el.classList.remove('is-dragging');
+      el.style.transform = '';
+    });
+
+    grab.addEventListener('click', function () {
+      /* 拖拽後的 click 不應再次切換，否則會「拖上又彈回」 */
+      if (Date.now() < suppressGrabClick) return;
+      setExpanded(!expanded);
+    });
+  }
+
+  function init() {
+    if (!ensure()) return;
+    closeBtn.addEventListener('click', function () { close('button'); });
+    scrim.addEventListener('click', function () { close('scrim'); });
+    document.addEventListener('keydown', onKeydown, true);
+    bindDrag();
+    el.addEventListener('click', function (event) {
+      /* 半開時，點抽屜內容任何位置都展開（不影響按鈕本身） */
+      if (!expanded && event.target.closest('button, a, input, .player, .segment')) return;
+      if (!expanded) setExpanded(true);
+    });
+  }
+
+  VTN.sheet = {
+    init: init,
+    open: open,
+    close: close,
+    isOpen: isOpen,
+    isExpanded: isExpanded,
+    expand: function (v) { setExpanded(v !== false); }
+  };
+})();
+
 /* ===== src/js/35-map.js ===== */
 /* =============================================================================
- * 35-map — 地圖：所選故事一對一，另設「總覽」可點圈切回故事
+ * 35-map — 故事地圖（MapLibre GL JS 3D 主引擎 + Leaflet 2D 兜底）
  * -----------------------------------------------------------------------------
- * 修復：
- *   1. 以前把所有故事的圈都畫出來，圆心固定取第一則 → 現在所選故事只畫一個圈；
- *   2. 新增總覽模式，點圈可切回對應故事；
- *   3. 篩選無結果時地圖顯示「沒有符合的故事」，不再畫舊資料；
- *   4. 圖磚失敗一律降級手繪示意圖，並如實更新說明文字。
- * 私隱：只畫約 800 米模糊圈，永不顯示 GPS 精確位置。
+ * 為什麼是 MapLibre 而不是 Mapbox：
+ *   * 同樣做到 2D/3D、pitch、建築擠出，但不需要 access token；
+ *   * 底圖用 OpenFreeMap（免費、無 key），Mapbox 免費額度用完會即場斷圖；
+ *   * 失敗時自動退回 Leaflet + OSM，再失敗才用手繪示意圖，路演不會開天窗。
+ *
+ * 私隱：
+ *   * 只畫約 800 米模糊圈，永不顯示精確 GPS；
+ *   * private 故事由 store / 伺服器過濾，地圖永遠收不到座標。
+ *
+ * 一級資訊：
+ *   * 顏色＋圖標＝故事類型；小圓點＝講者心情（人工標註，非 AI 推斷）；
+ *   * 低縮放用數字聚合，放大後展開為單一圖標。
  * ========================================================================== */
 
 (function () {
@@ -7777,316 +9952,767 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   var VTN = window.VTN;
   var U = VTN.util;
 
+  var MAPLIBRE_VERSION = '4.7.1';
+  var MAPLIBRE_CDN = 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + MAPLIBRE_VERSION + '/dist/';
+  var DEFAULT_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
   var LEAFLET_VERSION = '1.9.4';
-  var CDN = 'https://cdn.jsdelivr.net/npm/leaflet@' + LEAFLET_VERSION + '/dist/';
+  var LEAFLET_CDN = 'https://cdn.jsdelivr.net/npm/leaflet@' + LEAFLET_VERSION + '/dist/';
+  var HK_CENTER = [114.085, 22.468];
+  var STYLE_TIMEOUT_MS = 11000;
   var LOAD_TIMEOUT_MS = 12000;
-  var TILE_TIMEOUT_MS = 6500;
+  var PIN_MIN_ZOOM = 9.4;
 
-  var TILE_SETS = [
-    {
-      name: 'osm',
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      options: {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
-      }
-    },
-    {
-      name: 'esri',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-      options: {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a> &mdash; &copy; OpenStreetMap contributors'
-      }
-    }
-  ];
+  var el = null;
+  var ml = null;                 // MapLibre 實例
+  var leaflet = null;            // Leaflet 實例（兜底）
+  var leafletLayer = null;
+  var engine = 'idle';           // idle | loading | maplibre | leaflet | failed
+  var markers = {};
+  var is3D = false;
+  var booted = false;
 
-  var map = null;
-  var layerGroup = null;
-  var leafletState = 'idle';   // idle | loading | ready | failed
-  var lastState = { stories: [], selectedId: null, overview: false, empty: false, titleStory: null };
-  var hasFit = false;
+  var state = {
+    stories: [],
+    selectedId: null,
+    empty: false,
+    mode: 'map',
+    eraYear: null
+  };
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
+  function byId(id) { return document.getElementById(id); }
 
-  function loadLeaflet() {
+  /* =========================================================================
+   * 1. 圖標與色板（一級資訊）
+   * ======================================================================= */
+  var TYPE_ICON = {
+    festival: 'fa-fire',
+    farming: 'fa-wheat-awn',
+    migration: 'fa-route',
+    architecture: 'fa-building-columns',
+    oral: 'fa-microphone-lines',
+    market: 'fa-basket-shopping',
+    other: 'fa-feather-pointed'
+  };
+
+  function typeOf(story) {
+    return story && story.storyType && TYPE_ICON[story.storyType] ? story.storyType : 'other';
+  }
+
+  function iconOf(story) {
+    return TYPE_ICON[typeOf(story)];
+  }
+
+  /* =========================================================================
+   * 2. 載入外部腳本
+   * ======================================================================= */
+  function loadScript(src, marker, timeoutMs) {
     return new Promise(function (resolve, reject) {
-      if (window.L) { resolve(window.L); return; }
-      if (!document.querySelector('link[data-vtn-leaflet-css]')) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CDN + 'leaflet.min.css';
-        link.dataset.vtnLeafletCss = '1';
-        document.head.appendChild(link);
-      }
-      var existing = document.querySelector('script[data-vtn-leaflet-js]');
+      var existing = document.querySelector('script[data-vtn-' + marker + ']');
       if (existing) {
-        existing.addEventListener('load', function () { resolve(window.L); });
-        existing.addEventListener('error', reject);
+        existing.addEventListener('load', function () { resolve(); });
+        existing.addEventListener('error', function () { reject(new Error(marker + '-error')); });
         return;
       }
       var script = document.createElement('script');
-      script.src = CDN + 'leaflet.min.js';
+      script.src = src;
       script.async = true;
-      script.dataset.vtnLeafletJs = '1';
-      var timer = setTimeout(function () { reject(new Error('leaflet-timeout')); }, LOAD_TIMEOUT_MS);
-      script.onload = function () { clearTimeout(timer); resolve(window.L); };
-      script.onerror = function () { clearTimeout(timer); reject(new Error('leaflet-error')); };
+      script.setAttribute('data-vtn-' + marker, '1');
+      var timer = setTimeout(function () { reject(new Error(marker + '-timeout')); }, timeoutMs || LOAD_TIMEOUT_MS);
+      script.onload = function () { clearTimeout(timer); resolve(); };
+      script.onerror = function () { clearTimeout(timer); reject(new Error(marker + '-error')); };
       document.head.appendChild(script);
     });
   }
 
-  function addTileLayerWithFallback(theMap, onFirstTile) {
-    var index = 0;
-    var revealed = false;
-    var current = null;
-    var timer = null;
-
-    function tryNext() {
-      if (revealed) return;
-      if (current) { theMap.removeLayer(current); current = null; }
-      if (timer) { clearTimeout(timer); timer = null; }
-      if (index >= TILE_SETS.length) { onFirstTile(false); return; }
-
-      var set = TILE_SETS[index++];
-      var gotTile = false;
-      current = window.L.tileLayer(set.url, Object.assign({}, set.options, {
-        detectRetina: true,
-        className: 'vtn-tiles-' + set.name
-      }));
-      current.on('tileload', function () {
-        if (gotTile || revealed) return;
-        gotTile = true;
-        revealed = true;
-        if (timer) { clearTimeout(timer); timer = null; }
-        onFirstTile(true);
-      });
-      var errors = 0;
-      current.on('tileerror', function () {
-        if (gotTile || revealed) return;
-        errors++;
-        if (errors >= 6) tryNext();
-      });
-      current.addTo(theMap);
-      timer = setTimeout(tryNext, TILE_TIMEOUT_MS);
-    }
-    tryNext();
+  function loadCss(href, marker) {
+    if (document.querySelector('link[data-vtn-' + marker + ']')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute('data-vtn-' + marker, '1');
+    document.head.appendChild(link);
   }
 
-  function noteText(key) {
-    var note = document.getElementById('mapTilesNote');
+  /* =========================================================================
+   * 3. 幾何：800 米模糊圈
+   * ======================================================================= */
+  function circlePolygon(lng, lat, radiusM) {
+    var points = [];
+    var earth = 6378137;
+    var d = radiusM / earth;
+    var lat1 = lat * Math.PI / 180;
+    var lng1 = lng * Math.PI / 180;
+    for (var i = 0; i <= 64; i++) {
+      var bearing = i * 2 * Math.PI / 64;
+      var lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) +
+        Math.cos(lat1) * Math.sin(d) * Math.cos(bearing));
+      var lng2 = lng1 + Math.atan2(
+        Math.sin(bearing) * Math.sin(d) * Math.cos(lat1),
+        Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
+      );
+      points.push([lng2 * 180 / Math.PI, lat2 * 180 / Math.PI]);
+    }
+    return {
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'Polygon', coordinates: [points] }
+    };
+  }
+
+  function located() {
+    return state.stories.filter(function (story) {
+      return story.location && typeof story.location.lat === 'number' &&
+        typeof story.location.lng === 'number';
+    });
+  }
+
+  function boundsOf(list) {
+    if (!list.length) return null;
+    var west = 180, south = 90, east = -180, north = -90;
+    list.forEach(function (story) {
+      var loc = story.location;
+      west = Math.min(west, loc.lng);
+      east = Math.max(east, loc.lng);
+      south = Math.min(south, loc.lat);
+      north = Math.max(north, loc.lat);
+    });
+    /* 單一故事時給一點呼吸空間（不是精確定位，仍以模糊圈為中心） */
+    var padLng = Math.max((east - west) * 0.15, 0.012);
+    var padLat = Math.max((north - south) * 0.15, 0.012);
+    return [[west - padLng, south - padLat], [east + padLng, north + padLat]];
+  }
+
+  /* =========================================================================
+   * 4. MapLibre：建立與圖層
+   * ======================================================================= */
+  function setNote(key) {
+    var note = byId('mapTilesNote');
     if (note) note.textContent = t(key);
   }
 
-  function setTitle(story, empty) {
-    var title = document.getElementById('mapTitle');
-    if (!title) return;
-    if (empty) {
-      title.textContent = t('map.empty');
-      return;
-    }
-    if (!story) {
-      title.textContent = t('map.overviewTitle', { n: lastState.stories.length });
-      return;
-    }
-    var radius = (story.location && story.location.radiusM) || 800;
-    title.textContent = VTN.stories.villageLabel(story.villageKey) + ' ・ ' +
-      t('map.radius', { r: radius });
+  function hideLoading() {
+    var loading = byId('mapLoading');
+    if (loading) loading.classList.add('is-hidden');
   }
 
-  function updateModeButton() {
-    var btn = document.getElementById('mapModeBtn');
-    if (!btn) return;
-    btn.textContent = lastState.overview ? t('map.backToStory') : t('map.overview');
-    btn.setAttribute('aria-pressed', lastState.overview ? 'true' : 'false');
-    btn.disabled = lastState.empty;
-  }
+  function createMapLibre() {
+    engine = 'loading';
+    var styleUrl = window.VTN_MAP_STYLE || DEFAULT_STYLE;
+    loadCss(MAPLIBRE_CDN + 'maplibre-gl.css', 'maplibre-css');
 
-  function toggleEmpty(empty) {
-    var el = document.getElementById('mapEmpty');
-    if (el) el.hidden = !empty;
-    var mapEl = document.getElementById('vtnMap');
-    if (mapEl) mapEl.style.opacity = empty ? '0' : '';
-  }
-
-  function popupNode(story) {
-    var wrap = document.createElement('div');
-    var title = document.createElement('strong');
-    title.textContent = story.title;
-    wrap.appendChild(title);
-    var p = document.createElement('p');
-    p.style.margin = '4px 0 0';
-    p.textContent = t('map.popupBody', { r: (story.location && story.location.radiusM) || 800 });
-    wrap.appendChild(p);
-    return wrap;
-  }
-
-  function draw() {
-    if (!map) return;
-    var state = lastState;
-    layerGroup.clearLayers();
-
-    setTitle(state.empty ? null : (state.overview ? null : state.titleStory), state.empty);
-    toggleEmpty(state.empty);
-    updateModeButton();
-
-    if (state.empty) {
-      if (hasFit) {
-        try { map.setView([22.45, 114.08], 12, { animate: false }); } catch (e) { /* ignore */ }
+    loadScript(MAPLIBRE_CDN + 'maplibre-gl.js', 'maplibre-js').then(function () {
+      if (!window.maplibregl) throw new Error('maplibre-missing');
+      if (window.maplibregl.supported && !window.maplibregl.supported({ failIfMajorPerformanceCaveat: false })) {
+        throw new Error('webgl-unsupported');
       }
-      return;
-    }
-
-    var list = state.stories.filter(function (s) {
-      return s.location && typeof s.location.lat === 'number';
-    });
-    if (!list.length) return;
-
-    var drawList = state.overview ? list :
-      list.filter(function (s) { return s.id === state.selectedId; });
-    if (!drawList.length) drawList = [list[0]];
-
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    drawList.forEach(function (story) {
-      var loc = story.location;
-      var radius = loc.radiusM || 800;
-      var selected = story.id === state.selectedId;
-
-      var circle = window.L.circle([loc.lat, loc.lng], {
-        radius: radius,
-        color: selected ? '#2C5742' : '#5E8C70',
-        weight: selected ? 3.2 : 2.2,
-        dashArray: '6 8',
-        lineCap: 'round',
-        fillColor: '#5E8C70',
-        fillOpacity: selected ? 0.16 : 0.09,
-        className: state.overview ? 'leaflet-vtn-circle-overview' : ''
+      var loaded = false;
+      ml = new window.maplibregl.Map({
+        container: el,
+        style: styleUrl,
+        center: HK_CENTER,
+        zoom: 12,
+        pitch: 0,
+        bearing: 0,
+        maxPitch: 70,
+        attributionControl: false,
+        dragRotate: true,
+        antialias: true
       });
 
-      circle.bindTooltip(
-        VTN.stories.villageLabel(story.villageKey) + '・' + t('map.radius', { r: radius }),
-        { direction: 'top', offset: [0, -6], opacity: 0.96, className: 'leaflet-vtn-popup' }
-      );
-      circle.bindPopup(popupNode(story), { className: 'leaflet-vtn-popup', closeButton: true, offset: [0, -4] });
+      /* 署名放在自訂的 #mapTilesNote 內，避免與底部年代軸打架 */
+      var styleTimer = setTimeout(function () {
+        if (!loaded) fallbackToLeaflet('style-timeout');
+      }, STYLE_TIMEOUT_MS);
 
-      circle.on('click', function () {
-        if (state.overview) {
-          VTN.stories.select(story.id);
+      ml.on('load', function () {
+        loaded = true;
+        clearTimeout(styleTimer);
+        engine = 'maplibre';
+        el.classList.add('is-ready');
+        el.classList.remove('is-failed');
+        hideLoading();
+        setNote('atlas.tiles.maplibre');
+        addStorySources();
+        render(true);
+        fitAll();
+      });
+
+      ml.on('error', function (event) {
+        var message = event && event.error ? String(event.error.message || '') : '';
+        if (!loaded && /style|sprite|glyphs|source|network|fetch/i.test(message)) {
+          /* 只記錄；真正降級交由 styleTimer 決定，避免個別 tile 404 就全盤放棄 */
+          if (window.console) console.warn('[VTN] map style warning', message);
         }
       });
 
-      circle.addTo(layerGroup);
+      ml.on('click', function (event) {
+        var features = [];
+        try {
+          features = ml.queryRenderedFeatures(event.point, { layers: ['vtn-cluster'] });
+        } catch (e) { features = []; }
+        if (features.length) {
+          var clusterId = features[0].properties.cluster_id;
+          var source = ml.getSource('vtn-stories');
+          if (source && source.getClusterExpansionZoom) {
+            source.getClusterExpansionZoom(clusterId).then(function (zoom) {
+              ml.easeTo({
+                center: features[0].geometry.coordinates,
+                zoom: zoom + 0.2,
+                duration: 620
+              });
+            }).catch(function () { /* ignore */ });
+          }
+          return;
+        }
+        if (VTN.sheet && VTN.sheet.isOpen()) VTN.sheet.close('map');
+      });
+
+      ml.on('zoom', syncPinVisibility);
+    }).catch(function (error) {
+      if (window.console) console.warn('[VTN] maplibre unavailable', error && error.message);
+      fallbackToLeaflet('maplibre');
     });
-
-    try {
-      var bounds = layerGroup.getBounds();
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, {
-          padding: [28, 28],
-          animate: false,
-          maxZoom: drawList.length === 1 ? 15 : 13
-        });
-        hasFit = true;
-      }
-    } catch (e) { /* ignore */ }
-
-    if (reduceMotion) map.options.zoomAnimation = false;
   }
 
-  function init() {
-    if (leafletState === 'loading' || leafletState === 'ready') return;
-    var el = document.getElementById('vtnMap');
-    var loading = document.getElementById('mapLoading');
-    if (!el) return;
+  function addStorySources() {
+    if (!ml || ml.getSource('vtn-stories')) return;
 
-    leafletState = 'loading';
-    loadLeaflet().then(function (L) {
-      if (map) return;
-      map = L.map(el, {
-        center: [22.45, 114.08],
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: true,
-        scrollWheelZoom: false,
-        tap: true
+    ml.addSource('vtn-stories', {
+      type: 'geojson',
+      data: storiesGeoJson(),
+      cluster: true,
+      clusterRadius: 54,
+      clusterMaxZoom: 9
+    });
+
+    /* 密度熱力：只在低縮放、淡淡的，當作「這裡有很多聲音」的底層提示 */
+    ml.addLayer({
+      id: 'vtn-heat',
+      type: 'heatmap',
+      source: 'vtn-stories',
+      maxzoom: 12.4,
+      paint: {
+        'heatmap-weight': 1,
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 12, 1.1],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 16, 12, 34],
+        'heatmap-opacity': 0.42,
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(126,166,140,0)',
+          0.35, 'rgba(126,166,140,0.55)',
+          0.7, 'rgba(168,131,44,0.6)',
+          1, 'rgba(180,85,47,0.72)'
+        ]
+      }
+    }, firstLabelLayerId());
+
+    ml.addLayer({
+      id: 'vtn-cluster',
+      type: 'circle',
+      source: 'vtn-stories',
+      maxzoom: 9.4,
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': [
+          'step', ['get', 'point_count'],
+          '#5E8C70', 3,
+          '#A8832C', 5,
+          '#B4552F'
+        ],
+        'circle-radius': ['step', ['get', 'point_count'], 17, 3, 21, 5, 26],
+        'circle-opacity': 0.94,
+        'circle-stroke-width': 3,
+        'circle-stroke-color': 'rgba(253,251,244,0.92)',
+        'circle-stroke-opacity': 0.9
+      }
+    });
+
+    ml.addLayer({
+      id: 'vtn-cluster-count',
+      type: 'symbol',
+      source: 'vtn-stories',
+      maxzoom: 11,
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': ['get', 'point_count_abbreviated'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 12,
+        'text-allow-overlap': true
+      },
+      paint: { 'text-color': '#FDFBF4' }
+    });
+
+    /* 所選故事的模糊圈 */
+    ml.addSource('vtn-fuzz', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+    ml.addLayer({
+      id: 'vtn-fuzz-fill',
+      type: 'fill',
+      source: 'vtn-fuzz',
+      paint: { 'fill-color': '#2C5742', 'fill-opacity': 0.13 }
+    });
+    ml.addLayer({
+      id: 'vtn-fuzz-line',
+      type: 'line',
+      source: 'vtn-fuzz',
+      paint: {
+        'line-color': '#2C5742',
+        'line-width': 2,
+        'line-opacity': 0.65,
+        'line-dasharray': [2, 2]
+      }
+    });
+  }
+
+  function firstLabelLayerId() {
+    var style = ml.getStyle();
+    if (!style || !style.layers) return undefined;
+    for (var i = 0; i < style.layers.length; i++) {
+      var layer = style.layers[i];
+      if (layer.type === 'symbol') return layer.id;
+    }
+    return undefined;
+  }
+
+  function add3DBuildings() {
+    if (!ml || ml.getLayer('vtn-buildings-3d')) return;
+    var style = ml.getStyle();
+    if (!style || !style.sources) return;
+    var sourceId = null;
+    Object.keys(style.sources).some(function (key) {
+      if (style.sources[key] && style.sources[key].type === 'vector') {
+        sourceId = key;
+        return true;
+      }
+      return false;
+    });
+    if (!sourceId) return;
+    try {
+      ml.addLayer({
+        id: 'vtn-buildings-3d',
+        type: 'fill-extrusion',
+        source: sourceId,
+        'source-layer': 'building',
+        minzoom: 13.2,
+        paint: {
+          'fill-extrusion-color': [
+            'interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 8],
+            0, '#E6DEC9', 30, '#DBD0B6', 90, '#C8BCA0'
+          ],
+          'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8],
+          'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+          'fill-extrusion-opacity': 0.82,
+          'fill-extrusion-vertical-gradient': true
+        }
+      }, firstLabelLayerId());
+    } catch (e) {
+      if (window.console) console.warn('[VTN] 3D buildings unavailable', e);
+    }
+  }
+
+  function storiesGeoJson() {
+    return {
+      type: 'FeatureCollection',
+      features: located().map(function (story) {
+        return {
+          type: 'Feature',
+          properties: {
+            id: story.id,
+            type: typeOf(story),
+            mood: story.mood || '',
+            year: story.year || 0
+          },
+          geometry: { type: 'Point', coordinates: [story.location.lng, story.location.lat] }
+        };
+      })
+    };
+  }
+
+  /* =========================================================================
+   * 5. MapLibre：標記與同步
+   * ======================================================================= */
+  function pinElement(story) {
+    var type = typeOf(story);
+    var mood = story.mood || 'wistful';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'vtn-pin vtn-type--' + type;
+    btn.setAttribute('data-story', story.id);
+    btn.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(type));
+    btn.innerHTML =
+      '<span class="vtn-pin__ring" aria-hidden="true"></span>' +
+      '<span class="vtn-pin__disc"><i class="fa-solid ' + iconOf(story) + '" aria-hidden="true"></i></span>' +
+      '<span class="vtn-pin__mood vtn-mood--' + U.escapeHtml(mood) + '" aria-hidden="true"></span>' +
+      '<span class="vtn-pin__label">' + U.escapeHtml(story.title) + '</span>';
+    btn.addEventListener('click', function (event) {
+      event.stopPropagation();
+      VTN.stories.select(story.id);
+    });
+    return btn;
+  }
+
+  function syncMarkers() {
+    if (!ml) return;
+    var alive = {};
+    located().forEach(function (story) {
+      alive[story.id] = true;
+      var marker = markers[story.id];
+      if (!marker) {
+        var node = pinElement(story);
+        marker = new window.maplibregl.Marker({ element: node, anchor: 'bottom' })
+          .setLngLat([story.location.lng, story.location.lat])
+          .addTo(ml);
+        markers[story.id] = marker;
+      }
+      var element = marker.getElement();
+      element.classList.toggle('is-selected', story.id === state.selectedId);
+    });
+
+    Object.keys(markers).forEach(function (id) {
+      if (!alive[id]) {
+        try { markers[id].remove(); } catch (e) { /* ignore */ }
+        delete markers[id];
+      }
+    });
+    syncPinVisibility();
+  }
+
+  function syncPinVisibility() {
+    if (!ml) return;
+    var zoom = ml.getZoom();
+    var show = zoom >= PIN_MIN_ZOOM;
+    el.classList.toggle('atlas--far', zoom < 11);
+    Object.keys(markers).forEach(function (id) {
+      var node = markers[id].getElement();
+      node.style.display = show ? '' : 'none';
+      node.style.pointerEvents = show ? '' : 'none';
+    });
+  }
+
+  function syncFuzz() {
+    if (!ml || !ml.getSource('vtn-fuzz')) return;
+    var story = state.selectedId ? VTN.stories.get(state.selectedId) : null;
+    var features = [];
+    if (story && story.location) {
+      features.push(circlePolygon(story.location.lng, story.location.lat,
+        story.location.radiusM || 800));
+    }
+    ml.getSource('vtn-fuzz').setData({ type: 'FeatureCollection', features: features });
+  }
+
+  function render(forceFit) {
+    if (engine !== 'maplibre' || !ml) return;
+    if (ml.getSource('vtn-stories')) {
+      ml.getSource('vtn-stories').setData(storiesGeoJson());
+    }
+    syncMarkers();
+    syncFuzz();
+    if (forceFit) fitAll();
+    toggleEmpty();
+  }
+
+  function toggleEmpty() {
+    var empty = byId('mapEmpty');
+    if (!empty) return;
+    empty.hidden = !state.empty;
+  }
+
+  function fitAll(options) {
+    if (!ml) return;
+    var bounds = boundsOf(located());
+    if (!bounds) {
+      ml.easeTo({ center: HK_CENTER, zoom: 11.6, pitch: is3D ? 45 : 0, duration: 600 });
+      return;
+    }
+    ml.fitBounds(bounds, {
+      padding: { top: 210, bottom: state.mode === 'map' ? 152 : 80, left: 42, right: 42 },
+      pitch: is3D ? 42 : 0,
+      bearing: is3D ? -14 : 0,
+      duration: (options && options.immediate) ? 0 : 760,
+      maxZoom: 13.6
+    });
+  }
+
+  function focusStory(storyId) {
+    var story = VTN.stories.get(storyId);
+    if (!story || !story.location) return;
+    if (engine === 'maplibre' && ml) {
+      var sheetOpen = VTN.sheet && VTN.sheet.isOpen();
+      ml.flyTo({
+        center: [story.location.lng, story.location.lat],
+        zoom: Math.max(ml.getZoom(), 14),
+        pitch: is3D ? 52 : 0,
+        bearing: is3D ? -16 : 0,
+        padding: {
+          top: 150,
+          bottom: sheetOpen ? Math.round(el.clientHeight * 0.5) : 210,
+          left: 40,
+          right: 40
+        },
+        duration: 900
       });
-      map.once('focus click', function () { map.scrollWheelZoom.enable(); });
-      L.control.scale({ imperial: false, maxWidth: 110 }).addTo(map);
-      layerGroup = L.featureGroup().addTo(map);
+      return;
+    }
+    if (engine === 'leaflet' && leaflet) {
+      leaflet.setView([story.location.lat, story.location.lng], 14, { animate: true });
+    }
+  }
 
-      addTileLayerWithFallback(map, function (ok) {
-        if (ok) {
-          requestAnimationFrame(function () {
-            map.invalidateSize();
-            draw();
-            el.classList.add('is-ready');
-            el.classList.remove('is-failed');
-            if (loading) loading.classList.add('is-hidden');
-            noteText('map.tilesNote');
+  function fitStories(ids) {
+    var list = (ids || []).map(function (id) { return VTN.stories.get(id); })
+      .filter(function (story) { return story && story.location; });
+    if (!list.length) return;
+    if (engine === 'maplibre' && ml) {
+      ml.fitBounds(boundsOf(list), {
+        padding: { top: 168, bottom: 236, left: 54, right: 54 },
+        duration: 700,
+        maxZoom: 14
+      });
+    } else if (engine === 'leaflet' && leaflet) {
+      var latlngs = list.map(function (story) {
+        return [story.location.lat, story.location.lng];
+      });
+      try { leaflet.fitBounds(latlngs, { padding: [40, 40], maxZoom: 14 }); } catch (e) { /* ignore */ }
+    }
+  }
+
+  /* 3D 展示優先選「故事最密」的聚落：附近故事越多，越有機會看到市鎮樓群 */
+  function densestStory() {
+    var list = located();
+    if (!list.length) return null;
+    var cos = Math.cos(22.5 * Math.PI / 180);
+    var best = null;
+    var bestScore = -1;
+    list.forEach(function (a) {
+      var score = 0;
+      list.forEach(function (b) {
+        if (a === b) return;
+        var dx = (a.location.lng - b.location.lng) * cos;
+        var dy = a.location.lat - b.location.lat;
+        score += 1 / Math.max(Math.sqrt(dx * dx + dy * dy), 0.004);
+      });
+      if (score > bestScore) { bestScore = score; best = a; }
+    });
+    return best;
+  }
+
+  function set3D(next) {
+    is3D = !!next;
+    if (engine === 'maplibre' && ml) {
+      if (is3D) {
+        add3DBuildings();
+        /* 3D 要有樓宇才成立：聚焦到最接近市鎮的故事，俯仰 55° 展示山形與樓群 */
+        var focus = state.selectedId ? VTN.stories.get(state.selectedId) : densestStory();
+        var sheetOpen = VTN.sheet && VTN.sheet.isOpen();
+        if (focus && focus.location) {
+          ml.flyTo({
+            center: [focus.location.lng, focus.location.lat],
+            zoom: Math.max(ml.getZoom(), 14.2),
+            pitch: 55,
+            bearing: -18,
+            padding: { top: 130, bottom: sheetOpen ? 320 : 150 },
+            duration: 1100
           });
         } else {
-          fail('tiles');
+          ml.easeTo({ pitch: 55, bearing: -18, duration: 950 });
         }
-      });
-      leafletState = 'ready';
-      draw();
-    }).catch(function () {
-      fail('leaflet');
-    });
-
-    function fail(reason) {
-      leafletState = 'failed';
-      el.classList.add('is-failed');
-      if (loading) loading.classList.add('is-hidden');
-      noteText(reason === 'tiles' ? 'map.fallbackTiles' : 'map.fallback');
+      } else {
+        ml.easeTo({ pitch: 0, bearing: 0, duration: 750 });
+      }
+      el.classList.toggle('is-at-3d', is3D);
     }
+    var btn = byId('atlas3dBtn');
+    if (btn) btn.setAttribute('aria-pressed', is3D ? 'true' : 'false');
   }
 
-  function update(state) {
-    lastState = {
-      stories: state.stories || [],
-      selectedId: state.selectedId || null,
-      overview: !!state.overview,
-      empty: !!state.empty,
-      titleStory: state.titleStory || null
-    };
-    if (leafletState === 'failed') {
-      setTitle(lastState.empty ? null : lastState.titleStory, lastState.empty);
-      toggleEmpty(lastState.empty);
-      updateModeButton();
-      return;
+  /* =========================================================================
+   * 6. Leaflet 兜底
+   * ======================================================================= */
+  function disable3D() {
+    var btn = byId('atlas3dBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.setAttribute('aria-disabled', 'true');
+    btn.setAttribute('title', t('atlas.3dUnavailable'));
+    btn.setAttribute('aria-label', t('atlas.3dUnavailable'));
+  }
+
+  function fallbackToLeaflet(reason) {
+    if (engine === 'leaflet' || engine === 'failed') return;
+    if (ml) {
+      try { ml.remove(); } catch (e) { /* ignore */ }
+      ml = null;
     }
-    if (!map) {
-      /* Leaflet 未載入時：至少更新標題、空狀態與模式按鈕 */
-      setTitle(lastState.empty ? null : lastState.titleStory, lastState.empty);
-      toggleEmpty(lastState.empty);
-      updateModeButton();
-      return;
+    markers = {};
+    disable3D();
+    engine = 'loading';
+    loadCss(LEAFLET_CDN + 'leaflet.min.css', 'leaflet-css');
+    loadScript(LEAFLET_CDN + 'leaflet.min.js', 'leaflet-js').then(function () {
+      if (!window.L) throw new Error('leaflet-missing');
+      engine = 'leaflet';
+      leaflet = window.L.map(el, {
+        center: [HK_CENTER[1], HK_CENTER[0]],
+        zoom: 12,
+        zoomControl: false,
+        attributionControl: true,
+        scrollWheelZoom: true
+      });
+      window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      }).addTo(leaflet);
+      leafletLayer = window.L.featureGroup().addTo(leaflet);
+      el.classList.add('is-ready');
+      el.classList.remove('is-failed');
+      hideLoading();
+      setNote('atlas.tiles.leaflet');
+      renderLeaflet(true);
+    }).catch(function () {
+      engine = 'failed';
+      disable3D();
+      el.classList.add('is-failed');
+      hideLoading();
+      setNote('atlas.tiles.fallback');
+    });
+    if (window.console) console.warn('[VTN] map fallback:', reason);
+  }
+
+  function renderLeaflet(fit) {
+    if (!leaflet || !leafletLayer) return;
+    leafletLayer.clearLayers();
+    var list = located();
+    list.forEach(function (story) {
+      var selected = story.id === state.selectedId;
+      var radius = story.location.radiusM || 800;
+      var circle = window.L.circle([story.location.lat, story.location.lng], {
+        radius: radius,
+        color: selected ? '#2C5742' : '#5E8C70',
+        weight: selected ? 3 : 2,
+        dashArray: '6 8',
+        fillColor: '#5E8C70',
+        fillOpacity: selected ? 0.18 : 0.08
+      });
+      circle.bindTooltip(story.title + '・' + t('atlas.fuzz', { r: radius }), {
+        direction: 'top', opacity: 0.96
+      });
+      circle.on('click', function () { VTN.stories.select(story.id); });
+      circle.addTo(leafletLayer);
+    });
+    if (fit) {
+      try {
+        var bounds = leafletLayer.getBounds();
+        if (bounds.isValid()) leaflet.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
+      } catch (e) { /* ignore */ }
     }
-    draw();
+    toggleEmpty();
+  }
+
+  /* =========================================================================
+   * 7. 對外 API（與 30-stories.js 相容）
+   * ======================================================================= */
+  function init() {
+    el = byId('vtnMap');
+    if (!el || booted) return;
+    booted = true;
+
+    var view = document.querySelector('.vtn-view[data-view="stories"]');
+    if (view && view.classList.contains('is-active')) ensureVisible();
+
+    var zoomIn = byId('atlasZoomIn');
+    var zoomOut = byId('atlasZoomOut');
+    var reset = byId('atlasRecenter');
+    var btn3d = byId('atlas3dBtn');
+
+    if (zoomIn) zoomIn.addEventListener('click', function () {
+      if (engine === 'maplibre' && ml) ml.zoomIn({ duration: 380 });
+      else if (engine === 'leaflet' && leaflet) leaflet.zoomIn();
+    });
+    if (zoomOut) zoomOut.addEventListener('click', function () {
+      if (engine === 'maplibre' && ml) ml.zoomOut({ duration: 380 });
+      else if (engine === 'leaflet' && leaflet) leaflet.zoomOut();
+    });
+    if (reset) reset.addEventListener('click', function () {
+      if (engine === 'maplibre' && ml) {
+        ml.easeTo({ pitch: is3D ? 48 : 0, bearing: is3D ? -14 : 0, duration: 600 });
+        fitAll();
+      } else if (engine === 'leaflet' && leaflet) {
+        renderLeaflet(true);
+      }
+    });
+    if (btn3d) btn3d.addEventListener('click', function () { set3D(!is3D); });
   }
 
   function ensureVisible() {
-    if (!map) { init(); return; }
-    try { map.invalidateSize(); } catch (e) { /* ignore */ }
-    draw();
+    el = el || byId('vtnMap');
+    if (!el) return;
+    if (engine === 'idle') { createMapLibre(); return; }
+    if (engine === 'maplibre' && ml) {
+      setTimeout(function () { try { ml.resize(); } catch (e) { /* ignore */ } }, 30);
+    } else if (engine === 'leaflet' && leaflet) {
+      setTimeout(function () { try { leaflet.invalidateSize(); } catch (e) { /* ignore */ } }, 30);
+    }
+  }
+
+  function update(next) {
+    var previousMode = state.mode;
+    state.stories = (next && next.stories) || [];
+    state.selectedId = (next && next.selectedId) || null;
+    state.empty = !!(next && next.empty);
+    state.mode = (next && next.mode) || 'map';
+    state.eraYear = next && next.eraYear !== undefined ? next.eraYear : null;
+
+    if (engine === 'maplibre' && ml) {
+      if (previousMode !== state.mode) {
+        setTimeout(function () { try { ml.resize(); } catch (e) { /* ignore */ } }, 30);
+      }
+      render(false);
+    } else if (engine === 'leaflet') {
+      renderLeaflet(false);
+    } else if (state.empty) {
+      toggleEmpty();
+    }
   }
 
   function reset() {
-    if (map) { try { map.remove(); } catch (e) { /* ignore */ } }
-    map = null;
-    layerGroup = null;
-    leafletState = 'idle';
-    hasFit = false;
+    if (ml) { try { ml.remove(); } catch (e) { /* ignore */ } }
+    if (leaflet) { try { leaflet.remove(); } catch (e) { /* ignore */ } }
+    ml = null;
+    leaflet = null;
+    markers = {};
+    engine = 'idle';
   }
 
   VTN.map = {
     init: init,
     update: update,
     ensureVisible: ensureVisible,
+    focusStory: focusStory,
+    fitAll: fitAll,
+    fitStories: fitStories,
+    set3D: set3D,
+    is3D: function () { return is3D; },
     reset: reset,
-    status: function () { return leafletState; }
+    status: function () { return engine; },
+    debug: function () {
+      if (engine !== 'maplibre' || !ml) return { engine: engine };
+      var c = ml.getCenter();
+      var b = ml.getBounds();
+      return {
+        engine: engine,
+        zoom: Number(ml.getZoom().toFixed(2)),
+        center: [Number(c.lng.toFixed(4)), Number(c.lat.toFixed(4))],
+        bounds: [
+          [Number(b.getWest().toFixed(4)), Number(b.getSouth().toFixed(4))],
+          [Number(b.getEast().toFixed(4)), Number(b.getNorth().toFixed(4))]
+        ],
+        pitch: ml.getPitch(),
+        located: located().length,
+        container: [ml.getContainer().clientWidth, ml.getContainer().clientHeight]
+      };
+    }
   };
 })();
 
@@ -10113,7 +12739,7 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   function refreshControls() {
     var prefs = VTN.store.prefs();
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-font-size]'), function (btn) {
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-font-size]'), function (btn) {
       var active = btn.getAttribute('data-font-size') === prefs.fontSize;
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -10143,7 +12769,7 @@ window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consen
   }
 
   function bind() {
-    Array.prototype.forEach.call(document.querySelectorAll('[data-font-size]'), function (btn) {
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-font-size]'), function (btn) {
       btn.addEventListener('click', function () {
         VTN.store.setPref('fontSize', btn.getAttribute('data-font-size'));
         refreshControls();

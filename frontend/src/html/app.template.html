@@ -178,29 +178,101 @@
     <!-- ======================= 分頁：stories ======================= -->
     <main class="page page--stories vtn-view" data-view="stories">
 
-      <section class="hero hero--stories" aria-labelledby="pageTitle-stories">
-        <div class="hero__art" aria-hidden="true">
-          <img src="assets/stories-background.png" alt="">
-        </div>
-        <div class="hero__fade hero__fade--corner" aria-hidden="true"></div>
-        <div class="hero__fade hero__fade--bottom" aria-hidden="true"></div>
+      <!-- 地圖主視圖：故事點＝一級資訊，列表降級為模式切換 -->
+      <div class="atlas" id="storyAtlas">
+        <img class="atlas__fallback" src="assets/map-blurred.svg"
+             alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，只作示意並非 GPS 定位。">
+        <div class="atlas__canvas" id="vtnMap" role="application"
+             aria-label="故事地圖：顯示約 800 米模糊範圍內的故事，並非講者精確位置"></div>
+        <div class="atlas__tint" aria-hidden="true"></div>
 
-        <div class="hero__copy">
-          <h1 class="hero__title" id="pageTitle-stories" data-i18n="stories.title">村落故事</h1>
-          <p class="hero__sub" data-i18n="stories.sub">聽聽長者分享的地方記憶</p>
-        </div>
+        <header class="atlas__top">
+          <div class="atlas__titles">
+            <p class="atlas__eyebrow">
+              <span class="atlas__live" aria-hidden="true"></span>
+              <span data-i18n="atlas.eyebrow">北區聲音地圖</span>
+            </p>
+            <h1 class="atlas__title" id="pageTitle-stories" data-i18n="atlas.title">故事，响邊度？</h1>
+          </div>
+          <div class="atlas__tools">
+            <button type="button" class="atlas-btn" id="atlasViewBtn" aria-pressed="false"
+                    aria-label="切換列表模式" data-i18n-aria="atlas.listAria" title="列表模式">
+              <i class="fa-solid fa-list" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="atlas-btn atlas-btn--3d" id="atlas3dBtn" aria-pressed="false"
+                    aria-label="切換 3D 立體地圖" data-i18n-aria="atlas.3dAria" title="3D 立體">
+              <span>3D</span>
+            </button>
+          </div>
 
-        <div class="stories-toolbar">
-          <input type="search" id="storySearch" autocomplete="off"
-                 data-i18n-ph="stories.searchPh" data-i18n-aria="stories.searchAria">
-          <button type="button" class="vtn-btn" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">
-            <i class="fa-solid fa-sliders" aria-hidden="true"></i><span data-i18n="stories.filter">篩選</span><span class="filter-toggle-badge" id="filterBadge" hidden>0</span>
+          <div class="atlas__searchrow">
+            <label class="atlas__search" for="storySearch">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <input type="search" id="storySearch" autocomplete="off"
+                     data-i18n-ph="atlas.searchPh" data-i18n-aria="stories.searchAria">
+            </label>
+            <button type="button" class="atlas__filter" id="filterToggle"
+                    aria-expanded="false" aria-controls="filterPanel">
+              <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+              <span class="filter-toggle-badge" id="filterBadge" hidden>0</span>
+            </button>
+          </div>
+          <div class="filter-summary" id="filterSummary"></div>
+
+          <div class="atlas__legend" id="atlasLegend" role="group"
+               aria-label="故事類型圖例" data-i18n-aria="atlas.legendAria"></div>
+        </header>
+
+        <div class="atlas__controls">
+          <button type="button" class="atlas-ctl" id="atlasZoomIn" aria-label="放大" data-i18n-aria="atlas.zoomIn">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="atlas-ctl" id="atlasZoomOut" aria-label="縮小" data-i18n-aria="atlas.zoomOut">
+            <i class="fa-solid fa-minus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="atlas-ctl atlas-ctl--reset" id="atlasRecenter"
+                  aria-label="重設視角" data-i18n-aria="atlas.reset">
+            <i class="fa-solid fa-compass" aria-hidden="true"></i>
           </button>
         </div>
-        <div class="filter-summary" id="filterSummary"></div>
-      </section>
+
+        <div class="atlas__loading" id="mapLoading">
+          <span class="atlas__spinner" aria-hidden="true"></span>
+          <span data-i18n="atlas.loading">正在打開故事地圖…</span>
+        </div>
+        <div class="atlas__empty" id="mapEmpty" hidden>
+          <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+          <span data-i18n="atlas.empty">這個範圍未有故事</span>
+        </div>
+
+        <div class="atlas__bottom">
+          <div class="atlas__timeline" id="atlasTimeline">
+            <div class="atlas__timeline-head">
+              <span data-i18n="atlas.era">故事年代</span>
+              <b id="atlasEraLabel">全部</b>
+            </div>
+            <input type="range" id="atlasEra" min="0" max="4" step="1" value="4"
+                   aria-label="故事年代" data-i18n-aria="atlas.eraAria">
+            <div class="atlas__ticks" id="atlasTicks" aria-hidden="true"></div>
+          </div>
+          <div class="atlas__meta">
+            <p class="atlas__privacy">
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              <span data-i18n="atlas.privacy">位置只顯示約 800 米模糊範圍，並非講者實際位置</span>
+            </p>
+            <p class="atlas__tiles" id="mapTilesNote"></p>
+          </div>
+        </div>
+      </div>
 
       <section class="filter-panel" id="filterPanel" hidden aria-label="篩選故事">
+        <div class="filter-panel__head">
+          <p class="filter-panel__title" data-i18n="stories.filter">篩選</p>
+          <button type="button" class="filter-panel__close" id="filterClose"
+                  aria-label="關閉" data-i18n-aria="common.close">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
         <div class="filter-group">
           <p class="filter-group__label" data-i18n="filter.location">地點</p>
           <div class="chip-row" id="filterLocation"></div>
@@ -233,56 +305,52 @@
         </div>
       </section>
 
-      <p class="result-count" id="resultCount" role="status" aria-live="polite"></p>
-      <div class="story-list" id="storyList" role="list"></div>
-      <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
-
-      <section class="empty" id="storiesEmpty" hidden>
-        <div class="empty__inner">
-          <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
-          <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
+      <section class="atlas-listview" id="atlasList" hidden aria-label="故事列表">
+        <div class="atlas-listview__head">
+          <button type="button" class="atlas-listview__back" id="atlasListBack"
+                  aria-label="返回地圖" data-i18n-aria="atlas.backToMap">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          </button>
+          <div class="atlas-listview__heading">
+            <h2 class="atlas-listview__title" data-i18n="atlas.listTitle">故事列表</h2>
+            <p class="atlas-listview__sub" id="atlasListCount"></p>
+          </div>
         </div>
-        <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
-      </section>
+        <p class="result-count" id="resultCount" role="status" aria-live="polite"></p>
+        <div class="story-list" id="storyList" role="list"></div>
 
-      <section class="map-card" aria-labelledby="mapTitle">
-        <div class="map-card__head">
-          <span class="map-card__pin" aria-hidden="true">
-            <i class="fa-solid fa-location-dot"></i>
+        <section class="empty" id="storiesEmpty" hidden>
+          <div class="empty__inner">
+            <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
+            <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
+          </div>
+          <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
+        </section>
+
+        <aside class="disclosure-card" role="note" aria-label="示範故事披露">
+          <span class="disclosure-card__icon" aria-hidden="true">
+            <i class="fa-solid fa-circle-info"></i>
           </span>
-          <div class="map-card__heading">
-            <h2 class="map-card__title" id="mapTitle">元朗 <span aria-hidden="true">・</span> 約 800 米模糊範圍</h2>
-            <p class="map-card__note" id="mapNote" data-i18n="map.note">位置經模糊處理，並非 GPS 定位</p>
+          <div class="disclosure-card__body">
+            <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
+            <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
           </div>
-          <button type="button" class="map-mode-btn" id="mapModeBtn" aria-pressed="false" data-i18n="map.overview">總覽</button>
-        </div>
-        <div class="map-card__frame" id="mapFrame">
-          <img class="map-card__fallback" src="assets/map-blurred.svg"
-               alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，附指北針與比例尺，只作示意並非 GPS 定位。">
-          <div class="map-card__leaflet" id="vtnMap" role="application" aria-label="約 800 米模糊範圍真地圖（非 GPS 定位）"></div>
-          <div class="map-card__loading" id="mapLoading">
-            <span class="map-card__spinner" aria-hidden="true"></span>
-            <span data-i18n="map.loading">正在載入真實地圖…</span>
-          </div>
-          <div class="map-card__empty" id="mapEmpty" hidden>
-            <span><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i></span>
-            <span data-i18n="map.empty">沒有符合的故事</span>
-          </div>
-          <span class="map-card__north" aria-hidden="true">N<span>↑</span></span>
-        </div>
-        <p class="map-card__tiles-note" id="mapTilesNote">真實地圖由 OpenStreetMap 貢獻者提供・範圍經模糊處理，並非講者實際位置</p>
-        <p class="map-card__hint" id="mapHint" data-i18n="map.hint">只顯示所選故事嘅模糊範圍；切到「總覽」可一次睇全部並點圈切換。</p>
+        </aside>
       </section>
 
-      <aside class="disclosure-card" role="note" aria-label="示範故事披露">
-        <span class="disclosure-card__icon" aria-hidden="true">
-          <i class="fa-solid fa-circle-info"></i>
-        </span>
-        <div class="disclosure-card__body">
-          <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
-          <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
+      <!-- 二級故事頁：半拉抽屜（預設半開，可上拉全開） -->
+      <div class="story-sheet__scrim" id="sheetScrim" hidden></div>
+      <section class="story-sheet" id="storySheet" hidden role="dialog" aria-modal="false"
+               aria-label="故事詳情" data-i18n-aria="atlas.sheetAria">
+        <div class="story-sheet__grab" id="sheetGrab" aria-hidden="true"><span></span></div>
+        <button type="button" class="story-sheet__close" id="sheetClose"
+                aria-label="關閉" data-i18n-aria="common.close">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        <div class="story-sheet__body" id="storySheetBody">
+          <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
         </div>
-      </aside>
+      </section>
     </main>
 
     <!-- ======================= 分頁：me ======================= -->

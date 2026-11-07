@@ -33,10 +33,16 @@ CSS_ORDER = [
     "record-flow.css",
     "assistant.css",
     "app-ext.css",
+    "story-map.css",
 ]
 JS_FIRST = ["generated/stories.gen.js"]
 
 SCOPES = {"private", "family", "community", "public"}
+
+# 地圖一級資訊（見 docs 的 PRD 辯證：六類之外補「墟市商貿」，因為北區故事
+# 大量圍繞趁墟、米舖、蠔田買賣，硬塞進「其他」會令地圖失去辨識度）。
+STORY_TYPES = {"festival", "farming", "migration", "architecture", "oral", "market", "other"}
+MOODS = {"wistful", "joyful", "reflective", "heavy", "proud"}
 
 
 def load_data() -> dict:
@@ -66,11 +72,12 @@ def resolve_audio(rel: str) -> Path | None:
     return None
 
 
-def validate(data: dict) -> list[str]:
+def validate(data: dict) -> tuple[list[str], list[str]]:
     errors: list[str] = []
+    warnings: list[str] = []
     stories = data.get("stories")
     if not isinstance(stories, list) or not stories:
-        return ["data/stories.json 缺少 stories 陣列"]
+        return ["data/stories.json 缺少 stories 陣列"], warnings
 
     seen: set[str] = set()
     for story in stories:
@@ -91,6 +98,34 @@ def validate(data: dict) -> list[str]:
             errors.append(f"{label}: 缺少 consentRef（同意記錄編號）")
         if not story.get("topicKeys"):
             errors.append(f"{label}: 缺少 topicKeys")
+
+        # 地圖一級資訊：缺欄位只警告（舊資料向後兼容），枚舉錯值即失敗。
+        story_type = story.get("storyType")
+        if story_type is None:
+            warnings.append(f"{label}: 缺少 storyType，地圖暫以 other 呈現")
+        elif story_type not in STORY_TYPES:
+            errors.append(f"{label}: storyType={story_type!r} 不在 {sorted(STORY_TYPES)}")
+        mood = story.get("mood")
+        if mood is None:
+            warnings.append(f"{label}: 缺少 mood，詳情頁不顯示心情標籤")
+        elif mood not in MOODS:
+            errors.append(f"{label}: mood={mood!r} 不在 {sorted(MOODS)}")
+        year = story.get("year")
+        if year is None:
+            warnings.append(f"{label}: 缺少 year，年代軸會略過此故事")
+        elif not isinstance(year, int) or not (1900 <= year <= 2026):
+            errors.append(f"{label}: year={year!r} 必須是 1900–2026 的整數")
+
+        if story.get("scope") != "private":
+            loc = story.get("location") or {}
+            lat, lng = loc.get("lat"), loc.get("lng")
+            radius = loc.get("radiusM")
+            if not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
+                errors.append(f"{label}: 非私人故事必須有 location.lat / location.lng")
+            elif not (22.1 <= lat <= 22.7 and 113.8 <= lng <= 114.5):
+                errors.append(f"{label}: location 不在香港範圍內（{lat}, {lng}）")
+            if not isinstance(radius, (int, float)) or radius < 100:
+                errors.append(f"{label}: location.radiusM 必須 ≥100，模糊定位不可收窄")
 
         duration = story.get("durationSec")
         if not isinstance(duration, (int, float)) or duration <= 0:
@@ -147,7 +182,7 @@ def validate(data: dict) -> list[str]:
     for key in ("zh-HK", "zh-CN", "en"):
         if not str((data.get("outOfScopeMessage") or {}).get(key) or "").strip():
             errors.append(f"outOfScopeMessage 缺少 {key}")
-    return errors
+    return errors, warnings
 
 
 def js_payload(data: dict) -> str:
@@ -184,7 +219,11 @@ def read_modules() -> tuple[str, str]:
 
 def build(check_only: bool = False) -> int:
     data = load_data()
-    errors = validate(data)
+    errors, warnings = validate(data)
+    if warnings:
+        print("資料提醒：")
+        for warn in warnings:
+            print("  ! " + warn)
     if errors:
         print("資料驗證失敗：")
         for err in errors:

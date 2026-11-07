@@ -34,7 +34,7 @@
   function refreshControls() {
     var prefs = VTN.store.prefs();
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-font-size]'), function (btn) {
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-font-size]'), function (btn) {
       var active = btn.getAttribute('data-font-size') === prefs.fontSize;
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -64,7 +64,7 @@
   }
 
   function bind() {
-    Array.prototype.forEach.call(document.querySelectorAll('[data-font-size]'), function (btn) {
+    Array.prototype.forEach.call(document.querySelectorAll('button[data-font-size]'), function (btn) {
       btn.addEventListener('click', function () {
         VTN.store.setPref('fontSize', btn.getAttribute('data-font-size'));
         refreshControls();

@@ -10,15 +10,17 @@
 ```
 data/stories.json              單一資料來源：故事、逐字稿段落、授權、分享範圍、時長
 frontend/src/                  前端原始碼（CSS / JS / HTML 模板，開發時只看這裡）
-  css/*.css                    樣式模組
+  css/*.css                    樣式模組（story-map.css = 地圖主視圖與抽屜）
   js/00-config.js              版本、API 位址解析、共用工具
   js/05-i18n.js                三語翻譯表（zh-HK / zh-CN / en）
   js/10-store.js               統一儲存層（localStorage + 記憶體回退）
   js/15-api.js                 後端 API 封裝（含 Bearer token）
   js/20-audio.js               音訊播放與跳秒
   js/25-ui.js                  toast / 對話框 / 狀態徽章
-  js/30-stories.js             故事列表、篩選、詳情、來源跳轉
-  js/35-map.js                 模糊範圍地圖（Leaflet + 圖磚回退）
+  js/28-waveform.js            音檔實測振幅解碼（Web Audio，失敗即回退，不畫假波形）
+  js/30-stories.js             故事地圖／列表、篩選、年代軸、二級頁內容、波形播放器、來源跳轉
+  js/32-sheet.js               半拉抽屜（拖拽、展開、關閉與焦點管理）
+  js/35-map.js                 地圖引擎：MapLibre GL JS 3D ＋ Leaflet／手繪圖三層回退
   js/40-recorder.js            錄音流程（草稿 → 待轉寫 → 已完成）
   js/45-recordings.js          錄音管理三個分頁
   js/50-assistant.js           助手（檢索、來源、拒答）
@@ -49,6 +51,8 @@ python tools/check_frontend_syntax.py   # 檢查單檔內嵌 JS 語法
 
 - 故事 ID 唯一、`scope` 只能是 `private / family / community / public`
 - 每則故事必須有 `authorized: true` 與 `consentRef`
+- 地圖一級資訊：`storyType` ∈ `festival / farming / migration / architecture / oral / market / other`、`mood` ∈ `wistful / joyful / reflective / heavy / proud`、`year` 為 1900–2026 整數；缺欄位只警告（舊資料向後兼容），枚舉錯值即失敗
+- 非私人故事的 `location.lat/lng` 必須在香港範圍，`location.radiusM` 必須 ≥100（模糊範圍不可收窄）
 - 逐字稿段落時間遞增、不重疊，且 `end` 不可超出 `durationSec`
 - 有音檔者 `durationSource` 必須是 `measured`，且 `durationSec` 必須與**音檔實測長度**一致（±0.5 秒）
 - 逐字稿結尾不可超出音檔實測長度（否則「可溯源」會跳到不存在的秒數）
@@ -111,7 +115,8 @@ python -m http.server 8421 --directory frontend
 - **更正**：申請 → 審核 → 產生新版本，原文保留並在詳情頁標示「已更正（原文保留）」。
 - **限流**：`/api/process` 10 次、`/api/auth/request-code` 5 次、`/api/ask-village` 30 次、其他 `/api/*` 90 次（每分鐘每 IP）。
 - **上傳**：分塊讀取，累計超過 10MB 立即中止，不把整個檔案讀入記憶體。
-- **地圖**：只顯示約 800 米模糊範圍，不設精確 GPS 標記。
+- **地圖**：只顯示約 800 米模糊範圍，不設精確 GPS 標記；`private` 故事在地圖、聚合數字、圖例計數與搜尋中都不會出現（前端 store 與後端 `/api/stories` 雙重過濾）。
+- **地圖失敗**：MapLibre → Leaflet → 手繪示意圖三層回退；3D 不可用時按鈕會禁用並說明，不會靜默假裝成功。
 
 ## 6. AI 行為紅線
 
@@ -132,5 +137,5 @@ python tools/audit_frontend.mjs     # 前端靜態檢查（需 node）
 
 ## 8. 授權與致謝
 
-- 地圖圖磚：© OpenStreetMap 貢獻者；字型：Noto Sans HK（SIL Open Font License）。
+- 地圖：MapLibre GL JS（BSD-3-Clause）、OpenFreeMap 圖資（無需 API key）、© OpenStreetMap 貢獻者；Leaflet（BSD-2-Clause）作 2D 回退。字型：Noto Sans HK（SIL Open Font License）。
 - 示範故事由團隊撰寫，僅供黑客松演示；收錄真實訪談前必須先取得書面同意。

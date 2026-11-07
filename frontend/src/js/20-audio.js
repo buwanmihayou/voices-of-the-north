@@ -50,6 +50,9 @@
         try { fn(hidden.currentTime, currentStoryId); } catch (e) { /* ignore */ }
       });
     });
+    hidden.addEventListener('ended', function () {
+      U.emit('vtn:audio-ended', { storyId: currentStoryId });
+    });
     return hidden;
   }
 
