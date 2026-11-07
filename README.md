@@ -17,7 +17,8 @@ frontend/src/                  前端原始碼（CSS / JS / HTML 模板，開發
   js/15-api.js                 後端 API 封裝（含 Bearer token）
   js/20-audio.js               音訊播放與跳秒
   js/25-ui.js                  toast / 對話框 / 狀態徽章
-  js/28-waveform.js            音檔實測振幅解碼（Web Audio，失敗即回退，不畫假波形）
+  js/27-metrics.js             指標三事件（地圖瀏覽時長／點位點擊率／音訊完成率）
+  js/28-waveform.js            音檔實測振幅解碼（優先讀構建期快取，失敗即回退）
   js/30-stories.js             故事地圖／列表、篩選、年代軸、二級頁內容、波形播放器、來源跳轉
   js/32-sheet.js               半拉抽屜（拖拽、展開、關閉與焦點管理）
   js/35-map.js                 地圖引擎：MapLibre GL JS 3D ＋ Leaflet／手繪圖三層回退
@@ -58,6 +59,12 @@ python tools/check_frontend_syntax.py   # 檢查單檔內嵌 JS 語法
 - 逐字稿結尾不可超出音檔實測長度（否則「可溯源」會跳到不存在的秒數）
 
 新增故事只需改 `data/stories.json`，不必改頁面程式碼。
+
+補充契約：
+
+- 波形由建置腳本從 WAV 實測振幅後內嵌成 `window.VTN_WAVEFORMS`，執行期不必為畫波形再解碼音檔；快取缺失或瀏覽器不支援 Web Audio 時，播放器回退細進度條，不生成假波形。
+- `GET /api/stories?bbox=west,south,east,north` 只回視口內故事（在授權／分享範圍過濾之後）；參數格式錯誤回 400，回應會回顯 `bbox`。
+- 指標事件 `map.view` / `pin.click` / `audio.complete`（另有中途 `audio.progress`）只記錄數值與故事 ID，送往 `/api/audit`；後端 meta 白名單會丟棄逐字稿、標題等自由文字。離線時僅留本機緩衝。
 
 ## 3. 本地運行
 

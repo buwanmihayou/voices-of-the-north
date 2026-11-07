@@ -111,12 +111,18 @@
   function pauseStory() {
     if (current && !current.paused) current.pause();
     if (hidden && !hidden.paused) hidden.pause();
+    U.emit('vtn:audio-paused', { storyId: currentStoryId });
   }
 
   function playingStoryId() {
     if (current && !current.paused) return currentStoryId;
     if (hidden && !hidden.paused) return currentStoryId;
     return null;
+  }
+
+  function currentTime() {
+    if (current) return current.currentTime || 0;
+    return hidden ? (hidden.currentTime || 0) : 0;
   }
 
   function onTime(fn) { timeHandlers.push(fn); }
@@ -127,6 +133,7 @@
     playStory: playStory,
     pauseStory: pauseStory,
     playingStoryId: playingStoryId,
+    currentTime: currentTime,
     onTime: onTime,
     elements: function () { return Array.prototype.slice.call(document.querySelectorAll('audio')); }
   };

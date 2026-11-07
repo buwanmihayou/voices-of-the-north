@@ -73,6 +73,51 @@
     });
   }
 
+  /* 視口查詢：只回已授權、且中心點落在 bbox 內的故事 */
+  function inBbox(bounds) {
+    if (!bounds || bounds.length !== 2) return visible();
+    var sw = bounds[0], ne = bounds[1];
+    if (!sw || !ne || sw.length !== 2 || ne.length !== 2) return visible();
+    return visible().filter(function (story) {
+      var loc = story.location;
+      return loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' &&
+        loc.lng >= sw[0] && loc.lng <= ne[0] && loc.lat >= sw[1] && loc.lat <= ne[1];
+    });
+  }
+
+  function distanceM(a, b) {
+    var rad = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * rad;
+    var dLng = (b.lng - a.lng) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a.lat * rad) * Math.cos(b.lat * rad) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 6371000 * 2 * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  /* 同圈合併：中心距不超過較大的模糊半徑，視為同一個 800m 圈。
+     不搬動座標、不收窄半徑，只是把點位歸組供地圖顯示數字與選擇。 */
+  function fuzzGroups(list) {
+    var source = (list || visible()).filter(function (s) { return s && s.location; });
+    var used = {};
+    var groups = [];
+    source.forEach(function (story, i) {
+      if (used[story.id]) return;
+      var ids = [story.id];
+      used[story.id] = true;
+      source.forEach(function (other, j) {
+        if (j <= i || used[other.id]) return;
+        var radius = Math.max(story.location.radiusM || 800, other.location.radiusM || 800);
+        if (distanceM(story.location, other.location) <= radius) {
+          used[other.id] = true;
+          ids.push(other.id);
+        }
+      });
+      groups.push({ id: story.id, ids: ids, count: ids.length, location: story.location });
+    });
+    return groups;
+  }
+
   function villageLabel(key) { return t('village.' + key); }
   function topicLabel(key) { return t('topic.' + key); }
   function eraLabel(key) { return t('era.' + key); }
@@ -614,7 +659,7 @@
 
     /* 解碼成功才換成波形；失敗時維持細進度條，不畫假波形 */
     if (VTN.waveform) {
-      VTN.waveform.get(story.audio).then(function (amps) {
+      VTN.waveform.get(story.audio, story.id).then(function (amps) {
         if (!amps) return;
         if (!wrap.isConnected || wrap.getAttribute('data-player-story') !== story.id) return;
         drawWave(wrap, track, amps, story);
@@ -941,6 +986,7 @@
    * ======================================================================= */
   function setMode(next) {
     state.mode = next === 'list' ? 'list' : 'map';
+    U.emit('vtn:stories-mode', { mode: state.mode });
     if (state.mode === 'list' && VTN.sheet && VTN.sheet.isOpen()) VTN.sheet.close('mode');
     syncUrl();
     render();
@@ -1200,6 +1246,8 @@
     get: get,
     visible: visible,
     filtered: filtered,
+    inBbox: inBbox,
+    fuzzGroups: fuzzGroups,
     select: select,
     applyParams: applyParams,
     currentParams: currentParams,
@@ -1221,6 +1269,7 @@
     typeIcon: typeIcon,
     lastList: function () { return state.lastList; },
     selectedId: function () { return state.selectedId; },
+    mode: function () { return state.mode; },
     isOverview: function () { return state.mode === 'list'; },
     meta: function () { return DATA; },
     clearFilters: clearFilters

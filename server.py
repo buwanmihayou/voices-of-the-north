@@ -703,8 +703,26 @@ async def delete_record(rid: str, request: Request):
 # ---------------------------------------------------------------------------
 # 故事庫（按授權＋分享範圍＋未撤回過濾）與問答
 # ---------------------------------------------------------------------------
+def parse_bbox(raw: str | None):
+    """解析 west,south,east,north；無參數代表不过滤，格式错误返回 400。"""
+    if raw is None or raw == "":
+        return None
+    parts = str(raw).split(",")
+    if len(parts) != 4:
+        raise HTTPException(status_code=400, detail="bbox 需為 west,south,east,north")
+    try:
+        west, south, east, north = (float(part.strip()) for part in parts)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="bbox 必須是四個數字")
+    if not (-180 <= west <= 180 and -180 <= east <= 180 and
+            -90 <= south <= 90 and -90 <= north <= 90 and west < east and south < north):
+        raise HTTPException(status_code=400, detail="bbox 範圍不合法")
+    return (west, south, east, north)
+
+
 @app.get("/api/stories")
 async def list_stories(request: Request):
+    bbox = parse_bbox(request.query_params.get("bbox"))
     who = viewer(request)
     excluded = _withdrawn_ids()
     versions = _story_versions()
@@ -717,6 +735,13 @@ async def list_stories(request: Request):
         owner = str(story.get("owner") or "").lower()
         if who["role"] != "admin" and scope not in ("community", "public") and owner != who["email"]:
             continue
+        if bbox:
+            loc = story.get("location") or {}
+            lat, lng = loc.get("lat"), loc.get("lng")
+            if not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
+                continue
+            if not (bbox[0] <= lng <= bbox[2] and bbox[1] <= lat <= bbox[3]):
+                continue
         item = dict(story)
         item["audioUrl"] = ("/" + str(story["audio"]).lstrip("/")) if story.get("audio") else None
         item["transcriptOnly"] = not bool(story.get("audio"))
@@ -724,12 +749,15 @@ async def list_stories(request: Request):
             item["versions"] = versions[story["id"]]
             item["correctedText"] = versions[story["id"]][-1]["formalText"]
         stories.append(item)
-    return {
+    result = {
         "stories": stories,
         "count": len(stories),
         "contentVersion": data.get("contentVersion"),
         "consentPolicyVersion": data.get("consentPolicyVersion"),
     }
+    if bbox:
+        result["bbox"] = list(bbox)
+    return result
 
 
 @app.post("/api/ask-village")
@@ -1040,8 +1068,11 @@ async def write_audit(request: Request):
         body = {}
     who = viewer(request)
     log_id = uuid.uuid4().hex
+    # 指標事件只允許數值／ID／模式欄位，拒絕逐字稿、標題等自由文字。
+    metric_keys = ("storyId", "durationMs", "ratio", "zoom", "engine",
+                   "view", "source", "count", "event")
     meta = {k: v for k, v in (body.get("meta") or {}).items()
-            if k in ("from", "to", "note", "targetId", "version", "synced")}
+            if k in ("from", "to", "note", "targetId", "version", "synced") + metric_keys}
     conn = _connect()
     try:
         with _db_lock:

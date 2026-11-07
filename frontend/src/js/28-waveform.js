@@ -14,6 +14,7 @@
   var BARS = 60;
   var MAX_SAMPLES_PER_BAR = 240;
   var cache = Object.create(null);
+  var buildHits = [];
   var context = null;
 
   function getContext() {
@@ -84,8 +85,14 @@
 
   /**
    * 取得某個音檔的實測振幅（0..1，長度 BARS）。失敗 resolve(null)。
+   * 優先讀構建期快取 window.VTN_WAVEFORMS，其次才在執行期 fetch + decode。
    */
-  function get(url) {
+  function get(url, storyId) {
+    var baked = (storyId && window.VTN_WAVEFORMS) ? window.VTN_WAVEFORMS[storyId] : null;
+    if (Array.isArray(baked) && baked.length) {
+      if (buildHits.indexOf(storyId) < 0) buildHits.push(storyId);
+      return Promise.resolve(baked);
+    }
     if (!url) return Promise.resolve(null);
     if (cache[url]) return cache[url];
     if (typeof fetch !== 'function' || !(window.AudioContext || window.webkitAudioContext)) {
@@ -107,7 +114,12 @@
     bars: BARS,
     get: get,
     debug: function () {
-      return { urls: Object.keys(cache), contextReady: !!context };
+      return {
+        buildHits: buildHits.slice(),
+        bakedCount: Object.keys(window.VTN_WAVEFORMS || {}).length,
+        runtimeDecodes: Object.keys(cache),
+        contextReady: !!context
+      };
     }
   };
 })();

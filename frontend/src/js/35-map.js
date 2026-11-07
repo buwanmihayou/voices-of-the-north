@@ -205,6 +205,8 @@
         addStorySources();
         render(true);
         fitAll();
+        ml.on('moveend', updateViewportCount);
+        updateViewportCount();
       });
 
       ml.on('error', function (event) {
@@ -383,16 +385,19 @@
   }
 
   function storiesGeoJson() {
+    var groups = groupMap();
     return {
       type: 'FeatureCollection',
       features: located().map(function (story) {
+        var group = groups[story.id];
         return {
           type: 'Feature',
           properties: {
             id: story.id,
             type: typeOf(story),
             mood: story.mood || '',
-            year: story.year || 0
+            year: story.year || 0,
+            groupSize: group ? group.count : 1
           },
           geometry: { type: 'Point', coordinates: [story.location.lng, story.location.lat] }
         };
@@ -403,12 +408,95 @@
   /* =========================================================================
    * 5. MapLibre：標記與同步
    * ======================================================================= */
-  function pinElement(story) {
+  /* 同圈合併：同一 800m 模糊圈內的故事歸組，地圖顯示數字、點擊後再選故事 */
+  function groupMap() {
+    var result = {};
+    if (!VTN.stories || !VTN.stories.fuzzGroups) return result;
+    VTN.stories.fuzzGroups(located()).forEach(function (group) {
+      group.ids.forEach(function (id) { result[id] = group; });
+    });
+    return result;
+  }
+
+  function groupFor(storyId) {
+    return groupMap()[storyId] || null;
+  }
+
+  /* 標記會被快取，分組變化時要同步角標，否則舊點不會顯示同圈數字 */
+  function syncGroupBadge(element, group, story) {
+    var size = group ? group.count : 1;
+    var badge = element.querySelector('.vtn-pin__count');
+    if (size > 1) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'vtn-pin__count';
+        badge.setAttribute('aria-hidden', 'true');
+        element.appendChild(badge);
+      }
+      badge.textContent = String(size);
+      element.classList.add('vtn-pin--group');
+      element.setAttribute('aria-label', story.title + '・' + t('atlas.groupAria', { n: size }));
+    } else {
+      if (badge) badge.remove();
+      element.classList.remove('vtn-pin--group');
+      element.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(typeOf(story)));
+    }
+  }
+
+  function openGroupDialog(group) {
+    if (!VTN.ui || !VTN.ui.dialog) return;
+    var body = U.node('div');
+    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('atlas.groupNote') }));
+    var dlg = VTN.ui.dialog({
+      title: t('atlas.groupTitle', { n: group.count }),
+      body: body,
+      actions: [{ label: t('common.close'), value: 'close' }]
+    });
+    group.ids.forEach(function (id) {
+      var story = VTN.stories.get(id);
+      if (!story) return;
+      var btn = U.node('button', {
+        class: 'vtn-btn vtn-btn--quiet vtn-group-choice',
+        type: 'button', text: story.title
+      });
+      btn.addEventListener('click', function () {
+        dlg.close('pick');
+        VTN.stories.select(id);
+      });
+      body.appendChild(btn);
+    });
+  }
+
+  /* 視口查詢：地圖移動後統計目前畫面內的已授權故事 */
+  function updateViewportCount() {
+    var node = byId('atlasViewport');
+    var text = byId('atlasViewportText');
+    if (!node || !text) return;
+    if (engine !== 'maplibre' || !ml || !VTN.stories.inBbox) { node.hidden = true; return; }
+    var b = ml.getBounds();
+    var list = VTN.stories.inBbox([
+      [b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]
+    ]);
+    node.hidden = false;
+    text.textContent = t('atlas.inView', { n: list.length });
+  }
+
+  /* 點位點擊率：MapLibre 標記與 Leaflet 模糊圈共用，兩條渲染路徑都要計到 */
+  function trackPinClick(storyId) {
+    if (!VTN.metrics) return;
+    var zoom = 0;
+    if (engine === 'maplibre' && ml) zoom = ml.getZoom();
+    else if (engine === 'leaflet' && leaflet) zoom = leaflet.getZoom();
+    VTN.metrics.track('pin.click', { storyId: storyId, zoom: zoom, engine: engine });
+  }
+
+  function pinElement(story, group) {
     var type = typeOf(story);
     var mood = story.mood || 'wistful';
+    var groupSize = group ? group.count : 1;
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'vtn-pin vtn-type--' + type;
+    btn.className = 'vtn-pin vtn-type--' + type + (groupSize > 1 ? ' vtn-pin--group' : '');
     btn.setAttribute('data-story', story.id);
     btn.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(type));
     btn.innerHTML =
@@ -416,27 +504,33 @@
       '<span class="vtn-pin__disc"><i class="fa-solid ' + iconOf(story) + '" aria-hidden="true"></i></span>' +
       '<span class="vtn-pin__mood vtn-mood--' + U.escapeHtml(mood) + '" aria-hidden="true"></span>' +
       '<span class="vtn-pin__label">' + U.escapeHtml(story.title) + '</span>';
+    syncGroupBadge(btn, group, story);
     btn.addEventListener('click', function (event) {
       event.stopPropagation();
-      VTN.stories.select(story.id);
+      trackPinClick(story.id);
+      var current = groupFor(story.id);
+      if (current && current.count > 1) openGroupDialog(current);
+      else VTN.stories.select(story.id);
     });
     return btn;
   }
 
   function syncMarkers() {
     if (!ml) return;
+    var groups = groupMap();
     var alive = {};
     located().forEach(function (story) {
       alive[story.id] = true;
       var marker = markers[story.id];
       if (!marker) {
-        var node = pinElement(story);
+        var node = pinElement(story, groups[story.id]);
         marker = new window.maplibregl.Marker({ element: node, anchor: 'bottom' })
           .setLngLat([story.location.lng, story.location.lat])
           .addTo(ml);
         markers[story.id] = marker;
       }
       var element = marker.getElement();
+      syncGroupBadge(element, groups[story.id], story);
       element.classList.toggle('is-selected', story.id === state.selectedId);
     });
 
@@ -667,7 +761,10 @@
       circle.bindTooltip(story.title + '・' + t('atlas.fuzz', { r: radius }), {
         direction: 'top', opacity: 0.96
       });
-      circle.on('click', function () { VTN.stories.select(story.id); });
+      circle.on('click', function () {
+        trackPinClick(story.id);
+        VTN.stories.select(story.id);
+      });
       circle.addTo(leafletLayer);
     });
     if (fit) {
@@ -761,6 +858,9 @@
     focusStory: focusStory,
     fitAll: fitAll,
     fitStories: fitStories,
+    trackPinClick: trackPinClick,
+    updateViewportCount: updateViewportCount,
+    groupMap: groupMap,
     set3D: set3D,
     is3D: function () { return is3D; },
     reset: reset,

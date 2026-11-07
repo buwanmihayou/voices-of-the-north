@@ -1,8 +1,10 @@
 # 故事 Tab 地图化重构：辩证评审与落地记录
 
-日期：2026-11-07 ｜ 对应 PRD：`北区之声_故事Tab地图化重构PRD.docx` ｜ 实现：`frontend/src/js/30-stories.js`、`32-sheet.js`、`35-map.js`、`28-waveform.js`、`css/story-map.css`
+日期：2026-11-07 ｜ 对应 PRD：`北区之声_故事Tab地图化重构PRD.docx` ｜ 实现：`frontend/src/js/27-metrics.js`、`28-waveform.js`、`30-stories.js`、`32-sheet.js`、`35-map.js`、`15-api.js`、`css/story-map.css`、`tools/build_frontend.py`、`server.py`
 
 > 同日第二轮补记：逐项核对 6 项任务后，第 4 项「波形音频条」是唯一缺口，已用音档实测振幅补齐（不是装饰波形），并补上降级路径与验证。
+>
+> 同日第三轮补记：把第 6 节原列的三项后续工作做完——构建期振幅缓存、埋点三事件、`bbox` 视口查询与同圈合并，并修正了 `CustomEvent` 取值与 marker 缓存导致的两个实际缺陷。
 
 ## 0. 一句话结论
 
@@ -18,6 +20,10 @@
 - **私隐红线**：只画约 800m 模糊圈（虚线 + 呼吸填充）；`private` 故事不进入地图数据、聚合计数、图例计数与搜索；构建时强制 `radiusM ≥ 100`。
 - **三级回退**：MapLibre → Leaflet → 手绘示意图；3D 不可用时按钮禁用并给出原因，不静默失败。
 - **数据契约**：新增 `storyType / mood / year`，构建脚本校验枚举与坐标范围；缺字段只警告，兼容旧数据。
+- **构建期振幅缓存**：`build_frontend.py` 用标准库 `wave` 实测 PCM，把 60 柱振幅写入 `window.VTN_WAVEFORMS`；运行时不再为画波形下载/解码 4MB WAV。与浏览器 `decodeAudioData` 的结果相关系数 0.918（差异来自重采样）。
+- **埋点三事件**：`map.view`（地图浏览时长）、`pin.click`（点位点击率）、`audio.complete` / `audio.progress`（音频完成率）；只记录数值与故事 ID，前端本地缓冲 + `/api/audit` 上报，后端 meta 白名单拒绝自由文本。
+- **bbox 视口查询**：`GET /api/stories?bbox=w,s,e,n` 服务端裁剪（授权过滤之后），非法参数 400；前端 `VTN.stories.inBbox()` 与地图 `moveend` 的「视口内 N 则故事」提示。
+- **同圈合并**：中心距 ≤ 较大模糊半径即视为同一 800m 圈；点位显示数字角标，点击弹出该圈故事列表再选择，不搬动坐标、不收窄半径。
 
 ## 2. 七个判断：同意什么、不同意什么
 
@@ -96,8 +102,8 @@ PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约
 
 ## 5. 验证记录
 
-- `python tools/build_frontend.py`：资料验证通过，单档 497,798 字符 / 13,944 行
-- `python tools/check_frontend_syntax.py`：内嵌脚本语法通过
+- `python tools/build_frontend.py`：资料验证通过；波形快取 1 则故事；单档 510,623 字符 / 14,316 行
+- `python tools/check_frontend_syntax.py`：内嵌脚本语法通过；`python -m py_compile server.py lab_api.py` 通过
 - Playwright（390×844，Chrome）：
   - 8 个故事点按经纬度落位；3D 切换后 pitch=55、建筑挤出可见
   - 抽屉半开 y=493/818；上拉展开；播放进度随时间更新，暂停按钮状态正确
@@ -110,16 +116,23 @@ PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约
   - 方向键 → 跳至 8 秒；英文文案显示 `measured waveform`
   - `KT-002`（无音档）保持「未附音档」说明，不生成波形
   - 两条降级路径（fetch 失败 / 禁用 `AudioContext`）都回到细进度条，且播放仍正常
-- 截图：`map.png`、`3d.png`、`sheet-expanded.png`、`filter.png`、`fallback-offline.png`、`waveform-playing.png`、`waveform-fallback.png`（同目录）
+- 第三轮：构建期波形缓存、埋点三事件、bbox 与同圈合并：
+  - 缓存命中 `buildHits=['YL-001']`、`runtimeDecodes=[]`、`contextReady=false`；与运行时解码相关系数 **0.918**
+  - 埋点产生 `pin.click`、`audio.progress`（ratio 0.038）、`audio.complete`（ratio 1）、`map.view`（15.4s）；meta 白名单违规 0；刷新后本地缓冲保留 4 条
+  - 后端隔离 DB 12 项检查全过：bbox 过滤/回显、空结果、三种非法参数 400、`/api/audit` 指标字段保留且自由文本被丢弃
+  - `inBbox([[113.98,22.43],[114.03,22.47]])` → 3 则，与后端一致；当前数据 8 组各 1（无同圈），注入同坐标故事后合并为 2 则
+  - 联网端到端：9 个点位、2 个显示「2」角标、视口提示「視口內 9 則故事」、弹窗列出两个故事；三语文案全部生效
+  - 过程中修掉两个真实缺陷：`U.on` 收到的是 `CustomEvent`（payload 在 `event.detail`）；marker 缓存导致同圈角标与点击分支未更新
+- 截图：`map.png`、`3d.png`、`sheet-expanded.png`、`filter.png`、`fallback-offline.png`、`waveform-playing.png`、`waveform-fallback.png`、`fuzz-group.png`（同目录）
 
-## 6. 下一步（按性价比排序）
+## 6. 已完成与下一步
 
-1. **P0**：埋点三事件；真实故事的 `mood/year` 由讲述者/采集员勾选，替换示范标注。
-2. **P0**：`/api/stories?bbox=` 与同圈合并，接上 PRD 的视口查询。
-3. **P1**：把振幅数组在构建期写入 JSON，避免每次页面加载都解码 4MB WAV（当前仅一次，且按 URL 缓存）。
-4. **P1**：自定义暖色 vector style（现在是 OpenFreeMap Liberty + CSS 滤镜），减少「通用地图」感。
-5. **P1**：LandsD 授权与历史底图切片跑通后，用年代轴联动历史栅格；在此之前不做假图层。
-6. **P2**：地形起伏与 3D 楼群光影。
+第三轮已完成：构建期振幅缓存（P1）、埋点三事件（P0）、`/api/stories?bbox=` 与同圈合并（P0）。仍需外部条件的工作：
+
+1. **需要真实素材**：`mood/year` 目前是团队按逐字稿人工标注的示范值；正式采集应由讲述者/采集员勾选。
+2. **需要设计资源**：自定义暖色 vector style（现在是 OpenFreeMap Liberty + CSS 滤镜），减少「通用地图」感。
+3. **需要授权**：LandsD 历史底图切片与 license 核实时，再用年代轴联动历史栅格；在此之前不做假图层。
+4. **P2**：地形起伏与 3D 楼群光影。
 
 ## 7. 待 Douglas 拍板
 

@@ -65,6 +65,9 @@
     });
     setNav(route.view);
     document.body.setAttribute('data-view', route.view);
+    if (VTN.util && VTN.util.emit) {
+      VTN.util.emit('vtn:view-changed', { view: route.view });
+    }
 
     if (route.view !== 'stories') VTN.audio.pauseStory();
 

@@ -18,7 +18,9 @@
 
 from __future__ import annotations
 
+import array
 import json
+import math
 import sys
 import wave
 from pathlib import Path
@@ -185,13 +187,94 @@ def validate(data: dict) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
-def js_payload(data: dict) -> str:
+WAVE_BARS = 60
+WAVE_SAMPLE_CAP = 240
+
+
+def waveform_peaks(path: Path) -> list[float] | None:
+    """由 WAV 實測振幅，演算法與前端 28-waveform.js 一致。
+
+    前端 decodeAudioData 會重採樣到 AudioContext 取樣率，這裡讀原始 PCM，
+    兩者數值可以有輕微差異，但柱狀形狀一致；都只用真實振幅，不生成假波形。
+    """
+    try:
+        with wave.open(str(path), "rb") as handle:
+            width = handle.getsampwidth()
+            channels = handle.getnchannels()
+            raw = handle.readframes(handle.getnframes())
+    except Exception:
+        return None
+    if width not in (1, 2) or channels < 1 or not raw:
+        return None
+
+    if width == 2:
+        pcm = array.array("h")
+        pcm.frombytes(raw[: len(raw) // 2 * 2])
+        if sys.byteorder != "little":
+            pcm.byteswap()
+        total = len(pcm) // channels
+
+        def sample_at(i: int) -> float:
+            return float(pcm[i * channels]) / 32768.0
+    else:
+        total = len(raw) // channels
+
+        def sample_at(i: int) -> float:
+            return (float(raw[i * channels]) - 128.0) / 128.0
+
+    if total < WAVE_BARS:
+        return None
+
+    per_bar = max(1, total // WAVE_BARS)
+    step = max(1, per_bar // WAVE_SAMPLE_CAP)
+    values: list[float] = []
+    for bar in range(WAVE_BARS):
+        start = bar * per_bar
+        end = min(total, start + per_bar)
+        square_sum = 0.0
+        count = 0
+        peak = 0.0
+        for i in range(start, end, step):
+            v = sample_at(i)
+            square_sum += v * v
+            count += 1
+            av = abs(v)
+            if av > peak:
+                peak = av
+        rms = math.sqrt(square_sum / count) if count else 0.0
+        values.append(0.6 * rms + 0.4 * peak)
+
+    maximum = max(values) if values else 0.0
+    if maximum <= 0:
+        return None
+    return [round(min(1.0, (v / maximum) ** 0.85), 3) for v in values]
+
+
+def waveform_payload(data: dict) -> tuple[str, int]:
+    """把每則有 WAV 的故事振幅寫進單檔，避免執行期為畫波形再下載 4MB 音檔。"""
+    baked: dict[str, list[float]] = {}
+    for story in data.get("stories") or []:
+        audio = story.get("audio")
+        if not audio:
+            continue
+        path = resolve_audio(str(audio))
+        if not path or path.suffix.lower() != ".wav":
+            continue
+        peaks = waveform_peaks(path)
+        if peaks:
+            baked[str(story.get("id"))] = peaks
+    raw = json.dumps(baked, ensure_ascii=False, separators=(",", ":"))
+    return "window.VTN_WAVEFORMS = " + raw + ";\n", len(baked)
+
+
+def js_payload(data: dict) -> tuple[str, int]:
     raw = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     raw = raw.replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
-    return "window.VTN_STORY_DATA = " + raw + ";\n"
+    waves, count = waveform_payload(data)
+    return "window.VTN_STORY_DATA = " + raw + ";\n" + waves, count
 
 
-def read_modules() -> tuple[str, str]:
+def read_modules() -> tuple[str, str, int]:
     missing = [name for name in CSS_ORDER if not (SRC / "css" / name).is_file()]
     if missing:
         raise SystemExit("缺少 CSS 模組: " + ", ".join(missing))
@@ -206,7 +289,8 @@ def read_modules() -> tuple[str, str]:
     if not js_files:
         raise SystemExit("src/js 沒有任何模組")
 
-    js_parts = [js_payload(load_data())]
+    payload, wave_count = js_payload(load_data())
+    js_parts = [payload]
     for path in js_files:
         text = path.read_text(encoding="utf-8")
         if "</script" in text.lower():
@@ -214,7 +298,7 @@ def read_modules() -> tuple[str, str]:
         rel = path.relative_to(SRC).as_posix()
         js_parts.append(f"/* ===== src/{rel} ===== */\n{text.strip(chr(10))}")
     js = "\n\n".join(js_parts) + "\n"
-    return css, js
+    return css, js, wave_count
 
 
 def build(check_only: bool = False) -> int:
@@ -230,7 +314,8 @@ def build(check_only: bool = False) -> int:
             print("  - " + err)
         return 1
 
-    css, js = read_modules()
+    css, js, wave_count = read_modules()
+    print(f"波形快取：{wave_count} 則故事（構建期實測振幅，執行期不再解碼 WAV）")
     template = (SRC / "html" / "app.template.html").read_text(encoding="utf-8")
     for token in ("<!--@@CSS@@-->", "<!--@@JS@@-->"):
         if token not in template:

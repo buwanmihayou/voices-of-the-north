@@ -225,6 +225,20 @@
   -webkit-mask-image: linear-gradient(to right, #000 0, #000 88%, transparent 100%);
 }
 .atlas__legend::-webkit-scrollbar { display: none; }
+.atlas__viewport[hidden] { display: none; }
+.atlas__viewport {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: rgba(253, 251, 244, 0.88);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--forest-deep);
+}
 .legend-chip {
   flex: none;
   display: inline-flex;
@@ -598,6 +612,30 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   transform: rotate(-45deg) scale(1.12);
   border-color: #F6F1E6;
   box-shadow: 0 10px 22px -8px rgba(22, 40, 30, 1);
+}
+.vtn-pin__count {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border: 2px solid rgba(253, 251, 244, 0.92);
+  border-radius: 999px;
+  background: #B4552F;
+  color: #FDFBF4;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.vtn-group-choice {
+  width: 100%;
+  margin-top: 8px;
+  text-align: left;
+  justify-content: flex-start;
 }
 .vtn-pin__mood {
   position: absolute;

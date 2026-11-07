@@ -192,8 +192,14 @@
   }
 
   /* ---------------- 故事與助手 ---------------- */
-  function fetchStories() {
-    return request('/api/stories', { timeout: 10000 }).then(function (data) {
+  function fetchStories(options) {
+    var path = '/api/stories';
+    var bbox = options && options.bbox;
+    if (Array.isArray(bbox) && bbox.length === 2 && bbox[0].length === 2 && bbox[1].length === 2) {
+      path += '?bbox=' + [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]
+        .map(function (n) { return Number(n).toFixed(5); }).join(',');
+    }
+    return request(path, { timeout: 10000 }).then(function (data) {
       return (data && data.stories) || [];
     });
   }
