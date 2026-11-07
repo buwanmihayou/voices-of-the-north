@@ -2,7 +2,7 @@
  * 32-sheet — 二級故事頁：半拉抽屜
  * -----------------------------------------------------------------------------
  * 行為：
- *   * 預設半開（52%），可上拉全開、下拉收起；
+ *   * 預設露出 55dvh（相對視口，小屏不會把標題區截掉），可上拉全開、下拉收起；
  *   * 點遮罩、按 Esc、按關閉鍵都會收起，並暫停播放；
  *   * 收起後把焦點交回原本的故事點／列表項；
  *   * 只負責「殼」，內容由 30-stories.js 渲染入 #storyDetail。
@@ -119,7 +119,10 @@
     grab.addEventListener('pointermove', function (event) {
       if (!dragging) return;
       var dy = event.clientY - dragging.y;
-      var base = dragging.expanded ? 0 : dragging.height * 0.52;
+      /* 與 CSS 的 55dvh 半開高度一致：用視口換算，不寫死抽屜自身百分比 */
+      var viewport = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      var peek = viewport * 0.55;
+      var base = dragging.expanded ? 0 : Math.max(0, dragging.height - peek);
       var next = base + dy;
       var max = dragging.height;
       next = Math.max(0, Math.min(max, next));

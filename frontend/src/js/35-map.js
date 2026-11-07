@@ -11,8 +11,9 @@
  *   * private 故事由 store / 伺服器過濾，地圖永遠收不到座標。
  *
  * 一級資訊：
- *   * 顏色＋圖標＝故事類型；小圓點＝講者心情（人工標註，非 AI 推斷）；
- *   * 低縮放用數字聚合，放大後展開為單一圖標。
+ *   * 顏色＋圖標＝故事類型（掃圖唯一維度）；心情標籤只在二級抽屜出現，
+ *     避免「7 類 icon × 5 種心情角標」的雙編碼噪音；
+ *   * 低縮放用數字聚合，放大後展開為單一圖標；同圈故事用數字角標合併。
  * ========================================================================== */
 
 (function () {
@@ -39,6 +40,9 @@
   var markers = {};
   var is3D = false;
   var booted = false;
+  var fuzzFrame = null;
+  var motionQuery = null;
+  var sceneIndex = -1;
 
   var state = {
     stories: [],
@@ -223,6 +227,11 @@
           features = ml.queryRenderedFeatures(event.point, { layers: ['vtn-cluster'] });
         } catch (e) { features = []; }
         if (features.length) {
+          /* 低縮放聚合氣泡：展開視角，不算「點開故事」 */
+          if (VTN.metrics) VTN.metrics.track('cluster.click', {
+            count: Number(features[0].properties.point_count) || 0,
+            zoom: ml.getZoom(), engine: 'maplibre'
+          });
           var clusterId = features[0].properties.cluster_id;
           var source = ml.getSource('vtn-stories');
           if (source && source.getClusterExpansionZoom) {
@@ -395,7 +404,6 @@
           properties: {
             id: story.id,
             type: typeOf(story),
-            mood: story.mood || '',
             year: story.year || 0,
             groupSize: group ? group.count : 1
           },
@@ -461,7 +469,7 @@
       });
       btn.addEventListener('click', function () {
         dlg.close('pick');
-        VTN.stories.select(id);
+        VTN.stories.select(id, { source: 'group' });
       });
       body.appendChild(btn);
     });
@@ -481,18 +489,27 @@
     text.textContent = t('atlas.inView', { n: list.length });
   }
 
-  /* 點位點擊率：MapLibre 標記與 Leaflet 模糊圈共用，兩條渲染路徑都要計到 */
-  function trackPinClick(storyId) {
+  /* 點位點擊：MapLibre 標記與 Leaflet 模糊圈共用兩條渲染路徑。
+     kind='group' 代表同圈氣泡，只記 cluster.click；真正打開故事由
+     30-stories.js 的 select() 記 story.open，後者才是北極星指標分母。 */
+  function trackPinClick(storyId, kind) {
     if (!VTN.metrics) return;
     var zoom = 0;
     if (engine === 'maplibre' && ml) zoom = ml.getZoom();
     else if (engine === 'leaflet' && leaflet) zoom = leaflet.getZoom();
-    VTN.metrics.track('pin.click', { storyId: storyId, zoom: zoom, engine: engine });
+    var meta = { zoom: zoom, engine: engine };
+    if (kind === 'group') {
+      var group = groupFor(storyId);
+      meta.count = group ? group.count : 1;
+      VTN.metrics.track('cluster.click', meta);
+    } else {
+      meta.storyId = storyId;
+      VTN.metrics.track('pin.click', meta);
+    }
   }
 
   function pinElement(story, group) {
     var type = typeOf(story);
-    var mood = story.mood || 'wistful';
     var groupSize = group ? group.count : 1;
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -502,15 +519,15 @@
     btn.innerHTML =
       '<span class="vtn-pin__ring" aria-hidden="true"></span>' +
       '<span class="vtn-pin__disc"><i class="fa-solid ' + iconOf(story) + '" aria-hidden="true"></i></span>' +
-      '<span class="vtn-pin__mood vtn-mood--' + U.escapeHtml(mood) + '" aria-hidden="true"></span>' +
       '<span class="vtn-pin__label">' + U.escapeHtml(story.title) + '</span>';
     syncGroupBadge(btn, group, story);
     btn.addEventListener('click', function (event) {
       event.stopPropagation();
-      trackPinClick(story.id);
       var current = groupFor(story.id);
+      /* 同圈氣泡不等於打開故事：只記 cluster.click，不進入北極星分母 */
+      trackPinClick(story.id, current && current.count > 1 ? 'group' : 'pin');
       if (current && current.count > 1) openGroupDialog(current);
-      else VTN.stories.select(story.id);
+      else VTN.stories.select(story.id, { source: 'pin' });
     });
     return btn;
   }
@@ -564,6 +581,49 @@
         story.location.radiusM || 800));
     }
     ml.getSource('vtn-fuzz').setData({ type: 'FeatureCollection', features: features });
+    updateFuzzMotion(features.length > 0);
+  }
+
+  function prefersReducedMotion() {
+    if (!window.matchMedia) return false;
+    if (!motionQuery) motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    return !!motionQuery.matches;
+  }
+
+  /* MapLibre 用 canvas 畫圖，CSS keyframes 動不到 fill-opacity，
+     所以呼吸填充由 JS 驅動；系統要求減少動態時降級為靜態虛線圈。 */
+  function stopFuzzPulse() {
+    if (fuzzFrame && window.cancelAnimationFrame) window.cancelAnimationFrame(fuzzFrame);
+    fuzzFrame = null;
+    if (ml && ml.getLayer('vtn-fuzz-fill')) {
+      ml.setPaintProperty('vtn-fuzz-fill', 'fill-opacity', 0.13);
+    }
+  }
+
+  function updateFuzzMotion(hasSelection) {
+    if (!ml || !ml.getLayer('vtn-fuzz-fill')) return;
+    var reduce = prefersReducedMotion();
+    stopFuzzPulse();
+    if (el) el.classList.toggle('atlas--reduced-motion', reduce);
+    if (reduce) {
+      ml.setPaintProperty('vtn-fuzz-fill', 'fill-opacity', 0.10);
+      ml.setPaintProperty('vtn-fuzz-line', 'line-width', 2.5);
+      ml.setPaintProperty('vtn-fuzz-line', 'line-opacity', 0.85);
+      return;
+    }
+    ml.setPaintProperty('vtn-fuzz-line', 'line-width', 2);
+    ml.setPaintProperty('vtn-fuzz-line', 'line-opacity', 0.65);
+    if (!hasSelection || !window.requestAnimationFrame) return;
+    var start = (window.performance && window.performance.now)
+      ? window.performance.now() : Date.now();
+    function tick(now) {
+      if (!ml || !ml.getLayer('vtn-fuzz-fill')) { fuzzFrame = null; return; }
+      var phase = (now - start) / 2600 * Math.PI * 2;
+      var opacity = 0.10 + 0.12 * (0.5 - 0.5 * Math.cos(phase));
+      ml.setPaintProperty('vtn-fuzz-fill', 'fill-opacity', opacity);
+      fuzzFrame = window.requestAnimationFrame(tick);
+    }
+    fuzzFrame = window.requestAnimationFrame(tick);
   }
 
   function render(forceFit) {
@@ -691,11 +751,76 @@
     if (btn) btn.setAttribute('aria-pressed', is3D ? 'true' : 'false');
   }
 
+  /* 3D 書籤：只取已有真實故事座標的新市鎮／墟市，不新增任何示範資料。
+     鄉村村屋與農田沒有建築高度，55° 俯仰在那些點只會「把山抬起」；
+     示範時按一下就輪播到有樓群可擠出的視角。 */
+  var SCENE_VILLAGES = ['fanling', 'sheung-shui', 'tai-po'];
+
+  function sceneStops() {
+    var list = located();
+    return SCENE_VILLAGES.map(function (key) {
+      var story = null;
+      list.some(function (item) {
+        if (item.villageKey === key && item.location) { story = item; return true; }
+        return false;
+      });
+      if (!story) return null;
+      return {
+        key: key,
+        label: VTN.stories.villageLabel(key),
+        center: [story.location.lng, story.location.lat]
+      };
+    }).filter(function (stop) { return !!stop; });
+  }
+
+  function cycleScene() {
+    var stops = sceneStops();
+    if (!stops.length || engine !== 'maplibre' || !ml) return null;
+    sceneIndex = (sceneIndex + 1) % stops.length;
+    var stop = stops[sceneIndex];
+    is3D = true;
+    var btn3d = byId('atlas3dBtn');
+    if (btn3d) btn3d.setAttribute('aria-pressed', 'true');
+    add3DBuildings();
+    el.classList.add('is-at-3d');
+    ml.flyTo({
+      center: stop.center,
+      zoom: 15.2,
+      pitch: 55,
+      bearing: -18,
+      padding: { top: 130, bottom: 150 },
+      duration: 1100
+    });
+    var sceneBtn = byId('atlasSceneBtn');
+    if (sceneBtn) {
+      sceneBtn.setAttribute('aria-label', t('atlas.sceneAria', { place: stop.label }));
+      sceneBtn.setAttribute('title', t('atlas.sceneHint', { place: stop.label }));
+      sceneBtn.setAttribute('data-place', stop.key);
+    }
+    if (VTN.metrics) VTN.metrics.track('scene.view', {
+      view: stop.key, zoom: 15.2, engine: engine
+    });
+    return stop;
+  }
+
+  /* 問答與地圖共用同一個視口範圍，避免「來源數量」口徑分叉 */
+  function currentBbox() {
+    if (engine !== 'maplibre' || !ml) return null;
+    var b = ml.getBounds();
+    return [[b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]];
+  }
+
   /* =========================================================================
    * 6. Leaflet 兜底
    * ======================================================================= */
   function disable3D() {
     var btn = byId('atlas3dBtn');
+    var scene = byId('atlasSceneBtn');
+    if (scene) {
+      scene.disabled = true;
+      scene.setAttribute('aria-disabled', 'true');
+      scene.setAttribute('title', t('atlas.3dUnavailable'));
+    }
     if (!btn) return;
     btn.disabled = true;
     btn.setAttribute('aria-disabled', 'true');
@@ -762,8 +887,8 @@
         direction: 'top', opacity: 0.96
       });
       circle.on('click', function () {
-        trackPinClick(story.id);
-        VTN.stories.select(story.id);
+        trackPinClick(story.id, 'pin');
+        VTN.stories.select(story.id, { source: 'pin' });
       });
       circle.addTo(leafletLayer);
     });
@@ -809,6 +934,15 @@
       }
     });
     if (btn3d) btn3d.addEventListener('click', function () { set3D(!is3D); });
+    var sceneBtn = byId('atlasSceneBtn');
+    if (sceneBtn) sceneBtn.addEventListener('click', function () { cycleScene(); });
+
+    if (window.matchMedia) {
+      motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var onMotionChange = function () { updateFuzzMotion(!!state.selectedId); };
+      if (motionQuery.addEventListener) motionQuery.addEventListener('change', onMotionChange);
+      else if (motionQuery.addListener) motionQuery.addListener(onMotionChange);
+    }
   }
 
   function ensureVisible() {
@@ -843,6 +977,7 @@
   }
 
   function reset() {
+    stopFuzzPulse();
     if (ml) { try { ml.remove(); } catch (e) { /* ignore */ } }
     if (leaflet) { try { leaflet.remove(); } catch (e) { /* ignore */ } }
     ml = null;
@@ -862,6 +997,9 @@
     updateViewportCount: updateViewportCount,
     groupMap: groupMap,
     set3D: set3D,
+    cycleScene: cycleScene,
+    sceneStops: sceneStops,
+    bbox: currentBbox,
     is3D: function () { return is3D; },
     reset: reset,
     status: function () { return engine; },

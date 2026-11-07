@@ -17,8 +17,8 @@ frontend/src/                  前端原始碼（CSS / JS / HTML 模板，開發
   js/15-api.js                 後端 API 封裝（含 Bearer token）
   js/20-audio.js               音訊播放與跳秒
   js/25-ui.js                  toast / 對話框 / 狀態徽章
-  js/27-metrics.js             指標三事件（地圖瀏覽時長／點位點擊率／音訊完成率）
-  js/28-waveform.js            音檔實測振幅解碼（優先讀構建期快取，失敗即回退）
+  js/27-metrics.js             指標事件（story.open 為分母；本機緩衝 + /api/audit）
+  js/28-waveform.js            8 kHz 實測振幅（內嵌快取／外置 JSON／執行期解碼三級）
   js/30-stories.js             故事地圖／列表、篩選、年代軸、二級頁內容、波形播放器、來源跳轉
   js/32-sheet.js               半拉抽屜（拖拽、展開、關閉與焦點管理）
   js/35-map.js                 地圖引擎：MapLibre GL JS 3D ＋ Leaflet／手繪圖三層回退
@@ -32,10 +32,13 @@ frontend/src/                  前端原始碼（CSS / JS / HTML 模板，開發
   js/99-init.js                初始化與健康輪詢
   html/app.template.html       全部視圖骨架（含 data-i18n 標記）
 frontend/voices-of-the-north-app.html   交付用單檔（由建置腳本產生，請勿手改）
+frontend/waveforms.json        波形按需載入用（--external-waveforms 時由單檔 fetch）
 frontend/js, frontend/lib      舊版副本，僅供對照（已不參與建置）
+docs/voice-scripts/voice-scripts.md  每則故事的配音文字腳本與時間線
 server.py                      FastAPI 後端（同時託管 frontend/ 靜態檔）
 story_corpus.py                語料檢索與拒答邏輯（讀 data/stories.json）
-tools/build_frontend.py        建置腳本：驗證資料 → 合併成單檔 → 語法檢查
+tools/build_frontend.py        建置腳本：驗證資料 → 合併成單檔 → 波形快取
+tools/export_voice_scripts.py  由已授權逐字稿匯出配音腳本
 tools/check_frontend_syntax.py 單檔語法檢查
 tools/audit_frontend.mjs       前端自我檢查（可選）
 ```
@@ -43,9 +46,11 @@ tools/audit_frontend.mjs       前端自我檢查（可選）
 ## 2. 建置
 
 ```bash
-python tools/build_frontend.py          # 驗證 + 產出 frontend/voices-of-the-north-app.html
-python tools/build_frontend.py --check  # 只驗證資料
-python tools/check_frontend_syntax.py   # 檢查單檔內嵌 JS 語法
+python tools/build_frontend.py                     # 驗證 + 產出單檔（波形內嵌）
+python tools/build_frontend.py --check             # 只驗證資料
+python tools/build_frontend.py --external-waveforms # 波形改為按需載入 waveforms.json
+python tools/export_voice_scripts.py               # 匯出每則故事的配音文字腳本
+python tools/check_frontend_syntax.py              # 檢查單檔內嵌 JS 語法
 ```
 
 建置時會硬性檢查（不通過即失敗）：
@@ -62,9 +67,12 @@ python tools/check_frontend_syntax.py   # 檢查單檔內嵌 JS 語法
 
 補充契約：
 
-- 波形由建置腳本從 WAV 實測振幅後內嵌成 `window.VTN_WAVEFORMS`，執行期不必為畫波形再解碼音檔；快取缺失或瀏覽器不支援 Web Audio 時，播放器回退細進度條，不生成假波形。
-- `GET /api/stories?bbox=west,south,east,north` 只回視口內故事（在授權／分享範圍過濾之後）；參數格式錯誤回 400，回應會回顯 `bbox`。
-- 指標事件 `map.view` / `pin.click` / `audio.complete`（另有中途 `audio.progress`）只記錄數值與故事 ID，送往 `/api/audit`；後端 meta 白名單會丟棄逐字稿、標題等自由文字。離線時僅留本機緩衝。
+- **波形**：建置腳本用標準庫 `wave` 實測 PCM，與 `28-waveform.js` 執行期解碼共用 **8 kHz 重採樣網格 + 60 柱 RMS／峰值**，兩條路徑相關係數 **1.000**（舊版 0.918）；播放器標明「構建期 8kHz 取樣」。預設內嵌 `window.VTN_WAVEFORMS`，快取缺失、外置載入失敗或瀏覽器不支援 Web Audio 時回退細進度條，**不生成假波形**。
+- **波形體積**：目前 1 則 × 60 柱 = 358 bytes；故事量增大時用 `--external-waveforms`，單檔只留 `window.VTN_WAVEFORMS_URL`，前端按需 fetch `frontend/waveforms.json` 並寫回快取（50 則約 18 KB，屆時建議切換）。
+- **可見故事集合**：`GET /api/stories?bbox=west,south,east,north` 與 `POST /api/ask-village`（可帶同一 `bbox`）都從 `server.current_visible_stories()` 出發，共用同一份授權／分享範圍／撤回／視口過濾結果；回應回顯 `visibleCount` / `visibleIds`，避免「問答找到 3 則、地圖只有 1 個點」。參數格式錯誤回 400。
+- **指標口徑**：`story.open`（真正打開詳情）才是北極星指標分母；`pin.click`（單點）、`cluster.click`（同圈氣泡／低縮放聚合）只作診斷；另有 `map.view`、`audio.complete`、`audio.progress`、`scene.view`。只記錄數值與故事 ID，送往 `/api/audit`；後端 meta 白名單會丟棄逐字稿、標題等自由文字，離線時僅留本機緩衝。
+- **版位與無障礙**：列表入口在地圖右上角常顯（帶文字，不是降級才出現）；半拉抽屜半開露出 `55dvh`；`prefers-reduced-motion` 下模糊圈呼吸填充降級為靜態虛線圈；3D 書籤只取已有真實故事座標的新市鎮視角。
+- **配音腳本**：`docs/voice-scripts/voice-scripts.md` 由 `tools/export_voice_scripts.py` 從已授權逐字稿匯出每則故事的台詞、時間線與補錄驗收流程。8 則中 7 則仍待真人補錄，介面如實顯示「未附音檔」；**不合成示範音檔、不改寫逐字稿**。
 
 ## 3. 本地運行
 
@@ -135,10 +143,12 @@ python -m http.server 8421 --directory frontend
 ## 7. 測試
 
 ```bash
-python tools/test_records_api.py    # 錄音 API 與權限
+python tools/test_records_api.py    # 錄音 API 與權限（歷史腳本，與現行分享範圍契約待對齊）
 python tools/test_lab_api.py        # 實驗室 API
 python tools/audit_frontend.mjs     # 前端靜態檢查（需 node）
 ```
+
+本輪評審修復的回歸腳本放在工作區 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`），未納入版本控制；`build_frontend.py` 與 `check_frontend_syntax.py` 則為正式交付工具。
 
 手動驗證要點：三語切換後重整仍保持、錄音停止即存草稿、斷網上傳變「待轉寫」且可重試、來源按鈕跳轉並從指定秒數播放、撤回後來源按鈕變灰。
 

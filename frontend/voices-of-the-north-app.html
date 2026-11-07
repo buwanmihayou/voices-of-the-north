@@ -3893,17 +3893,6 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   text-align: left;
   justify-content: flex-start;
 }
-.vtn-pin__mood {
-  position: absolute;
-  right: 2px;
-  top: 9px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid #FDFBF4;
-  background: var(--mood-color, #8C7A5B);
-  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
-}
 .vtn-pin__label {
   position: absolute;
   left: 50%;
@@ -3992,7 +3981,21 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 .atlas-listview .story-list { margin-top: 10px; }
 .atlas-listview .disclosure-card { margin-top: 18px; }
 
-/* 列表卡片：類型色塊與心情角標，和地圖保持同一套語言 */
+/* 地圖／列表固定入口：帶文字，長者不必猜圖標，也不在地圖降級時才出現 */
+.atlas-btn--list {
+  width: auto;
+  min-width: 44px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* 列表卡片：只保留類型色塊；心情標籤統一放在二級抽屜 */
 .story-item__cover--festival { background: #F6E4DA; color: #B4552F; }
 .story-item__cover--farming { background: #E6EFE1; color: #4F7A4A; }
 .story-item__cover--migration { background: #E1EBF2; color: #3C6E8F; }
@@ -4029,7 +4032,9 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   right: 0;
   bottom: 0;
   z-index: 55;
-  height: 90%;
+  /* 相對視口而非父容器：小屏（如 iPhone SE 375×667）半開仍露出 55dvh */
+  height: 90vh;
+  height: 90dvh;
   display: flex;
   flex-direction: column;
   border-radius: 26px 26px 0 0;
@@ -4040,7 +4045,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   touch-action: none;
   will-change: transform;
 }
-.story-sheet.is-open { transform: translateY(52%); }
+.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); }
 .story-sheet.is-expanded { transform: translateY(0); }
 .story-sheet.is-dragging { transition: none; }
 .story-sheet__grab {
@@ -4429,11 +4434,8 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 .atlas-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 
-/* 800 米模糊圈（MapLibre）呼吸感 */
-@keyframes fuzz-breathe {
-  0%, 100% { fill-opacity: 0.10; }
-  50% { fill-opacity: 0.22; }
-}
+/* 800 米模糊圈的呼吸填充由 35-map.js 驅動 MapLibre paint 屬性
+   （canvas 圖層不吃 CSS keyframes）；減少動態時由 JS 降級為靜態虛線圈。 */
 .atlas__canvas.is-at-3d { cursor: grab; }
 
 /* ---------- 暗色主題 ---------- */
@@ -4478,6 +4480,9 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
   .story-sheet__scrim,
   .atlas__canvas,
   .atlas__loading { transition: none !important; }
+  /* 模糊圈是 MapLibre canvas：CSS 關不掉呼吸填充。35-map.js 會停止
+     requestAnimationFrame、把 fill-opacity 固定 0.10、虛線加粗至 2.5。 */
+  .atlas__canvas.atlas--reduced-motion { cursor: default; }
 }
 
 /* ---------- 窄屏 ---------- */
@@ -4657,9 +4662,15 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
             <h1 class="atlas__title" id="pageTitle-stories" data-i18n="atlas.title">故事，响邊度？</h1>
           </div>
           <div class="atlas__tools">
-            <button type="button" class="atlas-btn" id="atlasViewBtn" aria-pressed="false"
+            <!-- 列表入口固定可見：不是只有地圖降級時才出現的後備按鈕 -->
+            <button type="button" class="atlas-btn atlas-btn--list" id="atlasViewBtn" aria-pressed="false"
                     aria-label="切換列表模式" data-i18n-aria="atlas.listAria" title="列表模式">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
+              <span data-i18n="atlas.listShort">列表</span>
+            </button>
+            <button type="button" class="atlas-btn" id="atlasSceneBtn"
+                    aria-label="3D 示範書籤" data-i18n-aria="atlas.sceneAria" title="3D 示範書籤">
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
             </button>
             <button type="button" class="atlas-btn atlas-btn--3d" id="atlas3dBtn" aria-pressed="false"
                     aria-label="切換 3D 立體地圖" data-i18n-aria="atlas.3dAria" title="3D 立體">
@@ -5126,7 +5137,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 
 <script>
 window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consentPolicyVersion":"CONSENT-2026-11-v2","storyMetaNote":"storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。","outOfScopeMessage":{"zh-HK":"抱歉，錄製的故事中未包含此資訊。","zh-CN":"抱歉，录制的故事中未包含此信息。","en":"Sorry, the recorded stories do not contain this information."},"suggestedQuestions":["細個元朗周邊係點㗎？","以前村民用咩出行？","錦田天后誕會做啲咩？","聯和墟趁墟係點嘅？","石湖墟以前會水浸嗎？","沙頭角中英街係咩地方？","林村河以前可以游水嗎？","天水圍以前係魚塘嗎？"],"stories":[{"id":"YL-001","title":"元朗・村落晨光","titleEn":"Yuen Long · Village Morning","villageKey":"yuen-long","topicKeys":["community","agriculture"],"eraKey":"1960s","storyType":"farming","mood":"wistful","year":1962,"languageKey":"yue","teller":"Boris Lau","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-001","scope":"community","publishedAt":"2026-10-25","location":{"area":"元朗","lat":22.4445,"lng":114.015,"radiusM":800},"audio":"assets/Demo Story.wav","durationSec":46.7,"durationSource":"measured","cover":"assets/story-cover-village.png","segments":[{"start":0,"end":17.5,"text":"細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。","keywords":["細個","童年","元朗","農田","田野","鄉村","鄉郊","單車","踩車","出行","交通"]},{"start":17.5,"end":33,"text":"大學畢業之後，我有時會同朋友返去附近散步，同佢哋介紹樹上雀鳥嘅叫聲，同草叢入面嘅蟲鳴。","keywords":["大學","畢業","朋友","散步","雀鳥","雀仔","叫聲","蟲鳴","昆蟲","草叢","樹木","自然"]},{"start":33,"end":46.7,"text":"近年好多農田同空地都起咗密集樓宇，昔日寧靜自然嘅鄉郊環境慢慢消失，呢個係我印象最深嘅轉變。","keywords":["近年","近排","而家","轉變","變化","發展","起樓","樓宇","大廈","密集","消失","環境"]}]},{"id":"KT-002","title":"錦田・圍村天后誕","titleEn":"Kam Tin · Tin Hau Festival","villageKey":"kam-tin","topicKeys":["festival","clan"],"eraKey":"1950s","storyType":"festival","mood":"joyful","year":1955,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-002","scope":"community","publishedAt":"2026-10-26","location":{"area":"錦田","lat":22.4405,"lng":114.0635,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"我哋錦田圍村最重視天后誕，每年三月尾會搭戲棚、舞獅，仲有搶花炮，全村兄弟都會返嚟。","keywords":["錦田","圍村","天后誕","天后","戲棚","做大戲","舞獅","花炮","節慶","神功戲"]},{"start":16,"end":34,"text":"細個跟阿媽去天后廟上香，之後全村食盆菜，幾十圍擺喺祠堂前面，豬肉同蠔豉最香。","keywords":["細個","阿媽","天后廟","上香","拜神","盆菜","祠堂","豬肉","蠔豉","食"]},{"start":34,"end":50,"text":"近呢二十年儀式簡化咗好多，後生仔女肯返村幫手，已經算好難得，我哋最怕呢啲規矩失傳。","keywords":["近年","而家","儀式","簡化","後生","年輕人","返村","幫手","失傳","傳統","變化"]}]},{"id":"FL-003","title":"粉嶺・聯和墟趁墟日","titleEn":"Fanling · Luen Wo Market Day","villageKey":"fanling","topicKeys":["market","agriculture"],"eraKey":"1960s","storyType":"market","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-003","scope":"community","publishedAt":"2026-10-27","location":{"area":"粉嶺","lat":22.4965,"lng":114.1435,"radiusM":800},"audio":null,"durationSec":48,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"以前趁墟要天未光起身，擔住兩籮菜行去聯和墟，行到嗰陣個天啱啱光，街邊已經擺滿咗人。","keywords":["粉嶺","聯和墟","趁墟","墟市","天未光","擔菜","賣菜","菜農","街市","行路"]},{"start":15,"end":32,"text":"墟市有菜檔、魚檔、布檔，仲有火車站，啲人搭火車去九龍返工，我哋就喺度賣完菜先返屋企。","keywords":["菜檔","魚檔","布檔","火車","火車站","九龍","返工","賣菜","買賣","搭車"]},{"start":32,"end":48,"text":"而家聯和墟街市搬咗入冷氣大樓，乾淨係乾淨，但係以前嗰種人情味同叫賣聲，真係搵唔返。","keywords":["而家","聯和墟","街市","冷氣","大樓","人情味","叫賣","變化","以前","對比"]}]},{"id":"SS-004","title":"上水・石湖墟米舖","titleEn":"Sheung Shui · Shek Wu Hui Rice Shop","villageKey":"sheung-shui","topicKeys":["market","border"],"eraKey":"1940s","storyType":"market","mood":"wistful","year":1948,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-004","scope":"community","publishedAt":"2026-10-28","location":{"area":"上水","lat":22.5025,"lng":114.1285,"radiusM":800},"audio":null,"durationSec":55,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":18,"text":"我阿爸喺石湖墟開米舖，啲米用麻包袋裝，一斗米賣幾個斗零，客人多數係附近鄉村嘅農民。","keywords":["上水","石湖墟","米舖","米","麻包袋","斗零","農民","買米","價錢","生意"]},{"start":18,"end":37,"text":"石湖墟以前成日水浸，一到雨季就要把米搬上閣樓，水退之後成條街都係泥，要好幾日先清得完。","keywords":["水浸","雨季","搬米","閣樓","水退","泥","清理","天災","石湖墟","街"]},{"start":37,"end":55,"text":"後來邊境愈來愈多人，火車運米落嚟，米舖生意好過以前，但係再過幾年，超級市場開張就唔同講法。","keywords":["邊境","火車","運米","生意","超級市場","開張","後來","變化","競爭","米舖"]}]},{"id":"STK-005","title":"沙頭角・中英街邊境","titleEn":"Sha Tau Kok · Chung Ying Street","villageKey":"sha-tau-kok","topicKeys":["border","migration"],"eraKey":"1970s","storyType":"migration","mood":"wistful","year":1972,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-005","scope":"community","publishedAt":"2026-10-29","location":{"area":"沙頭角","lat":22.5475,"lng":114.1495,"radiusM":800},"audio":null,"durationSec":47,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"沙頭角係禁區，入去要禁區紙，我哋細個跟大人去中英街，一條街一邊香港一邊深圳，好特別。","keywords":["沙頭角","禁區","禁區紙","中英街","香港","深圳","邊境","邊界","特別"]},{"start":15,"end":31,"text":"嗰陣去中英街主要係探親同買嘢，兩邊舖頭都做街坊生意，過關要排隊，但唔算好麻煩。","keywords":["探親","買嘢","舖頭","街坊","過關","排隊","中英街","購物","親戚"]},{"start":31,"end":47,"text":"後來邊境政策收緊，沙頭角墟愈來愈靜，年輕人都搬出去市區，剩返老人家守住間屋。","keywords":["後來","邊境政策","收緊","沙頭角墟","靜","年輕人","搬走","市區","老人家","變化"]}]},{"id":"TP-006","title":"大埔・林村河與荔枝園","titleEn":"Tai Po · Lam Tsuen River","villageKey":"tai-po","topicKeys":["ecology","agriculture"],"eraKey":"1950s","storyType":"farming","mood":"joyful","year":1958,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-006","scope":"community","publishedAt":"2026-10-30","location":{"area":"大埔","lat":22.4505,"lng":114.1645,"radiusM":800},"audio":null,"durationSec":51,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"細個喺林村河邊大，夏天成班細路落河游水捉魚，河水好清，洗衫、洗菜都係用河水。","keywords":["大埔","林村河","細個","游水","捉魚","河水","洗衫","洗菜","童年","夏天"]},{"start":16,"end":33,"text":"河兩邊以前係荔枝園同菜田，荔枝熟嘅時候，阿爸會擔去大埔墟賣，我哋就喺樹下執跌落地嘅。","keywords":["荔枝","荔枝園","菜田","果園","大埔墟","賣","擔","生果","務農","收成"]},{"start":33,"end":51,"text":"後來河流整治，石屎化咗，水冇以前咁清；村屋愈起愈多，不過每年端午仲有人扒龍舟。","keywords":["後來","河流整治","石屎","水質","村屋","起屋","端午","龍舟","變化","而家"]}]},{"id":"TSW-007","title":"天水圍・魚塘變高樓","titleEn":"Tin Shui Wai · Fish Ponds to High-rises","villageKey":"tin-shui-wai","topicKeys":["migration","community"],"eraKey":"1980s","storyType":"migration","mood":"heavy","year":1982,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-007","scope":"community","publishedAt":"2026-10-31","location":{"area":"天水圍","lat":22.4595,"lng":114.0045,"radiusM":800},"audio":null,"durationSec":53,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"以前天水圍全部係魚塘同基圍，我屋企養魚，朝早要落塘餵魚，收成季節就抽乾水捉魚去賣。","keywords":["天水圍","魚塘","基圍","養魚","餵魚","捉魚","收成","抽水","賣魚","漁業"]},{"start":17,"end":35,"text":"八十年代政府收地發展新市鎮，我哋條村搬去第二度，魚塘填平起樓，好多鄰居都唔捨得。","keywords":["八十年代","政府","收地","發展","新市鎮","搬村","填塘","起樓","鄰居","唔捨得"]},{"start":35,"end":53,"text":"而家天水圍高樓林立，住咗幾十萬人，交通方便咗，但係細個嗰種塘邊生活，只可以喺記憶度搵。","keywords":["而家","天水圍","高樓","人口","交通","方便","記憶","變化","以前","生活"]}]},{"id":"LFS-008","title":"流浮山・蠔田與鹹水歌","titleEn":"Lau Fau Shan · Oyster Beds","villageKey":"lau-fau-shan","topicKeys":["craft","ecology"],"eraKey":"1960s","storyType":"farming","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-008","scope":"community","publishedAt":"2026-11-01","location":{"area":"流浮山","lat":22.4685,"lng":113.9835,"radiusM":800},"audio":null,"durationSec":49,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"流浮山最有名係蠔，我哋叫蠔田，潮退嘅時候落去撬蠔，潮水一漲就要即刻返上岸，好講究時間。","keywords":["流浮山","蠔","蠔田","養蠔","撬蠔","潮退","潮水","潮汐","上岸","海"]},{"start":16,"end":32,"text":"以前落蠔田會唱鹹水歌，一人一句咁對唱，講天氣、講收成，而家識唱嘅人已經好少。","keywords":["鹹水歌","唱歌","對唱","收成","天氣","漁民","歌謠","傳統","而家","失傳"]},{"start":32,"end":49,"text":"後來后海灣水質變差，蠔業慢慢式微，好多人轉做酒家生意，不過每年仲有蠔節，好熱鬧。","keywords":["后海灣","水質","蠔業","式微","酒家","生意","蠔節","熱鬧","轉行","變化"]}]}]};
-window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.64,0.325,0.681,0.661,0.455,0.496,0.472,0.379,0.422,0.632,0.569,0.616,0.649,0.642,0.589,0.609,0.419,0.455,0.326,0.485,0.607,0.452,1.0,0.775,0.535,0.574,0.619,0.606,0.528,0.419,0.45,0.618,0.551,0.534,0.413,0.534,0.503,0.396,0.375,0.999,0.544,0.644,0.471,0.378,0.52,0.598,0.509,0.422,0.406,0.357,0.252,0.173]};
+window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,0.582,0.371,0.711,0.576,0.419,0.455,0.472,0.37,0.421,0.532,0.585,0.545,0.579,0.537,0.602,0.556,0.43,0.431,0.358,0.434,0.642,0.46,1.0,0.741,0.466,0.538,0.543,0.548,0.609,0.464,0.417,0.515,0.536,0.51,0.339,0.489,0.456,0.37,0.358,0.811,0.45,0.6,0.442,0.378,0.452,0.526,0.465,0.4,0.405,0.376,0.339,0.149]};
 
 
 /* ===== src/js/00-config.js ===== */
@@ -5624,6 +5635,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'atlas.eyebrow': '北區聲音地圖',
       'atlas.title': '故事，响邊度？',
       'atlas.listAria': '切換列表模式',
+      'atlas.listShort': '列表',
+      'atlas.sceneAria': '3D 示範書籤：按一下跳到下一個視角',
+      'atlas.sceneHint': '3D 示範書籤：{place}',
       'atlas.3dAria': '切換 3D 立體地圖',
       'atlas.3dUnavailable': '此裝置或網絡未能啟用 3D 地圖',
       'atlas.searchPh': '搜村落、人物、關鍵詞',
@@ -5645,8 +5659,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'atlas.teller': '講者：{name}',
       'atlas.yearLabel': '{y} 年',
       'atlas.playerMeta': '{n} 段逐字稿・{dur}',
-      'atlas.playerMetaWave': '{n} 段逐字稿・{dur}・实测音频波形',
-      'atlas.playerMetaWave': '{n} 段逐字稿・{dur}・實測音訊波形',
+      'atlas.playerMetaWave': '{n} 段逐字稿・{dur}・實測振幅（構建期 8kHz 取樣）',
       'atlas.playAria': '播放《{title}》',
       'atlas.pauseAria': '暫停播放',
       'atlas.seekAria': '點擊或拖動跳轉錄音',
@@ -6169,6 +6182,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'atlas.eyebrow': '北区声音地图',
       'atlas.title': '故事，响边度？',
       'atlas.listAria': '切换列表模式',
+      'atlas.listShort': '列表',
+      'atlas.sceneAria': '3D 演示书签：按一下跳到下一个视角',
+      'atlas.sceneHint': '3D 演示书签：{place}',
       'atlas.3dAria': '切换 3D 立体地图',
       'atlas.3dUnavailable': '此设备或网络未能启用 3D 地图',
       'atlas.searchPh': '搜村落、人物、关键词',
@@ -6190,6 +6206,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'atlas.teller': '讲述者：{name}',
       'atlas.yearLabel': '{y} 年',
       'atlas.playerMeta': '{n} 段逐字稿・{dur}',
+      'atlas.playerMetaWave': '{n} 段逐字稿・{dur}・实测振幅（构建期 8kHz 取样）',
       'atlas.playAria': '播放《{title}》',
       'atlas.pauseAria': '暂停播放',
       'atlas.seekAria': '点击或拖动跳转录音',
@@ -6712,6 +6729,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'atlas.eyebrow': 'SOUND MAP OF THE NORTH',
       'atlas.title': 'Where do stories live?',
       'atlas.listAria': 'Switch to list view',
+      'atlas.listShort': 'List',
+      'atlas.sceneAria': '3D demo bookmark: tap to fly to the next viewpoint',
+      'atlas.sceneHint': '3D demo bookmark: {place}',
       'atlas.3dAria': 'Toggle 3D map',
       'atlas.3dUnavailable': '3D map is unavailable on this device or network',
       'atlas.searchPh': 'Search villages, narrators, keywords',
@@ -6733,7 +6753,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'atlas.teller': 'Narrator: {name}',
       'atlas.yearLabel': '{y}',
       'atlas.playerMeta': '{n} transcript passages · {dur}',
-      'atlas.playerMetaWave': '{n} passages · {dur} · measured waveform',
+      'atlas.playerMetaWave': '{n} passages · {dur} · measured waveform (8 kHz precomputed)',
       'atlas.playAria': 'Play “{title}”',
       'atlas.pauseAria': 'Pause playback',
       'atlas.seekAria': 'Tap or drag to seek the recording',
@@ -6753,7 +6773,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       'storyType.migration': 'Settling & migration',
       'storyType.architecture': 'Built heritage',
       'storyType.oral': 'Personal accounts',
-      'storyType.market': 'Market life',
+      'storyType.market': 'Market & Trade',
       'storyType.other': 'Other',
       'mood.wistful': 'Nostalgic',
       'mood.joyful': 'Joyful',
@@ -7995,9 +8015,20 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
   }
 
   function ask(question, options) {
+    var body = { question: question, lang: options && options.lang };
+    /* 與地圖共用同一個可見故事集合：問答的來源數量不會比地圖多出視口外的故事 */
+    try {
+      var bbox = (options && options.bbox) ||
+        (VTN.map && VTN.map.bbox ? VTN.map.bbox() : null);
+      if (Array.isArray(bbox) && bbox.length === 2 &&
+        bbox[0].length === 2 && bbox[1].length === 2) {
+        body.bbox = [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]
+          .map(function (n) { return Number(n).toFixed(5); }).join(',');
+      }
+    } catch (e) { /* 地圖未就緒：改用伺服器回傳的全域可見集合 */ }
     return request('/api/ask-village', {
       method: 'POST',
-      body: { question: question, lang: options && options.lang },
+      body: body,
       timeout: 12000
     });
   }
@@ -8600,9 +8631,23 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     reportPlaying('pagehide');
     endMapView('pagehide');
   });
+  /* 北極星指標的分母只用 story.open；pin.click / cluster.click 為診斷事件，
+     點擊同圈氣泡後未選故事而關掉，不應被算成「打開故事」。 */
+  function funnel() {
+    var out = {
+      'map.view': 0, 'pin.click': 0, 'cluster.click': 0,
+      'story.open': 0, 'audio.complete': 0, 'audio.progress': 0
+    };
+    buffer.forEach(function (entry) {
+      if (out[entry.event] !== undefined) out[entry.event]++;
+    });
+    return out;
+  }
+
   VTN.metrics = {
     track: track,
-    debug: function () { return { count: buffer.length, recent: buffer.slice(-6) }; },
+    debug: function () { return { count: buffer.length, recent: buffer.slice(-6), funnel: funnel() }; },
+    funnel: funnel,
     clear: function () { buffer = []; save(); }
   };
 })();
@@ -8613,8 +8658,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
  * -----------------------------------------------------------------------------
  * 原則：只畫實測振幅。解碼失敗（檔案不存在、格式不支援、跨域被擋）時
  *       回傳 null，播放器維持原本的細進度條，**不生成任何假波形**。
- * 技術：fetch → AudioContext.decodeAudioData → 每柱 RMS → 歸一化 + 動態壓縮。
- *       一個 url 只解碼一次，結果以 Promise 快取。
+ * 一致性：構建期（tools/build_frontend.py）與執行期共用同一套
+ *         8 kHz 重採樣網格 + 60 柱 RMS/峰值混合，兩條路徑畫的是同一條波形，
+ *         不再因 AudioContext 取樣率不同而產生可解釋性問題。
+ * 資料：優先讀構建期快取 window.VTN_WAVEFORMS；故事量大時可改用
+ *       window.VTN_WAVEFORMS_URL 指向外置 waveforms.json 按需載入。
  * ========================================================================== */
 
 (function () {
@@ -8622,9 +8670,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
 
   var VTN = window.VTN;
   var BARS = 60;
-  var MAX_SAMPLES_PER_BAR = 240;
+  var TARGET_RATE = 8000;
   var cache = Object.create(null);
   var buildHits = [];
+  var externalPromise = null;
   var context = null;
 
   function getContext() {
@@ -8652,31 +8701,43 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     });
   }
 
-  function peaks(audio) {
-    var channels = Math.min(audio.numberOfChannels || 1, 2);
-    var length = audio.length || 0;
-    if (!length || !channels) return null;
+  /* 任意取樣率的單聲道 PCM → 8 kHz 線性插值網格。
+     與 tools/build_frontend.py 的 waveform_peaks 逐樣本對齊（含取整規則）。 */
+  function resample(data, sourceRate) {
+    var duration = data.length / sourceRate;
+    var count = Math.max(BARS, Math.round(duration * TARGET_RATE));
+    var out = new Float32Array(count);
+    var ratio = sourceRate / TARGET_RATE;
+    for (var i = 0; i < count; i++) {
+      var pos = i * ratio;
+      var lo = Math.floor(pos);
+      var frac = pos - lo;
+      var a = lo < data.length ? data[lo] : 0;
+      var b = lo + 1 < data.length ? data[lo + 1] : a;
+      out[i] = a + (b - a) * frac;
+    }
+    return out;
+  }
 
-    var perBar = Math.max(1, Math.floor(length / BARS));
-    var step = Math.max(1, Math.floor(perBar / MAX_SAMPLES_PER_BAR));
+  function peaks(samples) {
+    var length = samples.length;
+    if (length < BARS) return null;
     var out = new Array(BARS);
     var max = 0;
 
     for (var b = 0; b < BARS; b++) {
-      var start = b * perBar;
-      var end = Math.min(length, start + perBar);
+      var start = Math.floor(b * length / BARS);
+      var end = Math.max(start + 1, Math.floor((b + 1) * length / BARS));
+      if (end > length) end = length;
       var sum = 0;
       var n = 0;
       var peak = 0;
-      for (var c = 0; c < channels; c++) {
-        var data = audio.getChannelData(c);
-        for (var i = start; i < end; i += step) {
-          var v = data[i];
-          sum += v * v;
-          var av = v < 0 ? -v : v;
-          if (av > peak) peak = av;
-          n++;
-        }
+      for (var i = start; i < end; i++) {
+        var v = samples[i];
+        sum += v * v;
+        var av = v < 0 ? -v : v;
+        if (av > peak) peak = av;
+        n++;
       }
       var rms = n ? Math.sqrt(sum / n) : 0;
       /* 純 RMS 會把語音壓成近等高柱；混入峰值後停頓與重音才看得出來 */
@@ -8687,22 +8748,37 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
 
     if (!(max > 0)) return null; /* 全靜音視為無法判讀，不硬湊波形 */
     for (var j = 0; j < BARS; j++) {
-      /* 0.85 次方：只做輕微動態壓縮，保留真實起伏 */
-      out[j] = Math.min(1, Math.pow(out[j] / max, 0.85));
+      /* 0.85 次方：只做輕微動態壓縮，保留真實起伏；四捨五入與構建期一致 */
+      out[j] = Math.round(Math.min(1, Math.pow(out[j] / max, 0.85)) * 1000) / 1000;
     }
     return out;
   }
 
-  /**
-   * 取得某個音檔的實測振幅（0..1，長度 BARS）。失敗 resolve(null)。
-   * 優先讀構建期快取 window.VTN_WAVEFORMS，其次才在執行期 fetch + decode。
-   */
-  function get(url, storyId) {
-    var baked = (storyId && window.VTN_WAVEFORMS) ? window.VTN_WAVEFORMS[storyId] : null;
-    if (Array.isArray(baked) && baked.length) {
-      if (buildHits.indexOf(storyId) < 0) buildHits.push(storyId);
-      return Promise.resolve(baked);
+  function peaksFromAudio(audio) {
+    if (!audio || !audio.length || !audio.sampleRate) return null;
+    return peaks(resample(audio.getChannelData(0), audio.sampleRate));
+  }
+
+  function loadExternal() {
+    var url = window.VTN_WAVEFORMS_URL;
+    if (!url || typeof fetch !== 'function') return Promise.resolve(null);
+    if (!externalPromise) {
+      externalPromise = fetch(url)
+        .then(function (response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          if (!data || typeof data !== 'object') return null;
+          window.VTN_WAVEFORMS = data;
+          return data;
+        })
+        .catch(function () { return null; });
     }
+    return externalPromise;
+  }
+
+  function runtime(url) {
     if (!url) return Promise.resolve(null);
     if (cache[url]) return cache[url];
     if (typeof fetch !== 'function' || !(window.AudioContext || window.webkitAudioContext)) {
@@ -8715,18 +8791,41 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
         return response.arrayBuffer();
       })
       .then(decodeArrayBuffer)
-      .then(peaks)
+      .then(peaksFromAudio)
       .catch(function () { return null; });
     return cache[url];
   }
 
+  /**
+   * 取得某個音檔的實測振幅（0..1，長度 BARS）。失敗 resolve(null)。
+   * 順序：內嵌快取 → 外置 waveforms.json → 執行期 fetch + decode。
+   */
+  function get(url, storyId) {
+    var baked = (storyId && window.VTN_WAVEFORMS) ? window.VTN_WAVEFORMS[storyId] : null;
+    if (Array.isArray(baked) && baked.length) {
+      if (buildHits.indexOf(storyId) < 0) buildHits.push(storyId);
+      return Promise.resolve(baked);
+    }
+    if (!window.VTN_WAVEFORMS_URL) return runtime(url);
+    return loadExternal().then(function (data) {
+      var hit = data && storyId ? data[storyId] : null;
+      if (Array.isArray(hit) && hit.length) {
+        if (buildHits.indexOf(storyId) < 0) buildHits.push(storyId);
+        return hit;
+      }
+      return runtime(url);
+    });
+  }
+
   VTN.waveform = {
     bars: BARS,
+    rate: TARGET_RATE,
     get: get,
     debug: function () {
       return {
         buildHits: buildHits.slice(),
         bakedCount: Object.keys(window.VTN_WAVEFORMS || {}).length,
+        externalUrl: window.VTN_WAVEFORMS_URL || null,
         runtimeDecodes: Object.keys(cache),
         contextReady: !!context
       };
@@ -8753,9 +8852,27 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
   var U = VTN.util;
   var DATA = window.VTN_STORY_DATA || { stories: [], suggestedQuestions: [] };
 
-  /* 年代軸：只做「故事年代」篩選，不假裝切換歷史底圖（LandsD 授權未核實前
-     不做會開天窗的演示）。最後一格＝全部。 */
-  var ERA_STOPS = [1950, 1970, 1990, 2010, 2026];
+  /* 年代軸：只做「故事年代」篩選，不假裝切換歷史底圖。
+     刻度由資料的 year 分佈動態產生，只保留「真的會改變結果」的年份，
+     最後一格＝全部；避免資料全在 1990 前、刻度卻停在 2026 而成為擺設。 */
+  function eraStopsFromData() {
+    var years = (DATA.stories || []).map(yearOf).filter(function (y) {
+      return typeof y === 'number' && isFinite(y);
+    });
+    if (!years.length) return [1950, 1970, 1990, 2010, 2026];
+    var min = Math.min.apply(null, years);
+    var max = Math.max.apply(null, years);
+    var stops = [];
+    for (var y = Math.floor(min / 10) * 10; y <= Math.ceil(max / 10) * 10; y += 10) {
+      var hasBefore = years.some(function (v) { return v <= y; });
+      var hasAfter = years.some(function (v) { return v > y; });
+      if (hasBefore && hasAfter) stops.push(y);
+    }
+    if (!stops.length) stops.push(Math.floor(min / 10) * 10);
+    stops.push(Math.ceil(max / 10) * 10); /* 最後一格：全部年代 */
+    return stops;
+  }
+  var ERA_STOPS = eraStopsFromData();
   var STORY_TYPE_ORDER = ['festival', 'farming', 'migration', 'architecture', 'oral', 'market', 'other'];
   var TYPE_ICON = {
     festival: 'fa-fire',
@@ -9062,9 +9179,17 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     state.overview = false;
     state.selectedId = params.story || null;
 
+    /* 刻度改由資料分佈產生後，舊分享連結的 since（1950/1970/…/2026）
+       可能不在新刻度上：映射到「不大於 since 的最後一格」，超過上限視為全部。 */
     var since = Number(params.since);
     if (since && ERA_STOPS.indexOf(since) !== -1) state.eraIndex = ERA_STOPS.indexOf(since);
-    else state.eraIndex = ERA_STOPS.length - 1;
+    else if (since && isFinite(since)) {
+      var mapped = 0;
+      ERA_STOPS.forEach(function (year, index) {
+        if (year <= since && index < ERA_STOPS.length - 1) mapped = index;
+      });
+      state.eraIndex = since >= ERA_STOPS[ERA_STOPS.length - 1] ? ERA_STOPS.length - 1 : mapped;
+    } else state.eraIndex = ERA_STOPS.length - 1;
 
     var search = document.getElementById('storySearch');
     if (search && search.value !== f.keyword) search.value = f.keyword;
@@ -9087,6 +9212,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     }
     state.selectedId = storyId;
     state.overview = false;
+    /* 指標口徑：pin.click 只代表點到點位／同圈氣泡；真正打開故事記 story.open */
+    if (VTN.metrics) VTN.metrics.track('story.open', {
+      storyId: storyId, source: opts.source || 'direct'
+    });
 
     if (opts.updateUrl !== false) {
       var params = currentParams();
@@ -9256,7 +9385,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     typeTag.innerHTML = '<i class="fa-solid ' + typeIcon(storyTypeOf(story)) + '" aria-hidden="true"></i>' +
       U.escapeHtml(typeLabel(storyTypeOf(story)));
     tags.appendChild(typeTag);
-    if (story.mood) tags.appendChild(moodTagOf(story.mood));
+    /* 心情只在二級抽屜顯示：列表與地圖維持「類型」單一編碼 */
     (story.topicKeys || []).slice(0, 1).forEach(function (key) {
       tags.appendChild(U.node('span', { class: 'tag', text: topicLabel(key) }));
     });
@@ -9264,7 +9393,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     if (!story.audio) tags.appendChild(U.node('span', { class: 'tag tag--line', text: t('story.noAudioTag') }));
     body.appendChild(tags);
     main.appendChild(body);
-    main.addEventListener('click', function () { select(story.id); });
+    main.addEventListener('click', function () { select(story.id, { source: 'list' }); });
     item.appendChild(main);
     return item;
   }
@@ -9712,7 +9841,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     main.appendChild(body);
     main.addEventListener('click', function () {
       VTN.router.go('stories', { story: story.id });
-      select(story.id, { updateUrl: false });
+      select(story.id, { updateUrl: false, source: 'featured' });
     });
     card.appendChild(main);
     host.appendChild(card);
@@ -9730,17 +9859,31 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     if (state.mode === 'map' && VTN.map) VTN.map.ensureVisible();
   }
 
+  function renderEraTicks(ticks) {
+    if (!ticks) return;
+    ticks.textContent = '';
+    ERA_STOPS.forEach(function (year, index) {
+      ticks.appendChild(U.node('span', {
+        text: index === ERA_STOPS.length - 1 ? t('atlas.eraAll') : String(year)
+      }));
+    });
+  }
+
   function updateEraUI() {
     var label = document.getElementById('atlasEraLabel');
     if (label) label.textContent = eraLabelText();
     var ticks = document.getElementById('atlasTicks');
     if (ticks) {
+      renderEraTicks(ticks); /* 每次重建，語言切換時「全部」也會跟著翻譯 */
       Array.prototype.forEach.call(ticks.children, function (node, index) {
         node.classList.toggle('is-active', index === state.eraIndex);
       });
     }
     var input = document.getElementById('atlasEra');
-    if (input && input.value !== String(state.eraIndex)) input.value = String(state.eraIndex);
+    if (input) {
+      input.max = String(ERA_STOPS.length - 1);
+      if (input.value !== String(state.eraIndex)) input.value = String(state.eraIndex);
+    }
   }
 
   function setEra(index, options) {
@@ -9818,7 +9961,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
         text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story)
       }));
       card.appendChild(body);
-      card.addEventListener('click', function () { select(story.id); });
+      card.addEventListener('click', function () { select(story.id, { source: 'peek' }); });
       host.appendChild(card);
     });
   }
@@ -9993,6 +10136,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     shareUrl: shareUrl,
     setMode: setMode,
     setEra: setEra,
+    eraStops: function () { return ERA_STOPS.slice(); },
     toggleType: toggleType,
     toggleOverview: toggleOverview,
     durationLabel: durationLabel,
@@ -10018,7 +10162,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
  * 32-sheet — 二級故事頁：半拉抽屜
  * -----------------------------------------------------------------------------
  * 行為：
- *   * 預設半開（52%），可上拉全開、下拉收起；
+ *   * 預設露出 55dvh（相對視口，小屏不會把標題區截掉），可上拉全開、下拉收起；
  *   * 點遮罩、按 Esc、按關閉鍵都會收起，並暫停播放；
  *   * 收起後把焦點交回原本的故事點／列表項；
  *   * 只負責「殼」，內容由 30-stories.js 渲染入 #storyDetail。
@@ -10135,7 +10279,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     grab.addEventListener('pointermove', function (event) {
       if (!dragging) return;
       var dy = event.clientY - dragging.y;
-      var base = dragging.expanded ? 0 : dragging.height * 0.52;
+      /* 與 CSS 的 55dvh 半開高度一致：用視口換算，不寫死抽屜自身百分比 */
+      var viewport = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      var peek = viewport * 0.55;
+      var base = dragging.expanded ? 0 : Math.max(0, dragging.height - peek);
       var next = base + dy;
       var max = dragging.height;
       next = Math.max(0, Math.min(max, next));
@@ -10211,8 +10358,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
  *   * private 故事由 store / 伺服器過濾，地圖永遠收不到座標。
  *
  * 一級資訊：
- *   * 顏色＋圖標＝故事類型；小圓點＝講者心情（人工標註，非 AI 推斷）；
- *   * 低縮放用數字聚合，放大後展開為單一圖標。
+ *   * 顏色＋圖標＝故事類型（掃圖唯一維度）；心情標籤只在二級抽屜出現，
+ *     避免「7 類 icon × 5 種心情角標」的雙編碼噪音；
+ *   * 低縮放用數字聚合，放大後展開為單一圖標；同圈故事用數字角標合併。
  * ========================================================================== */
 
 (function () {
@@ -10239,6 +10387,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
   var markers = {};
   var is3D = false;
   var booted = false;
+  var fuzzFrame = null;
+  var motionQuery = null;
+  var sceneIndex = -1;
 
   var state = {
     stories: [],
@@ -10423,6 +10574,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
           features = ml.queryRenderedFeatures(event.point, { layers: ['vtn-cluster'] });
         } catch (e) { features = []; }
         if (features.length) {
+          /* 低縮放聚合氣泡：展開視角，不算「點開故事」 */
+          if (VTN.metrics) VTN.metrics.track('cluster.click', {
+            count: Number(features[0].properties.point_count) || 0,
+            zoom: ml.getZoom(), engine: 'maplibre'
+          });
           var clusterId = features[0].properties.cluster_id;
           var source = ml.getSource('vtn-stories');
           if (source && source.getClusterExpansionZoom) {
@@ -10595,7 +10751,6 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
           properties: {
             id: story.id,
             type: typeOf(story),
-            mood: story.mood || '',
             year: story.year || 0,
             groupSize: group ? group.count : 1
           },
@@ -10661,7 +10816,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       });
       btn.addEventListener('click', function () {
         dlg.close('pick');
-        VTN.stories.select(id);
+        VTN.stories.select(id, { source: 'group' });
       });
       body.appendChild(btn);
     });
@@ -10681,18 +10836,27 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     text.textContent = t('atlas.inView', { n: list.length });
   }
 
-  /* 點位點擊率：MapLibre 標記與 Leaflet 模糊圈共用，兩條渲染路徑都要計到 */
-  function trackPinClick(storyId) {
+  /* 點位點擊：MapLibre 標記與 Leaflet 模糊圈共用兩條渲染路徑。
+     kind='group' 代表同圈氣泡，只記 cluster.click；真正打開故事由
+     30-stories.js 的 select() 記 story.open，後者才是北極星指標分母。 */
+  function trackPinClick(storyId, kind) {
     if (!VTN.metrics) return;
     var zoom = 0;
     if (engine === 'maplibre' && ml) zoom = ml.getZoom();
     else if (engine === 'leaflet' && leaflet) zoom = leaflet.getZoom();
-    VTN.metrics.track('pin.click', { storyId: storyId, zoom: zoom, engine: engine });
+    var meta = { zoom: zoom, engine: engine };
+    if (kind === 'group') {
+      var group = groupFor(storyId);
+      meta.count = group ? group.count : 1;
+      VTN.metrics.track('cluster.click', meta);
+    } else {
+      meta.storyId = storyId;
+      VTN.metrics.track('pin.click', meta);
+    }
   }
 
   function pinElement(story, group) {
     var type = typeOf(story);
-    var mood = story.mood || 'wistful';
     var groupSize = group ? group.count : 1;
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -10702,15 +10866,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     btn.innerHTML =
       '<span class="vtn-pin__ring" aria-hidden="true"></span>' +
       '<span class="vtn-pin__disc"><i class="fa-solid ' + iconOf(story) + '" aria-hidden="true"></i></span>' +
-      '<span class="vtn-pin__mood vtn-mood--' + U.escapeHtml(mood) + '" aria-hidden="true"></span>' +
       '<span class="vtn-pin__label">' + U.escapeHtml(story.title) + '</span>';
     syncGroupBadge(btn, group, story);
     btn.addEventListener('click', function (event) {
       event.stopPropagation();
-      trackPinClick(story.id);
       var current = groupFor(story.id);
+      /* 同圈氣泡不等於打開故事：只記 cluster.click，不進入北極星分母 */
+      trackPinClick(story.id, current && current.count > 1 ? 'group' : 'pin');
       if (current && current.count > 1) openGroupDialog(current);
-      else VTN.stories.select(story.id);
+      else VTN.stories.select(story.id, { source: 'pin' });
     });
     return btn;
   }
@@ -10764,6 +10928,49 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
         story.location.radiusM || 800));
     }
     ml.getSource('vtn-fuzz').setData({ type: 'FeatureCollection', features: features });
+    updateFuzzMotion(features.length > 0);
+  }
+
+  function prefersReducedMotion() {
+    if (!window.matchMedia) return false;
+    if (!motionQuery) motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    return !!motionQuery.matches;
+  }
+
+  /* MapLibre 用 canvas 畫圖，CSS keyframes 動不到 fill-opacity，
+     所以呼吸填充由 JS 驅動；系統要求減少動態時降級為靜態虛線圈。 */
+  function stopFuzzPulse() {
+    if (fuzzFrame && window.cancelAnimationFrame) window.cancelAnimationFrame(fuzzFrame);
+    fuzzFrame = null;
+    if (ml && ml.getLayer('vtn-fuzz-fill')) {
+      ml.setPaintProperty('vtn-fuzz-fill', 'fill-opacity', 0.13);
+    }
+  }
+
+  function updateFuzzMotion(hasSelection) {
+    if (!ml || !ml.getLayer('vtn-fuzz-fill')) return;
+    var reduce = prefersReducedMotion();
+    stopFuzzPulse();
+    if (el) el.classList.toggle('atlas--reduced-motion', reduce);
+    if (reduce) {
+      ml.setPaintProperty('vtn-fuzz-fill', 'fill-opacity', 0.10);
+      ml.setPaintProperty('vtn-fuzz-line', 'line-width', 2.5);
+      ml.setPaintProperty('vtn-fuzz-line', 'line-opacity', 0.85);
+      return;
+    }
+    ml.setPaintProperty('vtn-fuzz-line', 'line-width', 2);
+    ml.setPaintProperty('vtn-fuzz-line', 'line-opacity', 0.65);
+    if (!hasSelection || !window.requestAnimationFrame) return;
+    var start = (window.performance && window.performance.now)
+      ? window.performance.now() : Date.now();
+    function tick(now) {
+      if (!ml || !ml.getLayer('vtn-fuzz-fill')) { fuzzFrame = null; return; }
+      var phase = (now - start) / 2600 * Math.PI * 2;
+      var opacity = 0.10 + 0.12 * (0.5 - 0.5 * Math.cos(phase));
+      ml.setPaintProperty('vtn-fuzz-fill', 'fill-opacity', opacity);
+      fuzzFrame = window.requestAnimationFrame(tick);
+    }
+    fuzzFrame = window.requestAnimationFrame(tick);
   }
 
   function render(forceFit) {
@@ -10891,11 +11098,76 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     if (btn) btn.setAttribute('aria-pressed', is3D ? 'true' : 'false');
   }
 
+  /* 3D 書籤：只取已有真實故事座標的新市鎮／墟市，不新增任何示範資料。
+     鄉村村屋與農田沒有建築高度，55° 俯仰在那些點只會「把山抬起」；
+     示範時按一下就輪播到有樓群可擠出的視角。 */
+  var SCENE_VILLAGES = ['fanling', 'sheung-shui', 'tai-po'];
+
+  function sceneStops() {
+    var list = located();
+    return SCENE_VILLAGES.map(function (key) {
+      var story = null;
+      list.some(function (item) {
+        if (item.villageKey === key && item.location) { story = item; return true; }
+        return false;
+      });
+      if (!story) return null;
+      return {
+        key: key,
+        label: VTN.stories.villageLabel(key),
+        center: [story.location.lng, story.location.lat]
+      };
+    }).filter(function (stop) { return !!stop; });
+  }
+
+  function cycleScene() {
+    var stops = sceneStops();
+    if (!stops.length || engine !== 'maplibre' || !ml) return null;
+    sceneIndex = (sceneIndex + 1) % stops.length;
+    var stop = stops[sceneIndex];
+    is3D = true;
+    var btn3d = byId('atlas3dBtn');
+    if (btn3d) btn3d.setAttribute('aria-pressed', 'true');
+    add3DBuildings();
+    el.classList.add('is-at-3d');
+    ml.flyTo({
+      center: stop.center,
+      zoom: 15.2,
+      pitch: 55,
+      bearing: -18,
+      padding: { top: 130, bottom: 150 },
+      duration: 1100
+    });
+    var sceneBtn = byId('atlasSceneBtn');
+    if (sceneBtn) {
+      sceneBtn.setAttribute('aria-label', t('atlas.sceneAria', { place: stop.label }));
+      sceneBtn.setAttribute('title', t('atlas.sceneHint', { place: stop.label }));
+      sceneBtn.setAttribute('data-place', stop.key);
+    }
+    if (VTN.metrics) VTN.metrics.track('scene.view', {
+      view: stop.key, zoom: 15.2, engine: engine
+    });
+    return stop;
+  }
+
+  /* 問答與地圖共用同一個視口範圍，避免「來源數量」口徑分叉 */
+  function currentBbox() {
+    if (engine !== 'maplibre' || !ml) return null;
+    var b = ml.getBounds();
+    return [[b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]];
+  }
+
   /* =========================================================================
    * 6. Leaflet 兜底
    * ======================================================================= */
   function disable3D() {
     var btn = byId('atlas3dBtn');
+    var scene = byId('atlasSceneBtn');
+    if (scene) {
+      scene.disabled = true;
+      scene.setAttribute('aria-disabled', 'true');
+      scene.setAttribute('title', t('atlas.3dUnavailable'));
+    }
     if (!btn) return;
     btn.disabled = true;
     btn.setAttribute('aria-disabled', 'true');
@@ -10962,8 +11234,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
         direction: 'top', opacity: 0.96
       });
       circle.on('click', function () {
-        trackPinClick(story.id);
-        VTN.stories.select(story.id);
+        trackPinClick(story.id, 'pin');
+        VTN.stories.select(story.id, { source: 'pin' });
       });
       circle.addTo(leafletLayer);
     });
@@ -11009,6 +11281,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
       }
     });
     if (btn3d) btn3d.addEventListener('click', function () { set3D(!is3D); });
+    var sceneBtn = byId('atlasSceneBtn');
+    if (sceneBtn) sceneBtn.addEventListener('click', function () { cycleScene(); });
+
+    if (window.matchMedia) {
+      motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var onMotionChange = function () { updateFuzzMotion(!!state.selectedId); };
+      if (motionQuery.addEventListener) motionQuery.addEventListener('change', onMotionChange);
+      else if (motionQuery.addListener) motionQuery.addListener(onMotionChange);
+    }
   }
 
   function ensureVisible() {
@@ -11043,6 +11324,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
   }
 
   function reset() {
+    stopFuzzPulse();
     if (ml) { try { ml.remove(); } catch (e) { /* ignore */ } }
     if (leaflet) { try { leaflet.remove(); } catch (e) { /* ignore */ } }
     ml = null;
@@ -11062,6 +11344,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.515,0.73,0.622,0.435,0.43,0.773,0.746,0.6,0.
     updateViewportCount: updateViewportCount,
     groupMap: groupMap,
     set3D: set3D,
+    cycleScene: cycleScene,
+    sceneStops: sceneStops,
+    bbox: currentBbox,
     is3D: function () { return is3D; },
     reset: reset,
     status: function () { return engine; },

@@ -1,10 +1,12 @@
 # 故事 Tab 地图化重构：辩证评审与落地记录
 
-日期：2026-11-07 ｜ 对应 PRD：`北区之声_故事Tab地图化重构PRD.docx` ｜ 实现：`frontend/src/js/27-metrics.js`、`28-waveform.js`、`30-stories.js`、`32-sheet.js`、`35-map.js`、`15-api.js`、`css/story-map.css`、`tools/build_frontend.py`、`server.py`
+日期：2026-11-07 ｜ 对应 PRD：`北区之声_故事Tab地图化重构PRD.docx` ｜ 实现：`frontend/src/js/27-metrics.js`、`28-waveform.js`、`30-stories.js`、`32-sheet.js`、`35-map.js`、`15-api.js`、`05-i18n.js`、`css/story-map.css`、`tools/build_frontend.py`、`tools/export_voice_scripts.py`、`server.py`、`story_corpus.py`
 
 > 同日第二轮补记：逐项核对 6 项任务后，第 4 项「波形音频条」是唯一缺口，已用音档实测振幅补齐（不是装饰波形），并补上降级路径与验证。
 >
 > 同日第三轮补记：把第 6 节原列的三项后续工作做完——构建期振幅缓存、埋点三事件、`bbox` 视口查询与同圈合并，并修正了 `CustomEvent` 取值与 marker 缓存导致的两个实际缺陷。
+>
+> 同日第四轮补记：按 `Douglas bug.pdf` 的 12 条编号意见逐项修复（原档跳号 3），见第 8 节。原则是**不为演示伪造年数据、不合成示范音档、不画假历史底图**。
 
 ## 0. 一句话结论
 
@@ -13,15 +15,15 @@
 ## 1. 已经落地的结果
 
 - **地图主视图**：MapLibre GL JS + OpenFreeMap（无 API key），默认展示全部故事点；拖拽/缩放/指南针；2D ⇄ 3D（pitch 55°、建筑挤出，自动飞向故事最密的聚落）。
-- **一级信息**：7 类故事图标 + 色板；心情用 12px 角标 + 详情标签双编码；低缩放保留聚合，热力只做底色氛围。
+- **一级信息**：7 类故事图标 + 色板（扫图唯一维度）；心情标签只在二级抽屉出现，第四轮移除点位与列表的心情角标；低缩放保留聚合，热力只做底色氛围。
 - **二级半拉抽屉**：拖拽手柄、半开/全开、Esc/遮罩关闭并暂停音频；标题区、类型/年代/村落/时长、讲述者、心情标签。
 - **录音信息**：自定义播放器，**波形由音档实测振幅解码产生**（RMS＋峰值混合、60 柱双层 SVG，已播放部分着色）；逐字稿真实时间戳作为刻度叠加；点句子、点波形或方向键跳听；段落随播放高亮。音档缺失或浏览器不支持 Web Audio 时自动回退细进度条，**绝不画假波形**。
-- **发现路径**：搜索单结果飞至 14 级并高亮，多个结果 fitBounds；类型图例可点选筛选；年代轴按「截至某年」过滤；列表模式保留为降级入口。
-- **私隐红线**：只画约 800m 模糊圈（虚线 + 呼吸填充）；`private` 故事不进入地图数据、聚合计数、图例计数与搜索；构建时强制 `radiusM ≥ 100`。
+- **发现路径**：搜索单结果飞至 14 级并高亮，多个结果 fitBounds；类型图例可点选筛选；年代轴按「截至某年」过滤且刻度由数据分布动态产生；列表入口在地图右上角常显（带三语文字，不是降级入口）。
+- **私隐红线**：只画约 800m 模糊圈（虚线 + 呼吸填充，`prefers-reduced-motion` 下降级为静态虚线圈）；`private` 故事不进入地图数据、聚合计数、图例计数与搜索；构建时强制 `radiusM ≥ 100`。
 - **三级回退**：MapLibre → Leaflet → 手绘示意图；3D 不可用时按钮禁用并给出原因，不静默失败。
 - **数据契约**：新增 `storyType / mood / year`，构建脚本校验枚举与坐标范围；缺字段只警告，兼容旧数据。
-- **构建期振幅缓存**：`build_frontend.py` 用标准库 `wave` 实测 PCM，把 60 柱振幅写入 `window.VTN_WAVEFORMS`；运行时不再为画波形下载/解码 4MB WAV。与浏览器 `decodeAudioData` 的结果相关系数 0.918（差异来自重采样）。
-- **埋点三事件**：`map.view`（地图浏览时长）、`pin.click`（点位点击率）、`audio.complete` / `audio.progress`（音频完成率）；只记录数值与故事 ID，前端本地缓冲 + `/api/audit` 上报，后端 meta 白名单拒绝自由文本。
+- **构建期振幅缓存**：`build_frontend.py` 用标准库 `wave` 实测 PCM，把 60 柱振幅写入 `window.VTN_WAVEFORMS`；运行时不再为画波形下载/解码 4MB WAV。第四轮把构建期与执行期统一到 8 kHz 重采样网格后，与浏览器 `decodeAudioData` 的相关系数由 **0.918 → 1.000**；故事量增大时可切成外置 `waveforms.json`。
+- **埋点**：`story.open`（真正打开详情）是北极星指标分母；`pin.click`（单点）、`cluster.click`（同圈气泡／聚合）只作诊断；另有 `map.view`、`audio.complete` / `audio.progress`、`scene.view`。只记录数值与故事 ID，前端本地缓冲 + `/api/audit` 上报，后端 meta 白名单拒绝自由文本。
 - **bbox 视口查询**：`GET /api/stories?bbox=w,s,e,n` 服务端裁剪（授权过滤之后），非法参数 400；前端 `VTN.stories.inBbox()` 与地图 `moveend` 的「视口内 N 则故事」提示。
 - **同圈合并**：中心距 ≤ 较大模糊半径即视为同一 800m 圈；点位显示数字角标，点击弹出该圈故事列表再选择，不搬动坐标、不收窄半径。
 
@@ -49,7 +51,7 @@ LandsD / GeoInfo Map / CSDI 的百年航拍与 TDOP 有三个坑：授权范围�
 
 ### 2.4 心情标签：做，但拒绝 AI 推断 ✓
 
-PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约而不是只写在 PRD 里。实现上不再给心情一套独立图标（7 类 × 5 心情 = 35 种组合，必然噪音），而是**颜色角标 + 详情页文字标签**：扫图时几乎无感，打开抽屉才读到「怀旧 / 欢喜 / 沉重」。
+PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约而不是只写在 PRD 里。**第四轮修订**：原先的「点位 12px 颜色角标 + 详情文字标签」仍要求扫图时同时分辨类型与心情两个维度，属于双编码过载。现在地图点位与列表卡片只保留类型图标，心情文字标签只在二级抽屉出现（见第 8 节第 6 条）。
 
 当前 8 则故事的 `mood/year` 是团队按逐字稿人工标注的示范数据，已在 `data/stories.json` 顶部注明，不是模型输出。
 
@@ -106,7 +108,7 @@ PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约
 - `python tools/check_frontend_syntax.py`：内嵌脚本语法通过；`python -m py_compile server.py lab_api.py` 通过
 - Playwright（390×844，Chrome）：
   - 8 个故事点按经纬度落位；3D 切换后 pitch=55、建筑挤出可见
-  - 抽屉半开 y=493/818；上拉展开；播放进度随时间更新，暂停按钮状态正确
+  - 抽屉半开 y=493/818（第四轮已改为露出 55dvh，见第 8 节第 8 条）；上拉展开；播放进度随时间更新，暂停按钮状态正确
   - 搜索「天后」→ 1 个点、飞至 14 级、URL 带 `story=KT-002`
   - 年代轴 1990 → 8 则（全部早于 1990）；图例计数随筛选更新
   - 屏蔽 MapLibre → Leaflet 正常；全断网 → 手绘图 + 抽屉仍可打开
@@ -117,19 +119,27 @@ PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约
   - `KT-002`（无音档）保持「未附音档」说明，不生成波形
   - 两条降级路径（fetch 失败 / 禁用 `AudioContext`）都回到细进度条，且播放仍正常
 - 第三轮：构建期波形缓存、埋点三事件、bbox 与同圈合并：
-  - 缓存命中 `buildHits=['YL-001']`、`runtimeDecodes=[]`、`contextReady=false`；与运行时解码相关系数 **0.918**
+  - 缓存命中 `buildHits=['YL-001']`、`runtimeDecodes=[]`、`contextReady=false`；与运行时解码相关系数 **0.918**（第四轮统一 8 kHz 后为 **1.000**）
   - 埋点产生 `pin.click`、`audio.progress`（ratio 0.038）、`audio.complete`（ratio 1）、`map.view`（15.4s）；meta 白名单违规 0；刷新后本地缓冲保留 4 条
   - 后端隔离 DB 12 项检查全过：bbox 过滤/回显、空结果、三种非法参数 400、`/api/audit` 指标字段保留且自由文本被丢弃
   - `inBbox([[113.98,22.43],[114.03,22.47]])` → 3 则，与后端一致；当前数据 8 组各 1（无同圈），注入同坐标故事后合并为 2 则
   - 联网端到端：9 个点位、2 个显示「2」角标、视口提示「視口內 9 則故事」、弹窗列出两个故事；三语文案全部生效
   - 过程中修掉两个真实缺陷：`U.on` 收到的是 `CustomEvent`（payload 在 `event.detail`）；marker 缓存导致同圈角标与点击分支未更新
+- 第四轮（Douglas 评审修复，逐条见第 8 节）：
+  - `tools/verify/douglas_review.py` **25 项全过**：年代轴刻度 `[1950,1960,1970,1980,1990]` 各格结果 `[1,3,6,7,8]`、旧链接 `since=2026` → 8 则、指标漏斗（气泡只记 `cluster.click`、打开详情才记 `story.open`）、列表常显、3D 书签、三语文案
+  - 抽屉半开露出 55dvh：390×844 → 464.2px、375×667 → 366.8px
+  - `tools/verify/waveform.py`：8 kHz 统一后相关系数 **1.000**（断言 ≥ 0.98），执行期 `runtimeDecodes=[]`
+  - `tools/verify/external_waveforms.py`：`--external-waveforms` 下单档 `inline=0`、`VTN_WAVEFORMS_URL='waveforms.json'`、按需载入 60 柱、播放器 120 柱 SVG、无运行时解码
+  - 后端口径隔离验证：`/api/stories` 与 `/api/ask-village` 的 `visibleIds` 完全一致，视口内 3 则、问答来源 `['YL-001']`、非法 bbox 400
+  - `tools/verify/bbox_api.py` 12 项、`tools/test_lab_api.py` 48 项、`tools/check_frontend_syntax.py` 1/1、`py_compile` 全通过；`read_lints` 0
+  - 单档 521,655 字符 / 14,601 行；波形 JSON 358 bytes
 - 截图：`map.png`、`3d.png`、`sheet-expanded.png`、`filter.png`、`fallback-offline.png`、`waveform-playing.png`、`waveform-fallback.png`、`fuzz-group.png`（同目录）
 
 ## 6. 已完成与下一步
 
-第三轮已完成：构建期振幅缓存（P1）、埋点三事件（P0）、`/api/stories?bbox=` 与同圈合并（P0）。仍需外部条件的工作：
+前三轮已完成：构建期振幅缓存（P1）、埋点三事件（P0）、`/api/stories?bbox=` 与同圈合并（P0）。第四轮已按 `Douglas bug.pdf` 修完 12 项编号意见（正确性风险、产品逻辑、体积／无障碍优化，见第 8 节）。仍需外部条件的工作：
 
-1. **需要真实素材**：`mood/year` 目前是团队按逐字稿人工标注的示范值；正式采集应由讲述者/采集员勾选。
+1. **需要真实素材**：`mood/year` 目前是团队按逐字稿人工标注的示范值；正式采集应由讲述者/采集员勾选。8 则故事的配音文字脚本已备，7 则仍待真人补录。
 2. **需要设计资源**：自定义暖色 vector style（现在是 OpenFreeMap Liberty + CSS 滤镜），减少「通用地图」感。
 3. **需要授权**：LandsD 历史底图切片与 license 核实时，再用年代轴联动历史栅格；在此之前不做假图层。
 4. **P2**：地形起伏与 3D 楼群光影。
@@ -139,4 +149,27 @@ PRD 的「人工勾选、不做 AI 推断」是对的，应该写进数据契约
 - 是否接受「年代轴」替代「历史底图切换」作为本期范围？
 - 第七类「墟市商贸」是否写回 PRD 与后续数据字典？
 - 地图页隐藏助手 FAB（列表模式保留）是否可接受？如不行，需要重新排底部空间。
-- 波形只覆盖有音档的故事（8 则中 1 则）。是否为其余故事补录示范音档？不建议为凑数合成音频。
+- 波形只覆盖有音档的故事（8 则中 1 则）。第四轮已提供每则故事的配音文字脚本（`docs/voice-scripts/voice-scripts.md`），仍待真人补录；维持「不为凑数合成音频」的结论。
+
+## 8. 第四轮：Douglas 评审意见逐条回复
+
+来源：`Douglas bug.pdf`（4 页，编号 1 / 2 / 4 / 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12 / 13，原档跳号 3）。原则：**不为演示伪造年数据、不合成示范音档、不画假历史底图**。
+
+| # | 评审意见 | 处理 | 验证 |
+| --- | --- | --- | --- |
+| 1 | 年代轴 1950–2026 与 demo 数据（1948–1982）不匹配，拖动无过滤效果 | 刻度由 `year` 分布动态产生，只保留「会改变结果」的十年分界，最后一格＝全部；旧分享链接 `since` 映射到最近有效刻度。**没有为演示伪造 2000 年后的故事** | 刻度 `[1950,1960,1970,1980,1990]`；各格 `[1,3,6,7,8]`；`since=2026` → 8 则 |
+| 2 | `pin.click` 把「N 则故事气泡」当点位点击，指标虚高 | 拆成 `cluster.click`（同圈气泡／低缩放聚合）与 `story.open`（真正打开详情，北极星分母）；同圈弹窗选中具体故事才计 open；`VTN.metrics.funnel()` 暴露口径 | 气泡点击 1 次 cluster、0 次 open；选故事后 open=1 |
+| 4 | `story_corpus.py` 与地图过滤口径分叉，问答「找到 3 则」但地图只有 1 个点 | `server.current_visible_stories()` 成为唯一可见集合，`/api/stories` 与 `/api/ask-village` 共用；`VTN.api.ask` 自动附当前视口 `bbox`，响应回显 `visibleCount` / `visibleIds` | 视口内 3 则，问答 `visibleIds` 与地图完全一致、来源 `['YL-001']`；无 bbox 用全域；非法 bbox 400 |
+| 5 | 构建期／运行期波形相关系数 0.918，作为「真实振幅」卖点偏低 | 两条路径统一线性重采样到 **8 kHz** 网格再算 60 柱 RMS＋峰值，UI 标注「构建期 8kHz 取样」 | **1.000**（`tools/verify/waveform.py` 断言 ≥ 0.98），首 5 柱 `0.465/0.466` 等逐柱吻合 |
+| 6 | 7 类 icon × 5 种心情角标双编码过载 | 地图点位与列表卡片只留类型，心情标签只在二级抽屉 | 单档已无 `vtn-pin__mood`；详情仍有 `mood-tag` |
+| 7 | 乡村无建筑高度数据，3D 演示平淡 | 新增「3D 书签」按钮，轮播粉岭／上水／大埔三个**已有真实故事坐标**的新市镇视角（zoom 15.2、pitch 55），不新增示范数据 | 3 个书签的坐标均来自 `data/stories.json` |
+| 8 | 抽屉 y=493/818 在 iPhone SE 上标题可能被截 | 高度 `90dvh`、半开露出 `55dvh`，`32-sheet.js` 拖拽基准同步改用视口换算 | 390×844 露出 464.2px、375×667 露出 366.8px，均为 55dvh |
+| 9 | 7/8 故事无音档，主 CTA 灰态削弱「可听」卖点 | 交付 `docs/voice-scripts/voice-scripts.md`（由 `tools/export_voice_scripts.py` 生成）：每则故事的原句台词、时间线、类型／心情／时长多样性、补录验收流程。**仍需真人录音，不合成假音频、不改逐字稿** | 8 份脚本；4 类 / 4 种心情 / 1948–1982 / 46.7–55.0 秒，未使用的枚举如实标注、不硬凑 |
+| 10 | 列表入口被写成「降级入口」，长者学习成本高 | 地图右上角固定带文字「列表」按钮（三语），文档不再称降级入口 | 常显且切换英文后显示 `List` |
+| 11 | 呼吸填充与 `prefers-reduced-motion` 冲突 | 原 CSS `@keyframes` 对 MapLibre canvas 无效，改由 JS 驱动 `fill-opacity`；减少动效时停止 `requestAnimationFrame`、填充固定 0.10、虚线加粗 2.5，并监听系统偏好变化 | 媒体查询与 JS 分支静态断言；CSS 全局 `animation: none` 仍生效 |
+| 12 | `VTN_WAVEFORMS` 随故事量线性膨胀 | 构建期输出独立 `frontend/waveforms.json`；`--external-waveforms` 让单档只留 URL，前端按需 fetch 并写回缓存 | 外置模式：`inline=0`、`url=waveforms.json`、载入 60 柱、播放器 120 柱、无运行时解码 |
+| 13 | 英文 `market` 易被误解成现代商业 | 英文文案改 `Market & Trade`（联和墟／石湖墟的「墟」） | 三语切换断言通过 |
+
+量化：单档 **521,655 字符 / 14,601 行**；波形 1 则 358 bytes（外置模式单档少 311 字符）。按每则 60 柱 × 约 6 字符估算，50 则故事约 18 KB，届时建议切外置模式。
+
+仍需外部条件：真人补录 7 则音档（脚本已备）；LandsD 历史底图授权；暖色 vector style。

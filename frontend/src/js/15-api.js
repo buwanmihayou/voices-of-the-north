@@ -205,9 +205,20 @@
   }
 
   function ask(question, options) {
+    var body = { question: question, lang: options && options.lang };
+    /* 與地圖共用同一個可見故事集合：問答的來源數量不會比地圖多出視口外的故事 */
+    try {
+      var bbox = (options && options.bbox) ||
+        (VTN.map && VTN.map.bbox ? VTN.map.bbox() : null);
+      if (Array.isArray(bbox) && bbox.length === 2 &&
+        bbox[0].length === 2 && bbox[1].length === 2) {
+        body.bbox = [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]
+          .map(function (n) { return Number(n).toFixed(5); }).join(',');
+      }
+    } catch (e) { /* 地圖未就緒：改用伺服器回傳的全域可見集合 */ }
     return request('/api/ask-village', {
       method: 'POST',
-      body: { question: question, lang: options && options.lang },
+      body: body,
       timeout: 12000
     });
   }

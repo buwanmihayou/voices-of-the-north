@@ -44,7 +44,7 @@ from google.cloud import speech_v1p1beta1 as speech
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from lab_api import router as lab_router
-from story_corpus import load_data, retrieve_answer
+from story_corpus import load_data, retrieve_answer, visible_stories
 
 APP_VERSION = "2026.11.05"
 DATA_DIR = Path(os.environ.get("VTN_DATA_DIR", "data"))
@@ -720,38 +720,56 @@ def parse_bbox(raw: str | None):
     return (west, south, east, north)
 
 
-@app.get("/api/stories")
-async def list_stories(request: Request):
-    bbox = parse_bbox(request.query_params.get("bbox"))
+def clip_to_bbox(stories: list[dict], bbox) -> list[dict]:
+    """視口裁剪：地圖與問答都用這一份結果，不各寫一套。"""
+    if not bbox:
+        return list(stories)
+    result = []
+    for story in stories:
+        loc = story.get("location") or {}
+        lat, lng = loc.get("lat"), loc.get("lng")
+        if not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
+            continue
+        if bbox[0] <= lng <= bbox[2] and bbox[1] <= lat <= bbox[3]:
+            result.append(story)
+    return result
+
+
+def current_visible_stories(request: Request) -> list[dict]:
+    """全站唯一的可見故事集合。
+
+    授權／分享範圍／撤回由 story_corpus.visible_stories 判定；這裡只補上
+    audioUrl、transcriptOnly 與更正版本等顯示欄位。地圖與問答都從這一份
+    出發，避免「問答說找到 3 則、地圖只有 1 個點」的口徑分叉。
+    """
     who = viewer(request)
     excluded = _withdrawn_ids()
     versions = _story_versions()
-    data = load_data()
-    stories = []
-    for story in data.get("stories") or []:
-        if story.get("authorized") is not True or story.get("id") in excluded:
-            continue
-        scope = story.get("scope") or "private"
-        owner = str(story.get("owner") or "").lower()
-        if who["role"] != "admin" and scope not in ("community", "public") and owner != who["email"]:
-            continue
-        if bbox:
-            loc = story.get("location") or {}
-            lat, lng = loc.get("lat"), loc.get("lng")
-            if not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
-                continue
-            if not (bbox[0] <= lng <= bbox[2] and bbox[1] <= lat <= bbox[3]):
-                continue
+    result = []
+    for story in visible_stories(
+        viewer_user=who["email"], role=who["role"], excluded=excluded
+    ):
         item = dict(story)
         item["audioUrl"] = ("/" + str(story["audio"]).lstrip("/")) if story.get("audio") else None
         item["transcriptOnly"] = not bool(story.get("audio"))
         if versions.get(story["id"]):
             item["versions"] = versions[story["id"]]
             item["correctedText"] = versions[story["id"]][-1]["formalText"]
-        stories.append(item)
+        result.append(item)
+    return result
+
+
+@app.get("/api/stories")
+async def list_stories(request: Request):
+    bbox = parse_bbox(request.query_params.get("bbox"))
+    visible = current_visible_stories(request)
+    stories = clip_to_bbox(visible, bbox)
+    data = load_data()
     result = {
         "stories": stories,
         "count": len(stories),
+        "visibleCount": len(visible),
+        "visibleIds": [str(s["id"]) for s in visible],
         "contentVersion": data.get("contentVersion"),
         "consentPolicyVersion": data.get("consentPolicyVersion"),
     }
@@ -766,19 +784,21 @@ async def ask_village(request: Request):
         body = await request.json()
     except Exception:
         body = {}
+    if not isinstance(body, dict):
+        body = {}
     question = str(body.get("question") or body.get("query") or "")[:MAX_QUESTION_LEN]
     lang = str(body.get("lang") or "zh-HK")
     if lang not in ("zh-HK", "zh-CN", "en"):
         lang = "zh-HK"
     who = viewer(request)
-    result = retrieve_answer(
-        question,
-        lang=lang,
-        viewer_user=who["email"],
-        role=who["role"],
-        excluded=_withdrawn_ids(),
-    )
+    bbox = parse_bbox(body.get("bbox"))
+    scope = clip_to_bbox(current_visible_stories(request), bbox)
+    result = retrieve_answer(question, lang=lang, stories=scope)
     result["rank"] = who["role"]
+    result["visibleCount"] = len(scope)
+    result["visibleIds"] = [str(s["id"]) for s in scope]
+    if bbox:
+        result["bbox"] = list(bbox)
     return result
 
 

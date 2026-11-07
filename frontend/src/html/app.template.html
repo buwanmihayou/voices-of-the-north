@@ -195,9 +195,15 @@
             <h1 class="atlas__title" id="pageTitle-stories" data-i18n="atlas.title">故事，响邊度？</h1>
           </div>
           <div class="atlas__tools">
-            <button type="button" class="atlas-btn" id="atlasViewBtn" aria-pressed="false"
+            <!-- 列表入口固定可見：不是只有地圖降級時才出現的後備按鈕 -->
+            <button type="button" class="atlas-btn atlas-btn--list" id="atlasViewBtn" aria-pressed="false"
                     aria-label="切換列表模式" data-i18n-aria="atlas.listAria" title="列表模式">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
+              <span data-i18n="atlas.listShort">列表</span>
+            </button>
+            <button type="button" class="atlas-btn" id="atlasSceneBtn"
+                    aria-label="3D 示範書籤" data-i18n-aria="atlas.sceneAria" title="3D 示範書籤">
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
             </button>
             <button type="button" class="atlas-btn atlas-btn--3d" id="atlas3dBtn" aria-pressed="false"
                     aria-label="切換 3D 立體地圖" data-i18n-aria="atlas.3dAria" title="3D 立體">

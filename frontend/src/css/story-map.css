@@ -637,17 +637,6 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   text-align: left;
   justify-content: flex-start;
 }
-.vtn-pin__mood {
-  position: absolute;
-  right: 2px;
-  top: 9px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid #FDFBF4;
-  background: var(--mood-color, #8C7A5B);
-  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
-}
 .vtn-pin__label {
   position: absolute;
   left: 50%;
@@ -736,7 +725,21 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 .atlas-listview .story-list { margin-top: 10px; }
 .atlas-listview .disclosure-card { margin-top: 18px; }
 
-/* 列表卡片：類型色塊與心情角標，和地圖保持同一套語言 */
+/* 地圖／列表固定入口：帶文字，長者不必猜圖標，也不在地圖降級時才出現 */
+.atlas-btn--list {
+  width: auto;
+  min-width: 44px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* 列表卡片：只保留類型色塊；心情標籤統一放在二級抽屜 */
 .story-item__cover--festival { background: #F6E4DA; color: #B4552F; }
 .story-item__cover--farming { background: #E6EFE1; color: #4F7A4A; }
 .story-item__cover--migration { background: #E1EBF2; color: #3C6E8F; }
@@ -773,7 +776,9 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   right: 0;
   bottom: 0;
   z-index: 55;
-  height: 90%;
+  /* 相對視口而非父容器：小屏（如 iPhone SE 375×667）半開仍露出 55dvh */
+  height: 90vh;
+  height: 90dvh;
   display: flex;
   flex-direction: column;
   border-radius: 26px 26px 0 0;
@@ -784,7 +789,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   touch-action: none;
   will-change: transform;
 }
-.story-sheet.is-open { transform: translateY(52%); }
+.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); }
 .story-sheet.is-expanded { transform: translateY(0); }
 .story-sheet.is-dragging { transition: none; }
 .story-sheet__grab {
@@ -1173,11 +1178,8 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 .atlas-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 
-/* 800 米模糊圈（MapLibre）呼吸感 */
-@keyframes fuzz-breathe {
-  0%, 100% { fill-opacity: 0.10; }
-  50% { fill-opacity: 0.22; }
-}
+/* 800 米模糊圈的呼吸填充由 35-map.js 驅動 MapLibre paint 屬性
+   （canvas 圖層不吃 CSS keyframes）；減少動態時由 JS 降級為靜態虛線圈。 */
 .atlas__canvas.is-at-3d { cursor: grab; }
 
 /* ---------- 暗色主題 ---------- */
@@ -1222,6 +1224,9 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
   .story-sheet__scrim,
   .atlas__canvas,
   .atlas__loading { transition: none !important; }
+  /* 模糊圈是 MapLibre canvas：CSS 關不掉呼吸填充。35-map.js 會停止
+     requestAnimationFrame、把 fill-opacity 固定 0.10、虛線加粗至 2.5。 */
+  .atlas__canvas.atlas--reduced-motion { cursor: default; }
 }
 
 /* ---------- 窄屏 ---------- */

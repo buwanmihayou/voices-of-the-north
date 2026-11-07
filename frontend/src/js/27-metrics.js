@@ -130,9 +130,23 @@
     reportPlaying('pagehide');
     endMapView('pagehide');
   });
+  /* 北極星指標的分母只用 story.open；pin.click / cluster.click 為診斷事件，
+     點擊同圈氣泡後未選故事而關掉，不應被算成「打開故事」。 */
+  function funnel() {
+    var out = {
+      'map.view': 0, 'pin.click': 0, 'cluster.click': 0,
+      'story.open': 0, 'audio.complete': 0, 'audio.progress': 0
+    };
+    buffer.forEach(function (entry) {
+      if (out[entry.event] !== undefined) out[entry.event]++;
+    });
+    return out;
+  }
+
   VTN.metrics = {
     track: track,
-    debug: function () { return { count: buffer.length, recent: buffer.slice(-6) }; },
+    debug: function () { return { count: buffer.length, recent: buffer.slice(-6), funnel: funnel() }; },
+    funnel: funnel,
     clear: function () { buffer = []; save(); }
   };
 })();

@@ -1,8 +1,9 @@
 """把 frontend/src 的模組合併成單一交付檔（frontend/voices-of-the-north-app.html）。
 
 用法：
-    python tools/build_frontend.py            # 驗證＋建置
-    python tools/build_frontend.py --check    # 只驗證資料，不寫檔
+    python tools/build_frontend.py                      # 驗證＋建置（波形內嵌單檔）
+    python tools/build_frontend.py --check             # 只驗證資料，不寫檔
+    python tools/build_frontend.py --external-waveforms # 波形改由 waveforms.json 按需載入
 
 單一資料來源：
     data/stories.json  ── 由本腳本驗證後內嵌成 window.VTN_STORY_DATA，
@@ -188,70 +189,90 @@ def validate(data: dict) -> tuple[list[str], list[str]]:
 
 
 WAVE_BARS = 60
-WAVE_SAMPLE_CAP = 240
+WAVE_TARGET_RATE = 8000
+WAVE_JSON_NAME = "waveforms.json"
+WAVE_FILE = ROOT / "frontend" / WAVE_JSON_NAME
 
 
-def waveform_peaks(path: Path) -> list[float] | None:
-    """由 WAV 實測振幅，演算法與前端 28-waveform.js 一致。
-
-    前端 decodeAudioData 會重採樣到 AudioContext 取樣率，這裡讀原始 PCM，
-    兩者數值可以有輕微差異，但柱狀形狀一致；都只用真實振幅，不生成假波形。
-    """
-    try:
-        with wave.open(str(path), "rb") as handle:
-            width = handle.getsampwidth()
-            channels = handle.getnchannels()
-            raw = handle.readframes(handle.getnframes())
-    except Exception:
+def _pcm_channel0(handle) -> tuple[list[float], int] | None:
+    """讀單聲道（第 0 聲道）正規化 PCM，與前端 getChannelData(0) 對齊。"""
+    width = handle.getsampwidth()
+    channels = handle.getnchannels()
+    rate = handle.getframerate()
+    raw = handle.readframes(handle.getnframes())
+    if width not in (1, 2) or channels < 1 or not rate or not raw:
         return None
-    if width not in (1, 2) or channels < 1 or not raw:
-        return None
-
     if width == 2:
         pcm = array.array("h")
         pcm.frombytes(raw[: len(raw) // 2 * 2])
         if sys.byteorder != "little":
             pcm.byteswap()
-        total = len(pcm) // channels
-
-        def sample_at(i: int) -> float:
-            return float(pcm[i * channels]) / 32768.0
+        values = [pcm[i] / 32768.0 for i in range(0, len(pcm) - channels + 1, channels)]
     else:
-        total = len(raw) // channels
+        values = [(raw[i] - 128.0) / 128.0
+                  for i in range(0, len(raw) - channels + 1, channels)]
+    return values, rate
 
-        def sample_at(i: int) -> float:
-            return (float(raw[i * channels]) - 128.0) / 128.0
 
+def waveform_peaks(path: Path) -> list[float] | None:
+    """由 WAV 實測振幅；與前端 28-waveform.js 共用 8 kHz 重採樣網格。
+
+    兩條路徑都先把各自取樣率的 PCM 線性插值到 8 kHz，再切成 60 柱算
+    RMS + 峰值，因此相關係數接近 1，不再受 AudioContext 取樣率影響。
+    """
+    try:
+        with wave.open(str(path), "rb") as handle:
+            pcm = _pcm_channel0(handle)
+    except Exception:
+        return None
+    if pcm is None:
+        return None
+    values, rate = pcm
+    total = len(values)
     if total < WAVE_BARS:
         return None
 
-    per_bar = max(1, total // WAVE_BARS)
-    step = max(1, per_bar // WAVE_SAMPLE_CAP)
-    values: list[float] = []
+    count = max(WAVE_BARS, round(total / rate * WAVE_TARGET_RATE))
+    ratio = rate / WAVE_TARGET_RATE
+    samples: list[float] = []
+    for i in range(count):
+        pos = i * ratio
+        lo = int(pos)
+        frac = pos - lo
+        a = values[lo] if lo < total else 0.0
+        b = values[lo + 1] if lo + 1 < total else a
+        samples.append(a + (b - a) * frac)
+
+    bars: list[float] = []
     for bar in range(WAVE_BARS):
-        start = bar * per_bar
-        end = min(total, start + per_bar)
+        start = bar * count // WAVE_BARS
+        end = min(count, max(start + 1, (bar + 1) * count // WAVE_BARS))
         square_sum = 0.0
-        count = 0
         peak = 0.0
-        for i in range(start, end, step):
-            v = sample_at(i)
+        n = 0
+        for i in range(start, end):
+            v = samples[i]
             square_sum += v * v
-            count += 1
             av = abs(v)
             if av > peak:
                 peak = av
-        rms = math.sqrt(square_sum / count) if count else 0.0
-        values.append(0.6 * rms + 0.4 * peak)
+            n += 1
+        rms = math.sqrt(square_sum / n) if n else 0.0
+        bars.append(0.6 * rms + 0.4 * peak)
 
-    maximum = max(values) if values else 0.0
+    maximum = max(bars) if bars else 0.0
     if maximum <= 0:
         return None
-    return [round(min(1.0, (v / maximum) ** 0.85), 3) for v in values]
+    return [round(min(1.0, (v / maximum) ** 0.85), 3) for v in bars]
 
 
-def waveform_payload(data: dict) -> tuple[str, int]:
-    """把每則有 WAV 的故事振幅寫進單檔，避免執行期為畫波形再下載 4MB 音檔。"""
+def waveform_payload(
+    data: dict, external: bool = False, write_json: bool = True
+) -> tuple[str, int, int]:
+    """把實測振幅內嵌進單檔，或改為按需載入外置 waveforms.json。
+
+    回傳 (JS 片段, 故事數, JSON 位元組數)。JSON 一律輸出，方便部署切換。
+    """
     baked: dict[str, list[float]] = {}
     for story in data.get("stories") or []:
         audio = story.get("audio")
@@ -264,17 +285,24 @@ def waveform_payload(data: dict) -> tuple[str, int]:
         if peaks:
             baked[str(story.get("id"))] = peaks
     raw = json.dumps(baked, ensure_ascii=False, separators=(",", ":"))
-    return "window.VTN_WAVEFORMS = " + raw + ";\n", len(baked)
+    if write_json:
+        WAVE_FILE.write_text(raw, encoding="utf-8", newline="\n")
+    size = len(raw.encode("utf-8"))
+    if external:
+        return ("window.VTN_WAVEFORMS = {};\n"
+                "window.VTN_WAVEFORMS_URL = '" + WAVE_JSON_NAME + "';\n",
+                len(baked), size)
+    return "window.VTN_WAVEFORMS = " + raw + ";\n", len(baked), size
 
 
-def js_payload(data: dict) -> tuple[str, int]:
+def js_payload(data: dict, external: bool = False, write_json: bool = True) -> tuple[str, int, int]:
     raw = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     raw = raw.replace("</", "<\\/").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
-    waves, count = waveform_payload(data)
-    return "window.VTN_STORY_DATA = " + raw + ";\n" + waves, count
+    waves, count, size = waveform_payload(data, external, write_json)
+    return "window.VTN_STORY_DATA = " + raw + ";\n" + waves, count, size
 
 
-def read_modules() -> tuple[str, str, int]:
+def read_modules(external: bool = False, write_json: bool = True) -> tuple[str, str, int, int]:
     missing = [name for name in CSS_ORDER if not (SRC / "css" / name).is_file()]
     if missing:
         raise SystemExit("缺少 CSS 模組: " + ", ".join(missing))
@@ -289,7 +317,7 @@ def read_modules() -> tuple[str, str, int]:
     if not js_files:
         raise SystemExit("src/js 沒有任何模組")
 
-    payload, wave_count = js_payload(load_data())
+    payload, wave_count, wave_bytes = js_payload(load_data(), external, write_json)
     js_parts = [payload]
     for path in js_files:
         text = path.read_text(encoding="utf-8")
@@ -298,10 +326,10 @@ def read_modules() -> tuple[str, str, int]:
         rel = path.relative_to(SRC).as_posix()
         js_parts.append(f"/* ===== src/{rel} ===== */\n{text.strip(chr(10))}")
     js = "\n\n".join(js_parts) + "\n"
-    return css, js, wave_count
+    return css, js, wave_count, wave_bytes
 
 
-def build(check_only: bool = False) -> int:
+def build(check_only: bool = False, external_waveforms: bool = False) -> int:
     data = load_data()
     errors, warnings = validate(data)
     if warnings:
@@ -314,8 +342,11 @@ def build(check_only: bool = False) -> int:
             print("  - " + err)
         return 1
 
-    css, js, wave_count = read_modules()
-    print(f"波形快取：{wave_count} 則故事（構建期實測振幅，執行期不再解碼 WAV）")
+    css, js, wave_count, wave_bytes = read_modules(external_waveforms, not check_only)
+    mode = "外置按需載入" if external_waveforms else "內嵌單檔"
+    print(f"波形快取：{wave_count} 則故事 / {wave_bytes:,} bytes（8 kHz 統一取樣・{mode}）")
+    if not check_only:
+        print(f"已輸出 frontend/{WAVE_JSON_NAME}（{wave_bytes:,} bytes，供大規模部署切換）")
     template = (SRC / "html" / "app.template.html").read_text(encoding="utf-8")
     for token in ("<!--@@CSS@@-->", "<!--@@JS@@-->"):
         if token not in template:
@@ -334,4 +365,4 @@ def build(check_only: bool = False) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(build("--check" in sys.argv))
+    sys.exit(build("--check" in sys.argv, "--external-waveforms" in sys.argv))

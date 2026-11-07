@@ -183,7 +183,7 @@ def retrieve_segments(question: str, stories: list[dict] | None = None) -> list[
 
     # 同一故事只保留得分最高的段落群，避免答非所問的長篇拼接
     top_story = max(hits, key=lambda h: h["score"])["story"].get("id")
-    if not any(normalize(s.get("title") or "") in q for s in all_stories()):
+    if not any(normalize(s.get("title") or "") in q for s in (stories or [])):
         story_scores: dict[str, float] = defaultdict(float)
         for hit in hits:
             story_scores[hit["story"]["id"]] += hit["score"]
@@ -212,8 +212,14 @@ def retrieve_answer(
     viewer_user: str | None = None,
     role: str = "visitor",
     excluded: set[str] | None = None,
+    stories: list[dict] | None = None,
 ) -> dict:
-    stories = visible_stories(viewer_user, role, excluded)
+    """stories 由呼叫端傳入時，直接用該「當前可見集合」做檢索。
+
+    /api/stories 與 /api/ask-village 因此共用同一份授權／分享範圍／撤回／
+    視口過濾結果；不傳才退回本模組自行計算（供離線測試與舊呼叫相容）。
+    """
+    stories = stories if stories is not None else visible_stories(viewer_user, role, excluded)
     hits = retrieve_segments(question, stories)
 
     if not hits:
