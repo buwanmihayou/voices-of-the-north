@@ -80,6 +80,12 @@
   /* 底導航實際佔高：8px 上 padding + 58px 項目 + 10px 下 padding + 1px 邊框
      + iPhone 底部安全區。彈層／FAB 一律用呢個變數留位，唔好硬編碼。 */
   --vtn-nav-h: calc(77px + env(safe-area-inset-bottom));
+
+  /* 11.08 統一的節奏與字級下限：所有頁面區塊間距、底部留白與輔助字級都用這幾個變數 */
+  --space-section: 20px;   /* 同頁相鄰區塊 */
+  --space-block:   28px;   /* 精選卡到下一個區塊的最小距離 */
+  --nav-safe:      calc(var(--space-block) + env(safe-area-inset-bottom));
+  --fs-min:        0.875rem; /* 14px 硬底線，任何輔助文字不得低於此值 */
 }
 
 /* ---------- 基礎 ---------- */
@@ -345,7 +351,7 @@ a { text-decoration: none; }
 /* ==========================================================================
    精選故事
    ========================================================================== */
-.featured { padding: 32px 20px 0; }
+.featured { padding: var(--space-section) 20px var(--space-block); }
 
 .featured__head {
   display: flex;
@@ -495,7 +501,7 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 22px 20px 24px;
+  margin: var(--space-section) 20px var(--space-block);
   padding: 16px 18px;
   border-radius: 17px;
   background: var(--sage-wash);
@@ -632,6 +638,7 @@ body:has(.sheet.is-show) .toast {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-bottom: var(--nav-safe);
 }
 .app-shell > .page::-webkit-scrollbar { display: none; }
 
@@ -823,7 +830,7 @@ body:has(.sheet.is-show) .toast {
    第三頁：村落故事
    ========================================================================== */
 
-.page--stories { padding-bottom: 18px; }
+.page--stories { padding-bottom: var(--nav-safe); }
 
 /* Hero：需容納標題、副標與篩選膠囊（縮短標題至膠囊的垂直距離） */
 .hero--stories {
@@ -1098,7 +1105,7 @@ body:has(.sheet.is-show) .toast {
   background: rgba(253, 251, 244, 0.92);
   border: 1px solid var(--hairline);
   color: var(--forest-deep);
-  font-size: 0.85rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   white-space: nowrap;
   transition: opacity 0.3s ease;
@@ -1128,7 +1135,7 @@ body:has(.sheet.is-show) .toast {
   background: rgba(253, 251, 244, 0.92);
   border: 1px solid var(--hairline);
   color: var(--forest-deep);
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   line-height: 1;
   pointer-events: none;
@@ -1139,14 +1146,14 @@ body:has(.sheet.is-show) .toast {
 /* Leaflet 微調：配合米白風格＋長者字號 */
 .map-card__leaflet .leaflet-control-attribution {
   background: rgba(253, 251, 244, 0.82);
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   color: #6f7d70;
 }
 .map-card__leaflet .leaflet-control-scale-line {
   background: rgba(253, 251, 244, 0.82);
   border-color: var(--forest-deep);
   color: var(--forest-deep);
-  font-size: 0.66rem;
+  font-size: var(--fs-min);
 }
 .map-card__leaflet .leaflet-bar a {
   color: var(--forest-deep);
@@ -1159,14 +1166,14 @@ body:has(.sheet.is-show) .toast {
 }
 .leaflet-vtn-popup .leaflet-popup-content {
   margin: 11px 14px;
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
   line-height: 1.55;
   color: var(--forest-deep);
 }
 
 .map-card__tiles-note {
   margin: 9px 2px 0;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   line-height: 1.5;
   color: var(--muted);
 }
@@ -1180,7 +1187,9 @@ body:has(.sheet.is-show) .toast {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  margin: 16px 16px 0;
+  min-width: 0;
+  max-width: 100%;
+  margin: var(--space-section) 16px 0;
   padding: 16px 18px;
   border-radius: 20px;
   background: var(--gold-pale);
@@ -1199,13 +1208,14 @@ body:has(.sheet.is-show) .toast {
   font-size: 1.15rem;
 }
 
-.disclosure-card__body { min-width: 0; }
+.disclosure-card__body { flex: 1 1 auto; min-width: 0; }
 
 .disclosure-card__en {
   margin: 0;
-  font-size: 0.875rem;             /* 14px 硬底線 */
+  font-size: var(--fs-min);
   line-height: 1.55;
   color: #6B5326;
+  overflow-wrap: anywhere;
 }
 
 .disclosure-card__zh {
@@ -1213,10 +1223,8 @@ body:has(.sheet.is-show) .toast {
   font-size: 0.9rem;
   line-height: 1.55;
   color: #6B5326;
-  white-space: nowrap;
-}
-@media (max-width: 360px) {
-  .disclosure-card__zh { white-space: normal; }
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- 窄屏微調（≤360px）：封面收窄防擠壓，長文案安全換行 ---------- */
@@ -1235,9 +1243,21 @@ body:has(.sheet.is-show) .toast {
    第四頁：我的（管理中心）
    ========================================================================== */
 
-.page--me { padding-bottom: 16px; }
+/* 草叢裝飾改到背景層：不再靠 .me-list 的負 margin 疊圖，卡片與統計卡各自有完整留白。
+   實際草叢濃淡／位置仍需設計確認，這裡先保留原本的 my-background.png 並加淡色遮罩。 */
+.page--me {
+  padding-bottom: var(--nav-safe);
+  background-color: var(--ivory);
+  background-image:
+    linear-gradient(to bottom, rgba(246, 241, 230, 0.35), rgba(246, 241, 230, 0.92)),
+    url('assets/my-background.png');
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: 100% 320px;
+  background-attachment: local;
+}
 
-/* Hero：雙行標題較高，卡片輕疊於背景草叢之上。
+/* Hero：雙行標題較高，卡片不再疊在背景草叢上。
    底部保留 26px padding，確保任何字體渲染下副文都不被卡片遮擋。 */
 .hero--me {
   padding: 42px 22px 26px;
@@ -1271,7 +1291,7 @@ body:has(.sheet.is-show) .toast {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: -10px;               /* 只輕疊背景草叢，保留與副文的安全距離 */
+  margin-top: 0;                   /* 不再用負 margin 做裝飾留白 */
   padding: 0 16px;
 }
 
@@ -1664,7 +1684,7 @@ body:has(.sheet.is-show) .toast {
   align-items: center;
   gap: 7px;
   margin: 10px 0 0;
-  font-size: 0.84rem;
+  font-size: var(--fs-min);
   color: var(--gold, #83632B);
   font-weight: 500;
 }
@@ -1745,7 +1765,7 @@ body:has(.sheet.is-show) .toast {
 .vtn-rec-sheet__title { margin: 0; font-size: 1.1rem; font-weight: 900; }
 .vtn-rec-sheet__sub {
   margin: 1px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   color: #DCE9DC;
   white-space: nowrap;
   overflow: hidden;
@@ -1776,10 +1796,10 @@ body:has(.sheet.is-show) .toast {
   margin: 0 auto 14px;
   padding: 6px 14px;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
   font-weight: 700;
 }
-.vtn-rec-status i { font-size: 0.72rem; }
+.vtn-rec-status i { font-size: var(--fs-min); }
 .vtn-rec-status--online { background: #DCE9DC; color: #2C5742; }
 .vtn-rec-status--offline { background: #F1E3C1; color: #6d5326; }
 .vtn-rec-status--checking { background: #EAF0E5; color: #5D7063; }
@@ -1909,7 +1929,7 @@ body:has(.sheet.is-show) .toast {
   border-radius: 999px;
   background: #EAF0E5;
   color: #3d5a48;
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   font-weight: 700;
 }
 .vtn-rec-pill--gold { background: #F1E3C1; color: #6d5326; }
@@ -1980,7 +2000,7 @@ body:has(.sheet.is-show) .toast {
 }
 .vtn-rec-subhead {
   margin: 4px 0 8px;
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   letter-spacing: 0.04em;
   color: #5D7063;
@@ -2019,7 +2039,7 @@ body:has(.sheet.is-show) .toast {
   border-radius: 999px;
   background: var(--forest, #2C5742);
   color: #F4F8F1;
-  font-size: 0.76rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -2039,14 +2059,14 @@ body:has(.sheet.is-show) .toast {
   border-radius: 8px;
   background: #fff;
   border: 1px solid #d8ddcf;
-  font-size: 0.84rem;
+  font-size: var(--fs-min);
   cursor: pointer;
 }
 .vtn-rec-word:hover { background: #DCE9DC; }
 .vtn-rec-word.is-low { border-color: #d9a99f; color: #9c4637; }
 .vtn-rec-word .w-t {
   margin-left: 5px;
-  font-size: 0.68rem;
+  font-size: var(--fs-min);
   color: #8a978b;
   font-variant-numeric: tabular-nums;
 }
@@ -2060,7 +2080,7 @@ body:has(.sheet.is-show) .toast {
   border-radius: 12px;
   background: rgba(241, 227, 193, 0.65);
   color: #6d5326;
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
   line-height: 1.55;
 }
 .vtn-rec-note i { margin-top: 2px; }
@@ -2129,7 +2149,7 @@ body:has(.sheet.is-show) .toast {
 }
 .vtn-rec-card__meta {
   margin: 2px 0 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   color: #7d8b7f;
 }
 .vtn-rec-card__chevron {
@@ -2173,7 +2193,7 @@ body:has(.sheet.is-show) .toast {
   border-radius: 999px;
   background: #DCE9DC;
   color: var(--forest, #2C5742);
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   font-weight: 900;
 }
 
@@ -2257,7 +2277,7 @@ body:has(.sheet.is-show) .toast {
 .vtn-ai-hint small {
   display: block;
   margin-top: 2px;
-  font-size: 0.76rem;
+  font-size: var(--fs-min);
   font-weight: 500;
   color: #5D7063;
 }
@@ -2274,7 +2294,7 @@ body:has(.sheet.is-show) .toast {
   border-radius: 50%;
   background: #fff;
   color: #5D7063;
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   line-height: 1;
   cursor: pointer;
 }
@@ -2317,7 +2337,7 @@ body:has(.sheet.is-show) .toast {
   border-radius: 50%;
   background: var(--gold-pale, #F1E3C1);
   color: var(--gold, #83632B);
-  font-size: 0.7rem;
+  font-size: var(--fs-min);
 }
 
 /* ---------- 聊天面板：App 內全寬 BottomSheet（底導航以上全屏覆蓋） ---------- */
@@ -2387,7 +2407,7 @@ body:has(.sheet.is-show) .toast {
 }
 .vtn-ai-head-sub {
   margin: 1px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   color: #DCE9DC;
   white-space: nowrap;
   overflow: hidden;
@@ -2479,7 +2499,7 @@ body:has(.sheet.is-show) .toast {
   background: #fff;
   color: var(--forest, #2C5742);
   font-family: inherit;
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   cursor: pointer;
 }
@@ -2487,7 +2507,7 @@ body:has(.sheet.is-show) .toast {
 .vtn-ai-disclosure {
   margin: 6px 0 0;
   padding: 0 2px;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   line-height: 1.4;
   color: var(--gold, #83632B);
 }
@@ -2497,7 +2517,7 @@ body:has(.sheet.is-show) .toast {
   align-items: center;
   gap: 6px;
   margin: 8px 0 7px;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   letter-spacing: 0.03em;
   color: #5D7063;
@@ -2513,13 +2533,13 @@ body:has(.sheet.is-show) .toast {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.85);
   color: var(--forest, #2C5742);
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
 }
 .vtn-ai-chip:hover { background: #DCE9DC; }
-.vtn-ai-chip i { font-size: 0.78rem; }
+.vtn-ai-chip i { font-size: var(--fs-min); }
 
 /* 推薦問題 */
 .vtn-ai-suggests {
@@ -2536,7 +2556,7 @@ body:has(.sheet.is-show) .toast {
   background: #fff;
   color: var(--forest, #2C5742);
   font-family: inherit;
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2548,7 +2568,7 @@ body:has(.sheet.is-show) .toast {
   margin: 2px 0 0;
   padding: 0 2px;
   text-align: center;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   color: #7a8578;
 }
 
@@ -2574,7 +2594,7 @@ body:has(.sheet.is-show) .toast {
   padding: 6px 10px;
   background: rgba(241, 227, 193, 0.7);
   color: #6d5326;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   text-align: center;
 }
 
@@ -2706,7 +2726,7 @@ html[data-font-size="xl"] { font-size: 22px; }
   background: var(--cream);
   color: var(--ink-body);
   font-family: inherit;
-  font-size: 0.76rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   cursor: pointer;
 }
@@ -2741,7 +2761,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 .vtn-btn--quiet { border-color: var(--hairline); color: var(--muted); }
 .vtn-btn--block { width: 100%; }
 .vtn-btn:disabled { opacity: .5; cursor: not-allowed; }
-.vtn-btn--sm { min-height: 38px; padding: 0 12px; font-size: 0.8rem; }
+.vtn-btn--sm { min-height: 38px; padding: 0 12px; font-size: var(--fs-min); }
 
 /* ---------- 5. 錄音管理：分頁數字／草稿卡 ---------- */
 .tabs__btn .tab-count[hidden] { display: none; }
@@ -2754,20 +2774,20 @@ html[data-font-size="xl"] { font-size: 22px; }
 .vtn-rec-card__actions .vtn-btn { min-height: 44px; }
 .vtn-rec-sync {
   display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 6px; font-size: .74rem; font-weight: 700; color: var(--muted);
+  margin-top: 6px; font-size: var(--fs-min); font-weight: 700; color: var(--muted);
 }
 .vtn-rec-sync--failed { color: #8E3B2E; }
 .vtn-rec-sync--local { color: #6d5326; }
 .vtn-rec-missing-audio {
   margin: 8px 0 0; padding: 8px 11px; border-radius: 10px;
-  background: #F8E9E5; color: #8E3B2E; font-size: .8rem; line-height: 1.5;
+  background: #F8E9E5; color: #8E3B2E; font-size: var(--fs-min); line-height: 1.5;
 }
 .vtn-rec-actions-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
 .vtn-rec-actions-row .vtn-btn { flex: 1 1 45%; }
 
 /* ---------- 6. 故事頁：搜尋與篩選 ---------- */
 .stories-toolbar {
-  display: flex; gap: 8px; margin: 4px 20px 0;
+  display: flex; gap: 8px; margin: var(--space-section) 20px 0;
 }
 .stories-toolbar input[type="search"] {
   flex: 1 1 auto; min-width: 0; min-height: 48px;
@@ -2782,10 +2802,10 @@ html[data-font-size="xl"] { font-size: 22px; }
 .filter-toggle-badge {
   display: inline-block; min-width: 1.35em; margin-left: 5px; padding: 0 6px;
   border-radius: 999px; background: var(--forest); color: #fff;
-  font-size: .72rem; font-weight: 900;
+  font-size: var(--fs-min); font-weight: 900;
 }
 .filter-summary {
-  display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 20px 0;
+  display: flex; flex-wrap: wrap; gap: 7px; margin: var(--space-section) 20px 0;
 }
 .filter-summary:empty { display: none; }
 .filter-summary__chip {
@@ -2793,14 +2813,14 @@ html[data-font-size="xl"] { font-size: 22px; }
   min-height: 34px; padding: 3px 6px 3px 12px;
   border: 1px solid var(--sage-line); border-radius: 999px;
   background: var(--sage-wash); color: var(--forest);
-  font-family: inherit; font-size: .8rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; font-size: var(--fs-min); font-weight: 700; cursor: pointer;
 }
-.filter-summary__chip i { font-size: .7rem; }
+.filter-summary__chip i { font-size: var(--fs-min); }
 .result-count {
-  margin: 10px 22px 0; font-size: .86rem; font-weight: 700; color: var(--muted);
+  margin: var(--space-section) 22px 0; font-size: var(--fs-min); font-weight: 700; color: var(--muted);
 }
 .filter-panel {
-  margin: 10px 16px 0; padding: 14px 14px 6px;
+  margin: var(--space-section) 16px 0; padding: 14px 14px 6px;
   border: 1px solid var(--hairline); border-radius: 18px;
   background: var(--cream);
   box-shadow: var(--shadow-card);
@@ -2808,13 +2828,13 @@ html[data-font-size="xl"] { font-size: 22px; }
 .filter-panel[hidden] { display: none; }
 .filter-group { margin-bottom: 12px; }
 .filter-group__label {
-  margin: 0 0 6px; font-size: .82rem; font-weight: 900;
+  margin: 0 0 6px; font-size: var(--fs-min); font-weight: 900;
   letter-spacing: .04em; color: var(--muted);
 }
 .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip-row .chip { min-height: 38px; padding: 6px 13px; font-size: .84rem; }
+.chip-row .chip { min-height: 38px; padding: 6px 13px; font-size: var(--fs-min); }
 .filter-sort { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.filter-sort label { flex: none; font-size: .84rem; font-weight: 700; color: var(--muted); }
+.filter-sort label { flex: none; font-size: var(--fs-min); font-weight: 700; color: var(--muted); }
 .filter-sort select {
   flex: 1 1 auto; min-height: 44px; padding: 6px 10px;
   border: 1.5px solid var(--sage-line); border-radius: 12px;
@@ -2825,7 +2845,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 .filter-actions .vtn-btn { flex: 1 1 50%; }
 
 /* ---------- 7. 故事列表 ---------- */
-.story-list { display: flex; flex-direction: column; gap: 12px; margin: 12px 16px 0; }
+.story-list { display: flex; flex-direction: column; gap: 12px; margin: var(--space-section) 16px 0; }
 .story-item {
   position: relative;
   border: 1.5px solid var(--hairline);
@@ -2856,12 +2876,12 @@ html[data-font-size="xl"] { font-size: 22px; }
   display: block; margin: 0 0 3px; font-size: 1rem; font-weight: 900;
   color: var(--ink); line-height: 1.4;
 }
-.story-item__meta { display: block; font-size: .78rem; color: var(--muted); }
+.story-item__meta { display: block; font-size: var(--fs-min); color: var(--muted); }
 .story-item__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
 .tag {
   padding: 2px 9px; border-radius: 999px;
   background: var(--sage-wash); color: var(--forest);
-  font-size: .72rem; font-weight: 700;
+  font-size: var(--fs-min); font-weight: 700;
 }
 .tag--gold { background: var(--gold-pale); color: #6d5326; }
 .tag--red { background: #F8E9E5; color: #8E3B2E; }
@@ -2869,7 +2889,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 
 /* 故事詳情 */
 .story-detail {
-  margin: 12px 16px 0; padding: 16px;
+  margin: var(--space-section) 16px 0; padding: 16px;
   border: 1.5px solid var(--jade-strong); border-radius: 20px;
   background: var(--cream);
   box-shadow: var(--shadow-card);
@@ -2877,17 +2897,17 @@ html[data-font-size="xl"] { font-size: 22px; }
 .story-detail__head { display: flex; align-items: flex-start; gap: 10px; }
 .story-detail__titles { flex: 1 1 auto; min-width: 0; }
 .story-detail__title { margin: 0; font-size: 1.16rem; font-weight: 900; color: var(--ink); line-height: 1.4; }
-.story-detail__meta { margin: 3px 0 0; font-size: .8rem; color: var(--muted); }
+.story-detail__meta { margin: 3px 0 0; font-size: var(--fs-min); color: var(--muted); }
 .story-detail__badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
 .story-detail__note {
   margin: 0 0 10px; display: flex; gap: 8px; align-items: flex-start;
-  font-size: .8rem; line-height: 1.55; color: var(--gold);
+  font-size: var(--fs-min); line-height: 1.55; color: var(--gold);
 }
 .story-detail__audio { width: 100%; margin: 6px 0 10px; border-radius: 12px; }
 .story-detail__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .story-detail__actions .vtn-btn { flex: 1 1 45%; }
 .story-detail__subhead {
-  margin: 14px 0 8px; font-size: .82rem; font-weight: 900;
+  margin: 14px 0 8px; font-size: var(--fs-min); font-weight: 900;
   letter-spacing: .04em; color: var(--muted);
 }
 .segments { display: flex; flex-direction: column; gap: 8px; }
@@ -2902,12 +2922,12 @@ html[data-font-size="xl"] { font-size: 22px; }
 .segment__t {
   display: inline-block; margin-bottom: 3px; padding: 1px 8px;
   border-radius: 999px; background: var(--forest); color: #F4F8F1;
-  font-size: .72rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  font-size: var(--fs-min); font-weight: 700; font-variant-numeric: tabular-nums;
 }
 .segment__text { display: block; font-size: .95rem; line-height: 1.75; }
 .story-detail__empty {
   margin: 10px 0 0; padding: 12px; border-radius: 12px;
-  background: var(--sage-wash); color: var(--muted); font-size: .86rem;
+  background: var(--sage-wash); color: var(--muted); font-size: var(--fs-min);
 }
 
 /* 地圖卡補充 */
@@ -2916,7 +2936,7 @@ html[data-font-size="xl"] { font-size: 22px; }
   flex: none; min-height: 38px; padding: 0 12px;
   border: 1.5px solid var(--sage-line); border-radius: 999px;
   background: var(--cream); color: var(--forest);
-  font-family: inherit; font-size: .78rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; font-size: var(--fs-min); font-weight: 700; cursor: pointer;
 }
 .map-card__empty {
   position: absolute; inset: 0; z-index: 4;
@@ -2926,13 +2946,13 @@ html[data-font-size="xl"] { font-size: 22px; }
 }
 .map-card__empty[hidden] { display: none; }
 .map-card__frame { position: relative; }
-.map-card__hint { margin: 8px 0 0; font-size: .78rem; color: var(--muted); }
+.map-card__hint { margin: 8px 0 0; font-size: var(--fs-min); color: var(--muted); }
 .leaflet-vtn-circle-overview { cursor: pointer; }
 
 /* ---------- 8. 帳戶與統計 ---------- */
 .account-card {
   display: flex; align-items: center; gap: 12px;
-  margin: 4px 16px 12px; padding: 14px;
+  margin: 0 16px var(--space-section); padding: 14px;
   border: 1.5px solid var(--hairline); border-radius: 20px;
   background: var(--cream); box-shadow: var(--shadow-card);
 }
@@ -2944,20 +2964,22 @@ html[data-font-size="xl"] { font-size: 22px; }
 .account-card__body { flex: 1 1 auto; min-width: 0; }
 .account-card__role { margin: 0; font-size: .98rem; font-weight: 900; color: var(--ink); }
 .account-card__id {
-  margin: 2px 0 0; font-size: .76rem; color: var(--muted);
+  margin: 2px 0 0; font-size: var(--fs-min); color: var(--muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.stat-row { display: flex; gap: 10px; margin: 0 16px 12px; }
+.stat-row { display: flex; gap: 10px; margin: 0 16px var(--space-section); }
 .stat {
   flex: 1 1 0; min-width: 0; padding: 12px 8px; text-align: center;
   border: 1.5px solid var(--hairline); border-radius: 16px; background: var(--cream);
 }
 .stat__num { display: block; font-size: 1.4rem; font-weight: 900; color: var(--forest); line-height: 1.2; }
-.stat__label { display: block; margin-top: 2px; font-size: .74rem; color: var(--muted); }
+.stat__label { display: block; margin-top: 2px; font-size: var(--fs-min); color: var(--muted); }
 .me-section-title {
-  margin: 18px 22px 6px; font-size: .8rem; font-weight: 900;
+  margin: var(--space-section) 22px var(--space-section);
+  font-size: var(--fs-min); font-weight: 900;
   letter-spacing: .06em; color: var(--muted);
 }
+.home-section-title { margin-bottom: 0; }
 
 /* ---------- 9. 設定頁 ---------- */
 .page-head {
@@ -2972,11 +2994,11 @@ html[data-font-size="xl"] { font-size: 22px; }
 }
 .page-head__title { margin: 0; font-size: 1.15rem; font-weight: 900; color: var(--ink); }
 .settings-group {
-  margin: 10px 16px 0; padding: 6px 14px;
+  margin: var(--space-section) 16px 0; padding: 6px 14px;
   border: 1.5px solid var(--hairline); border-radius: 18px; background: var(--cream);
 }
 .settings-group__title {
-  margin: 12px 0 4px; font-size: .8rem; font-weight: 900;
+  margin: 12px 0 4px; font-size: var(--fs-min); font-weight: 900;
   letter-spacing: .05em; color: var(--muted);
 }
 .setting-row {
@@ -2986,32 +3008,32 @@ html[data-font-size="xl"] { font-size: 22px; }
 .settings-group__title + .setting-row { border-top: 0; }
 .setting-row__text { flex: 1 1 auto; min-width: 0; }
 .setting-row__label { display: block; font-size: .95rem; font-weight: 700; color: var(--ink-body); }
-.setting-row__hint { display: block; margin-top: 2px; font-size: .76rem; color: var(--muted); line-height: 1.5; }
+.setting-row__hint { display: block; margin-top: 2px; font-size: var(--fs-min); color: var(--muted); line-height: 1.5; }
 .setting-row__control { flex: none; display: flex; align-items: center; gap: 8px; }
 .seg { display: inline-flex; border: 1.5px solid var(--sage-line); border-radius: 999px; overflow: hidden; }
 .seg__btn {
   min-height: 38px; padding: 0 12px; border: 0; background: transparent;
-  color: var(--muted); font-family: inherit; font-size: .8rem; font-weight: 700; cursor: pointer;
+  color: var(--muted); font-family: inherit; font-size: var(--fs-min); font-weight: 700; cursor: pointer;
 }
 .seg__btn.is-active { background: var(--forest); color: #F4F8F1; }
 .setting-row input[type="range"] { width: 132px; accent-color: var(--forest); }
 .setting-row select {
   min-height: 42px; padding: 4px 10px; border: 1.5px solid var(--sage-line);
   border-radius: 12px; background: var(--cream); color: var(--ink-body);
-  font-family: inherit; font-size: .85rem;
+  font-family: inherit; font-size: var(--fs-min);
 }
-.setting-row output { min-width: 3.2em; text-align: right; font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.settings-foot { margin: 14px 22px 24px; font-size: .78rem; color: var(--muted); line-height: 1.6; }
+.setting-row output { min-width: 3.2em; text-align: right; font-size: var(--fs-min); color: var(--muted); font-variant-numeric: tabular-nums; }
+.settings-foot { margin: var(--space-section) 22px var(--nav-safe); font-size: var(--fs-min); color: var(--muted); line-height: 1.6; }
 
 /* ---------- 10. 關於頁 ---------- */
 .about-banner {
-  margin: 6px 16px 12px; padding: 13px 14px;
+  margin: 0 16px var(--space-section); padding: 13px 14px;
   border: 1.5px solid #D9BC84; border-radius: 16px;
   background: #FBF3E2; color: #6d5326;
-  font-size: .86rem; font-weight: 700; line-height: 1.6;
+  font-size: var(--fs-min); font-weight: 700; line-height: 1.6;
 }
 .about-section {
-  margin: 0 16px 12px; padding: 15px;
+  margin: 0 16px var(--space-section); padding: 15px;
   border: 1.5px solid var(--hairline); border-radius: 18px;
   background: var(--cream);
 }
@@ -3019,7 +3041,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 .about-section p { margin: 0 0 8px; font-size: .88rem; line-height: 1.75; color: var(--ink-body); }
 .about-section p:last-child { margin-bottom: 0; }
 .about-section ul, .about-section ol { margin: 0; padding-left: 20px; }
-.about-section li { margin-bottom: 6px; font-size: .87rem; line-height: 1.7; }
+.about-section li { margin-bottom: 6px; font-size: var(--fs-min); line-height: 1.7; }
 .about-redlines { counter-reset: redline; list-style: none; padding-left: 0; }
 .about-redlines li {
   position: relative; padding-left: 30px; margin-bottom: 8px;
@@ -3029,9 +3051,9 @@ html[data-font-size="xl"] { font-size: 22px; }
   position: absolute; left: 0; top: 2px;
   display: grid; place-items: center; width: 21px; height: 21px;
   border-radius: 50%; background: var(--forest); color: #fff;
-  font-size: .7rem; font-weight: 900;
+  font-size: var(--fs-min); font-weight: 900;
 }
-.about-meta { font-size: .78rem; color: var(--muted); line-height: 1.7; }
+.about-meta { font-size: var(--fs-min); color: var(--muted); line-height: 1.7; }
 
 /* ---------- 11. 對話框（App 殼內，無障礙） ---------- */
 .vtn-modal-mask {
@@ -3070,7 +3092,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 .vtn-modal__foot { flex: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--hairline); }
 .vtn-modal__foot .vtn-btn { flex: 1 1 45%; }
 .vtn-field { margin-bottom: 12px; }
-.vtn-field__label { display: block; margin-bottom: 5px; font-size: .82rem; font-weight: 700; color: var(--muted); }
+.vtn-field__label { display: block; margin-bottom: 5px; font-size: var(--fs-min); font-weight: 700; color: var(--muted); }
 .vtn-field input[type="text"], .vtn-field input[type="email"],
 .vtn-field textarea, .vtn-field select {
   width: 100%; min-height: 44px; padding: 9px 12px;
@@ -3090,9 +3112,9 @@ html[data-font-size="xl"] { font-size: 22px; }
 .radio-card.is-active { border-color: var(--jade-strong); background: var(--sage-wash); }
 .radio-card input { margin-top: 4px; accent-color: var(--forest); }
 .radio-card__title { display: block; font-size: .92rem; font-weight: 700; color: var(--ink); }
-.radio-card__hint { display: block; margin-top: 2px; font-size: .76rem; color: var(--muted); line-height: 1.5; }
-.vtn-modal__note { font-size: .78rem; color: var(--muted); line-height: 1.6; }
-.vtn-modal__error { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; background: #F8E9E5; color: #8E3B2E; font-size: .8rem; }
+.radio-card__hint { display: block; margin-top: 2px; font-size: var(--fs-min); color: var(--muted); line-height: 1.5; }
+.vtn-modal__note { font-size: var(--fs-min); color: var(--muted); line-height: 1.6; }
+.vtn-modal__error { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; background: #F8E9E5; color: #8E3B2E; font-size: var(--fs-min); }
 
 /* 語言選項 */
 .lang-option {
@@ -3105,12 +3127,46 @@ html[data-font-size="xl"] { font-size: 22px; }
 .lang-option.is-selected { border-color: var(--jade-strong); background: var(--sage-wash); font-weight: 700; }
 .lang-option__check { margin-left: auto; color: var(--forest); }
 
+/* ---------- 11a. 隱私彈層：一個預設 + 例外清單 ---------- */
+.privacy-preset {
+  margin: var(--space-section) 0;
+  padding: 14px;
+  border: 1.5px solid var(--jade-strong);
+  border-radius: 16px;
+  background: var(--sage-wash);
+}
+.privacy-preset select,
+.privacy-exceptions__list select {
+  min-height: 44px; padding: 6px 10px;
+  border: 1.5px solid var(--sage-line); border-radius: 12px;
+  background: var(--cream); color: var(--ink-body);
+  font-family: inherit; font-size: var(--fs-min);
+}
+.privacy-preset select { display: block; width: 100%; margin-top: 6px; }
+.privacy-exceptions {
+  margin: var(--space-section) 0;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+}
+.privacy-exceptions__summary {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: var(--fs-min); font-weight: 900; color: var(--ink);
+}
+.privacy-exceptions > .vtn-modal__note { margin: 0 14px 10px; }
+.privacy-exceptions__list {
+  max-height: 50dvh;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+}
+.privacy-exceptions__list .radio-card { margin-bottom: 8px; }
+
 /* ---------- 12. 助手補充 ---------- */
 .vtn-ai-status {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 2px 8px; border-radius: 999px;
   background: rgba(255,255,255,.18); color: #F4F8F1;
-  font-size: .68rem; font-weight: 700; white-space: nowrap;
+  font-size: var(--fs-min); font-weight: 700; white-space: nowrap;
 }
 .vtn-ai-status--offline { background: #8E3B2E; }
 .vtn-ai-status--degraded { background: #8A6414; }
@@ -3118,7 +3174,7 @@ html[data-font-size="xl"] { font-size: 22px; }
   opacity: .55; pointer-events: none; text-decoration: line-through;
   background: var(--sage-wash); color: var(--muted); border-color: var(--hairline);
 }
-.vtn-ai-chip__note { font-size: .68rem; color: var(--muted); }
+.vtn-ai-chip__note { font-size: var(--fs-min); color: var(--muted); }
 .vtn-ai-fab-badge { display: none !important; }
 
 /* ---------- 13. 深色模式（文字對比 ≥ 4.5:1） ---------- */
@@ -3348,7 +3404,7 @@ html[data-reduce-motion="true"] *::after {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--muted);
@@ -3399,7 +3455,7 @@ html[data-reduce-motion="true"] *::after {
   border-color: var(--forest);
   color: #F6F1E6;
 }
-.atlas-btn--3d span { font-size: 0.78rem; letter-spacing: 0.04em; }
+.atlas-btn--3d span { font-size: var(--fs-min); letter-spacing: 0.04em; }
 
 .atlas__searchrow { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 10px; }
 .atlas__search {
@@ -3416,7 +3472,7 @@ html[data-reduce-motion="true"] *::after {
   box-shadow: 0 10px 24px -18px rgba(33, 69, 58, 0.65);
   color: var(--muted);
 }
-.atlas__search i { font-size: 0.82rem; flex: none; }
+.atlas__search i { font-size: var(--fs-min); flex: none; }
 .atlas__search input {
   flex: 1 1 auto;
   min-width: 0;
@@ -3456,7 +3512,7 @@ html[data-reduce-motion="true"] *::after {
   border-radius: 999px;
   background: #B4552F;
   color: #fff;
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   box-shadow: 0 0 0 2px var(--ivory);
 }
@@ -3464,7 +3520,7 @@ html[data-reduce-motion="true"] *::after {
 .atlas__top .filter-summary__chip {
   min-height: 30px;
   background: rgba(253, 251, 244, 0.94);
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
 }
 
 /* ---------- 類型圖例（可點擊篩選） ---------- */
@@ -3491,7 +3547,7 @@ html[data-reduce-motion="true"] *::after {
   border: 1px solid var(--hairline);
   border-radius: 999px;
   background: rgba(253, 251, 244, 0.88);
-  font-size: 0.68rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   color: var(--forest-deep);
 }
@@ -3507,7 +3563,7 @@ html[data-reduce-motion="true"] *::after {
   background: rgba(253, 251, 244, 0.9);
   color: var(--ink-body);
   font-family: inherit;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
@@ -3523,9 +3579,9 @@ html[data-reduce-motion="true"] *::after {
   height: 24px;
   border-radius: 50%;
   color: #FDFBF4;
-  font-size: 0.66rem;
+  font-size: var(--fs-min);
 }
-.legend-chip__count { font-size: 0.66rem; opacity: 0.62; font-variant-numeric: tabular-nums; }
+.legend-chip__count { font-size: var(--fs-min); opacity: 0.62; font-variant-numeric: tabular-nums; }
 .legend-chip[aria-pressed="true"] {
   background: var(--forest);
   border-color: var(--forest);
@@ -3553,7 +3609,7 @@ html[data-reduce-motion="true"] *::after {
   border-radius: 13px;
   background: rgba(253, 251, 244, 0.94);
   color: var(--forest-deep);
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   cursor: pointer;
   backdrop-filter: blur(8px);
   box-shadow: 0 8px 20px -14px rgba(33, 69, 58, 0.75);
@@ -3591,13 +3647,13 @@ html[data-reduce-motion="true"] *::after {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  font-size: 0.7rem;
+  font-size: var(--fs-min);
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
 .atlas__timeline-head b {
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   letter-spacing: 0.02em;
   color: var(--forest);
   font-variant-numeric: tabular-nums;
@@ -3644,7 +3700,7 @@ html[data-reduce-motion="true"] *::after {
   display: flex;
   justify-content: space-between;
   margin-top: -2px;
-  font-size: 0.6rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
@@ -3690,12 +3746,12 @@ html[data-reduce-motion="true"] *::after {
   height: 32px;
   border-radius: 10px;
   color: #FDFBF4;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
 }
 .peek-card__body { min-width: 0; }
 .peek-card__title {
   display: block;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   line-height: 1.35;
   white-space: nowrap;
@@ -3705,7 +3761,7 @@ html[data-reduce-motion="true"] *::after {
 .peek-card__meta {
   display: block;
   margin-top: 1px;
-  font-size: 0.64rem;
+  font-size: var(--fs-min);
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -3718,13 +3774,13 @@ html[data-reduce-motion="true"] *::after {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: rgba(246, 241, 230, 0.86);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
-.atlas__privacy i { font-size: 0.62rem; }
+.atlas__privacy i { font-size: var(--fs-min); }
 
 .atlas__meta {
   display: flex;
@@ -3736,7 +3792,7 @@ html[data-reduce-motion="true"] *::after {
 .atlas__tiles {
   margin: 0;
   max-width: 96%;
-  font-size: 0.5rem;
+  font-size: var(--fs-min);
   line-height: 1.35;
   text-align: center;
   color: rgba(246, 241, 230, 0.78);
@@ -3759,7 +3815,7 @@ html[data-reduce-motion="true"] *::after {
   background: rgba(253, 251, 244, 0.96);
   border: 1px solid var(--hairline);
   color: var(--forest-deep);
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   white-space: nowrap;
   box-shadow: 0 12px 30px -18px rgba(33, 69, 58, 0.8);
@@ -3860,7 +3916,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 }
 .vtn-pin__disc i {
   transform: rotate(45deg);
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
 }
 .vtn-pin:hover .vtn-pin__disc,
 .vtn-pin:focus-visible .vtn-pin__disc { transform: rotate(-45deg) translate(2px, -2px) scale(1.08); }
@@ -3883,7 +3939,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   border-radius: 999px;
   background: #B4552F;
   color: #FDFBF4;
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   font-weight: 800;
   line-height: 1;
 }
@@ -3902,7 +3958,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   border-radius: 999px;
   background: rgba(28, 48, 38, 0.92);
   color: #F6F1E6;
-  font-size: 0.68rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
@@ -3976,7 +4032,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   font-weight: 900;
   color: var(--ink);
 }
-.atlas-listview__sub { margin: 2px 0 0; font-size: 0.76rem; color: var(--muted); }
+.atlas-listview__sub { margin: 2px 0 0; font-size: var(--fs-min); color: var(--muted); }
 .atlas-listview .result-count { margin: 8px 20px 0; }
 .atlas-listview .story-list { margin-top: 10px; }
 .atlas-listview .disclosure-card { margin-top: 18px; }
@@ -3990,7 +4046,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -4012,8 +4068,8 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   color: var(--pin-color, #6F7D70);
   background: rgba(255, 255, 255, 0.55);
 }
-.story-item .tag--type i { font-size: 0.66rem; }
-.story-item .mood-tag { font-size: 0.68rem; padding: 1px 8px; }
+.story-item .tag--type i { font-size: var(--fs-min); }
+.story-item .mood-tag { font-size: var(--fs-min); padding: 1px 8px; }
 
 /* ---------- 半拉抽屜 ---------- */
 .story-sheet__scrim {
@@ -4118,7 +4174,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   font-weight: 800;
   letter-spacing: 0.05em;
   color: var(--muted);
@@ -4134,7 +4190,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 }
 .sheet-hero__sub {
   margin: 4px 0 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   line-height: 1.5;
   color: var(--muted);
 }
@@ -4154,7 +4210,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   border: 1.5px solid var(--mood-color, #8C7A5B);
   background: rgba(255, 255, 255, 0.5);
   color: #5A4A30;
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   font-weight: 800;
 }
 .mood-tag__dot {
@@ -4265,16 +4321,16 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   justify-content: space-between;
   gap: 8px;
   margin-top: 7px;
-  font-size: 0.66rem;
+  font-size: var(--fs-min);
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 .player__now { font-weight: 800; color: var(--forest); }
-.player__note { font-size: 0.64rem; color: var(--muted); }
+.player__note { font-size: var(--fs-min); color: var(--muted); }
 .player--noaudio {
   display: block;
   padding: 12px 14px;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   line-height: 1.6;
   color: var(--muted);
   background: var(--sage-wash);
@@ -4290,7 +4346,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 }
 .story-sheet .story-detail__actions .vtn-btn {
   min-height: 42px;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   padding: 0 10px;
 }
 .story-sheet .story-detail__actions .vtn-btn--solid { grid-column: span 2; }
@@ -4312,7 +4368,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 }
 .story-sheet__section-title {
   margin: 0;
-  font-size: 0.76rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   letter-spacing: 0.06em;
   color: var(--muted);
@@ -4322,7 +4378,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   background: transparent;
   color: var(--forest);
   font-family: inherit;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   font-weight: 800;
   cursor: pointer;
   padding: 4px 0;
@@ -4333,8 +4389,8 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.5);
 }
-.story-sheet .segment__text { font-size: 0.86rem; line-height: 1.7; }
-.story-sheet .segment__t { font-size: 0.64rem; }
+.story-sheet .segment__text { font-size: var(--fs-min); line-height: 1.7; }
+.story-sheet .segment__t { font-size: var(--fs-min); }
 .story-sheet .segment.is-collapsed { display: none; }
 .story-sheet .story-detail__note {
   margin: 12px 0 0;
@@ -4342,15 +4398,15 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   border-radius: 12px;
   background: var(--gold-pale);
   color: #6B5326;
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
 }
 .story-sheet .story-detail__empty {
   margin-top: 12px;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
 }
 .story-sheet__note {
   margin: 14px 0 0;
-  font-size: 0.68rem;
+  font-size: var(--fs-min);
   line-height: 1.6;
   color: var(--muted);
 }
@@ -4373,7 +4429,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 .page--stories .filter-panel .chip {
   min-height: 38px;
   padding: 6px 13px;
-  font-size: 0.84rem;
+  font-size: var(--fs-min);
 }
 .filter-panel__head {
   position: sticky;
@@ -4419,7 +4475,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
 .atlas__canvas .maplibregl-ctrl-attrib,
 .atlas__canvas .leaflet-control-attribution {
   background: rgba(253, 251, 244, 0.72);
-  font-size: 0.52rem;
+  font-size: var(--fs-min);
   color: #6f7d70;
   padding: 2px 6px;
   border-radius: 6px;
@@ -4500,7 +4556,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 <div class="app-shell" id="appShell">
 
     <header class="topbar">
-      <img class="topbar__logo" src="assets/app-icon.png" alt="Voices of the North 標誌" width="40" height="40">
+      <img class="topbar__logo" src="assets/app-icon.png" data-i18n-alt="app.logoAlt" alt="Voices of the North" width="40" height="40">
       <span class="topbar__title">北部都會區 <span class="topbar__dot" aria-hidden="true">・</span> 鄉村故事館</span>
       <span class="topbar__spacer" aria-hidden="true"></span>
       <button type="button" class="ai-status ai-status--offline" id="aiStatusBtn"
@@ -4543,6 +4599,8 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         <span class="cta-card__sub" data-i18n="home.ctaSub">首次錄音可先聽示範</span>
       </button>
 
+      <p class="me-section-title home-section-title" data-i18n="home.demoStories">示範故事</p>
+
       <section class="featured" aria-labelledby="featuredTitle">
         <div class="featured__head">
           <h2 class="featured__title" id="featuredTitle" data-i18n="home.featured">精選故事</h2>
@@ -4551,7 +4609,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         <div id="featuredStory"></div>
       </section>
 
-      <div class="trust-bar" role="note" aria-label="我們的承諾">
+      <div class="trust-bar" role="note" data-i18n-aria="aria.homeTrust">
         <span class="trust-bar__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
@@ -4581,7 +4639,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       </section>
 
       <section class="rec-tabs">
-        <div class="tabs" role="tablist" aria-label="錄音狀態分類">
+        <div class="tabs" role="tablist" data-i18n-aria="aria.recTabs">
           <button type="button" class="tabs__btn is-active" role="tab"
                   id="tab-drafts" aria-controls="panel-drafts" aria-selected="true" tabindex="0">
             <span data-i18n="rec.tabDraft">草稿</span><span class="tab-count" id="countDrafts" hidden>0</span>
@@ -4628,7 +4686,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 
       <p class="settings-foot" id="recStorageNote" hidden></p>
 
-      <div class="trust-bar" role="note" aria-label="私隱承諾">
+      <div class="trust-bar" role="note" data-i18n-aria="aria.recTrust">
         <span class="trust-bar__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
@@ -4648,9 +4706,9 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       <!-- 地圖主視圖：故事點＝一級資訊，列表降級為模式切換 -->
       <div class="atlas" id="storyAtlas">
         <img class="atlas__fallback" src="assets/map-blurred.svg"
-             alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，只作示意並非 GPS 定位。">
+             data-i18n-alt="atlas.fallbackAlt" alt="">
         <div class="atlas__canvas" id="vtnMap" role="application"
-             aria-label="故事地圖：顯示約 800 米模糊範圍內的故事，並非講者精確位置"></div>
+             data-i18n-aria="aria.mapApp"></div>
         <div class="atlas__tint" aria-hidden="true"></div>
 
         <header class="atlas__top">
@@ -4664,16 +4722,16 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
           <div class="atlas__tools">
             <!-- 列表入口固定可見：不是只有地圖降級時才出現的後備按鈕 -->
             <button type="button" class="atlas-btn atlas-btn--list" id="atlasViewBtn" aria-pressed="false"
-                    aria-label="切換列表模式" data-i18n-aria="atlas.listAria" title="列表模式">
+                    data-i18n-aria="atlas.listAria" data-i18n-title="atlas.listModeTitle">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
               <span data-i18n="atlas.listShort">列表</span>
             </button>
             <button type="button" class="atlas-btn" id="atlasSceneBtn"
-                    aria-label="3D 示範書籤" data-i18n-aria="atlas.sceneAria" title="3D 示範書籤">
+                    data-i18n-aria="atlas.sceneAria" data-i18n-title="atlas.sceneTitle">
               <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
             </button>
             <button type="button" class="atlas-btn atlas-btn--3d" id="atlas3dBtn" aria-pressed="false"
-                    aria-label="切換 3D 立體地圖" data-i18n-aria="atlas.3dAria" title="3D 立體">
+                    data-i18n-aria="atlas.3dAria" data-i18n-title="atlas.threeDTitle">
               <span>3D</span>
             </button>
           </div>
@@ -4693,7 +4751,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
           <div class="filter-summary" id="filterSummary"></div>
 
           <div class="atlas__legend" id="atlasLegend" role="group"
-               aria-label="故事類型圖例" data-i18n-aria="atlas.legendAria"></div>
+               data-i18n-aria="atlas.legendAria"></div>
           <div class="atlas__viewport" id="atlasViewport" hidden>
             <i class="fa-solid fa-eye" aria-hidden="true"></i>
             <span id="atlasViewportText"></span>
@@ -4701,14 +4759,14 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         </header>
 
         <div class="atlas__controls">
-          <button type="button" class="atlas-ctl" id="atlasZoomIn" aria-label="放大" data-i18n-aria="atlas.zoomIn">
+          <button type="button" class="atlas-ctl" id="atlasZoomIn" data-i18n-aria="atlas.zoomIn">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
           </button>
-          <button type="button" class="atlas-ctl" id="atlasZoomOut" aria-label="縮小" data-i18n-aria="atlas.zoomOut">
+          <button type="button" class="atlas-ctl" id="atlasZoomOut" data-i18n-aria="atlas.zoomOut">
             <i class="fa-solid fa-minus" aria-hidden="true"></i>
           </button>
           <button type="button" class="atlas-ctl atlas-ctl--reset" id="atlasRecenter"
-                  aria-label="重設視角" data-i18n-aria="atlas.reset">
+                  data-i18n-aria="atlas.reset">
             <i class="fa-solid fa-compass" aria-hidden="true"></i>
           </button>
         </div>
@@ -4729,7 +4787,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
               <b id="atlasEraLabel">全部</b>
             </div>
             <input type="range" id="atlasEra" min="0" max="4" step="1" value="4"
-                   aria-label="故事年代" data-i18n-aria="atlas.eraAria">
+                   data-i18n-aria="atlas.eraAria">
             <div class="atlas__ticks" id="atlasTicks" aria-hidden="true"></div>
           </div>
           <div class="atlas__meta">
@@ -4742,11 +4800,11 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         </div>
       </div>
 
-      <section class="filter-panel" id="filterPanel" hidden aria-label="篩選故事">
+      <section class="filter-panel" id="filterPanel" hidden data-i18n-aria="aria.filterPanel">
         <div class="filter-panel__head">
           <p class="filter-panel__title" data-i18n="stories.filter">篩選</p>
           <button type="button" class="filter-panel__close" id="filterClose"
-                  aria-label="關閉" data-i18n-aria="common.close">
+                  data-i18n-aria="common.close">
             <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           </button>
         </div>
@@ -4782,10 +4840,10 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         </div>
       </section>
 
-      <section class="atlas-listview" id="atlasList" hidden aria-label="故事列表">
+      <section class="atlas-listview" id="atlasList" hidden data-i18n-aria="aria.storyList">
         <div class="atlas-listview__head">
           <button type="button" class="atlas-listview__back" id="atlasListBack"
-                  aria-label="返回地圖" data-i18n-aria="atlas.backToMap">
+                  data-i18n-aria="atlas.backToMap">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           </button>
           <div class="atlas-listview__heading">
@@ -4804,12 +4862,12 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
           <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
         </section>
 
-        <aside class="disclosure-card" role="note" aria-label="示範故事披露">
+        <aside class="disclosure-card" role="note" data-i18n-aria="stories.disclosureAria">
           <span class="disclosure-card__icon" aria-hidden="true">
             <i class="fa-solid fa-circle-info"></i>
           </span>
           <div class="disclosure-card__body">
-            <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
+            <p class="disclosure-card__en" data-i18n="stories.disclosureEn">Role-played demo stories — created for hackathon demonstration purposes.</p>
             <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
           </div>
         </aside>
@@ -4818,14 +4876,14 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       <!-- 二級故事頁：半拉抽屜（預設半開，可上拉全開） -->
       <div class="story-sheet__scrim" id="sheetScrim" hidden></div>
       <section class="story-sheet" id="storySheet" hidden role="dialog" aria-modal="false"
-               aria-label="故事詳情" data-i18n-aria="atlas.sheetAria">
+               data-i18n-aria="atlas.sheetAria">
         <div class="story-sheet__grab" id="sheetGrab" aria-hidden="true"><span></span></div>
         <button type="button" class="story-sheet__close" id="sheetClose"
-                aria-label="關閉" data-i18n-aria="common.close">
+                data-i18n-aria="common.close">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
         <div class="story-sheet__body" id="storySheetBody">
-          <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
+          <section class="story-detail" id="storyDetail" hidden data-i18n-aria="aria.storyDetail"></section>
         </div>
       </section>
     </main>
@@ -4847,7 +4905,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         </div>
       </section>
 
-      <section class="account-card" aria-label="帳戶">
+      <section class="account-card" data-i18n-aria="aria.account">
         <span class="account-card__avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
         <div class="account-card__body">
           <p class="account-card__role" id="accountRole">訪客</p>
@@ -4862,7 +4920,9 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         <div class="stat"><span class="stat__num" id="statShared">0</span><span class="stat__label" data-i18n="me.statShared">已分享</span></div>
       </div>
 
-      <section class="me-list" aria-label="個人內容與私隱管理">
+      <p class="me-section-title" data-i18n="aria.meList">個人內容與私隱管理</p>
+
+      <section class="me-list" data-i18n-aria="aria.meList">
         <button type="button" class="me-item" id="meEntryRecordings">
           <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-microphone"></i></span>
           <span class="me-item__text">
@@ -4917,7 +4977,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
           <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
         </button>
 
-        <div class="me-note" role="note" aria-label="模糊地點說明">
+        <div class="me-note" role="note" data-i18n-aria="aria.meNote">
           <span class="me-note__pin" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
           <span class="me-note__divider" aria-hidden="true"></span>
           <p class="me-note__text" data-i18n="me.locationNote">故事地點以模糊範圍呈現，保護講述者私隱。</p>
@@ -4952,7 +5012,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
             <span class="setting-row__hint" data-i18n="settings.fontSizeHint">正文最小 18px，照顧長者閱讀</span>
           </div>
           <div class="setting-row__control">
-            <div class="seg" role="group" aria-label="字級">
+            <div class="seg" role="group" data-i18n-aria="aria.fontSize">
               <button type="button" class="seg__btn" data-font-size="md" data-i18n="settings.fontMd">標準</button>
               <button type="button" class="seg__btn" data-font-size="lg" data-i18n="settings.fontLg">大</button>
               <button type="button" class="seg__btn" data-font-size="xl" data-i18n="settings.fontXl">特大</button>
@@ -4966,7 +5026,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
             <span class="setting-row__hint" data-i18n="settings.themeHint">淺色、深色或跟隨系統</span>
           </div>
           <div class="setting-row__control">
-            <select id="setTheme" aria-label="主題">
+            <select id="setTheme" data-i18n-aria="aria.theme">
               <option value="system" data-i18n="settings.themeSystem">跟隨系統</option>
               <option value="light" data-i18n="settings.themeLight">淺色</option>
               <option value="dark" data-i18n="settings.themeDark">深色</option>
@@ -5004,7 +5064,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
             <span class="setting-row__hint" data-i18n="settings.volumeHint">套用到所有故事與錄音</span>
           </div>
           <div class="setting-row__control">
-            <input type="range" id="setVolume" min="0" max="100" step="5" value="100" aria-label="播放音量">
+            <input type="range" id="setVolume" min="0" max="100" step="5" value="100" data-i18n-aria="aria.volume">
             <output id="setVolumeOut" for="setVolume">100%</output>
           </div>
         </div>
@@ -5015,7 +5075,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
             <span class="setting-row__hint" data-i18n="settings.speedHint">慢速有助聽清長者口音</span>
           </div>
           <div class="setting-row__control">
-            <select id="setSpeed" aria-label="播放速度">
+            <select id="setSpeed" data-i18n-aria="aria.speed">
               <option value="0.75">0.75×</option>
               <option value="1">1.00×</option>
               <option value="1.25">1.25×</option>
@@ -5074,7 +5134,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 
       <section class="about-section">
         <h2 data-i18n="about.dataTitle">數據來源與授權</h2>
-        <p data-i18n="about.dataBody">本演示收錄 8 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。唯一真實音軌為 Boris Lau 的示範錄音（約 46.7 秒），其餘故事只有逐字稿，介面會如實標示「未附音檔」。</p>
+        <p id="aboutDataBody">—</p>
       </section>
 
       <section class="about-section">
@@ -5110,7 +5170,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       </section>
     </main>
 
-    <nav class="bottom-nav" aria-label="主導航">
+    <nav class="bottom-nav" data-i18n-aria="aria.nav">
       <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
         <span class="bottom-nav__icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
         <span class="bottom-nav__label" data-i18n="nav.home">主頁</span>
@@ -5563,7 +5623,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
       'scope.label': '分享範圍：{scope}',
       'scope.title': '設定分享範圍',
-      'scope.intro': '「{title}」目前嘅分享範圍如下。預設私人，只有你睇到。',
+      'scope.intro': '「{title}」目前嘅分享範圍如下；改動即時生效，並會記錄同意與稽核。',
       'scope.auditNote': '每次更改都會記錄同意版本（{version}）與稽核日誌；伺服器亦會按範圍過濾。',
       'scope.saved': '分享範圍已改為「{scope}」。',
       'scope.private': '私人',
@@ -5696,7 +5756,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'me.recordings': '我的錄音與故事',
       'me.recordingsSub': '查看草稿、待轉寫與已完成內容',
       'me.privacy': '隱私與分享範圍',
-      'me.privacySub': '私人・家人・社區・公開（預設私人）',
+      'me.privacySub': '私人・家人・社區・公開（新增內容預設私人）',
       'me.correction': '更正或撤回故事',
       'me.correctionSub': '申請更正（審核後成新版本）或整則撤回',
       'me.export': '匯出我的音訊與逐字稿',
@@ -5749,7 +5809,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'auth.logoutDone': '已登出，現以訪客身份使用。',
 
       'privacy.title': '隱私與分享範圍',
-      'privacy.intro': '每則故事同錄音都可以獨立設定分享範圍。預設私人，改動即時生效。',
+      'privacy.intro': '用一個預設範圍管理全部內容，只有需要不同的項目才加入例外清單；改動即時生效。',
       'privacy.serverNote': '伺服器會按分享範圍過濾 API 結果；撤回或改回私人後，其他瀏覽方式亦唔會再見到。',
       'privacy.empty': '暫時未有可設定嘅故事或已完成錄音。',
       'privacy.storyHint': '示範故事',
@@ -5867,12 +5927,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'about.team4': 'Douglas — 業務發展與社區聯絡',
       'about.team5': 'Dat — 用戶測試與合規審視',
       'about.dataTitle': '數據來源與授權',
-      'about.dataBody': '本演示收錄 8 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。唯一真實音軌為 Boris Lau 的示範錄音（約 46.7 秒），其餘故事只有逐字稿，介面會如實標示「未附音檔」。',
+      'about.dataBody': '本演示收錄 {n} 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。{audio} 則附有 Boris Lau 的真實示範音軌，合計約 {duration} 秒；其餘故事只有逐字稿，介面會如實標示「未附音檔」。',
       'about.aiTitle': 'AI 做什麼、不做什麼',
       'about.aiDoes': '做：將已授權的粵語錄音轉成逐字稿、標出逐詞時間戳、按你嘅問題檢索相關段落，並附上可核對的來源時間戳。',
       'about.aiDoesNot': '不做：不替長者發言、不補寫錄音以外嘅內容、不用外部知識回答、不在無來源時亂答。範圍外一律回答「錄製的故事中未包含此資訊」。',
       'about.privacyTitle': '私隱與模糊定位',
-      'about.privacyBody': '故事只以約 800 米模糊範圍呈現，並非講者 GPS 位置；不設精確標記。分享範圍分私人、家人、社區、公開四級，預設私人，每則故事可獨立設定。伺服器會按分享範圍過濾，唔止喺前端隱藏。',
+      'about.privacyBody': '故事只以約 800 米模糊範圍呈現，並非講者 GPS 位置；不設精確標記。分享範圍分私人、家人、社區、公開四級；新增內容預設私人，示範故事為演示預設社區，唔代表真實長者授權，每則故事仍可獨立設定。伺服器會按分享範圍過濾，唔止喺前端隱藏。',
       'about.redlineTitle': '五條誠實紅線',
       'about.redline1': '答案只來自已錄製並獲授權的內容。',
       'about.redline2': '在範圍內的答案必須附時間戳出處。',
@@ -5940,6 +6000,45 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'era.1960s': '1960 年代',
       'era.1970s': '1970 年代',
       'era.1980s': '1980 年代',
+
+      /* ---- 11.08 修復：讀屏標籤、區塊小標題、披露卡、私隱預設 ---- */
+      'app.logoAlt': 'Voices of the North 標誌',
+      'atlas.fallbackAlt': '手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，只作示意並非 GPS 定位。',
+      'atlas.listModeTitle': '列表模式',
+      'atlas.sceneTitle': '3D 示範書籤',
+      'atlas.threeDTitle': '3D 立體',
+
+      'aria.homeTrust': '我們的承諾',
+      'aria.recTabs': '錄音狀態分類',
+      'aria.recTrust': '私隱承諾',
+      'aria.mapApp': '故事地圖：顯示約 800 米模糊範圍內的故事，並非講者精確位置',
+      'aria.filterPanel': '篩選故事',
+      'aria.storyList': '故事列表',
+      'aria.storyDetail': '故事詳情',
+      'aria.account': '帳戶',
+      'aria.meList': '個人內容與私隱管理',
+      'aria.meNote': '模糊地點說明',
+      'aria.fontSize': '字級',
+      'aria.theme': '主題',
+      'aria.volume': '播放音量',
+      'aria.speed': '播放速度',
+      'aria.nav': '主導航',
+
+      'home.demoStories': '示範故事',
+      'stories.disclosureEn': '角色扮演示範故事 — 只作黑客松演示用途。',
+      'stories.disclosureAria': '示範故事披露',
+
+      'privacy.preset': '預設分享範圍',
+      'privacy.presetHint': '新增內容會以此範圍儲存；預設私人，只有你睇到。',
+      'privacy.exceptions': '例外項目 ({n})',
+      'privacy.exceptionsHint': '只列出與預設不同的項目；其餘全部跟隨預設。',
+      'privacy.exceptionsEmpty': '目前沒有例外，全部內容跟隨預設。',
+      'privacy.applyAll': '套用到全部',
+      'privacy.resetExceptions': '重設所有例外',
+      'privacy.applyAllDone': '已把全部項目套用為「{scope}」。',
+      'privacy.resetDone': '已重設所有例外。',
+      'privacy.defaultNote': '新增內容預設私人。',
+      'privacy.demoNote': '示範故事為演示預設社區，不代表真實長者授權。',
 
       'lang.yue': '粵語（香港）'
     },
@@ -6110,7 +6209,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
       'scope.label': '分享范围：{scope}',
       'scope.title': '设置分享范围',
-      'scope.intro': '「{title}」目前的分享范围如下。默认私人，只有你看到。',
+      'scope.intro': '「{title}」目前的分享范围如下；改动即时生效，并会记录同意与审计。',
       'scope.auditNote': '每次更改都会记录同意版本（{version}）与审计日志；服务器也会按范围过滤。',
       'scope.saved': '分享范围已改为「{scope}」。',
       'scope.private': '私人',
@@ -6243,7 +6342,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'me.recordings': '我的录音与故事',
       'me.recordingsSub': '查看草稿、待转写与已完成内容',
       'me.privacy': '隐私与分享范围',
-      'me.privacySub': '私人・家人・社区・公开（默认私人）',
+      'me.privacySub': '私人・家人・社区・公开（新增内容默认私人）',
       'me.correction': '更正或撤回故事',
       'me.correctionSub': '申请更正（审核后成新版本）或整则撤回',
       'me.export': '导出我的音频与逐字稿',
@@ -6296,7 +6395,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'auth.logoutDone': '已登出，现以访客身份使用。',
 
       'privacy.title': '隐私与分享范围',
-      'privacy.intro': '每则故事与录音都可以独立设置分享范围。默认私人，改动即时生效。',
+      'privacy.intro': '用一个预设范围管理全部内容，只有需要不同的项目才加入例外清单；改动即时生效。',
       'privacy.serverNote': '服务器会按分享范围过滤 API 结果；撤回或改回私人后，其他浏览方式也不会再看到。',
       'privacy.empty': '暂时没有可设置的故事或已完成录音。',
       'privacy.storyHint': '示范故事',
@@ -6414,12 +6513,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'about.team4': 'Douglas — 业务发展与社区联络',
       'about.team5': 'Dat — 用户测试与合规审视',
       'about.dataTitle': '数据来源与授权',
-      'about.dataBody': '本演示收录 8 则故事，全部标记为「角色扮演示范故事」，由团队撰写，并非真实长者访谈。每则故事都记录授权标记与同意记录编号（consentRef）；只有已授权内容会进入问答索引。唯一真实音轨为 Boris Lau 的示范录音（约 46.7 秒），其余故事只有逐字稿，界面会如实标示「未附音频」。',
+      'about.dataBody': '本演示收录 {n} 则故事，全部标记为「角色扮演示范故事」，由团队撰写，并非真实长者访谈。每则故事都记录授权标记与同意记录编号（consentRef）；只有已授权内容会进入问答索引。{audio} 则附有 Boris Lau 的真实示范音轨，合计约 {duration} 秒；其余故事只有逐字稿，界面会如实标示「未附音频」。',
       'about.aiTitle': 'AI 做什么、不做什么',
       'about.aiDoes': '做：将已授权的粤语录音转成逐字稿、标出逐词时间戳、按你的问题检索相关段落，并附上可核对的来源时间戳。',
       'about.aiDoesNot': '不做：不替长者发言、不补写录音以外的内容、不用外部知识回答、不在无来源时乱答。范围外一律回答「录制的故事中未包含此信息」。',
       'about.privacyTitle': '隐私与模糊定位',
-      'about.privacyBody': '故事只以约 800 米模糊范围呈现，并非讲者 GPS 位置；不设精确标记。分享范围分私人、家人、社区、公开四级，默认私人，每则故事可独立设置。服务器会按分享范围过滤，不只在前端隐藏。',
+      'about.privacyBody': '故事只以约 800 米模糊范围呈现，并非讲者 GPS 位置；不设精确标记。分享范围分私人、家人、社区、公开四级；新增内容默认私人，示范故事为演示默认社区，不代表真实长者授权，每则故事仍可独立设置。服务器会按分享范围过滤，不只在前端隐藏。',
       'about.redlineTitle': '五条诚实红线',
       'about.redline1': '答案只来自已录制并获授权的内容。',
       'about.redline2': '在范围内的答案必须附时间戳出处。',
@@ -6487,6 +6586,45 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'era.1960s': '1960 年代',
       'era.1970s': '1970 年代',
       'era.1980s': '1980 年代',
+
+      /* ---- 11.08 修复：读屏标签、区块小标题、披露卡、隐私预设 ---- */
+      'app.logoAlt': 'Voices of the North 标志',
+      'atlas.fallbackAlt': '手绘示意图：用虚线圆圈标示约 800 米模糊范围，仅作示意并非 GPS 定位。',
+      'atlas.listModeTitle': '列表模式',
+      'atlas.sceneTitle': '3D 演示书签',
+      'atlas.threeDTitle': '3D 立体',
+
+      'aria.homeTrust': '我们的承诺',
+      'aria.recTabs': '录音状态分类',
+      'aria.recTrust': '隐私承诺',
+      'aria.mapApp': '故事地图：显示约 800 米模糊范围内的故事，并非讲者精确位置',
+      'aria.filterPanel': '筛选故事',
+      'aria.storyList': '故事列表',
+      'aria.storyDetail': '故事详情',
+      'aria.account': '账户',
+      'aria.meList': '个人内容与隐私管理',
+      'aria.meNote': '模糊地点说明',
+      'aria.fontSize': '字号',
+      'aria.theme': '主题',
+      'aria.volume': '播放音量',
+      'aria.speed': '播放速度',
+      'aria.nav': '主导航',
+
+      'home.demoStories': '示范故事',
+      'stories.disclosureEn': '角色扮演示范故事 — 仅作黑客松演示用途。',
+      'stories.disclosureAria': '示范故事披露',
+
+      'privacy.preset': '预设分享范围',
+      'privacy.presetHint': '新增内容会以此范围保存；默认私人，只有你看到。',
+      'privacy.exceptions': '例外项目 ({n})',
+      'privacy.exceptionsHint': '只列出与预设不同的项目；其余全部跟随预设。',
+      'privacy.exceptionsEmpty': '目前没有例外，全部内容跟随预设。',
+      'privacy.applyAll': '套用到全部',
+      'privacy.resetExceptions': '重置所有例外',
+      'privacy.applyAllDone': '已把全部项目套用为「{scope}」。',
+      'privacy.resetDone': '已重置所有例外。',
+      'privacy.defaultNote': '新增内容默认私人。',
+      'privacy.demoNote': '示范故事为演示默认社区，不代表真实长者授权。',
 
       'lang.yue': '粤语（香港）'
     },
@@ -6657,7 +6795,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
       'scope.label': 'Sharing: {scope}',
       'scope.title': 'Sharing scope',
-      'scope.intro': 'Current sharing scope for “{title}”. Private by default — only you can see it.',
+      'scope.intro': 'Current sharing scope for “{title}”. Changes take effect immediately and are logged in the consent and audit records.',
       'scope.auditNote': 'Every change records the consent version ({version}) and an audit entry; the server also filters by scope.',
       'scope.saved': 'Sharing scope changed to “{scope}”.',
       'scope.private': 'Private',
@@ -6790,7 +6928,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'me.recordings': 'My recordings & stories',
       'me.recordingsSub': 'Drafts, pending and finished recordings',
       'me.privacy': 'Privacy & sharing',
-      'me.privacySub': 'Private · Family · Community · Public (private by default)',
+      'me.privacySub': 'Private · Family · Community · Public (new content is private)',
       'me.correction': 'Correct or withdraw',
       'me.correctionSub': 'Request a correction (reviewed into a new version) or withdraw',
       'me.export': 'Export my audio & transcript',
@@ -6843,7 +6981,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'auth.logoutDone': 'Signed out. You are now browsing as a visitor.',
 
       'privacy.title': 'Privacy & sharing',
-      'privacy.intro': 'Each story and recording has its own sharing scope. Private by default; changes take effect immediately.',
+      'privacy.intro': 'One default scope manages everything; only items that need a different scope go into the exception list. Changes take effect immediately.',
       'privacy.serverNote': 'The server filters API results by scope. Withdrawn or private items are not accessible through other views either.',
       'privacy.empty': 'No stories or finished recordings to configure yet.',
       'privacy.storyHint': 'Demo story',
@@ -6961,12 +7099,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'about.team4': 'Douglas — Business development and community liaison',
       'about.team5': 'Dat — User testing and compliance review',
       'about.dataTitle': 'Data sources and authorisation',
-      'about.dataBody': 'This demo contains 8 stories, all marked “role-played demo”, written by the team and not real elder interviews. Each story records an authorisation flag and a consent reference (consentRef); only authorised content enters the Q&A index. The only real audio is Boris Lau’s demo recording (about 46.7 seconds); the other stories have transcripts only and are labelled “no audio”.',
+      'about.dataBody': 'This demo contains {n} stories, all marked “role-played demo”, written by the team and not real elder interviews. Each story records an authorisation flag and a consent reference (consentRef); only authorised content enters the Q&A index. {audio} story has Boris Lau’s real demo recording, about {duration} seconds in total; the others have transcripts only and are labelled “no audio”.',
       'about.aiTitle': 'What the AI does and does not do',
       'about.aiDoes': 'It does: transcribe authorised Cantonese recordings, produce word-level timestamps, retrieve passages relevant to your question, and cite verifiable source timestamps.',
       'about.aiDoesNot': 'It does not: speak for elders, invent content beyond the recording, answer from outside knowledge, or answer without a source. Out-of-scope questions always get “the recorded stories do not contain this information”.',
       'about.privacyTitle': 'Privacy and blurred locations',
-      'about.privacyBody': 'Stories show only an approximate 800 m area, never a GPS position, and there are no precise markers. Sharing has four levels — private, family, community, public — defaulting to private, set per story. The server filters by scope, not just the frontend.',
+      'about.privacyBody': 'Stories show only an approximate 800 m area, never a GPS position, and there are no precise markers. Sharing has four levels — private, family, community, public. New content is private by default; demo stories default to Community for the demo only and do not represent real elders’ consent. Each story can still be set individually. The server filters by scope, not just the frontend.',
       'about.redlineTitle': 'Five honesty red lines',
       'about.redline1': 'Answers come only from recorded, authorised content.',
       'about.redline2': 'In-scope answers always carry a timestamped source.',
@@ -7035,6 +7173,45 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'era.1970s': '1970s',
       'era.1980s': '1980s',
 
+      /* ---- 11.08 fixes: screen-reader labels, section captions, disclosure, privacy preset ---- */
+      'app.logoAlt': 'Voices of the North logo',
+      'atlas.fallbackAlt': 'Sketch map: dashed circles show approximate 800 m areas. Illustration only, not a GPS location.',
+      'atlas.listModeTitle': 'List view',
+      'atlas.sceneTitle': '3D demo bookmark',
+      'atlas.threeDTitle': '3D view',
+
+      'aria.homeTrust': 'Our commitment',
+      'aria.recTabs': 'Recording status tabs',
+      'aria.recTrust': 'Privacy commitment',
+      'aria.mapApp': 'Story map: stories within approximate 800 m areas, not precise narrator locations',
+      'aria.filterPanel': 'Filter stories',
+      'aria.storyList': 'Story list',
+      'aria.storyDetail': 'Story details',
+      'aria.account': 'Account',
+      'aria.meList': 'Personal content and privacy management',
+      'aria.meNote': 'Approximate location note',
+      'aria.fontSize': 'Text size',
+      'aria.theme': 'Theme',
+      'aria.volume': 'Playback volume',
+      'aria.speed': 'Playback speed',
+      'aria.nav': 'Main navigation',
+
+      'home.demoStories': 'Demo stories',
+      'stories.disclosureEn': 'Role-played demo stories — created for hackathon demonstration purposes.',
+      'stories.disclosureAria': 'Demo story disclosure',
+
+      'privacy.preset': 'Default sharing scope',
+      'privacy.presetHint': 'New content uses this scope. Private by default, so only you can see it.',
+      'privacy.exceptions': 'Exceptions ({n})',
+      'privacy.exceptionsHint': 'Only items that differ from the default are listed; everything else follows the default.',
+      'privacy.exceptionsEmpty': 'No exceptions yet — all content follows the default.',
+      'privacy.applyAll': 'Apply to all',
+      'privacy.resetExceptions': 'Reset all exceptions',
+      'privacy.applyAllDone': 'Applied “{scope}” to every item.',
+      'privacy.resetDone': 'All exceptions have been reset.',
+      'privacy.defaultNote': 'New content is private by default.',
+      'privacy.demoNote': 'Demo stories default to Community for the demo only; they do not represent real elders’ consent.',
+
       'lang.yue': 'Cantonese (Hong Kong)'
     }
   };
@@ -7076,6 +7253,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     });
     Array.prototype.forEach.call(scope.querySelectorAll('[data-i18n-aria]'), function (el) {
       el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    Array.prototype.forEach.call(scope.querySelectorAll('[data-i18n-title]'), function (el) {
+      el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+    });
+    Array.prototype.forEach.call(scope.querySelectorAll('[data-i18n-alt]'), function (el) {
+      el.setAttribute('alt', t(el.getAttribute('data-i18n-alt')));
     });
     document.documentElement.setAttribute('lang', LANG_ATTR[current] || 'zh-Hant-HK');
     document.title = t('app.title');
@@ -7529,6 +7712,40 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   /* =========================================================================
+   * 4a. 「一個預設 + 例外清單」所需的四個函式（11.08）
+   * 只讀寫既有的 prefs.scope 與 K.scopes，不更動上面任何儲存邏輯。
+   * ======================================================================= */
+  function scopePreset() {
+    return VTN.SCOPES.indexOf(prefs.scope) === -1 ? 'private' : prefs.scope;
+  }
+
+  function setScopePreset(scope) {
+    if (VTN.SCOPES.indexOf(scope) === -1) return null;
+    var previous = scopePreset();
+    setPref('scope', scope);
+    U.emit('vtn:scope-changed', { id: '*', scope: scope, from: previous });
+    return scope;
+  }
+
+  function scopeExceptions(items) {
+    var preset = scopePreset();
+    return (items || []).filter(function (item) {
+      return item && scopeOverrides[item.id] && scopeOverrides[item.id] !== preset;
+    }).map(function (item) {
+      return { item: item, scope: scopeOverrides[item.id] };
+    });
+  }
+
+  function clearScopeExceptions() {
+    var count = Object.keys(scopeOverrides).length;
+    scopeOverrides = {};
+    rawSet(K.scopes, JSON.stringify(scopeOverrides));
+    addAudit('scope.reset', { cleared: count, to: scopePreset() });
+    U.emit('vtn:scope-changed', { id: '*', scope: scopePreset(), reset: true });
+    return count;
+  }
+
+  /* =========================================================================
    * 4b. 示範故事的更正版本（原文不動，只新增版本；存本機）
    * ======================================================================= */
   var storyPatches = readObject(K.storyPatches, {});
@@ -7788,6 +8005,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     /* 私隱 */
     scopeOf: scopeOf,
     setScope: setScope,
+    scopePreset: scopePreset,
+    setScopePreset: setScopePreset,
+    scopeExceptions: scopeExceptions,
+    clearScopeExceptions: clearScopeExceptions,
     authorizedFor: isAuthorizedForViewer,
     storyPatch: storyPatch,
     addStoryVersion: addStoryVersion,
@@ -8296,8 +8517,18 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     });
 
     var head = U.node('div', { class: 'vtn-modal__head' });
-    var title = U.node('h2', { class: 'vtn-modal__title', id: titleId, text: opts.title || '' });
-    var closeBtn = U.node('button', { class: 'vtn-modal__close', type: 'button', 'aria-label': VTN.i18n.t('common.close') });
+    var title = U.node('h2', {
+      class: 'vtn-modal__title',
+      id: titleId,
+      text: opts.titleKey ? VTN.i18n.t(opts.titleKey) : (opts.title || '')
+    });
+    if (opts.titleKey) title.setAttribute('data-i18n', opts.titleKey);
+    var closeBtn = U.node('button', {
+      class: 'vtn-modal__close',
+      type: 'button',
+      'aria-label': VTN.i18n.t('common.close'),
+      'data-i18n-aria': 'common.close'
+    });
     closeBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
     head.appendChild(title);
     head.appendChild(closeBtn);
@@ -8317,8 +8548,46 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       body: body,
       close: close,
       title: title,
-      setTitle: function (t) { title.textContent = t; }
+      setTitle: function (t) { title.textContent = t; },
+      refresh: refreshDialog
     };
+
+    /* 語言切換時重繪：先保存表單值，讓 i18nRefresh 可以整塊重建內容而不丟失輸入 */
+    function fieldKey(el, index) {
+      if (el.id) return el.id;
+      if (el.type === 'radio') return (el.getAttribute('name') || 'radio') + ':' + el.value;
+      return el.getAttribute('name') || ('#' + index);
+    }
+
+    function formSnapshot(root) {
+      var fields = root.querySelectorAll('input, textarea, select');
+      return Array.prototype.map.call(fields, function (el, index) {
+        return {
+          key: fieldKey(el, index),
+          checked: el.type === 'checkbox' || el.type === 'radio' ? el.checked : null,
+          value: el.value
+        };
+      });
+    }
+
+    function restoreForm(root, snapshot) {
+      var fields = root.querySelectorAll('input, textarea, select');
+      Array.prototype.forEach.call(fields, function (el, index) {
+        var key = fieldKey(el, index);
+        var entry = snapshot.filter(function (item) { return item.key === key; })[0];
+        if (!entry) return;
+        if (entry.checked !== null) el.checked = entry.checked;
+        else el.value = entry.value;
+      });
+    }
+
+    function refreshDialog() {
+      if (closed) return;
+      var snapshot = formSnapshot(modal);
+      if (VTN.i18n && VTN.i18n.apply) VTN.i18n.apply(modal);
+      if (typeof opts.i18nRefresh === 'function') opts.i18nRefresh(controller);
+      restoreForm(modal, snapshot);
+    }
 
     if (opts.actions && opts.actions.length) {
       var foot = U.node('div', { class: 'vtn-modal__foot' });
@@ -8328,8 +8597,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
             action.kind === 'danger' ? 'vtn-btn--danger' :
               action.kind === 'gold' ? 'vtn-btn--gold' : 'vtn-btn--quiet'),
           type: 'button',
-          text: action.label
+          text: action.labelKey ? VTN.i18n.t(action.labelKey) : action.label
         });
+        if (action.labelKey) btn.setAttribute('data-i18n', action.labelKey);
         btn.addEventListener('click', function () {
           if (action.onClick) {
             var result = action.onClick(controller);
@@ -8404,27 +8674,40 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     return new Promise(function (resolve) {
       var decided = false;
       var body = U.node('div');
-      if (options.message) body.appendChild(U.node('p', { text: options.message }));
-      if (options.note) body.appendChild(U.node('p', { class: 'vtn-modal__note', text: options.note }));
-      var dlg = dialog({
-        title: options.title || VTN.i18n.t('common.confirm'),
+      function renderBody() {
+        body.textContent = '';
+        var message = options.messageKey
+          ? VTN.i18n.t(options.messageKey, options.messageVars) : options.message;
+        var note = options.noteKey
+          ? VTN.i18n.t(options.noteKey, options.noteVars) : options.note;
+        if (message) body.appendChild(U.node('p', { text: message }));
+        if (note) body.appendChild(U.node('p', { class: 'vtn-modal__note', text: note }));
+      }
+      renderBody();
+      dialog({
+        title: options.title,
+        titleKey: options.titleKey || (options.title ? null : 'common.confirm'),
         body: body,
         actions: [
-          { label: options.cancelLabel || VTN.i18n.t('common.cancel'), kind: 'quiet', value: false },
           {
-            label: options.confirmLabel || VTN.i18n.t('common.ok'),
+            label: options.cancelLabel,
+            labelKey: options.cancelLabelKey || (options.cancelLabel ? null : 'common.cancel'),
+            kind: 'quiet', value: false
+          },
+          {
+            label: options.confirmLabel,
+            labelKey: options.confirmLabelKey || (options.confirmLabel ? null : 'common.ok'),
             kind: options.danger ? 'danger' : 'solid',
             value: true
           }
         ],
+        i18nRefresh: renderBody,
         onClose: function (value) {
           if (decided) return;
           decided = true;
           resolve(value === true);
         }
       });
-      /* 確保按鈕結果回傳 */
-      if (dlg) { /* no-op，onClose 會收到 value */ }
     });
   }
 
@@ -8448,31 +8731,41 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var status = VTN.api.aiState();
     var data = status.data || {};
     var body = U.node('div');
-    body.appendChild(U.node('p', {
-      text: VTN.i18n.t('status.dialogState', { state: VTN.i18n.t(STATE_KEY[status.state]) })
-    }));
-    var list = U.node('ul');
-    [
-      ['status.stt', data.stt_ready],
-      ['status.llm', !!(data.gemini_ready || data.llm_ready)],
-      ['status.storage', data.storage_ready],
-      ['status.answer', data.ask_village_ready]
-    ].forEach(function (pair) {
-      var li = U.node('li', {
-        text: VTN.i18n.t(pair[0]) + '：' + VTN.i18n.t(pair[1] ? 'status.ready' : 'status.notReady')
+    function renderBody() {
+      body.textContent = '';
+      body.appendChild(U.node('p', {
+        text: VTN.i18n.t('status.dialogState', { state: VTN.i18n.t(STATE_KEY[status.state]) })
+      }));
+      var list = U.node('ul');
+      [
+        ['status.stt', data.stt_ready],
+        ['status.llm', !!(data.gemini_ready || data.llm_ready)],
+        ['status.storage', data.storage_ready],
+        ['status.answer', data.ask_village_ready]
+      ].forEach(function (pair) {
+        list.appendChild(U.node('li', {
+          text: VTN.i18n.t(pair[0]) + '：' + VTN.i18n.t(pair[1] ? 'status.ready' : 'status.notReady')
+        }));
       });
-      list.appendChild(li);
-    });
-    body.appendChild(list);
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: VTN.i18n.t('status.apiBase', { url: VTN.api.base() }) }));
-    if (status.reason) {
-      body.appendChild(U.node('p', { class: 'vtn-modal__note', text: VTN.i18n.t('status.reason.' + status.reason) }));
+      body.appendChild(list);
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', text: VTN.i18n.t('status.apiBase', { url: VTN.api.base() })
+      }));
+      if (status.reason) {
+        body.appendChild(U.node('p', {
+          class: 'vtn-modal__note', text: VTN.i18n.t('status.reason.' + status.reason)
+        }));
+      }
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', text: VTN.i18n.t('status.honesty')
+      }));
     }
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: VTN.i18n.t('status.honesty') }));
+    renderBody();
     dialog({
-      title: VTN.i18n.t('status.title'),
+      titleKey: 'status.title',
       body: body,
-      actions: [{ label: VTN.i18n.t('common.close'), kind: 'solid' }]
+      actions: [{ labelKey: 'common.close', kind: 'solid' }],
+      i18nRefresh: renderBody
     });
   }
 
@@ -8485,6 +8778,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     renderStatus();
   }
 
+  /* 語言切換後統一重繪所有開啟中的彈層（含關閉按鈕 aria-label）。 */
+  function refreshOpenDialogs() {
+    openDialogs.slice().forEach(function (d) {
+      if (typeof d.refresh === 'function') d.refresh();
+    });
+  }
+
+  U.on('vtn:lang-changed', refreshOpenDialogs);
+
   VTN.ui = {
     toast: toast,
     announce: announce,
@@ -8492,6 +8794,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     confirm: confirmDialog,
     renderStatus: renderStatus,
     bindStatus: bindStatus,
+    refreshOpenDialogs: refreshOpenDialogs,
     closeAll: function () {
       openDialogs.slice().forEach(function (d) { d.close('all'); });
     }
@@ -9747,44 +10050,54 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
    * 8. 分享範圍對話框（每則故事獨立設定）
    * ======================================================================= */
   function openScopeDialog(item) {
-    var current = VTN.store.scopeOf(item);
+    var chosen = VTN.store.scopeOf(item);
     var body = U.node('div');
-    body.appendChild(U.node('p', {
-      text: t('scope.intro', { title: item.title || '' })
-    }));
-
-    var chosen = current;
     var cards = {};
-    VTN.SCOPES.forEach(function (scope) {
-      var meta = VTN.SCOPE_META[scope];
-      var label = U.node('label', { class: 'radio-card' + (scope === current ? ' is-active' : '') });
-      var input = U.node('input', { type: 'radio', name: 'vtn-scope', value: scope });
-      input.checked = scope === current;
-      var text = U.node('span');
-      text.appendChild(U.node('span', { class: 'radio-card__title', text: t(meta.labelKey) }));
-      text.appendChild(U.node('span', { class: 'radio-card__hint', text: t(meta.hintKey) }));
-      label.appendChild(input);
-      label.appendChild(text);
-      label.addEventListener('click', function () {
-        chosen = scope;
-        Object.keys(cards).forEach(function (key) { cards[key].classList.toggle('is-active', key === scope); });
-      });
-      cards[scope] = label;
-      body.appendChild(label);
-    });
 
-    body.appendChild(U.node('p', {
-      class: 'vtn-modal__note',
-      text: t('scope.auditNote', { version: VTN.config.consentPolicyVersion })
-    }));
+    function renderScopeBody() {
+      body.textContent = '';
+      cards = {};
+      body.appendChild(U.node('p', {
+        text: t('scope.intro', { title: item.title || '' })
+      }));
+
+      VTN.SCOPES.forEach(function (scope) {
+        var meta = VTN.SCOPE_META[scope];
+        var label = U.node('label', { class: 'radio-card' + (scope === chosen ? ' is-active' : '') });
+        var input = U.node('input', { type: 'radio', name: 'vtn-scope', value: scope });
+        input.checked = scope === chosen;
+        var text = U.node('span');
+        text.appendChild(U.node('span', {
+          class: 'radio-card__title', 'data-i18n': meta.labelKey, text: t(meta.labelKey)
+        }));
+        text.appendChild(U.node('span', {
+          class: 'radio-card__hint', 'data-i18n': meta.hintKey, text: t(meta.hintKey)
+        }));
+        label.appendChild(input);
+        label.appendChild(text);
+        label.addEventListener('click', function () {
+          chosen = scope;
+          Object.keys(cards).forEach(function (key) { cards[key].classList.toggle('is-active', key === scope); });
+        });
+        cards[scope] = label;
+        body.appendChild(label);
+      });
+
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note',
+        text: t('scope.auditNote', { version: VTN.config.consentPolicyVersion })
+      }));
+    }
+    renderScopeBody();
 
     var dlg = VTN.ui.dialog({
-      title: t('scope.title'),
+      titleKey: 'scope.title',
       body: body,
+      i18nRefresh: renderScopeBody,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('common.save'),
+          labelKey: 'common.save',
           kind: 'solid',
           keepOpen: true,
           onClick: function (ctx) {
@@ -10801,11 +11114,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function openGroupDialog(group) {
     if (!VTN.ui || !VTN.ui.dialog) return;
     var body = U.node('div');
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('atlas.groupNote') }));
+    body.appendChild(U.node('p', {
+      class: 'vtn-modal__note', 'data-i18n': 'atlas.groupNote', text: t('atlas.groupNote')
+    }));
     var dlg = VTN.ui.dialog({
       title: t('atlas.groupTitle', { n: group.count }),
       body: body,
-      actions: [{ label: t('common.close'), value: 'close' }]
+      actions: [{ labelKey: 'common.close', value: 'close' }],
+      i18nRefresh: function (ctx) { ctx.setTitle(t('atlas.groupTitle', { n: group.count })); }
     });
     group.ids.forEach(function (id) {
       var story = VTN.stories.get(id);
@@ -12538,15 +12854,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   function removeRecord(rec) {
-    var message = rec.sync === 'synced'
-      ? t('delete.confirmSynced')
-      : t('delete.confirmLocal');
     VTN.ui.confirm({
-      title: t('delete.title'),
-      message: message,
-      note: t('delete.note'),
-      confirmLabel: t('common.delete'),
-      cancelLabel: t('common.cancel'),
+      titleKey: 'delete.title',
+      messageKey: rec.sync === 'synced' ? 'delete.confirmSynced' : 'delete.confirmLocal',
+      noteKey: 'delete.note',
+      confirmLabelKey: 'common.delete',
+      cancelLabelKey: 'common.cancel',
       danger: true
     }).then(function (ok) {
       if (!ok) return;
@@ -13476,9 +13789,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     if (reset) {
       reset.addEventListener('click', function () {
         VTN.ui.confirm({
-          title: t('settings.reset'),
-          message: t('settings.resetConfirm'),
-          confirmLabel: t('settings.resetBtn'),
+          titleKey: 'settings.reset',
+          messageKey: 'settings.resetConfirm',
+          confirmLabelKey: 'settings.resetBtn',
           danger: true
         }).then(function (ok) {
           if (!ok) return;
@@ -13519,6 +13832,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 /* ===== src/js/60-about.js ===== */
 /* =============================================================================
  * 60-about — 關於頁：版本資訊、內容授權與誠實紅線
+ * -----------------------------------------------------------------------------
+ * 故事數／附音檔數／音檔秒數全部由 stories.json（window.VTN_STORY_DATA）計算，
+ * 不再在字典或 HTML 裡寫死，補錄音或加故事後不會失真。
  * ========================================================================== */
 
 (function () {
@@ -13529,31 +13845,44 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
 
-  function versionText() {
-    var data = VTN.stories.meta() || {};
-    var stories = (data.stories || []);
-    var withAudio = stories.filter(function (s) { return !!s.audio; }).length;
-    return t('about.versionBody', {
+  function storyStats() {
+    var data = (VTN.stories && VTN.stories.meta && VTN.stories.meta()) || {};
+    var stories = data.stories || [];
+    var withAudio = stories.filter(function (s) { return !!s.audio; });
+    var seconds = withAudio.reduce(function (sum, s) {
+      return sum + (Number(s.durationSec) || 0);
+    }, 0);
+    return {
       app: VTN.config.version,
       content: data.contentVersion || '—',
       consent: VTN.config.consentPolicyVersion,
       n: stories.length,
-      audio: withAudio
-    });
+      audio: withAudio.length,
+      duration: (Math.round(seconds * 10) / 10).toFixed(1)
+    };
   }
 
-  function renderVersion() {
-    var el = document.getElementById('aboutVersion');
-    if (!el) return;
-    el.textContent = versionText();
+  function versionText() {
+    return t('about.versionBody', storyStats());
+  }
+
+  function dataText() {
+    return t('about.dataBody', storyStats());
+  }
+
+  function render() {
+    var version = document.getElementById('aboutVersion');
+    if (version) version.textContent = versionText();
+    var data = document.getElementById('aboutDataBody');
+    if (data) data.textContent = dataText();
   }
 
   function init() {
-    renderVersion();
-    U.on('vtn:lang-changed', renderVersion);
+    render();
+    U.on('vtn:lang-changed', render);
   }
 
-  VTN.about = { init: init, render: renderVersion };
+  VTN.about = { init: init, render: render };
 })();
 
 /* ===== src/js/65-account.js ===== */
@@ -13631,10 +13960,16 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
     var body = U.node('div');
 
-    var seg = U.node('div', { class: 'seg', role: 'group', 'aria-label': t('auth.modeAria') });
+    var seg = U.node('div', { class: 'seg', role: 'group', 'data-i18n-aria': 'auth.modeAria' });
     seg.style.marginBottom = '12px';
-    var emailBtn = U.node('button', { class: 'seg__btn is-active', type: 'button', text: t('auth.emailTab') });
-    var schoolBtn = U.node('button', { class: 'seg__btn', type: 'button', text: t('auth.schoolTab') });
+    var emailBtn = U.node('button', {
+      class: 'seg__btn is-active', type: 'button',
+      'data-i18n': 'auth.emailTab', text: t('auth.emailTab')
+    });
+    var schoolBtn = U.node('button', {
+      class: 'seg__btn', type: 'button',
+      'data-i18n': 'auth.schoolTab', text: t('auth.schoolTab')
+    });
     seg.appendChild(emailBtn);
     seg.appendChild(schoolBtn);
     body.appendChild(seg);
@@ -13648,8 +13983,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var adminInput = U.node('input', { type: 'checkbox' });
     adminLabel.appendChild(adminInput);
     var adminText = U.node('span');
-    adminText.appendChild(U.node('span', { class: 'radio-card__title', text: t('auth.adminToggle') }));
-    adminText.appendChild(U.node('span', { class: 'radio-card__hint', text: t('auth.adminHint') }));
+    adminText.appendChild(U.node('span', {
+      class: 'radio-card__title', 'data-i18n': 'auth.adminToggle', text: t('auth.adminToggle')
+    }));
+    adminText.appendChild(U.node('span', {
+      class: 'radio-card__hint', 'data-i18n': 'auth.adminHint', text: t('auth.adminHint')
+    }));
     adminLabel.appendChild(adminText);
     adminInput.addEventListener('change', function () {
       adminFlag = adminInput.checked;
@@ -13657,7 +13996,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     });
     body.appendChild(adminLabel);
 
-    var note = U.node('p', { class: 'vtn-modal__note', text: t('auth.privacyNote') });
+    var note = U.node('p', {
+      class: 'vtn-modal__note', 'data-i18n': 'auth.privacyNote', text: t('auth.privacyNote')
+    });
     body.appendChild(note);
 
     function showError(message) {
@@ -13673,22 +14014,33 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
       if (mode === 'email') {
         var emailField = U.node('div', { class: 'vtn-field' });
-        emailField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.emailLabel') }));
-        var emailInput = U.node('input', { type: 'email', id: 'loginEmail', autocomplete: 'email', placeholder: t('auth.emailPh') });
+        emailField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.emailLabel', text: t('auth.emailLabel')
+        }));
+        var emailInput = U.node('input', {
+          type: 'email', id: 'loginEmail', autocomplete: 'email',
+          'data-i18n-ph': 'auth.emailPh', placeholder: t('auth.emailPh')
+        });
         emailInput.value = '';
         emailField.appendChild(emailInput);
         host.appendChild(emailField);
 
         var codeField = U.node('div', { class: 'vtn-field' });
-        codeField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.codeLabel') }));
+        codeField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.codeLabel', text: t('auth.codeLabel')
+        }));
         var codeInput = U.node('input', {
           type: 'text', id: 'loginCode', inputmode: 'numeric', maxlength: '6',
-          autocomplete: 'one-time-code', placeholder: t('auth.codePh')
+          autocomplete: 'one-time-code',
+          'data-i18n-ph': 'auth.codePh', placeholder: t('auth.codePh')
         });
         codeField.appendChild(codeInput);
         host.appendChild(codeField);
 
-        var sendBtn = U.node('button', { class: 'vtn-btn vtn-btn--quiet vtn-btn--block', type: 'button', text: t('auth.sendCode') });
+        var sendBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--quiet vtn-btn--block', type: 'button',
+          'data-i18n': 'auth.sendCode', text: t('auth.sendCode')
+        });
         sendBtn.addEventListener('click', function () {
           var email = (document.getElementById('loginEmail').value || '').trim();
           if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -13718,16 +14070,28 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
         host.appendChild(sendBtn);
       } else {
         var schoolField = U.node('div', { class: 'vtn-field' });
-        schoolField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.schoolLabel') }));
-        schoolField.appendChild(U.node('input', { type: 'text', id: 'loginSchool', autocomplete: 'username', placeholder: t('auth.schoolPh') }));
+        schoolField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.schoolLabel', text: t('auth.schoolLabel')
+        }));
+        schoolField.appendChild(U.node('input', {
+          type: 'text', id: 'loginSchool', autocomplete: 'username',
+          'data-i18n-ph': 'auth.schoolPh', placeholder: t('auth.schoolPh')
+        }));
         host.appendChild(schoolField);
 
         var passField = U.node('div', { class: 'vtn-field' });
-        passField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.passwordLabel') }));
-        passField.appendChild(U.node('input', { type: 'password', id: 'loginPassword', autocomplete: 'current-password', placeholder: t('auth.passwordPh') }));
+        passField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.passwordLabel', text: t('auth.passwordLabel')
+        }));
+        passField.appendChild(U.node('input', {
+          type: 'password', id: 'loginPassword', autocomplete: 'current-password',
+          'data-i18n-ph': 'auth.passwordPh', placeholder: t('auth.passwordPh')
+        }));
         host.appendChild(passField);
 
-        host.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('auth.schoolNote') }));
+        host.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'auth.schoolNote', text: t('auth.schoolNote')
+        }));
       }
       var first = host.querySelector('input');
       if (first) first.focus();
@@ -13738,12 +14102,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     renderMode();
 
     var dlg = VTN.ui.dialog({
-      title: t('auth.title'),
+      titleKey: 'auth.title',
       body: body,
+      i18nRefresh: renderMode,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('auth.login'),
+          labelKey: 'auth.login',
           kind: 'solid',
           keepOpen: true,
           onClick: function (ctx) {
@@ -13834,10 +14199,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var session = VTN.store.session();
     if (!session) return;
     VTN.ui.confirm({
-      title: t('auth.logout'),
-      message: t('auth.logoutConfirm', { email: session.email }),
-      note: t('auth.logoutNote'),
-      confirmLabel: t('auth.logout'),
+      titleKey: 'auth.logout',
+      messageKey: 'auth.logoutConfirm',
+      messageVars: { email: session.email },
+      noteKey: 'auth.logoutNote',
+      confirmLabelKey: 'auth.logout',
       danger: true
     }).then(function (ok) {
       if (!ok) return;
@@ -13852,54 +14218,152 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   /* =========================================================================
    * 3. 私隱與分享範圍
    * ======================================================================= */
+  function makeScopeSelect(id, value, title, onChange) {
+    var select = U.node('select', {
+      id: id,
+      'aria-label': t('privacy.selectAria', { title: title })
+    }, VTN.SCOPES.map(function (scope) {
+      return U.node('option', { value: scope, text: t(VTN.SCOPE_META[scope].labelKey) });
+    }));
+    select.value = value;
+    select.addEventListener('change', function () { onChange(select.value); });
+    return select;
+  }
+
+  function setItemScope(item, scope, rerender) {
+    var saved = VTN.store.setScope(item, scope);
+    if (saved === null) return;
+    VTN.api.audit({ action: 'scope.change', targetId: item.id, to: saved })
+      .catch(function () { /* 本機已有稽核 */ });
+    VTN.ui.toast(t('scope.saved', { scope: t(VTN.SCOPE_META[saved].labelKey) }), 'success');
+    if (rerender) rerender();
+  }
+
   function openPrivacy() {
     var body = U.node('div');
-    body.appendChild(U.node('p', { text: t('privacy.intro') }));
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('privacy.serverNote') }));
 
-    var items = ownItems();
-    if (!items.length) {
-      body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('privacy.empty') }));
+    function renderPrivacyBody() {
+      body.textContent = '';
+      var items = ownItems();
+      var preset = VTN.store.scopePreset();
+      var exceptions = VTN.store.scopeExceptions(items);
+
+      /* 兩句分開寫，避免「預設私人」與示範故事 community 互相矛盾 */
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.defaultNote', text: t('privacy.defaultNote')
+      }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.demoNote', text: t('privacy.demoNote')
+      }));
+      body.appendChild(U.node('p', {
+        'data-i18n': 'privacy.intro', text: t('privacy.intro')
+      }));
+
+      /* 頂部：一個預設分享範圍 */
+      var presetBox = U.node('div', { class: 'privacy-preset' });
+      presetBox.appendChild(U.node('label', {
+        class: 'vtn-field__label', 'for': 'privacyPreset',
+        'data-i18n': 'privacy.preset', text: t('privacy.preset')
+      }));
+      presetBox.appendChild(makeScopeSelect('privacyPreset', preset, t('privacy.preset'), function (value) {
+        VTN.store.setScopePreset(value);
+        VTN.ui.toast(t('scope.saved', { scope: t(VTN.SCOPE_META[value].labelKey) }), 'success');
+        VTN.stories.render();
+        renderPrivacyBody();
+      }));
+      presetBox.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.presetHint', text: t('privacy.presetHint')
+      }));
+      body.appendChild(presetBox);
+
+      /* 中部：摺疊的例外清單（列表區限高 50dvh） */
+      var details = U.node('details', { class: 'privacy-exceptions' });
+      details.appendChild(U.node('summary', {
+        class: 'privacy-exceptions__summary',
+        text: t('privacy.exceptions', { n: exceptions.length })
+      }));
+      details.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.exceptionsHint',
+        text: t('privacy.exceptionsHint')
+      }));
+      var list = U.node('div', { class: 'privacy-exceptions__list' });
+      if (!exceptions.length) {
+        list.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'privacy.exceptionsEmpty',
+          text: t('privacy.exceptionsEmpty')
+        }));
+      } else {
+        exceptions.forEach(function (entry, index) {
+          var item = entry.item;
+          var row = U.node('div', { class: 'radio-card' });
+          row.style.cursor = 'default';
+          var text = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
+          text.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(item) }));
+          text.appendChild(U.node('span', {
+            class: 'radio-card__hint',
+            text: isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')
+          }));
+          row.appendChild(text);
+          var control = U.node('span', { class: 'setting-row__control' });
+          control.appendChild(makeScopeSelect(
+            'privacyScope-' + index,
+            VTN.store.scopeOf(item),
+            titleOf(item),
+            function (value) { setItemScope(item, value, renderPrivacyBody); }
+          ));
+          row.appendChild(control);
+          list.appendChild(row);
+        });
+      }
+      details.appendChild(list);
+      body.appendChild(details);
+
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note',
+        text: t('privacy.auditNote', { version: VTN.config.consentPolicyVersion })
+      }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.serverNote', text: t('privacy.serverNote')
+      }));
+      if (!items.length) {
+        body.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'privacy.empty', text: t('privacy.empty')
+        }));
+      }
     }
 
-    items.forEach(function (item) {
-      var row = U.node('div', { class: 'radio-card' });
-      row.style.cursor = 'default';
-      var text = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
-      text.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(item) }));
-      text.appendChild(U.node('span', {
-        class: 'radio-card__hint',
-        text: isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')
-      }));
-      row.appendChild(text);
-
-      var control = U.node('span', { class: 'setting-row__control' });
-      var select = U.node('select', { 'aria-label': t('privacy.selectAria', { title: titleOf(item) }) });
-      VTN.SCOPES.forEach(function (scope) {
-        select.appendChild(U.node('option', {
-          value: scope,
-          text: t(VTN.SCOPE_META[scope].labelKey)
-        }));
-      });
-      select.value = VTN.store.scopeOf(item);
-      select.addEventListener('change', function () {
-        var scope = VTN.store.setScope(item, select.value);
-        VTN.api.audit({ action: 'scope.change', targetId: item.id, to: scope }).catch(function () { /* 本機已有稽核 */ });
-        VTN.ui.toast(t('scope.saved', { scope: t(VTN.SCOPE_META[scope].labelKey) }), 'success');
-      });
-      control.appendChild(select);
-      row.appendChild(control);
-      body.appendChild(row);
-    });
-
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('privacy.auditNote', {
-      version: VTN.config.consentPolicyVersion
-    }) }));
+    renderPrivacyBody();
 
     VTN.ui.dialog({
-      title: t('privacy.title'),
+      titleKey: 'privacy.title',
       body: body,
-      actions: [{ label: t('common.done'), kind: 'solid' }],
+      actions: [
+        {
+          labelKey: 'privacy.resetExceptions', kind: 'quiet', keepOpen: true,
+          onClick: function () {
+            VTN.store.clearScopeExceptions();
+            VTN.ui.toast(t('privacy.resetDone'), 'success');
+            VTN.stories.render();
+            renderPrivacyBody();
+          }
+        },
+        {
+          labelKey: 'privacy.applyAll', kind: 'gold', keepOpen: true,
+          onClick: function () {
+            var preset = VTN.store.scopePreset();
+            ownItems().forEach(function (item) { VTN.store.setScope(item, preset); });
+            VTN.api.audit({ action: 'scope.applyAll', to: preset })
+              .catch(function () { /* 本機已有稽核 */ });
+            VTN.ui.toast(t('privacy.applyAllDone', {
+              scope: t(VTN.SCOPE_META[preset].labelKey)
+            }), 'success');
+            VTN.stories.render();
+            renderPrivacyBody();
+          }
+        },
+        { labelKey: 'common.done', kind: 'solid' }
+      ],
+      i18nRefresh: renderPrivacyBody,
       onClose: function () {
         VTN.stories.render();
         if (VTN.assistant) VTN.assistant.refresh();
@@ -13913,31 +14377,44 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function openCorrectionPicker() {
     var items = ownItems();
     var body = U.node('div');
-    if (!items.length) {
-      body.appendChild(U.node('p', { text: t('correct.noTargets') }));
-      VTN.ui.dialog({ title: t('me.correction'), body: body, actions: [{ label: t('common.close'), kind: 'solid' }] });
-      return;
-    }
-    body.appendChild(U.node('p', { text: t('correct.pickIntro') }));
-    var field = U.node('div', { class: 'vtn-field' });
-    field.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.target') }));
-    var select = U.node('select', { id: 'corrTarget' });
-    items.forEach(function (item) {
-      select.appendChild(U.node('option', {
-        value: item.id,
-        text: titleOf(item) + (isStory(item) ? t('correct.kindStory') : t('correct.kindRecord'))
+
+    function renderPickerBody() {
+      body.textContent = '';
+      if (!items.length) {
+        body.appendChild(U.node('p', {
+          'data-i18n': 'correct.noTargets', text: t('correct.noTargets')
+        }));
+        return;
+      }
+      body.appendChild(U.node('p', {
+        'data-i18n': 'correct.pickIntro', text: t('correct.pickIntro')
       }));
-    });
-    field.appendChild(select);
-    body.appendChild(field);
+      var field = U.node('div', { class: 'vtn-field' });
+      field.appendChild(U.node('label', {
+        class: 'vtn-field__label', 'for': 'corrTarget',
+        'data-i18n': 'correct.target', text: t('correct.target')
+      }));
+      var select = U.node('select', { id: 'corrTarget' }, items.map(function (item) {
+        return U.node('option', {
+          value: item.id,
+          text: titleOf(item) + (isStory(item) ? t('correct.kindStory') : t('correct.kindRecord'))
+        });
+      }));
+      field.appendChild(select);
+      body.appendChild(field);
+    }
+    renderPickerBody();
 
     VTN.ui.dialog({
-      title: t('me.correction'),
+      titleKey: 'me.correction',
       body: body,
+      i18nRefresh: renderPickerBody,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('common.next'), kind: 'solid', onClick: function () {
+          labelKey: 'common.next', kind: 'solid', onClick: function () {
+            var select = document.getElementById('corrTarget');
+            if (!select) return;
             var item = items.filter(function (it) { return it.id === select.value; })[0];
             if (item) setTimeout(function () { openCorrection(item); }, 240);
           }
@@ -13949,51 +14426,70 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function openCorrection(item) {
     var body = U.node('div');
     body.appendChild(U.node('p', {
-      class: 'vtn-modal__note',
-      text: t('correct.demoNote')
+      class: 'vtn-modal__note', 'data-i18n': 'correct.demoNote', text: t('correct.demoNote')
     }));
 
     var target = U.node('div', { class: 'radio-card is-active' });
     target.style.cursor = 'default';
     var targetText = U.node('span');
     targetText.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(item) }));
-    targetText.appendChild(U.node('span', {
-      class: 'radio-card__hint',
-      text: (isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')) + '・' + item.id
-    }));
+    var hint = U.node('span', { class: 'radio-card__hint' }, [
+      U.node('span', {
+        'data-i18n': isStory(item) ? 'privacy.storyHint' : 'privacy.recordHint',
+        text: isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')
+      }),
+      document.createTextNode('・' + item.id)
+    ]);
+    targetText.appendChild(hint);
     target.appendChild(targetText);
     body.appendChild(target);
 
     var fieldBox = U.node('div', { class: 'vtn-field' });
-    fieldBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.field') }));
+    fieldBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.field', text: t('correct.field')
+    }));
     var fieldSelect = U.node('select', { id: 'corrField' });
     [
-      ['transcript', t('correct.fieldTranscript')],
-      ['timestamp', t('correct.fieldTimestamp')],
-      ['title', t('correct.fieldTitle')],
-      ['other', t('correct.fieldOther')]
+      ['transcript', 'correct.fieldTranscript'],
+      ['timestamp', 'correct.fieldTimestamp'],
+      ['title', 'correct.fieldTitle'],
+      ['other', 'correct.fieldOther']
     ].forEach(function (def) {
-      fieldSelect.appendChild(U.node('option', { value: def[0], text: def[1] }));
+      fieldSelect.appendChild(U.node('option', {
+        value: def[0], 'data-i18n': def[1], text: t(def[1])
+      }));
     });
     fieldBox.appendChild(fieldSelect);
     body.appendChild(fieldBox);
 
     var currentBox = U.node('div', { class: 'vtn-field' });
-    currentBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.current') }));
+    currentBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.current', text: t('correct.current')
+    }));
     var currentArea = U.node('textarea', { readonly: 'readonly', rows: '4' });
     currentArea.value = currentText(item) || '—';
     currentBox.appendChild(currentArea);
     body.appendChild(currentBox);
 
     var proposedBox = U.node('div', { class: 'vtn-field' });
-    proposedBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.proposed') }));
-    var proposedArea = U.node('textarea', { id: 'corrProposed', rows: '4', placeholder: t('correct.proposedPh') });
+    proposedBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.proposed', text: t('correct.proposed')
+    }));
+    var proposedArea = U.node('textarea', {
+      id: 'corrProposed', rows: '4',
+      'data-i18n-ph': 'correct.proposedPh', placeholder: t('correct.proposedPh')
+    });
     proposedBox.appendChild(proposedArea);
     body.appendChild(proposedBox);
 
     var reasonBox = U.node('div', { class: 'vtn-field' });
-    reasonBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.reason') }));
-    var reasonInput = U.node('input', { type: 'text', id: 'corrReason', placeholder: t('correct.reasonPh') });
+    reasonBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.reason', text: t('correct.reason')
+    }));
+    var reasonInput = U.node('input', {
+      type: 'text', id: 'corrReason',
+      'data-i18n-ph': 'correct.reasonPh', placeholder: t('correct.reasonPh')
+    });
     reasonBox.appendChild(reasonInput);
     body.appendChild(reasonBox);
 
@@ -14003,15 +14499,24 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     /* 已提交的申請 */
     var existing = VTN.store.corrections.list().filter(function (c) { return c.targetId === item.id; });
     if (existing.length) {
-      body.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('correct.listTitle') }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-rec-subhead', 'data-i18n': 'correct.listTitle', text: t('correct.listTitle')
+      }));
       existing.forEach(function (entry) {
         var row = U.node('div', { class: 'radio-card' });
         row.style.cursor = 'default';
         var info = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
-        info.appendChild(U.node('span', {
-          class: 'radio-card__title',
-          text: t('correct.status.' + entry.status) + '・' + t('correct.field.' + (entry.field || 'other'))
-        }));
+        info.appendChild(U.node('span', { class: 'radio-card__title' }, [
+          U.node('span', {
+            'data-i18n': 'correct.status.' + entry.status,
+            text: t('correct.status.' + entry.status)
+          }),
+          document.createTextNode('・'),
+          U.node('span', {
+            'data-i18n': 'correct.field.' + (entry.field || 'other'),
+            text: t('correct.field.' + (entry.field || 'other'))
+          })
+        ]));
         info.appendChild(U.node('span', {
           class: 'radio-card__hint',
           text: (entry.proposedText || '').slice(0, 80)
@@ -14020,7 +14525,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
         if (VTN.store.role() === 'admin' && entry.status === 'submitted') {
           var actions = U.node('span', { class: 'setting-row__control' });
-          var approve = U.node('button', { class: 'vtn-btn vtn-btn--sm vtn-btn--solid', type: 'button', text: t('correct.approve') });
+          var approve = U.node('button', {
+            class: 'vtn-btn vtn-btn--sm vtn-btn--solid', type: 'button',
+            'data-i18n': 'correct.approve', text: t('correct.approve')
+          });
           approve.addEventListener('click', function () {
             VTN.store.approveCorrection(entry.id, VTN.store.session().email);
             VTN.api.corrections.review(entry.id, true).catch(function () { /* 本機已記錄 */ });
@@ -14028,7 +14536,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
             dlg.close('approved');
             setTimeout(function () { openCorrection(VTN.store.records.get(item.id) || item); }, 260);
           });
-          var reject = U.node('button', { class: 'vtn-btn vtn-btn--sm vtn-btn--danger', type: 'button', text: t('correct.reject') });
+          var reject = U.node('button', {
+            class: 'vtn-btn vtn-btn--sm vtn-btn--danger', type: 'button',
+            'data-i18n': 'correct.reject', text: t('correct.reject')
+          });
           reject.addEventListener('click', function () {
             VTN.store.rejectCorrection(entry.id, VTN.store.session().email, '');
             VTN.api.corrections.review(entry.id, false).catch(function () { /* 同上 */ });
@@ -14044,25 +14555,35 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       });
     }
 
+    var versionRows = [];
     if (item.versions && item.versions.length) {
-      body.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('correct.versions') }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-rec-subhead', 'data-i18n': 'correct.versions', text: t('correct.versions')
+      }));
       item.versions.slice().reverse().forEach(function (version) {
         var row = U.node('div', { class: 'vtn-rec-note' });
-        row.textContent = t('correct.versionLine', {
-          v: version.version,
-          date: U.fmtDate(new Date(version.at).getTime())
-        }) + '　' + (version.reason || '');
+        versionRows.push({ el: row, version: version });
         body.appendChild(row);
       });
     }
+    function renderVersionRows() {
+      versionRows.forEach(function (pair) {
+        pair.el.textContent = t('correct.versionLine', {
+          v: pair.version.version,
+          date: U.fmtDate(new Date(pair.version.at).getTime())
+        }) + '　' + (pair.version.reason || '');
+      });
+    }
+    renderVersionRows();
 
     var dlg = VTN.ui.dialog({
-      title: t('correct.title'),
+      titleKey: 'correct.title',
       body: body,
+      i18nRefresh: renderVersionRows,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('correct.submit'),
+          labelKey: 'correct.submit',
           kind: 'solid',
           keepOpen: true,
           onClick: function (ctx) {
@@ -14108,10 +14629,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function openWithdraw(item) {
     var isRecord = !isStory(item);
     VTN.ui.confirm({
-      title: t('withdraw.title'),
-      message: t('withdraw.message'),
-      note: t('withdraw.note'),
-      confirmLabel: t('withdraw.confirm'),
+      titleKey: 'withdraw.title',
+      messageKey: 'withdraw.message',
+      noteKey: 'withdraw.note',
+      confirmLabelKey: 'withdraw.confirm',
       danger: true
     }).then(function (ok) {
       if (!ok) return;
@@ -14160,46 +14681,64 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function openExport() {
     var records = VTN.store.records.list();
     var body = U.node('div');
-    body.appendChild(U.node('p', { text: t('export.intro') }));
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('export.note') }));
 
-    if (!records.length) {
-      body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('export.empty') }));
-    }
-
-    records.forEach(function (rec) {
-      var row = U.node('div', { class: 'radio-card' });
-      row.style.cursor = 'default';
-      var info = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
-      info.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(rec) }));
-      info.appendChild(U.node('span', {
-        class: 'radio-card__hint',
-        text: U.fmtDate(rec.createdAt) + '・' + U.fmtTime(rec.durationSec) + '・' +
-          t('rec.status.' + rec.status)
+    function renderExportBody() {
+      body.textContent = '';
+      body.appendChild(U.node('p', {
+        'data-i18n': 'export.intro', text: t('export.intro')
       }));
-      row.appendChild(info);
-      var actions = U.node('span', { class: 'setting-row__control' });
-      var audioBtn = U.node('button', { class: 'vtn-btn vtn-btn--sm', type: 'button', text: t('export.audio') });
-      audioBtn.addEventListener('click', function () { exportAudio(rec); });
-      audioBtn.disabled = !(rec.audioDataURL || rec.audioUrl);
-      var txtBtn = U.node('button', { class: 'vtn-btn vtn-btn--sm', type: 'button', text: t('export.txt') });
-      txtBtn.addEventListener('click', function () {
-        exportTranscript(rec);
-        VTN.ui.toast(t('export.done'), 'success');
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'export.note', text: t('export.note')
+      }));
+
+      if (!records.length) {
+        body.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'export.empty', text: t('export.empty')
+        }));
+      }
+
+      records.forEach(function (rec) {
+        var row = U.node('div', { class: 'radio-card' });
+        row.style.cursor = 'default';
+        var info = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
+        info.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(rec) }));
+        info.appendChild(U.node('span', {
+          class: 'radio-card__hint',
+          text: U.fmtDate(rec.createdAt) + '・' + U.fmtTime(rec.durationSec) + '・' +
+            t('rec.status.' + rec.status)
+        }));
+        row.appendChild(info);
+        var actions = U.node('span', { class: 'setting-row__control' });
+        var audioBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--sm', type: 'button',
+          'data-i18n': 'export.audio', text: t('export.audio')
+        });
+        audioBtn.addEventListener('click', function () { exportAudio(rec); });
+        audioBtn.disabled = !(rec.audioDataURL || rec.audioUrl);
+        var txtBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--sm', type: 'button',
+          'data-i18n': 'export.txt', text: t('export.txt')
+        });
+        txtBtn.addEventListener('click', function () {
+          exportTranscript(rec);
+          VTN.ui.toast(t('export.done'), 'success');
+        });
+        actions.appendChild(audioBtn);
+        actions.appendChild(txtBtn);
+        row.appendChild(actions);
+        body.appendChild(row);
       });
-      actions.appendChild(audioBtn);
-      actions.appendChild(txtBtn);
-      row.appendChild(actions);
-      body.appendChild(row);
-    });
+    }
+    renderExportBody();
 
     VTN.ui.dialog({
-      title: t('export.title'),
+      titleKey: 'export.title',
       body: body,
+      i18nRefresh: renderExportBody,
       actions: [
-        { label: t('common.close'), kind: 'quiet' },
+        { labelKey: 'common.close', kind: 'quiet' },
         {
-          label: t('export.allJson'), kind: 'solid', onClick: function () {
+          labelKey: 'export.allJson', kind: 'solid', onClick: function () {
             if (!records.length) { VTN.ui.toast(t('export.empty'), 'error'); return; }
             var payload = records.map(function (rec) {
               var copy = Object.assign({}, rec);
@@ -14231,37 +14770,56 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   /* =========================================================================
    * 7. 語言
    * ======================================================================= */
-  function openLanguage() {
-    var body = U.node('div');
+  /* 每次都按「當下語言」重算勾選、選中樣式與 aria-pressed，不再只算一次。 */
+  function renderLanguageBody(body) {
     var current = VTN.i18n.lang();
-    var options = [
+    body.textContent = '';
+    [
       ['zh-HK', 'lang.name.zh-HK'],
       ['zh-CN', 'lang.name.zh-CN'],
       ['en', 'lang.name.en']
-    ];
-    options.forEach(function (def) {
+    ].forEach(function (def) {
+      var active = def[0] === current;
       var btn = U.node('button', {
-        class: 'lang-option' + (def[0] === current ? ' is-selected' : ''),
+        class: 'lang-option' + (active ? ' is-selected' : ''),
         type: 'button',
-        'aria-pressed': def[0] === current ? 'true' : 'false'
+        'data-lang': def[0],
+        'aria-pressed': active ? 'true' : 'false'
       });
-      btn.appendChild(U.node('span', { text: t(def[1]) }));
-      btn.appendChild(U.node('span', { class: 'lang-option__check', text: def[0] === current ? '✓' : '' }));
-      btn.addEventListener('click', function () {
-        VTN.i18n.setLang(def[0]);
-        VTN.store.setPref('lang', def[0]);
-        renderMe();
-        VTN.ui.toast(t('lang.switched'), 'success');
-        if (VTN.assistant) VTN.assistant.refresh();
-      });
+      btn.appendChild(U.node('span', { 'data-i18n': def[1], text: t(def[1]) }));
+      btn.appendChild(U.node('span', {
+        class: 'lang-option__check', 'aria-hidden': 'true', text: active ? '✓' : ''
+      }));
       body.appendChild(btn);
     });
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('lang.note') }));
+    body.appendChild(U.node('p', {
+      class: 'vtn-modal__note', 'data-i18n': 'lang.note', text: t('lang.note')
+    }));
+  }
+
+  function openLanguage() {
+    var body = U.node('div');
+    /* 事件委托：重繪後不用逐個重新綁定，也不會累積監聽器。 */
+    body.addEventListener('click', function (event) {
+      var target = event.target;
+      var btn = target && target.closest
+        ? target.closest('button.lang-option[data-lang]') : null;
+      if (!btn || !body.contains(btn)) return;
+      var code = btn.getAttribute('data-lang');
+      if (VTN.i18n.langs.indexOf(code) === -1) return;
+      VTN.i18n.setLang(code);
+      VTN.store.setPref('lang', code);
+      renderMe();
+      VTN.ui.toast(t('lang.switched'), 'success');
+      if (VTN.assistant) VTN.assistant.refresh();
+    });
+    renderLanguageBody(body);
 
     VTN.ui.dialog({
-      title: t('me.language'),
+      titleKey: 'me.language',
       body: body,
-      actions: [{ label: t('common.close'), kind: 'solid' }]
+      actions: [{ labelKey: 'common.close', kind: 'solid' }],
+      i18nRefresh: function () { renderLanguageBody(body); }
     });
   }
 

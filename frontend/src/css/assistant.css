@@ -69,7 +69,7 @@
 .vtn-ai-hint small {
   display: block;
   margin-top: 2px;
-  font-size: 0.76rem;
+  font-size: var(--fs-min);
   font-weight: 500;
   color: #5D7063;
 }
@@ -86,7 +86,7 @@
   border-radius: 50%;
   background: #fff;
   color: #5D7063;
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   line-height: 1;
   cursor: pointer;
 }
@@ -129,7 +129,7 @@
   border-radius: 50%;
   background: var(--gold-pale, #F1E3C1);
   color: var(--gold, #83632B);
-  font-size: 0.7rem;
+  font-size: var(--fs-min);
 }
 
 /* ---------- 聊天面板：App 內全寬 BottomSheet（底導航以上全屏覆蓋） ---------- */
@@ -199,7 +199,7 @@
 }
 .vtn-ai-head-sub {
   margin: 1px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   color: #DCE9DC;
   white-space: nowrap;
   overflow: hidden;
@@ -291,7 +291,7 @@
   background: #fff;
   color: var(--forest, #2C5742);
   font-family: inherit;
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   cursor: pointer;
 }
@@ -299,7 +299,7 @@
 .vtn-ai-disclosure {
   margin: 6px 0 0;
   padding: 0 2px;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   line-height: 1.4;
   color: var(--gold, #83632B);
 }
@@ -309,7 +309,7 @@
   align-items: center;
   gap: 6px;
   margin: 8px 0 7px;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   letter-spacing: 0.03em;
   color: #5D7063;
@@ -325,13 +325,13 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.85);
   color: var(--forest, #2C5742);
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
 }
 .vtn-ai-chip:hover { background: #DCE9DC; }
-.vtn-ai-chip i { font-size: 0.78rem; }
+.vtn-ai-chip i { font-size: var(--fs-min); }
 
 /* 推薦問題 */
 .vtn-ai-suggests {
@@ -348,7 +348,7 @@
   background: #fff;
   color: var(--forest, #2C5742);
   font-family: inherit;
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -360,7 +360,7 @@
   margin: 2px 0 0;
   padding: 0 2px;
   text-align: center;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   color: #7a8578;
 }
 
@@ -386,7 +386,7 @@
   padding: 6px 10px;
   background: rgba(241, 227, 193, 0.7);
   color: #6d5326;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   text-align: center;
 }
 

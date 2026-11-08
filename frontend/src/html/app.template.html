@@ -33,7 +33,7 @@
 <div class="app-shell" id="appShell">
 
     <header class="topbar">
-      <img class="topbar__logo" src="assets/app-icon.png" alt="Voices of the North 標誌" width="40" height="40">
+      <img class="topbar__logo" src="assets/app-icon.png" data-i18n-alt="app.logoAlt" alt="Voices of the North" width="40" height="40">
       <span class="topbar__title">北部都會區 <span class="topbar__dot" aria-hidden="true">・</span> 鄉村故事館</span>
       <span class="topbar__spacer" aria-hidden="true"></span>
       <button type="button" class="ai-status ai-status--offline" id="aiStatusBtn"
@@ -76,6 +76,8 @@
         <span class="cta-card__sub" data-i18n="home.ctaSub">首次錄音可先聽示範</span>
       </button>
 
+      <p class="me-section-title home-section-title" data-i18n="home.demoStories">示範故事</p>
+
       <section class="featured" aria-labelledby="featuredTitle">
         <div class="featured__head">
           <h2 class="featured__title" id="featuredTitle" data-i18n="home.featured">精選故事</h2>
@@ -84,7 +86,7 @@
         <div id="featuredStory"></div>
       </section>
 
-      <div class="trust-bar" role="note" aria-label="我們的承諾">
+      <div class="trust-bar" role="note" data-i18n-aria="aria.homeTrust">
         <span class="trust-bar__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
@@ -114,7 +116,7 @@
       </section>
 
       <section class="rec-tabs">
-        <div class="tabs" role="tablist" aria-label="錄音狀態分類">
+        <div class="tabs" role="tablist" data-i18n-aria="aria.recTabs">
           <button type="button" class="tabs__btn is-active" role="tab"
                   id="tab-drafts" aria-controls="panel-drafts" aria-selected="true" tabindex="0">
             <span data-i18n="rec.tabDraft">草稿</span><span class="tab-count" id="countDrafts" hidden>0</span>
@@ -161,7 +163,7 @@
 
       <p class="settings-foot" id="recStorageNote" hidden></p>
 
-      <div class="trust-bar" role="note" aria-label="私隱承諾">
+      <div class="trust-bar" role="note" data-i18n-aria="aria.recTrust">
         <span class="trust-bar__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 4 6 11v12.5C6 34 13.8 40.4 24 44c10.2-3.6 18-10 18-20.5V11L24 4Z"
@@ -181,9 +183,9 @@
       <!-- 地圖主視圖：故事點＝一級資訊，列表降級為模式切換 -->
       <div class="atlas" id="storyAtlas">
         <img class="atlas__fallback" src="assets/map-blurred.svg"
-             alt="手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，只作示意並非 GPS 定位。">
+             data-i18n-alt="atlas.fallbackAlt" alt="">
         <div class="atlas__canvas" id="vtnMap" role="application"
-             aria-label="故事地圖：顯示約 800 米模糊範圍內的故事，並非講者精確位置"></div>
+             data-i18n-aria="aria.mapApp"></div>
         <div class="atlas__tint" aria-hidden="true"></div>
 
         <header class="atlas__top">
@@ -197,16 +199,16 @@
           <div class="atlas__tools">
             <!-- 列表入口固定可見：不是只有地圖降級時才出現的後備按鈕 -->
             <button type="button" class="atlas-btn atlas-btn--list" id="atlasViewBtn" aria-pressed="false"
-                    aria-label="切換列表模式" data-i18n-aria="atlas.listAria" title="列表模式">
+                    data-i18n-aria="atlas.listAria" data-i18n-title="atlas.listModeTitle">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
               <span data-i18n="atlas.listShort">列表</span>
             </button>
             <button type="button" class="atlas-btn" id="atlasSceneBtn"
-                    aria-label="3D 示範書籤" data-i18n-aria="atlas.sceneAria" title="3D 示範書籤">
+                    data-i18n-aria="atlas.sceneAria" data-i18n-title="atlas.sceneTitle">
               <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
             </button>
             <button type="button" class="atlas-btn atlas-btn--3d" id="atlas3dBtn" aria-pressed="false"
-                    aria-label="切換 3D 立體地圖" data-i18n-aria="atlas.3dAria" title="3D 立體">
+                    data-i18n-aria="atlas.3dAria" data-i18n-title="atlas.threeDTitle">
               <span>3D</span>
             </button>
           </div>
@@ -226,7 +228,7 @@
           <div class="filter-summary" id="filterSummary"></div>
 
           <div class="atlas__legend" id="atlasLegend" role="group"
-               aria-label="故事類型圖例" data-i18n-aria="atlas.legendAria"></div>
+               data-i18n-aria="atlas.legendAria"></div>
           <div class="atlas__viewport" id="atlasViewport" hidden>
             <i class="fa-solid fa-eye" aria-hidden="true"></i>
             <span id="atlasViewportText"></span>
@@ -234,14 +236,14 @@
         </header>
 
         <div class="atlas__controls">
-          <button type="button" class="atlas-ctl" id="atlasZoomIn" aria-label="放大" data-i18n-aria="atlas.zoomIn">
+          <button type="button" class="atlas-ctl" id="atlasZoomIn" data-i18n-aria="atlas.zoomIn">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
           </button>
-          <button type="button" class="atlas-ctl" id="atlasZoomOut" aria-label="縮小" data-i18n-aria="atlas.zoomOut">
+          <button type="button" class="atlas-ctl" id="atlasZoomOut" data-i18n-aria="atlas.zoomOut">
             <i class="fa-solid fa-minus" aria-hidden="true"></i>
           </button>
           <button type="button" class="atlas-ctl atlas-ctl--reset" id="atlasRecenter"
-                  aria-label="重設視角" data-i18n-aria="atlas.reset">
+                  data-i18n-aria="atlas.reset">
             <i class="fa-solid fa-compass" aria-hidden="true"></i>
           </button>
         </div>
@@ -262,7 +264,7 @@
               <b id="atlasEraLabel">全部</b>
             </div>
             <input type="range" id="atlasEra" min="0" max="4" step="1" value="4"
-                   aria-label="故事年代" data-i18n-aria="atlas.eraAria">
+                   data-i18n-aria="atlas.eraAria">
             <div class="atlas__ticks" id="atlasTicks" aria-hidden="true"></div>
           </div>
           <div class="atlas__meta">
@@ -275,11 +277,11 @@
         </div>
       </div>
 
-      <section class="filter-panel" id="filterPanel" hidden aria-label="篩選故事">
+      <section class="filter-panel" id="filterPanel" hidden data-i18n-aria="aria.filterPanel">
         <div class="filter-panel__head">
           <p class="filter-panel__title" data-i18n="stories.filter">篩選</p>
           <button type="button" class="filter-panel__close" id="filterClose"
-                  aria-label="關閉" data-i18n-aria="common.close">
+                  data-i18n-aria="common.close">
             <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           </button>
         </div>
@@ -315,10 +317,10 @@
         </div>
       </section>
 
-      <section class="atlas-listview" id="atlasList" hidden aria-label="故事列表">
+      <section class="atlas-listview" id="atlasList" hidden data-i18n-aria="aria.storyList">
         <div class="atlas-listview__head">
           <button type="button" class="atlas-listview__back" id="atlasListBack"
-                  aria-label="返回地圖" data-i18n-aria="atlas.backToMap">
+                  data-i18n-aria="atlas.backToMap">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           </button>
           <div class="atlas-listview__heading">
@@ -337,12 +339,12 @@
           <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
         </section>
 
-        <aside class="disclosure-card" role="note" aria-label="示範故事披露">
+        <aside class="disclosure-card" role="note" data-i18n-aria="stories.disclosureAria">
           <span class="disclosure-card__icon" aria-hidden="true">
             <i class="fa-solid fa-circle-info"></i>
           </span>
           <div class="disclosure-card__body">
-            <p class="disclosure-card__en">Role-played demo stories — created for hackathon demonstration purposes.</p>
+            <p class="disclosure-card__en" data-i18n="stories.disclosureEn">Role-played demo stories — created for hackathon demonstration purposes.</p>
             <p class="disclosure-card__zh" data-i18n="stories.disclosure">全部為角色扮演示範故事，並非真實長者訪談。</p>
           </div>
         </aside>
@@ -351,14 +353,14 @@
       <!-- 二級故事頁：半拉抽屜（預設半開，可上拉全開） -->
       <div class="story-sheet__scrim" id="sheetScrim" hidden></div>
       <section class="story-sheet" id="storySheet" hidden role="dialog" aria-modal="false"
-               aria-label="故事詳情" data-i18n-aria="atlas.sheetAria">
+               data-i18n-aria="atlas.sheetAria">
         <div class="story-sheet__grab" id="sheetGrab" aria-hidden="true"><span></span></div>
         <button type="button" class="story-sheet__close" id="sheetClose"
-                aria-label="關閉" data-i18n-aria="common.close">
+                data-i18n-aria="common.close">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
         <div class="story-sheet__body" id="storySheetBody">
-          <section class="story-detail" id="storyDetail" hidden aria-label="故事詳情"></section>
+          <section class="story-detail" id="storyDetail" hidden data-i18n-aria="aria.storyDetail"></section>
         </div>
       </section>
     </main>
@@ -380,7 +382,7 @@
         </div>
       </section>
 
-      <section class="account-card" aria-label="帳戶">
+      <section class="account-card" data-i18n-aria="aria.account">
         <span class="account-card__avatar" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
         <div class="account-card__body">
           <p class="account-card__role" id="accountRole">訪客</p>
@@ -395,7 +397,9 @@
         <div class="stat"><span class="stat__num" id="statShared">0</span><span class="stat__label" data-i18n="me.statShared">已分享</span></div>
       </div>
 
-      <section class="me-list" aria-label="個人內容與私隱管理">
+      <p class="me-section-title" data-i18n="aria.meList">個人內容與私隱管理</p>
+
+      <section class="me-list" data-i18n-aria="aria.meList">
         <button type="button" class="me-item" id="meEntryRecordings">
           <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-microphone"></i></span>
           <span class="me-item__text">
@@ -450,7 +454,7 @@
           <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
         </button>
 
-        <div class="me-note" role="note" aria-label="模糊地點說明">
+        <div class="me-note" role="note" data-i18n-aria="aria.meNote">
           <span class="me-note__pin" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
           <span class="me-note__divider" aria-hidden="true"></span>
           <p class="me-note__text" data-i18n="me.locationNote">故事地點以模糊範圍呈現，保護講述者私隱。</p>
@@ -485,7 +489,7 @@
             <span class="setting-row__hint" data-i18n="settings.fontSizeHint">正文最小 18px，照顧長者閱讀</span>
           </div>
           <div class="setting-row__control">
-            <div class="seg" role="group" aria-label="字級">
+            <div class="seg" role="group" data-i18n-aria="aria.fontSize">
               <button type="button" class="seg__btn" data-font-size="md" data-i18n="settings.fontMd">標準</button>
               <button type="button" class="seg__btn" data-font-size="lg" data-i18n="settings.fontLg">大</button>
               <button type="button" class="seg__btn" data-font-size="xl" data-i18n="settings.fontXl">特大</button>
@@ -499,7 +503,7 @@
             <span class="setting-row__hint" data-i18n="settings.themeHint">淺色、深色或跟隨系統</span>
           </div>
           <div class="setting-row__control">
-            <select id="setTheme" aria-label="主題">
+            <select id="setTheme" data-i18n-aria="aria.theme">
               <option value="system" data-i18n="settings.themeSystem">跟隨系統</option>
               <option value="light" data-i18n="settings.themeLight">淺色</option>
               <option value="dark" data-i18n="settings.themeDark">深色</option>
@@ -537,7 +541,7 @@
             <span class="setting-row__hint" data-i18n="settings.volumeHint">套用到所有故事與錄音</span>
           </div>
           <div class="setting-row__control">
-            <input type="range" id="setVolume" min="0" max="100" step="5" value="100" aria-label="播放音量">
+            <input type="range" id="setVolume" min="0" max="100" step="5" value="100" data-i18n-aria="aria.volume">
             <output id="setVolumeOut" for="setVolume">100%</output>
           </div>
         </div>
@@ -548,7 +552,7 @@
             <span class="setting-row__hint" data-i18n="settings.speedHint">慢速有助聽清長者口音</span>
           </div>
           <div class="setting-row__control">
-            <select id="setSpeed" aria-label="播放速度">
+            <select id="setSpeed" data-i18n-aria="aria.speed">
               <option value="0.75">0.75×</option>
               <option value="1">1.00×</option>
               <option value="1.25">1.25×</option>
@@ -607,7 +611,7 @@
 
       <section class="about-section">
         <h2 data-i18n="about.dataTitle">數據來源與授權</h2>
-        <p data-i18n="about.dataBody">本演示收錄 8 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。唯一真實音軌為 Boris Lau 的示範錄音（約 46.7 秒），其餘故事只有逐字稿，介面會如實標示「未附音檔」。</p>
+        <p id="aboutDataBody">—</p>
       </section>
 
       <section class="about-section">
@@ -643,7 +647,7 @@
       </section>
     </main>
 
-    <nav class="bottom-nav" aria-label="主導航">
+    <nav class="bottom-nav" data-i18n-aria="aria.nav">
       <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
         <span class="bottom-nav__icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
         <span class="bottom-nav__label" data-i18n="nav.home">主頁</span>

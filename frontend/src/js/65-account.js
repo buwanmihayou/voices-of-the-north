@@ -72,10 +72,16 @@
 
     var body = U.node('div');
 
-    var seg = U.node('div', { class: 'seg', role: 'group', 'aria-label': t('auth.modeAria') });
+    var seg = U.node('div', { class: 'seg', role: 'group', 'data-i18n-aria': 'auth.modeAria' });
     seg.style.marginBottom = '12px';
-    var emailBtn = U.node('button', { class: 'seg__btn is-active', type: 'button', text: t('auth.emailTab') });
-    var schoolBtn = U.node('button', { class: 'seg__btn', type: 'button', text: t('auth.schoolTab') });
+    var emailBtn = U.node('button', {
+      class: 'seg__btn is-active', type: 'button',
+      'data-i18n': 'auth.emailTab', text: t('auth.emailTab')
+    });
+    var schoolBtn = U.node('button', {
+      class: 'seg__btn', type: 'button',
+      'data-i18n': 'auth.schoolTab', text: t('auth.schoolTab')
+    });
     seg.appendChild(emailBtn);
     seg.appendChild(schoolBtn);
     body.appendChild(seg);
@@ -89,8 +95,12 @@
     var adminInput = U.node('input', { type: 'checkbox' });
     adminLabel.appendChild(adminInput);
     var adminText = U.node('span');
-    adminText.appendChild(U.node('span', { class: 'radio-card__title', text: t('auth.adminToggle') }));
-    adminText.appendChild(U.node('span', { class: 'radio-card__hint', text: t('auth.adminHint') }));
+    adminText.appendChild(U.node('span', {
+      class: 'radio-card__title', 'data-i18n': 'auth.adminToggle', text: t('auth.adminToggle')
+    }));
+    adminText.appendChild(U.node('span', {
+      class: 'radio-card__hint', 'data-i18n': 'auth.adminHint', text: t('auth.adminHint')
+    }));
     adminLabel.appendChild(adminText);
     adminInput.addEventListener('change', function () {
       adminFlag = adminInput.checked;
@@ -98,7 +108,9 @@
     });
     body.appendChild(adminLabel);
 
-    var note = U.node('p', { class: 'vtn-modal__note', text: t('auth.privacyNote') });
+    var note = U.node('p', {
+      class: 'vtn-modal__note', 'data-i18n': 'auth.privacyNote', text: t('auth.privacyNote')
+    });
     body.appendChild(note);
 
     function showError(message) {
@@ -114,22 +126,33 @@
 
       if (mode === 'email') {
         var emailField = U.node('div', { class: 'vtn-field' });
-        emailField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.emailLabel') }));
-        var emailInput = U.node('input', { type: 'email', id: 'loginEmail', autocomplete: 'email', placeholder: t('auth.emailPh') });
+        emailField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.emailLabel', text: t('auth.emailLabel')
+        }));
+        var emailInput = U.node('input', {
+          type: 'email', id: 'loginEmail', autocomplete: 'email',
+          'data-i18n-ph': 'auth.emailPh', placeholder: t('auth.emailPh')
+        });
         emailInput.value = '';
         emailField.appendChild(emailInput);
         host.appendChild(emailField);
 
         var codeField = U.node('div', { class: 'vtn-field' });
-        codeField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.codeLabel') }));
+        codeField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.codeLabel', text: t('auth.codeLabel')
+        }));
         var codeInput = U.node('input', {
           type: 'text', id: 'loginCode', inputmode: 'numeric', maxlength: '6',
-          autocomplete: 'one-time-code', placeholder: t('auth.codePh')
+          autocomplete: 'one-time-code',
+          'data-i18n-ph': 'auth.codePh', placeholder: t('auth.codePh')
         });
         codeField.appendChild(codeInput);
         host.appendChild(codeField);
 
-        var sendBtn = U.node('button', { class: 'vtn-btn vtn-btn--quiet vtn-btn--block', type: 'button', text: t('auth.sendCode') });
+        var sendBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--quiet vtn-btn--block', type: 'button',
+          'data-i18n': 'auth.sendCode', text: t('auth.sendCode')
+        });
         sendBtn.addEventListener('click', function () {
           var email = (document.getElementById('loginEmail').value || '').trim();
           if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -159,16 +182,28 @@
         host.appendChild(sendBtn);
       } else {
         var schoolField = U.node('div', { class: 'vtn-field' });
-        schoolField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.schoolLabel') }));
-        schoolField.appendChild(U.node('input', { type: 'text', id: 'loginSchool', autocomplete: 'username', placeholder: t('auth.schoolPh') }));
+        schoolField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.schoolLabel', text: t('auth.schoolLabel')
+        }));
+        schoolField.appendChild(U.node('input', {
+          type: 'text', id: 'loginSchool', autocomplete: 'username',
+          'data-i18n-ph': 'auth.schoolPh', placeholder: t('auth.schoolPh')
+        }));
         host.appendChild(schoolField);
 
         var passField = U.node('div', { class: 'vtn-field' });
-        passField.appendChild(U.node('label', { class: 'vtn-field__label', text: t('auth.passwordLabel') }));
-        passField.appendChild(U.node('input', { type: 'password', id: 'loginPassword', autocomplete: 'current-password', placeholder: t('auth.passwordPh') }));
+        passField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.passwordLabel', text: t('auth.passwordLabel')
+        }));
+        passField.appendChild(U.node('input', {
+          type: 'password', id: 'loginPassword', autocomplete: 'current-password',
+          'data-i18n-ph': 'auth.passwordPh', placeholder: t('auth.passwordPh')
+        }));
         host.appendChild(passField);
 
-        host.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('auth.schoolNote') }));
+        host.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'auth.schoolNote', text: t('auth.schoolNote')
+        }));
       }
       var first = host.querySelector('input');
       if (first) first.focus();
@@ -179,12 +214,13 @@
     renderMode();
 
     var dlg = VTN.ui.dialog({
-      title: t('auth.title'),
+      titleKey: 'auth.title',
       body: body,
+      i18nRefresh: renderMode,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('auth.login'),
+          labelKey: 'auth.login',
           kind: 'solid',
           keepOpen: true,
           onClick: function (ctx) {
@@ -275,10 +311,11 @@
     var session = VTN.store.session();
     if (!session) return;
     VTN.ui.confirm({
-      title: t('auth.logout'),
-      message: t('auth.logoutConfirm', { email: session.email }),
-      note: t('auth.logoutNote'),
-      confirmLabel: t('auth.logout'),
+      titleKey: 'auth.logout',
+      messageKey: 'auth.logoutConfirm',
+      messageVars: { email: session.email },
+      noteKey: 'auth.logoutNote',
+      confirmLabelKey: 'auth.logout',
       danger: true
     }).then(function (ok) {
       if (!ok) return;
@@ -293,54 +330,152 @@
   /* =========================================================================
    * 3. 私隱與分享範圍
    * ======================================================================= */
+  function makeScopeSelect(id, value, title, onChange) {
+    var select = U.node('select', {
+      id: id,
+      'aria-label': t('privacy.selectAria', { title: title })
+    }, VTN.SCOPES.map(function (scope) {
+      return U.node('option', { value: scope, text: t(VTN.SCOPE_META[scope].labelKey) });
+    }));
+    select.value = value;
+    select.addEventListener('change', function () { onChange(select.value); });
+    return select;
+  }
+
+  function setItemScope(item, scope, rerender) {
+    var saved = VTN.store.setScope(item, scope);
+    if (saved === null) return;
+    VTN.api.audit({ action: 'scope.change', targetId: item.id, to: saved })
+      .catch(function () { /* 本機已有稽核 */ });
+    VTN.ui.toast(t('scope.saved', { scope: t(VTN.SCOPE_META[saved].labelKey) }), 'success');
+    if (rerender) rerender();
+  }
+
   function openPrivacy() {
     var body = U.node('div');
-    body.appendChild(U.node('p', { text: t('privacy.intro') }));
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('privacy.serverNote') }));
 
-    var items = ownItems();
-    if (!items.length) {
-      body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('privacy.empty') }));
+    function renderPrivacyBody() {
+      body.textContent = '';
+      var items = ownItems();
+      var preset = VTN.store.scopePreset();
+      var exceptions = VTN.store.scopeExceptions(items);
+
+      /* 兩句分開寫，避免「預設私人」與示範故事 community 互相矛盾 */
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.defaultNote', text: t('privacy.defaultNote')
+      }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.demoNote', text: t('privacy.demoNote')
+      }));
+      body.appendChild(U.node('p', {
+        'data-i18n': 'privacy.intro', text: t('privacy.intro')
+      }));
+
+      /* 頂部：一個預設分享範圍 */
+      var presetBox = U.node('div', { class: 'privacy-preset' });
+      presetBox.appendChild(U.node('label', {
+        class: 'vtn-field__label', 'for': 'privacyPreset',
+        'data-i18n': 'privacy.preset', text: t('privacy.preset')
+      }));
+      presetBox.appendChild(makeScopeSelect('privacyPreset', preset, t('privacy.preset'), function (value) {
+        VTN.store.setScopePreset(value);
+        VTN.ui.toast(t('scope.saved', { scope: t(VTN.SCOPE_META[value].labelKey) }), 'success');
+        VTN.stories.render();
+        renderPrivacyBody();
+      }));
+      presetBox.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.presetHint', text: t('privacy.presetHint')
+      }));
+      body.appendChild(presetBox);
+
+      /* 中部：摺疊的例外清單（列表區限高 50dvh） */
+      var details = U.node('details', { class: 'privacy-exceptions' });
+      details.appendChild(U.node('summary', {
+        class: 'privacy-exceptions__summary',
+        text: t('privacy.exceptions', { n: exceptions.length })
+      }));
+      details.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.exceptionsHint',
+        text: t('privacy.exceptionsHint')
+      }));
+      var list = U.node('div', { class: 'privacy-exceptions__list' });
+      if (!exceptions.length) {
+        list.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'privacy.exceptionsEmpty',
+          text: t('privacy.exceptionsEmpty')
+        }));
+      } else {
+        exceptions.forEach(function (entry, index) {
+          var item = entry.item;
+          var row = U.node('div', { class: 'radio-card' });
+          row.style.cursor = 'default';
+          var text = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
+          text.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(item) }));
+          text.appendChild(U.node('span', {
+            class: 'radio-card__hint',
+            text: isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')
+          }));
+          row.appendChild(text);
+          var control = U.node('span', { class: 'setting-row__control' });
+          control.appendChild(makeScopeSelect(
+            'privacyScope-' + index,
+            VTN.store.scopeOf(item),
+            titleOf(item),
+            function (value) { setItemScope(item, value, renderPrivacyBody); }
+          ));
+          row.appendChild(control);
+          list.appendChild(row);
+        });
+      }
+      details.appendChild(list);
+      body.appendChild(details);
+
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note',
+        text: t('privacy.auditNote', { version: VTN.config.consentPolicyVersion })
+      }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'privacy.serverNote', text: t('privacy.serverNote')
+      }));
+      if (!items.length) {
+        body.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'privacy.empty', text: t('privacy.empty')
+        }));
+      }
     }
 
-    items.forEach(function (item) {
-      var row = U.node('div', { class: 'radio-card' });
-      row.style.cursor = 'default';
-      var text = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
-      text.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(item) }));
-      text.appendChild(U.node('span', {
-        class: 'radio-card__hint',
-        text: isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')
-      }));
-      row.appendChild(text);
-
-      var control = U.node('span', { class: 'setting-row__control' });
-      var select = U.node('select', { 'aria-label': t('privacy.selectAria', { title: titleOf(item) }) });
-      VTN.SCOPES.forEach(function (scope) {
-        select.appendChild(U.node('option', {
-          value: scope,
-          text: t(VTN.SCOPE_META[scope].labelKey)
-        }));
-      });
-      select.value = VTN.store.scopeOf(item);
-      select.addEventListener('change', function () {
-        var scope = VTN.store.setScope(item, select.value);
-        VTN.api.audit({ action: 'scope.change', targetId: item.id, to: scope }).catch(function () { /* 本機已有稽核 */ });
-        VTN.ui.toast(t('scope.saved', { scope: t(VTN.SCOPE_META[scope].labelKey) }), 'success');
-      });
-      control.appendChild(select);
-      row.appendChild(control);
-      body.appendChild(row);
-    });
-
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('privacy.auditNote', {
-      version: VTN.config.consentPolicyVersion
-    }) }));
+    renderPrivacyBody();
 
     VTN.ui.dialog({
-      title: t('privacy.title'),
+      titleKey: 'privacy.title',
       body: body,
-      actions: [{ label: t('common.done'), kind: 'solid' }],
+      actions: [
+        {
+          labelKey: 'privacy.resetExceptions', kind: 'quiet', keepOpen: true,
+          onClick: function () {
+            VTN.store.clearScopeExceptions();
+            VTN.ui.toast(t('privacy.resetDone'), 'success');
+            VTN.stories.render();
+            renderPrivacyBody();
+          }
+        },
+        {
+          labelKey: 'privacy.applyAll', kind: 'gold', keepOpen: true,
+          onClick: function () {
+            var preset = VTN.store.scopePreset();
+            ownItems().forEach(function (item) { VTN.store.setScope(item, preset); });
+            VTN.api.audit({ action: 'scope.applyAll', to: preset })
+              .catch(function () { /* 本機已有稽核 */ });
+            VTN.ui.toast(t('privacy.applyAllDone', {
+              scope: t(VTN.SCOPE_META[preset].labelKey)
+            }), 'success');
+            VTN.stories.render();
+            renderPrivacyBody();
+          }
+        },
+        { labelKey: 'common.done', kind: 'solid' }
+      ],
+      i18nRefresh: renderPrivacyBody,
       onClose: function () {
         VTN.stories.render();
         if (VTN.assistant) VTN.assistant.refresh();
@@ -354,31 +489,44 @@
   function openCorrectionPicker() {
     var items = ownItems();
     var body = U.node('div');
-    if (!items.length) {
-      body.appendChild(U.node('p', { text: t('correct.noTargets') }));
-      VTN.ui.dialog({ title: t('me.correction'), body: body, actions: [{ label: t('common.close'), kind: 'solid' }] });
-      return;
-    }
-    body.appendChild(U.node('p', { text: t('correct.pickIntro') }));
-    var field = U.node('div', { class: 'vtn-field' });
-    field.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.target') }));
-    var select = U.node('select', { id: 'corrTarget' });
-    items.forEach(function (item) {
-      select.appendChild(U.node('option', {
-        value: item.id,
-        text: titleOf(item) + (isStory(item) ? t('correct.kindStory') : t('correct.kindRecord'))
+
+    function renderPickerBody() {
+      body.textContent = '';
+      if (!items.length) {
+        body.appendChild(U.node('p', {
+          'data-i18n': 'correct.noTargets', text: t('correct.noTargets')
+        }));
+        return;
+      }
+      body.appendChild(U.node('p', {
+        'data-i18n': 'correct.pickIntro', text: t('correct.pickIntro')
       }));
-    });
-    field.appendChild(select);
-    body.appendChild(field);
+      var field = U.node('div', { class: 'vtn-field' });
+      field.appendChild(U.node('label', {
+        class: 'vtn-field__label', 'for': 'corrTarget',
+        'data-i18n': 'correct.target', text: t('correct.target')
+      }));
+      var select = U.node('select', { id: 'corrTarget' }, items.map(function (item) {
+        return U.node('option', {
+          value: item.id,
+          text: titleOf(item) + (isStory(item) ? t('correct.kindStory') : t('correct.kindRecord'))
+        });
+      }));
+      field.appendChild(select);
+      body.appendChild(field);
+    }
+    renderPickerBody();
 
     VTN.ui.dialog({
-      title: t('me.correction'),
+      titleKey: 'me.correction',
       body: body,
+      i18nRefresh: renderPickerBody,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('common.next'), kind: 'solid', onClick: function () {
+          labelKey: 'common.next', kind: 'solid', onClick: function () {
+            var select = document.getElementById('corrTarget');
+            if (!select) return;
             var item = items.filter(function (it) { return it.id === select.value; })[0];
             if (item) setTimeout(function () { openCorrection(item); }, 240);
           }
@@ -390,51 +538,70 @@
   function openCorrection(item) {
     var body = U.node('div');
     body.appendChild(U.node('p', {
-      class: 'vtn-modal__note',
-      text: t('correct.demoNote')
+      class: 'vtn-modal__note', 'data-i18n': 'correct.demoNote', text: t('correct.demoNote')
     }));
 
     var target = U.node('div', { class: 'radio-card is-active' });
     target.style.cursor = 'default';
     var targetText = U.node('span');
     targetText.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(item) }));
-    targetText.appendChild(U.node('span', {
-      class: 'radio-card__hint',
-      text: (isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')) + '・' + item.id
-    }));
+    var hint = U.node('span', { class: 'radio-card__hint' }, [
+      U.node('span', {
+        'data-i18n': isStory(item) ? 'privacy.storyHint' : 'privacy.recordHint',
+        text: isStory(item) ? t('privacy.storyHint') : t('privacy.recordHint')
+      }),
+      document.createTextNode('・' + item.id)
+    ]);
+    targetText.appendChild(hint);
     target.appendChild(targetText);
     body.appendChild(target);
 
     var fieldBox = U.node('div', { class: 'vtn-field' });
-    fieldBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.field') }));
+    fieldBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.field', text: t('correct.field')
+    }));
     var fieldSelect = U.node('select', { id: 'corrField' });
     [
-      ['transcript', t('correct.fieldTranscript')],
-      ['timestamp', t('correct.fieldTimestamp')],
-      ['title', t('correct.fieldTitle')],
-      ['other', t('correct.fieldOther')]
+      ['transcript', 'correct.fieldTranscript'],
+      ['timestamp', 'correct.fieldTimestamp'],
+      ['title', 'correct.fieldTitle'],
+      ['other', 'correct.fieldOther']
     ].forEach(function (def) {
-      fieldSelect.appendChild(U.node('option', { value: def[0], text: def[1] }));
+      fieldSelect.appendChild(U.node('option', {
+        value: def[0], 'data-i18n': def[1], text: t(def[1])
+      }));
     });
     fieldBox.appendChild(fieldSelect);
     body.appendChild(fieldBox);
 
     var currentBox = U.node('div', { class: 'vtn-field' });
-    currentBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.current') }));
+    currentBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.current', text: t('correct.current')
+    }));
     var currentArea = U.node('textarea', { readonly: 'readonly', rows: '4' });
     currentArea.value = currentText(item) || '—';
     currentBox.appendChild(currentArea);
     body.appendChild(currentBox);
 
     var proposedBox = U.node('div', { class: 'vtn-field' });
-    proposedBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.proposed') }));
-    var proposedArea = U.node('textarea', { id: 'corrProposed', rows: '4', placeholder: t('correct.proposedPh') });
+    proposedBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.proposed', text: t('correct.proposed')
+    }));
+    var proposedArea = U.node('textarea', {
+      id: 'corrProposed', rows: '4',
+      'data-i18n-ph': 'correct.proposedPh', placeholder: t('correct.proposedPh')
+    });
     proposedBox.appendChild(proposedArea);
     body.appendChild(proposedBox);
 
     var reasonBox = U.node('div', { class: 'vtn-field' });
-    reasonBox.appendChild(U.node('label', { class: 'vtn-field__label', text: t('correct.reason') }));
-    var reasonInput = U.node('input', { type: 'text', id: 'corrReason', placeholder: t('correct.reasonPh') });
+    reasonBox.appendChild(U.node('label', {
+      class: 'vtn-field__label', 'data-i18n': 'correct.reason', text: t('correct.reason')
+    }));
+    var reasonInput = U.node('input', {
+      type: 'text', id: 'corrReason',
+      'data-i18n-ph': 'correct.reasonPh', placeholder: t('correct.reasonPh')
+    });
     reasonBox.appendChild(reasonInput);
     body.appendChild(reasonBox);
 
@@ -444,15 +611,24 @@
     /* 已提交的申請 */
     var existing = VTN.store.corrections.list().filter(function (c) { return c.targetId === item.id; });
     if (existing.length) {
-      body.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('correct.listTitle') }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-rec-subhead', 'data-i18n': 'correct.listTitle', text: t('correct.listTitle')
+      }));
       existing.forEach(function (entry) {
         var row = U.node('div', { class: 'radio-card' });
         row.style.cursor = 'default';
         var info = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
-        info.appendChild(U.node('span', {
-          class: 'radio-card__title',
-          text: t('correct.status.' + entry.status) + '・' + t('correct.field.' + (entry.field || 'other'))
-        }));
+        info.appendChild(U.node('span', { class: 'radio-card__title' }, [
+          U.node('span', {
+            'data-i18n': 'correct.status.' + entry.status,
+            text: t('correct.status.' + entry.status)
+          }),
+          document.createTextNode('・'),
+          U.node('span', {
+            'data-i18n': 'correct.field.' + (entry.field || 'other'),
+            text: t('correct.field.' + (entry.field || 'other'))
+          })
+        ]));
         info.appendChild(U.node('span', {
           class: 'radio-card__hint',
           text: (entry.proposedText || '').slice(0, 80)
@@ -461,7 +637,10 @@
 
         if (VTN.store.role() === 'admin' && entry.status === 'submitted') {
           var actions = U.node('span', { class: 'setting-row__control' });
-          var approve = U.node('button', { class: 'vtn-btn vtn-btn--sm vtn-btn--solid', type: 'button', text: t('correct.approve') });
+          var approve = U.node('button', {
+            class: 'vtn-btn vtn-btn--sm vtn-btn--solid', type: 'button',
+            'data-i18n': 'correct.approve', text: t('correct.approve')
+          });
           approve.addEventListener('click', function () {
             VTN.store.approveCorrection(entry.id, VTN.store.session().email);
             VTN.api.corrections.review(entry.id, true).catch(function () { /* 本機已記錄 */ });
@@ -469,7 +648,10 @@
             dlg.close('approved');
             setTimeout(function () { openCorrection(VTN.store.records.get(item.id) || item); }, 260);
           });
-          var reject = U.node('button', { class: 'vtn-btn vtn-btn--sm vtn-btn--danger', type: 'button', text: t('correct.reject') });
+          var reject = U.node('button', {
+            class: 'vtn-btn vtn-btn--sm vtn-btn--danger', type: 'button',
+            'data-i18n': 'correct.reject', text: t('correct.reject')
+          });
           reject.addEventListener('click', function () {
             VTN.store.rejectCorrection(entry.id, VTN.store.session().email, '');
             VTN.api.corrections.review(entry.id, false).catch(function () { /* 同上 */ });
@@ -485,25 +667,35 @@
       });
     }
 
+    var versionRows = [];
     if (item.versions && item.versions.length) {
-      body.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('correct.versions') }));
+      body.appendChild(U.node('p', {
+        class: 'vtn-rec-subhead', 'data-i18n': 'correct.versions', text: t('correct.versions')
+      }));
       item.versions.slice().reverse().forEach(function (version) {
         var row = U.node('div', { class: 'vtn-rec-note' });
-        row.textContent = t('correct.versionLine', {
-          v: version.version,
-          date: U.fmtDate(new Date(version.at).getTime())
-        }) + '　' + (version.reason || '');
+        versionRows.push({ el: row, version: version });
         body.appendChild(row);
       });
     }
+    function renderVersionRows() {
+      versionRows.forEach(function (pair) {
+        pair.el.textContent = t('correct.versionLine', {
+          v: pair.version.version,
+          date: U.fmtDate(new Date(pair.version.at).getTime())
+        }) + '　' + (pair.version.reason || '');
+      });
+    }
+    renderVersionRows();
 
     var dlg = VTN.ui.dialog({
-      title: t('correct.title'),
+      titleKey: 'correct.title',
       body: body,
+      i18nRefresh: renderVersionRows,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('correct.submit'),
+          labelKey: 'correct.submit',
           kind: 'solid',
           keepOpen: true,
           onClick: function (ctx) {
@@ -549,10 +741,10 @@
   function openWithdraw(item) {
     var isRecord = !isStory(item);
     VTN.ui.confirm({
-      title: t('withdraw.title'),
-      message: t('withdraw.message'),
-      note: t('withdraw.note'),
-      confirmLabel: t('withdraw.confirm'),
+      titleKey: 'withdraw.title',
+      messageKey: 'withdraw.message',
+      noteKey: 'withdraw.note',
+      confirmLabelKey: 'withdraw.confirm',
       danger: true
     }).then(function (ok) {
       if (!ok) return;
@@ -601,46 +793,64 @@
   function openExport() {
     var records = VTN.store.records.list();
     var body = U.node('div');
-    body.appendChild(U.node('p', { text: t('export.intro') }));
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('export.note') }));
 
-    if (!records.length) {
-      body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('export.empty') }));
-    }
-
-    records.forEach(function (rec) {
-      var row = U.node('div', { class: 'radio-card' });
-      row.style.cursor = 'default';
-      var info = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
-      info.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(rec) }));
-      info.appendChild(U.node('span', {
-        class: 'radio-card__hint',
-        text: U.fmtDate(rec.createdAt) + '・' + U.fmtTime(rec.durationSec) + '・' +
-          t('rec.status.' + rec.status)
+    function renderExportBody() {
+      body.textContent = '';
+      body.appendChild(U.node('p', {
+        'data-i18n': 'export.intro', text: t('export.intro')
       }));
-      row.appendChild(info);
-      var actions = U.node('span', { class: 'setting-row__control' });
-      var audioBtn = U.node('button', { class: 'vtn-btn vtn-btn--sm', type: 'button', text: t('export.audio') });
-      audioBtn.addEventListener('click', function () { exportAudio(rec); });
-      audioBtn.disabled = !(rec.audioDataURL || rec.audioUrl);
-      var txtBtn = U.node('button', { class: 'vtn-btn vtn-btn--sm', type: 'button', text: t('export.txt') });
-      txtBtn.addEventListener('click', function () {
-        exportTranscript(rec);
-        VTN.ui.toast(t('export.done'), 'success');
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', 'data-i18n': 'export.note', text: t('export.note')
+      }));
+
+      if (!records.length) {
+        body.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'export.empty', text: t('export.empty')
+        }));
+      }
+
+      records.forEach(function (rec) {
+        var row = U.node('div', { class: 'radio-card' });
+        row.style.cursor = 'default';
+        var info = U.node('span', { style: 'flex:1 1 auto;min-width:0' });
+        info.appendChild(U.node('span', { class: 'radio-card__title', text: titleOf(rec) }));
+        info.appendChild(U.node('span', {
+          class: 'radio-card__hint',
+          text: U.fmtDate(rec.createdAt) + '・' + U.fmtTime(rec.durationSec) + '・' +
+            t('rec.status.' + rec.status)
+        }));
+        row.appendChild(info);
+        var actions = U.node('span', { class: 'setting-row__control' });
+        var audioBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--sm', type: 'button',
+          'data-i18n': 'export.audio', text: t('export.audio')
+        });
+        audioBtn.addEventListener('click', function () { exportAudio(rec); });
+        audioBtn.disabled = !(rec.audioDataURL || rec.audioUrl);
+        var txtBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--sm', type: 'button',
+          'data-i18n': 'export.txt', text: t('export.txt')
+        });
+        txtBtn.addEventListener('click', function () {
+          exportTranscript(rec);
+          VTN.ui.toast(t('export.done'), 'success');
+        });
+        actions.appendChild(audioBtn);
+        actions.appendChild(txtBtn);
+        row.appendChild(actions);
+        body.appendChild(row);
       });
-      actions.appendChild(audioBtn);
-      actions.appendChild(txtBtn);
-      row.appendChild(actions);
-      body.appendChild(row);
-    });
+    }
+    renderExportBody();
 
     VTN.ui.dialog({
-      title: t('export.title'),
+      titleKey: 'export.title',
       body: body,
+      i18nRefresh: renderExportBody,
       actions: [
-        { label: t('common.close'), kind: 'quiet' },
+        { labelKey: 'common.close', kind: 'quiet' },
         {
-          label: t('export.allJson'), kind: 'solid', onClick: function () {
+          labelKey: 'export.allJson', kind: 'solid', onClick: function () {
             if (!records.length) { VTN.ui.toast(t('export.empty'), 'error'); return; }
             var payload = records.map(function (rec) {
               var copy = Object.assign({}, rec);
@@ -672,37 +882,56 @@
   /* =========================================================================
    * 7. 語言
    * ======================================================================= */
-  function openLanguage() {
-    var body = U.node('div');
+  /* 每次都按「當下語言」重算勾選、選中樣式與 aria-pressed，不再只算一次。 */
+  function renderLanguageBody(body) {
     var current = VTN.i18n.lang();
-    var options = [
+    body.textContent = '';
+    [
       ['zh-HK', 'lang.name.zh-HK'],
       ['zh-CN', 'lang.name.zh-CN'],
       ['en', 'lang.name.en']
-    ];
-    options.forEach(function (def) {
+    ].forEach(function (def) {
+      var active = def[0] === current;
       var btn = U.node('button', {
-        class: 'lang-option' + (def[0] === current ? ' is-selected' : ''),
+        class: 'lang-option' + (active ? ' is-selected' : ''),
         type: 'button',
-        'aria-pressed': def[0] === current ? 'true' : 'false'
+        'data-lang': def[0],
+        'aria-pressed': active ? 'true' : 'false'
       });
-      btn.appendChild(U.node('span', { text: t(def[1]) }));
-      btn.appendChild(U.node('span', { class: 'lang-option__check', text: def[0] === current ? '✓' : '' }));
-      btn.addEventListener('click', function () {
-        VTN.i18n.setLang(def[0]);
-        VTN.store.setPref('lang', def[0]);
-        renderMe();
-        VTN.ui.toast(t('lang.switched'), 'success');
-        if (VTN.assistant) VTN.assistant.refresh();
-      });
+      btn.appendChild(U.node('span', { 'data-i18n': def[1], text: t(def[1]) }));
+      btn.appendChild(U.node('span', {
+        class: 'lang-option__check', 'aria-hidden': 'true', text: active ? '✓' : ''
+      }));
       body.appendChild(btn);
     });
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('lang.note') }));
+    body.appendChild(U.node('p', {
+      class: 'vtn-modal__note', 'data-i18n': 'lang.note', text: t('lang.note')
+    }));
+  }
+
+  function openLanguage() {
+    var body = U.node('div');
+    /* 事件委托：重繪後不用逐個重新綁定，也不會累積監聽器。 */
+    body.addEventListener('click', function (event) {
+      var target = event.target;
+      var btn = target && target.closest
+        ? target.closest('button.lang-option[data-lang]') : null;
+      if (!btn || !body.contains(btn)) return;
+      var code = btn.getAttribute('data-lang');
+      if (VTN.i18n.langs.indexOf(code) === -1) return;
+      VTN.i18n.setLang(code);
+      VTN.store.setPref('lang', code);
+      renderMe();
+      VTN.ui.toast(t('lang.switched'), 'success');
+      if (VTN.assistant) VTN.assistant.refresh();
+    });
+    renderLanguageBody(body);
 
     VTN.ui.dialog({
-      title: t('me.language'),
+      titleKey: 'me.language',
       body: body,
-      actions: [{ label: t('common.close'), kind: 'solid' }]
+      actions: [{ labelKey: 'common.close', kind: 'solid' }],
+      i18nRefresh: function () { renderLanguageBody(body); }
     });
   }
 

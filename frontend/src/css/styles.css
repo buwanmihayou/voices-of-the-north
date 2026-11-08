@@ -51,6 +51,12 @@
   /* 底導航實際佔高：8px 上 padding + 58px 項目 + 10px 下 padding + 1px 邊框
      + iPhone 底部安全區。彈層／FAB 一律用呢個變數留位，唔好硬編碼。 */
   --vtn-nav-h: calc(77px + env(safe-area-inset-bottom));
+
+  /* 11.08 統一的節奏與字級下限：所有頁面區塊間距、底部留白與輔助字級都用這幾個變數 */
+  --space-section: 20px;   /* 同頁相鄰區塊 */
+  --space-block:   28px;   /* 精選卡到下一個區塊的最小距離 */
+  --nav-safe:      calc(var(--space-block) + env(safe-area-inset-bottom));
+  --fs-min:        0.875rem; /* 14px 硬底線，任何輔助文字不得低於此值 */
 }
 
 /* ---------- 基礎 ---------- */
@@ -316,7 +322,7 @@ a { text-decoration: none; }
 /* ==========================================================================
    精選故事
    ========================================================================== */
-.featured { padding: 32px 20px 0; }
+.featured { padding: var(--space-section) 20px var(--space-block); }
 
 .featured__head {
   display: flex;
@@ -466,7 +472,7 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 22px 20px 24px;
+  margin: var(--space-section) 20px var(--space-block);
   padding: 16px 18px;
   border-radius: 17px;
   background: var(--sage-wash);
@@ -603,6 +609,7 @@ body:has(.sheet.is-show) .toast {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-bottom: var(--nav-safe);
 }
 .app-shell > .page::-webkit-scrollbar { display: none; }
 
@@ -794,7 +801,7 @@ body:has(.sheet.is-show) .toast {
    第三頁：村落故事
    ========================================================================== */
 
-.page--stories { padding-bottom: 18px; }
+.page--stories { padding-bottom: var(--nav-safe); }
 
 /* Hero：需容納標題、副標與篩選膠囊（縮短標題至膠囊的垂直距離） */
 .hero--stories {
@@ -1069,7 +1076,7 @@ body:has(.sheet.is-show) .toast {
   background: rgba(253, 251, 244, 0.92);
   border: 1px solid var(--hairline);
   color: var(--forest-deep);
-  font-size: 0.85rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   white-space: nowrap;
   transition: opacity 0.3s ease;
@@ -1099,7 +1106,7 @@ body:has(.sheet.is-show) .toast {
   background: rgba(253, 251, 244, 0.92);
   border: 1px solid var(--hairline);
   color: var(--forest-deep);
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   line-height: 1;
   pointer-events: none;
@@ -1110,14 +1117,14 @@ body:has(.sheet.is-show) .toast {
 /* Leaflet 微調：配合米白風格＋長者字號 */
 .map-card__leaflet .leaflet-control-attribution {
   background: rgba(253, 251, 244, 0.82);
-  font-size: 0.62rem;
+  font-size: var(--fs-min);
   color: #6f7d70;
 }
 .map-card__leaflet .leaflet-control-scale-line {
   background: rgba(253, 251, 244, 0.82);
   border-color: var(--forest-deep);
   color: var(--forest-deep);
-  font-size: 0.66rem;
+  font-size: var(--fs-min);
 }
 .map-card__leaflet .leaflet-bar a {
   color: var(--forest-deep);
@@ -1130,14 +1137,14 @@ body:has(.sheet.is-show) .toast {
 }
 .leaflet-vtn-popup .leaflet-popup-content {
   margin: 11px 14px;
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
   line-height: 1.55;
   color: var(--forest-deep);
 }
 
 .map-card__tiles-note {
   margin: 9px 2px 0;
-  font-size: 0.74rem;
+  font-size: var(--fs-min);
   line-height: 1.5;
   color: var(--muted);
 }
@@ -1151,7 +1158,9 @@ body:has(.sheet.is-show) .toast {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  margin: 16px 16px 0;
+  min-width: 0;
+  max-width: 100%;
+  margin: var(--space-section) 16px 0;
   padding: 16px 18px;
   border-radius: 20px;
   background: var(--gold-pale);
@@ -1170,13 +1179,14 @@ body:has(.sheet.is-show) .toast {
   font-size: 1.15rem;
 }
 
-.disclosure-card__body { min-width: 0; }
+.disclosure-card__body { flex: 1 1 auto; min-width: 0; }
 
 .disclosure-card__en {
   margin: 0;
-  font-size: 0.875rem;             /* 14px 硬底線 */
+  font-size: var(--fs-min);
   line-height: 1.55;
   color: #6B5326;
+  overflow-wrap: anywhere;
 }
 
 .disclosure-card__zh {
@@ -1184,10 +1194,8 @@ body:has(.sheet.is-show) .toast {
   font-size: 0.9rem;
   line-height: 1.55;
   color: #6B5326;
-  white-space: nowrap;
-}
-@media (max-width: 360px) {
-  .disclosure-card__zh { white-space: normal; }
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- 窄屏微調（≤360px）：封面收窄防擠壓，長文案安全換行 ---------- */
@@ -1206,9 +1214,21 @@ body:has(.sheet.is-show) .toast {
    第四頁：我的（管理中心）
    ========================================================================== */
 
-.page--me { padding-bottom: 16px; }
+/* 草叢裝飾改到背景層：不再靠 .me-list 的負 margin 疊圖，卡片與統計卡各自有完整留白。
+   實際草叢濃淡／位置仍需設計確認，這裡先保留原本的 my-background.png 並加淡色遮罩。 */
+.page--me {
+  padding-bottom: var(--nav-safe);
+  background-color: var(--ivory);
+  background-image:
+    linear-gradient(to bottom, rgba(246, 241, 230, 0.35), rgba(246, 241, 230, 0.92)),
+    url('assets/my-background.png');
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: 100% 320px;
+  background-attachment: local;
+}
 
-/* Hero：雙行標題較高，卡片輕疊於背景草叢之上。
+/* Hero：雙行標題較高，卡片不再疊在背景草叢上。
    底部保留 26px padding，確保任何字體渲染下副文都不被卡片遮擋。 */
 .hero--me {
   padding: 42px 22px 26px;
@@ -1242,7 +1262,7 @@ body:has(.sheet.is-show) .toast {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: -10px;               /* 只輕疊背景草叢，保留與副文的安全距離 */
+  margin-top: 0;                   /* 不再用負 margin 做裝飾留白 */
   padding: 0 16px;
 }
 

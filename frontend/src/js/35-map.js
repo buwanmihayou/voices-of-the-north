@@ -454,11 +454,14 @@
   function openGroupDialog(group) {
     if (!VTN.ui || !VTN.ui.dialog) return;
     var body = U.node('div');
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: t('atlas.groupNote') }));
+    body.appendChild(U.node('p', {
+      class: 'vtn-modal__note', 'data-i18n': 'atlas.groupNote', text: t('atlas.groupNote')
+    }));
     var dlg = VTN.ui.dialog({
       title: t('atlas.groupTitle', { n: group.count }),
       body: body,
-      actions: [{ label: t('common.close'), value: 'close' }]
+      actions: [{ labelKey: 'common.close', value: 'close' }],
+      i18nRefresh: function (ctx) { ctx.setTitle(t('atlas.groupTitle', { n: group.count })); }
     });
     group.ids.forEach(function (id) {
       var story = VTN.stories.get(id);

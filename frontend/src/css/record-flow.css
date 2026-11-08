@@ -11,7 +11,7 @@
   align-items: center;
   gap: 7px;
   margin: 10px 0 0;
-  font-size: 0.84rem;
+  font-size: var(--fs-min);
   color: var(--gold, #83632B);
   font-weight: 500;
 }
@@ -92,7 +92,7 @@
 .vtn-rec-sheet__title { margin: 0; font-size: 1.1rem; font-weight: 900; }
 .vtn-rec-sheet__sub {
   margin: 1px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   color: #DCE9DC;
   white-space: nowrap;
   overflow: hidden;
@@ -123,10 +123,10 @@
   margin: 0 auto 14px;
   padding: 6px 14px;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
   font-weight: 700;
 }
-.vtn-rec-status i { font-size: 0.72rem; }
+.vtn-rec-status i { font-size: var(--fs-min); }
 .vtn-rec-status--online { background: #DCE9DC; color: #2C5742; }
 .vtn-rec-status--offline { background: #F1E3C1; color: #6d5326; }
 .vtn-rec-status--checking { background: #EAF0E5; color: #5D7063; }
@@ -256,7 +256,7 @@
   border-radius: 999px;
   background: #EAF0E5;
   color: #3d5a48;
-  font-size: 0.8rem;
+  font-size: var(--fs-min);
   font-weight: 700;
 }
 .vtn-rec-pill--gold { background: #F1E3C1; color: #6d5326; }
@@ -327,7 +327,7 @@
 }
 .vtn-rec-subhead {
   margin: 4px 0 8px;
-  font-size: 0.86rem;
+  font-size: var(--fs-min);
   font-weight: 900;
   letter-spacing: 0.04em;
   color: #5D7063;
@@ -366,7 +366,7 @@
   border-radius: 999px;
   background: var(--forest, #2C5742);
   color: #F4F8F1;
-  font-size: 0.76rem;
+  font-size: var(--fs-min);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -386,14 +386,14 @@
   border-radius: 8px;
   background: #fff;
   border: 1px solid #d8ddcf;
-  font-size: 0.84rem;
+  font-size: var(--fs-min);
   cursor: pointer;
 }
 .vtn-rec-word:hover { background: #DCE9DC; }
 .vtn-rec-word.is-low { border-color: #d9a99f; color: #9c4637; }
 .vtn-rec-word .w-t {
   margin-left: 5px;
-  font-size: 0.68rem;
+  font-size: var(--fs-min);
   color: #8a978b;
   font-variant-numeric: tabular-nums;
 }
@@ -407,7 +407,7 @@
   border-radius: 12px;
   background: rgba(241, 227, 193, 0.65);
   color: #6d5326;
-  font-size: 0.82rem;
+  font-size: var(--fs-min);
   line-height: 1.55;
 }
 .vtn-rec-note i { margin-top: 2px; }
@@ -476,7 +476,7 @@
 }
 .vtn-rec-card__meta {
   margin: 2px 0 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-min);
   color: #7d8b7f;
 }
 .vtn-rec-card__chevron {
@@ -520,7 +520,7 @@
   border-radius: 999px;
   background: #DCE9DC;
   color: var(--forest, #2C5742);
-  font-size: 0.72rem;
+  font-size: var(--fs-min);
   font-weight: 900;
 }
 

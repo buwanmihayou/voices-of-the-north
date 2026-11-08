@@ -177,7 +177,7 @@
 
       'scope.label': '分享範圍：{scope}',
       'scope.title': '設定分享範圍',
-      'scope.intro': '「{title}」目前嘅分享範圍如下。預設私人，只有你睇到。',
+      'scope.intro': '「{title}」目前嘅分享範圍如下；改動即時生效，並會記錄同意與稽核。',
       'scope.auditNote': '每次更改都會記錄同意版本（{version}）與稽核日誌；伺服器亦會按範圍過濾。',
       'scope.saved': '分享範圍已改為「{scope}」。',
       'scope.private': '私人',
@@ -310,7 +310,7 @@
       'me.recordings': '我的錄音與故事',
       'me.recordingsSub': '查看草稿、待轉寫與已完成內容',
       'me.privacy': '隱私與分享範圍',
-      'me.privacySub': '私人・家人・社區・公開（預設私人）',
+      'me.privacySub': '私人・家人・社區・公開（新增內容預設私人）',
       'me.correction': '更正或撤回故事',
       'me.correctionSub': '申請更正（審核後成新版本）或整則撤回',
       'me.export': '匯出我的音訊與逐字稿',
@@ -363,7 +363,7 @@
       'auth.logoutDone': '已登出，現以訪客身份使用。',
 
       'privacy.title': '隱私與分享範圍',
-      'privacy.intro': '每則故事同錄音都可以獨立設定分享範圍。預設私人，改動即時生效。',
+      'privacy.intro': '用一個預設範圍管理全部內容，只有需要不同的項目才加入例外清單；改動即時生效。',
       'privacy.serverNote': '伺服器會按分享範圍過濾 API 結果；撤回或改回私人後，其他瀏覽方式亦唔會再見到。',
       'privacy.empty': '暫時未有可設定嘅故事或已完成錄音。',
       'privacy.storyHint': '示範故事',
@@ -481,12 +481,12 @@
       'about.team4': 'Douglas — 業務發展與社區聯絡',
       'about.team5': 'Dat — 用戶測試與合規審視',
       'about.dataTitle': '數據來源與授權',
-      'about.dataBody': '本演示收錄 8 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。唯一真實音軌為 Boris Lau 的示範錄音（約 46.7 秒），其餘故事只有逐字稿，介面會如實標示「未附音檔」。',
+      'about.dataBody': '本演示收錄 {n} 則故事，全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。每則故事都記錄授權標記與同意記錄編號（consentRef）；只有已授權內容會進入問答索引。{audio} 則附有 Boris Lau 的真實示範音軌，合計約 {duration} 秒；其餘故事只有逐字稿，介面會如實標示「未附音檔」。',
       'about.aiTitle': 'AI 做什麼、不做什麼',
       'about.aiDoes': '做：將已授權的粵語錄音轉成逐字稿、標出逐詞時間戳、按你嘅問題檢索相關段落，並附上可核對的來源時間戳。',
       'about.aiDoesNot': '不做：不替長者發言、不補寫錄音以外嘅內容、不用外部知識回答、不在無來源時亂答。範圍外一律回答「錄製的故事中未包含此資訊」。',
       'about.privacyTitle': '私隱與模糊定位',
-      'about.privacyBody': '故事只以約 800 米模糊範圍呈現，並非講者 GPS 位置；不設精確標記。分享範圍分私人、家人、社區、公開四級，預設私人，每則故事可獨立設定。伺服器會按分享範圍過濾，唔止喺前端隱藏。',
+      'about.privacyBody': '故事只以約 800 米模糊範圍呈現，並非講者 GPS 位置；不設精確標記。分享範圍分私人、家人、社區、公開四級；新增內容預設私人，示範故事為演示預設社區，唔代表真實長者授權，每則故事仍可獨立設定。伺服器會按分享範圍過濾，唔止喺前端隱藏。',
       'about.redlineTitle': '五條誠實紅線',
       'about.redline1': '答案只來自已錄製並獲授權的內容。',
       'about.redline2': '在範圍內的答案必須附時間戳出處。',
@@ -554,6 +554,45 @@
       'era.1960s': '1960 年代',
       'era.1970s': '1970 年代',
       'era.1980s': '1980 年代',
+
+      /* ---- 11.08 修復：讀屏標籤、區塊小標題、披露卡、私隱預設 ---- */
+      'app.logoAlt': 'Voices of the North 標誌',
+      'atlas.fallbackAlt': '手繪示意地圖：以虛線圓圈標示約 800 米模糊範圍，只作示意並非 GPS 定位。',
+      'atlas.listModeTitle': '列表模式',
+      'atlas.sceneTitle': '3D 示範書籤',
+      'atlas.threeDTitle': '3D 立體',
+
+      'aria.homeTrust': '我們的承諾',
+      'aria.recTabs': '錄音狀態分類',
+      'aria.recTrust': '私隱承諾',
+      'aria.mapApp': '故事地圖：顯示約 800 米模糊範圍內的故事，並非講者精確位置',
+      'aria.filterPanel': '篩選故事',
+      'aria.storyList': '故事列表',
+      'aria.storyDetail': '故事詳情',
+      'aria.account': '帳戶',
+      'aria.meList': '個人內容與私隱管理',
+      'aria.meNote': '模糊地點說明',
+      'aria.fontSize': '字級',
+      'aria.theme': '主題',
+      'aria.volume': '播放音量',
+      'aria.speed': '播放速度',
+      'aria.nav': '主導航',
+
+      'home.demoStories': '示範故事',
+      'stories.disclosureEn': '角色扮演示範故事 — 只作黑客松演示用途。',
+      'stories.disclosureAria': '示範故事披露',
+
+      'privacy.preset': '預設分享範圍',
+      'privacy.presetHint': '新增內容會以此範圍儲存；預設私人，只有你睇到。',
+      'privacy.exceptions': '例外項目 ({n})',
+      'privacy.exceptionsHint': '只列出與預設不同的項目；其餘全部跟隨預設。',
+      'privacy.exceptionsEmpty': '目前沒有例外，全部內容跟隨預設。',
+      'privacy.applyAll': '套用到全部',
+      'privacy.resetExceptions': '重設所有例外',
+      'privacy.applyAllDone': '已把全部項目套用為「{scope}」。',
+      'privacy.resetDone': '已重設所有例外。',
+      'privacy.defaultNote': '新增內容預設私人。',
+      'privacy.demoNote': '示範故事為演示預設社區，不代表真實長者授權。',
 
       'lang.yue': '粵語（香港）'
     },
@@ -724,7 +763,7 @@
 
       'scope.label': '分享范围：{scope}',
       'scope.title': '设置分享范围',
-      'scope.intro': '「{title}」目前的分享范围如下。默认私人，只有你看到。',
+      'scope.intro': '「{title}」目前的分享范围如下；改动即时生效，并会记录同意与审计。',
       'scope.auditNote': '每次更改都会记录同意版本（{version}）与审计日志；服务器也会按范围过滤。',
       'scope.saved': '分享范围已改为「{scope}」。',
       'scope.private': '私人',
@@ -857,7 +896,7 @@
       'me.recordings': '我的录音与故事',
       'me.recordingsSub': '查看草稿、待转写与已完成内容',
       'me.privacy': '隐私与分享范围',
-      'me.privacySub': '私人・家人・社区・公开（默认私人）',
+      'me.privacySub': '私人・家人・社区・公开（新增内容默认私人）',
       'me.correction': '更正或撤回故事',
       'me.correctionSub': '申请更正（审核后成新版本）或整则撤回',
       'me.export': '导出我的音频与逐字稿',
@@ -910,7 +949,7 @@
       'auth.logoutDone': '已登出，现以访客身份使用。',
 
       'privacy.title': '隐私与分享范围',
-      'privacy.intro': '每则故事与录音都可以独立设置分享范围。默认私人，改动即时生效。',
+      'privacy.intro': '用一个预设范围管理全部内容，只有需要不同的项目才加入例外清单；改动即时生效。',
       'privacy.serverNote': '服务器会按分享范围过滤 API 结果；撤回或改回私人后，其他浏览方式也不会再看到。',
       'privacy.empty': '暂时没有可设置的故事或已完成录音。',
       'privacy.storyHint': '示范故事',
@@ -1028,12 +1067,12 @@
       'about.team4': 'Douglas — 业务发展与社区联络',
       'about.team5': 'Dat — 用户测试与合规审视',
       'about.dataTitle': '数据来源与授权',
-      'about.dataBody': '本演示收录 8 则故事，全部标记为「角色扮演示范故事」，由团队撰写，并非真实长者访谈。每则故事都记录授权标记与同意记录编号（consentRef）；只有已授权内容会进入问答索引。唯一真实音轨为 Boris Lau 的示范录音（约 46.7 秒），其余故事只有逐字稿，界面会如实标示「未附音频」。',
+      'about.dataBody': '本演示收录 {n} 则故事，全部标记为「角色扮演示范故事」，由团队撰写，并非真实长者访谈。每则故事都记录授权标记与同意记录编号（consentRef）；只有已授权内容会进入问答索引。{audio} 则附有 Boris Lau 的真实示范音轨，合计约 {duration} 秒；其余故事只有逐字稿，界面会如实标示「未附音频」。',
       'about.aiTitle': 'AI 做什么、不做什么',
       'about.aiDoes': '做：将已授权的粤语录音转成逐字稿、标出逐词时间戳、按你的问题检索相关段落，并附上可核对的来源时间戳。',
       'about.aiDoesNot': '不做：不替长者发言、不补写录音以外的内容、不用外部知识回答、不在无来源时乱答。范围外一律回答「录制的故事中未包含此信息」。',
       'about.privacyTitle': '隐私与模糊定位',
-      'about.privacyBody': '故事只以约 800 米模糊范围呈现，并非讲者 GPS 位置；不设精确标记。分享范围分私人、家人、社区、公开四级，默认私人，每则故事可独立设置。服务器会按分享范围过滤，不只在前端隐藏。',
+      'about.privacyBody': '故事只以约 800 米模糊范围呈现，并非讲者 GPS 位置；不设精确标记。分享范围分私人、家人、社区、公开四级；新增内容默认私人，示范故事为演示默认社区，不代表真实长者授权，每则故事仍可独立设置。服务器会按分享范围过滤，不只在前端隐藏。',
       'about.redlineTitle': '五条诚实红线',
       'about.redline1': '答案只来自已录制并获授权的内容。',
       'about.redline2': '在范围内的答案必须附时间戳出处。',
@@ -1101,6 +1140,45 @@
       'era.1960s': '1960 年代',
       'era.1970s': '1970 年代',
       'era.1980s': '1980 年代',
+
+      /* ---- 11.08 修复：读屏标签、区块小标题、披露卡、隐私预设 ---- */
+      'app.logoAlt': 'Voices of the North 标志',
+      'atlas.fallbackAlt': '手绘示意图：用虚线圆圈标示约 800 米模糊范围，仅作示意并非 GPS 定位。',
+      'atlas.listModeTitle': '列表模式',
+      'atlas.sceneTitle': '3D 演示书签',
+      'atlas.threeDTitle': '3D 立体',
+
+      'aria.homeTrust': '我们的承诺',
+      'aria.recTabs': '录音状态分类',
+      'aria.recTrust': '隐私承诺',
+      'aria.mapApp': '故事地图：显示约 800 米模糊范围内的故事，并非讲者精确位置',
+      'aria.filterPanel': '筛选故事',
+      'aria.storyList': '故事列表',
+      'aria.storyDetail': '故事详情',
+      'aria.account': '账户',
+      'aria.meList': '个人内容与隐私管理',
+      'aria.meNote': '模糊地点说明',
+      'aria.fontSize': '字号',
+      'aria.theme': '主题',
+      'aria.volume': '播放音量',
+      'aria.speed': '播放速度',
+      'aria.nav': '主导航',
+
+      'home.demoStories': '示范故事',
+      'stories.disclosureEn': '角色扮演示范故事 — 仅作黑客松演示用途。',
+      'stories.disclosureAria': '示范故事披露',
+
+      'privacy.preset': '预设分享范围',
+      'privacy.presetHint': '新增内容会以此范围保存；默认私人，只有你看到。',
+      'privacy.exceptions': '例外项目 ({n})',
+      'privacy.exceptionsHint': '只列出与预设不同的项目；其余全部跟随预设。',
+      'privacy.exceptionsEmpty': '目前没有例外，全部内容跟随预设。',
+      'privacy.applyAll': '套用到全部',
+      'privacy.resetExceptions': '重置所有例外',
+      'privacy.applyAllDone': '已把全部项目套用为「{scope}」。',
+      'privacy.resetDone': '已重置所有例外。',
+      'privacy.defaultNote': '新增内容默认私人。',
+      'privacy.demoNote': '示范故事为演示默认社区，不代表真实长者授权。',
 
       'lang.yue': '粤语（香港）'
     },
@@ -1271,7 +1349,7 @@
 
       'scope.label': 'Sharing: {scope}',
       'scope.title': 'Sharing scope',
-      'scope.intro': 'Current sharing scope for “{title}”. Private by default — only you can see it.',
+      'scope.intro': 'Current sharing scope for “{title}”. Changes take effect immediately and are logged in the consent and audit records.',
       'scope.auditNote': 'Every change records the consent version ({version}) and an audit entry; the server also filters by scope.',
       'scope.saved': 'Sharing scope changed to “{scope}”.',
       'scope.private': 'Private',
@@ -1404,7 +1482,7 @@
       'me.recordings': 'My recordings & stories',
       'me.recordingsSub': 'Drafts, pending and finished recordings',
       'me.privacy': 'Privacy & sharing',
-      'me.privacySub': 'Private · Family · Community · Public (private by default)',
+      'me.privacySub': 'Private · Family · Community · Public (new content is private)',
       'me.correction': 'Correct or withdraw',
       'me.correctionSub': 'Request a correction (reviewed into a new version) or withdraw',
       'me.export': 'Export my audio & transcript',
@@ -1457,7 +1535,7 @@
       'auth.logoutDone': 'Signed out. You are now browsing as a visitor.',
 
       'privacy.title': 'Privacy & sharing',
-      'privacy.intro': 'Each story and recording has its own sharing scope. Private by default; changes take effect immediately.',
+      'privacy.intro': 'One default scope manages everything; only items that need a different scope go into the exception list. Changes take effect immediately.',
       'privacy.serverNote': 'The server filters API results by scope. Withdrawn or private items are not accessible through other views either.',
       'privacy.empty': 'No stories or finished recordings to configure yet.',
       'privacy.storyHint': 'Demo story',
@@ -1575,12 +1653,12 @@
       'about.team4': 'Douglas — Business development and community liaison',
       'about.team5': 'Dat — User testing and compliance review',
       'about.dataTitle': 'Data sources and authorisation',
-      'about.dataBody': 'This demo contains 8 stories, all marked “role-played demo”, written by the team and not real elder interviews. Each story records an authorisation flag and a consent reference (consentRef); only authorised content enters the Q&A index. The only real audio is Boris Lau’s demo recording (about 46.7 seconds); the other stories have transcripts only and are labelled “no audio”.',
+      'about.dataBody': 'This demo contains {n} stories, all marked “role-played demo”, written by the team and not real elder interviews. Each story records an authorisation flag and a consent reference (consentRef); only authorised content enters the Q&A index. {audio} story has Boris Lau’s real demo recording, about {duration} seconds in total; the others have transcripts only and are labelled “no audio”.',
       'about.aiTitle': 'What the AI does and does not do',
       'about.aiDoes': 'It does: transcribe authorised Cantonese recordings, produce word-level timestamps, retrieve passages relevant to your question, and cite verifiable source timestamps.',
       'about.aiDoesNot': 'It does not: speak for elders, invent content beyond the recording, answer from outside knowledge, or answer without a source. Out-of-scope questions always get “the recorded stories do not contain this information”.',
       'about.privacyTitle': 'Privacy and blurred locations',
-      'about.privacyBody': 'Stories show only an approximate 800 m area, never a GPS position, and there are no precise markers. Sharing has four levels — private, family, community, public — defaulting to private, set per story. The server filters by scope, not just the frontend.',
+      'about.privacyBody': 'Stories show only an approximate 800 m area, never a GPS position, and there are no precise markers. Sharing has four levels — private, family, community, public. New content is private by default; demo stories default to Community for the demo only and do not represent real elders’ consent. Each story can still be set individually. The server filters by scope, not just the frontend.',
       'about.redlineTitle': 'Five honesty red lines',
       'about.redline1': 'Answers come only from recorded, authorised content.',
       'about.redline2': 'In-scope answers always carry a timestamped source.',
@@ -1649,6 +1727,45 @@
       'era.1970s': '1970s',
       'era.1980s': '1980s',
 
+      /* ---- 11.08 fixes: screen-reader labels, section captions, disclosure, privacy preset ---- */
+      'app.logoAlt': 'Voices of the North logo',
+      'atlas.fallbackAlt': 'Sketch map: dashed circles show approximate 800 m areas. Illustration only, not a GPS location.',
+      'atlas.listModeTitle': 'List view',
+      'atlas.sceneTitle': '3D demo bookmark',
+      'atlas.threeDTitle': '3D view',
+
+      'aria.homeTrust': 'Our commitment',
+      'aria.recTabs': 'Recording status tabs',
+      'aria.recTrust': 'Privacy commitment',
+      'aria.mapApp': 'Story map: stories within approximate 800 m areas, not precise narrator locations',
+      'aria.filterPanel': 'Filter stories',
+      'aria.storyList': 'Story list',
+      'aria.storyDetail': 'Story details',
+      'aria.account': 'Account',
+      'aria.meList': 'Personal content and privacy management',
+      'aria.meNote': 'Approximate location note',
+      'aria.fontSize': 'Text size',
+      'aria.theme': 'Theme',
+      'aria.volume': 'Playback volume',
+      'aria.speed': 'Playback speed',
+      'aria.nav': 'Main navigation',
+
+      'home.demoStories': 'Demo stories',
+      'stories.disclosureEn': 'Role-played demo stories — created for hackathon demonstration purposes.',
+      'stories.disclosureAria': 'Demo story disclosure',
+
+      'privacy.preset': 'Default sharing scope',
+      'privacy.presetHint': 'New content uses this scope. Private by default, so only you can see it.',
+      'privacy.exceptions': 'Exceptions ({n})',
+      'privacy.exceptionsHint': 'Only items that differ from the default are listed; everything else follows the default.',
+      'privacy.exceptionsEmpty': 'No exceptions yet — all content follows the default.',
+      'privacy.applyAll': 'Apply to all',
+      'privacy.resetExceptions': 'Reset all exceptions',
+      'privacy.applyAllDone': 'Applied “{scope}” to every item.',
+      'privacy.resetDone': 'All exceptions have been reset.',
+      'privacy.defaultNote': 'New content is private by default.',
+      'privacy.demoNote': 'Demo stories default to Community for the demo only; they do not represent real elders’ consent.',
+
       'lang.yue': 'Cantonese (Hong Kong)'
     }
   };
@@ -1690,6 +1807,12 @@
     });
     Array.prototype.forEach.call(scope.querySelectorAll('[data-i18n-aria]'), function (el) {
       el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    Array.prototype.forEach.call(scope.querySelectorAll('[data-i18n-title]'), function (el) {
+      el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+    });
+    Array.prototype.forEach.call(scope.querySelectorAll('[data-i18n-alt]'), function (el) {
+      el.setAttribute('alt', t(el.getAttribute('data-i18n-alt')));
     });
     document.documentElement.setAttribute('lang', LANG_ATTR[current] || 'zh-Hant-HK');
     document.title = t('app.title');

@@ -117,9 +117,9 @@
     if (reset) {
       reset.addEventListener('click', function () {
         VTN.ui.confirm({
-          title: t('settings.reset'),
-          message: t('settings.resetConfirm'),
-          confirmLabel: t('settings.resetBtn'),
+          titleKey: 'settings.reset',
+          messageKey: 'settings.resetConfirm',
+          confirmLabelKey: 'settings.resetBtn',
           danger: true
         }).then(function (ok) {
           if (!ok) return;

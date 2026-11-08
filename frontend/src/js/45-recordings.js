@@ -310,15 +310,12 @@
   }
 
   function removeRecord(rec) {
-    var message = rec.sync === 'synced'
-      ? t('delete.confirmSynced')
-      : t('delete.confirmLocal');
     VTN.ui.confirm({
-      title: t('delete.title'),
-      message: message,
-      note: t('delete.note'),
-      confirmLabel: t('common.delete'),
-      cancelLabel: t('common.cancel'),
+      titleKey: 'delete.title',
+      messageKey: rec.sync === 'synced' ? 'delete.confirmSynced' : 'delete.confirmLocal',
+      noteKey: 'delete.note',
+      confirmLabelKey: 'common.delete',
+      cancelLabelKey: 'common.cancel',
       danger: true
     }).then(function (ok) {
       if (!ok) return;

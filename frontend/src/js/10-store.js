@@ -417,6 +417,40 @@
   }
 
   /* =========================================================================
+   * 4a. 「一個預設 + 例外清單」所需的四個函式（11.08）
+   * 只讀寫既有的 prefs.scope 與 K.scopes，不更動上面任何儲存邏輯。
+   * ======================================================================= */
+  function scopePreset() {
+    return VTN.SCOPES.indexOf(prefs.scope) === -1 ? 'private' : prefs.scope;
+  }
+
+  function setScopePreset(scope) {
+    if (VTN.SCOPES.indexOf(scope) === -1) return null;
+    var previous = scopePreset();
+    setPref('scope', scope);
+    U.emit('vtn:scope-changed', { id: '*', scope: scope, from: previous });
+    return scope;
+  }
+
+  function scopeExceptions(items) {
+    var preset = scopePreset();
+    return (items || []).filter(function (item) {
+      return item && scopeOverrides[item.id] && scopeOverrides[item.id] !== preset;
+    }).map(function (item) {
+      return { item: item, scope: scopeOverrides[item.id] };
+    });
+  }
+
+  function clearScopeExceptions() {
+    var count = Object.keys(scopeOverrides).length;
+    scopeOverrides = {};
+    rawSet(K.scopes, JSON.stringify(scopeOverrides));
+    addAudit('scope.reset', { cleared: count, to: scopePreset() });
+    U.emit('vtn:scope-changed', { id: '*', scope: scopePreset(), reset: true });
+    return count;
+  }
+
+  /* =========================================================================
    * 4b. 示範故事的更正版本（原文不動，只新增版本；存本機）
    * ======================================================================= */
   var storyPatches = readObject(K.storyPatches, {});
@@ -676,6 +710,10 @@
     /* 私隱 */
     scopeOf: scopeOf,
     setScope: setScope,
+    scopePreset: scopePreset,
+    setScopePreset: setScopePreset,
+    scopeExceptions: scopeExceptions,
+    clearScopeExceptions: clearScopeExceptions,
     authorizedFor: isAuthorizedForViewer,
     storyPatch: storyPatch,
     addStoryVersion: addStoryVersion,

@@ -67,8 +67,18 @@
     });
 
     var head = U.node('div', { class: 'vtn-modal__head' });
-    var title = U.node('h2', { class: 'vtn-modal__title', id: titleId, text: opts.title || '' });
-    var closeBtn = U.node('button', { class: 'vtn-modal__close', type: 'button', 'aria-label': VTN.i18n.t('common.close') });
+    var title = U.node('h2', {
+      class: 'vtn-modal__title',
+      id: titleId,
+      text: opts.titleKey ? VTN.i18n.t(opts.titleKey) : (opts.title || '')
+    });
+    if (opts.titleKey) title.setAttribute('data-i18n', opts.titleKey);
+    var closeBtn = U.node('button', {
+      class: 'vtn-modal__close',
+      type: 'button',
+      'aria-label': VTN.i18n.t('common.close'),
+      'data-i18n-aria': 'common.close'
+    });
     closeBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
     head.appendChild(title);
     head.appendChild(closeBtn);
@@ -88,8 +98,46 @@
       body: body,
       close: close,
       title: title,
-      setTitle: function (t) { title.textContent = t; }
+      setTitle: function (t) { title.textContent = t; },
+      refresh: refreshDialog
     };
+
+    /* 語言切換時重繪：先保存表單值，讓 i18nRefresh 可以整塊重建內容而不丟失輸入 */
+    function fieldKey(el, index) {
+      if (el.id) return el.id;
+      if (el.type === 'radio') return (el.getAttribute('name') || 'radio') + ':' + el.value;
+      return el.getAttribute('name') || ('#' + index);
+    }
+
+    function formSnapshot(root) {
+      var fields = root.querySelectorAll('input, textarea, select');
+      return Array.prototype.map.call(fields, function (el, index) {
+        return {
+          key: fieldKey(el, index),
+          checked: el.type === 'checkbox' || el.type === 'radio' ? el.checked : null,
+          value: el.value
+        };
+      });
+    }
+
+    function restoreForm(root, snapshot) {
+      var fields = root.querySelectorAll('input, textarea, select');
+      Array.prototype.forEach.call(fields, function (el, index) {
+        var key = fieldKey(el, index);
+        var entry = snapshot.filter(function (item) { return item.key === key; })[0];
+        if (!entry) return;
+        if (entry.checked !== null) el.checked = entry.checked;
+        else el.value = entry.value;
+      });
+    }
+
+    function refreshDialog() {
+      if (closed) return;
+      var snapshot = formSnapshot(modal);
+      if (VTN.i18n && VTN.i18n.apply) VTN.i18n.apply(modal);
+      if (typeof opts.i18nRefresh === 'function') opts.i18nRefresh(controller);
+      restoreForm(modal, snapshot);
+    }
 
     if (opts.actions && opts.actions.length) {
       var foot = U.node('div', { class: 'vtn-modal__foot' });
@@ -99,8 +147,9 @@
             action.kind === 'danger' ? 'vtn-btn--danger' :
               action.kind === 'gold' ? 'vtn-btn--gold' : 'vtn-btn--quiet'),
           type: 'button',
-          text: action.label
+          text: action.labelKey ? VTN.i18n.t(action.labelKey) : action.label
         });
+        if (action.labelKey) btn.setAttribute('data-i18n', action.labelKey);
         btn.addEventListener('click', function () {
           if (action.onClick) {
             var result = action.onClick(controller);
@@ -175,27 +224,40 @@
     return new Promise(function (resolve) {
       var decided = false;
       var body = U.node('div');
-      if (options.message) body.appendChild(U.node('p', { text: options.message }));
-      if (options.note) body.appendChild(U.node('p', { class: 'vtn-modal__note', text: options.note }));
-      var dlg = dialog({
-        title: options.title || VTN.i18n.t('common.confirm'),
+      function renderBody() {
+        body.textContent = '';
+        var message = options.messageKey
+          ? VTN.i18n.t(options.messageKey, options.messageVars) : options.message;
+        var note = options.noteKey
+          ? VTN.i18n.t(options.noteKey, options.noteVars) : options.note;
+        if (message) body.appendChild(U.node('p', { text: message }));
+        if (note) body.appendChild(U.node('p', { class: 'vtn-modal__note', text: note }));
+      }
+      renderBody();
+      dialog({
+        title: options.title,
+        titleKey: options.titleKey || (options.title ? null : 'common.confirm'),
         body: body,
         actions: [
-          { label: options.cancelLabel || VTN.i18n.t('common.cancel'), kind: 'quiet', value: false },
           {
-            label: options.confirmLabel || VTN.i18n.t('common.ok'),
+            label: options.cancelLabel,
+            labelKey: options.cancelLabelKey || (options.cancelLabel ? null : 'common.cancel'),
+            kind: 'quiet', value: false
+          },
+          {
+            label: options.confirmLabel,
+            labelKey: options.confirmLabelKey || (options.confirmLabel ? null : 'common.ok'),
             kind: options.danger ? 'danger' : 'solid',
             value: true
           }
         ],
+        i18nRefresh: renderBody,
         onClose: function (value) {
           if (decided) return;
           decided = true;
           resolve(value === true);
         }
       });
-      /* 確保按鈕結果回傳 */
-      if (dlg) { /* no-op，onClose 會收到 value */ }
     });
   }
 
@@ -219,31 +281,41 @@
     var status = VTN.api.aiState();
     var data = status.data || {};
     var body = U.node('div');
-    body.appendChild(U.node('p', {
-      text: VTN.i18n.t('status.dialogState', { state: VTN.i18n.t(STATE_KEY[status.state]) })
-    }));
-    var list = U.node('ul');
-    [
-      ['status.stt', data.stt_ready],
-      ['status.llm', !!(data.gemini_ready || data.llm_ready)],
-      ['status.storage', data.storage_ready],
-      ['status.answer', data.ask_village_ready]
-    ].forEach(function (pair) {
-      var li = U.node('li', {
-        text: VTN.i18n.t(pair[0]) + '：' + VTN.i18n.t(pair[1] ? 'status.ready' : 'status.notReady')
+    function renderBody() {
+      body.textContent = '';
+      body.appendChild(U.node('p', {
+        text: VTN.i18n.t('status.dialogState', { state: VTN.i18n.t(STATE_KEY[status.state]) })
+      }));
+      var list = U.node('ul');
+      [
+        ['status.stt', data.stt_ready],
+        ['status.llm', !!(data.gemini_ready || data.llm_ready)],
+        ['status.storage', data.storage_ready],
+        ['status.answer', data.ask_village_ready]
+      ].forEach(function (pair) {
+        list.appendChild(U.node('li', {
+          text: VTN.i18n.t(pair[0]) + '：' + VTN.i18n.t(pair[1] ? 'status.ready' : 'status.notReady')
+        }));
       });
-      list.appendChild(li);
-    });
-    body.appendChild(list);
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: VTN.i18n.t('status.apiBase', { url: VTN.api.base() }) }));
-    if (status.reason) {
-      body.appendChild(U.node('p', { class: 'vtn-modal__note', text: VTN.i18n.t('status.reason.' + status.reason) }));
+      body.appendChild(list);
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', text: VTN.i18n.t('status.apiBase', { url: VTN.api.base() })
+      }));
+      if (status.reason) {
+        body.appendChild(U.node('p', {
+          class: 'vtn-modal__note', text: VTN.i18n.t('status.reason.' + status.reason)
+        }));
+      }
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note', text: VTN.i18n.t('status.honesty')
+      }));
     }
-    body.appendChild(U.node('p', { class: 'vtn-modal__note', text: VTN.i18n.t('status.honesty') }));
+    renderBody();
     dialog({
-      title: VTN.i18n.t('status.title'),
+      titleKey: 'status.title',
       body: body,
-      actions: [{ label: VTN.i18n.t('common.close'), kind: 'solid' }]
+      actions: [{ labelKey: 'common.close', kind: 'solid' }],
+      i18nRefresh: renderBody
     });
   }
 
@@ -256,6 +328,15 @@
     renderStatus();
   }
 
+  /* 語言切換後統一重繪所有開啟中的彈層（含關閉按鈕 aria-label）。 */
+  function refreshOpenDialogs() {
+    openDialogs.slice().forEach(function (d) {
+      if (typeof d.refresh === 'function') d.refresh();
+    });
+  }
+
+  U.on('vtn:lang-changed', refreshOpenDialogs);
+
   VTN.ui = {
     toast: toast,
     announce: announce,
@@ -263,6 +344,7 @@
     confirm: confirmDialog,
     renderStatus: renderStatus,
     bindStatus: bindStatus,
+    refreshOpenDialogs: refreshOpenDialogs,
     closeAll: function () {
       openDialogs.slice().forEach(function (d) { d.close('all'); });
     }

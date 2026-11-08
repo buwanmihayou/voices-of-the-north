@@ -911,44 +911,54 @@
    * 8. 分享範圍對話框（每則故事獨立設定）
    * ======================================================================= */
   function openScopeDialog(item) {
-    var current = VTN.store.scopeOf(item);
+    var chosen = VTN.store.scopeOf(item);
     var body = U.node('div');
-    body.appendChild(U.node('p', {
-      text: t('scope.intro', { title: item.title || '' })
-    }));
-
-    var chosen = current;
     var cards = {};
-    VTN.SCOPES.forEach(function (scope) {
-      var meta = VTN.SCOPE_META[scope];
-      var label = U.node('label', { class: 'radio-card' + (scope === current ? ' is-active' : '') });
-      var input = U.node('input', { type: 'radio', name: 'vtn-scope', value: scope });
-      input.checked = scope === current;
-      var text = U.node('span');
-      text.appendChild(U.node('span', { class: 'radio-card__title', text: t(meta.labelKey) }));
-      text.appendChild(U.node('span', { class: 'radio-card__hint', text: t(meta.hintKey) }));
-      label.appendChild(input);
-      label.appendChild(text);
-      label.addEventListener('click', function () {
-        chosen = scope;
-        Object.keys(cards).forEach(function (key) { cards[key].classList.toggle('is-active', key === scope); });
-      });
-      cards[scope] = label;
-      body.appendChild(label);
-    });
 
-    body.appendChild(U.node('p', {
-      class: 'vtn-modal__note',
-      text: t('scope.auditNote', { version: VTN.config.consentPolicyVersion })
-    }));
+    function renderScopeBody() {
+      body.textContent = '';
+      cards = {};
+      body.appendChild(U.node('p', {
+        text: t('scope.intro', { title: item.title || '' })
+      }));
+
+      VTN.SCOPES.forEach(function (scope) {
+        var meta = VTN.SCOPE_META[scope];
+        var label = U.node('label', { class: 'radio-card' + (scope === chosen ? ' is-active' : '') });
+        var input = U.node('input', { type: 'radio', name: 'vtn-scope', value: scope });
+        input.checked = scope === chosen;
+        var text = U.node('span');
+        text.appendChild(U.node('span', {
+          class: 'radio-card__title', 'data-i18n': meta.labelKey, text: t(meta.labelKey)
+        }));
+        text.appendChild(U.node('span', {
+          class: 'radio-card__hint', 'data-i18n': meta.hintKey, text: t(meta.hintKey)
+        }));
+        label.appendChild(input);
+        label.appendChild(text);
+        label.addEventListener('click', function () {
+          chosen = scope;
+          Object.keys(cards).forEach(function (key) { cards[key].classList.toggle('is-active', key === scope); });
+        });
+        cards[scope] = label;
+        body.appendChild(label);
+      });
+
+      body.appendChild(U.node('p', {
+        class: 'vtn-modal__note',
+        text: t('scope.auditNote', { version: VTN.config.consentPolicyVersion })
+      }));
+    }
+    renderScopeBody();
 
     var dlg = VTN.ui.dialog({
-      title: t('scope.title'),
+      titleKey: 'scope.title',
       body: body,
+      i18nRefresh: renderScopeBody,
       actions: [
-        { label: t('common.cancel'), kind: 'quiet' },
+        { labelKey: 'common.cancel', kind: 'quiet' },
         {
-          label: t('common.save'),
+          labelKey: 'common.save',
           kind: 'solid',
           keepOpen: true,
           onClick: function (ctx) {
