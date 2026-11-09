@@ -7,11 +7,14 @@ Voices of the North is a prototype for preserving Cantonese village oral histori
 - [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
 - [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
 - [Verified demo behavior and test checklist](docs/techathon/DEMO-EVIDENCE.md)
-- [Work items and acceptance criteria](docs/techathon/WORK-ITEMS.md)
+- [Work items, independent first steps, and handoffs](docs/techathon/WORK-ITEMS.md)
+- [Main demo flow and shared interfaces](docs/techathon/DEMO-FLOW.md)
 - [Active work and owners](https://github.com/buwanmihayou/voices-of-the-north/milestone/1)
 - [Agent instructions](AGENTS.md) and [InterHK archive](docs/archive/interhk-2026/README.md)
 
 The hosted build is a hackathon demo. The Techathon+ target is a public archive of approved stories with invited contributors and moderation. Production sign-in, durable private storage, and withdrawal checks are launch work. Use role-play samples when testing the current demo.
+
+Start from your issue and check what you can deliver locally with sample data. Use the demo flow to agree on what your part receives and hands off. Put decisions, PRs, and public-safe evidence on GitHub. Post your daily status in your own tab in the team Google Doc.
 
 ### Run locally
 

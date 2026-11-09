@@ -1,6 +1,6 @@
 # Techathon+ work items
 
-Use the [GitHub Issues](https://github.com/buwanmihayou/voices-of-the-north/milestone/1) for ownership, current status, and updates. The criteria below describe the initial handoffs.
+Open your [GitHub issue](https://github.com/buwanmihayou/voices-of-the-north/milestone/1), then use the independent first step below and the [shared demo example](DEMO-FLOW.md). A handoff can block a specific check while local work proceeds. Use the issue to agree on interface changes and link PRs.
 
 ## [Prepare the repository and agree the launch scope](https://github.com/buwanmihayou/voices-of-the-north/issues/2)
 
@@ -13,6 +13,10 @@ Use the [GitHub Issues](https://github.com/buwanmihayou/voices-of-the-north/mile
 **Deliverable**
 
 A reviewed repository setup, a shared demo URL and commit, and named reviewers and operational contacts for launch.
+
+**Start now** Record the baseline, run the current guest demo, and open the interface decisions that need owner agreement. Continue while access and reviewer confirmations come in.
+
+**Handoff** Share the baseline URL and commit, expected demo result, and the agreed sample and handoff for each workstream. The repo review and shared decisions need owner confirmation.
 
 **Acceptance**
 
@@ -33,6 +37,10 @@ A reviewed repository setup, a shared demo URL and commit, and named reviewers a
 
 An isolated staging environment with server-side account and recording permissions, persistent SQLite and private audio, and a documented backup and restore drill.
 
+**Start now** Map the current identity and storage boundaries. Use synthetic identities and a temporary local store for authorization and restart checks. Prepare the access matrix and storage configuration independently of the UI.
+
+**Handoff** Provide a staging URL and commit, the agreed role and access behavior, separate invited test identities, and restore evidence. Verify Google sign-in and persistent storage on staging. Share test access details privately.
+
 **Acceptance**
 
 - [ ] Verify Google OpenID Connect identity on the server and restrict contribution to invited accounts. Check invited and uninvited sign-in, guest behavior, and disabled demo auth and demo admin grants in production configuration.
@@ -51,6 +59,10 @@ An isolated staging environment with server-side account and recording permissio
 **Deliverable**
 
 An invited contributor can consent, record, transcribe, review the transcript and sharing scope, and submit a private story for approval.
+
+**Start now** Use the sample clip, a stub transcription result, and an invited test identity to exercise consent, review, and retry locally. Share the proposed submission shape with Dat and Steven.
+
+**Handoff** Give Dat a pending submission fixture with reviewed text, audio reference, and consent metadata. Final staging verification needs Zheng's invited identities and durable storage, plus a real transcription run.
 
 **Acceptance**
 
@@ -71,6 +83,10 @@ An invited contributor can consent, record, transcribe, review the transcript an
 
 Mobile screens for browsing and for invited contributors, with consistent draft, pending review, published, withdrawn, and error states.
 
+**Start now** Build and test screens with fixtures for guest and invited views and each review state. Own layout, copy, and state presentation. Coordinate with Boris on recording behavior and Dat on visibility rules.
+
+**Handoff** Provide a phone walkthrough of the fixture states, then repeat it on staging once Boris's submission and Dat's visibility paths are available.
+
 **Acceptance**
 
 - [ ] Guests can browse approved stories, play audio, and ask about the archive. Contributor-only actions communicate the access requirement.
@@ -89,6 +105,10 @@ Mobile screens for browsing and for invited contributors, with consistent draft,
 **Deliverable**
 
 A reviewer can publish or withdraw a submitted story, with one server-side visibility policy across public surfaces.
+
+**Start now** Use a seeded pending submission and a reviewer test identity to develop and verify moderation and guest visibility locally. Agree with Boris on the submission shape and Zheng on reviewer authorization and storage.
+
+**Handoff** Share review and public visibility behavior with public-safe test evidence. Final staging verification needs an actual submission from Boris's flow and Zheng's authorization and storage.
 
 **Acceptance**
 
@@ -109,6 +129,10 @@ A reviewer can publish or withdraw a submitted story, with one server-side visib
 
 A team-specific submission checklist and an evidence-backed deck. If Douglas chooses Demo Review & Evidence or Business & Impact, Dat keeps the submission checklist and fills any ownership gap.
 
+**Start now** Dat verifies portal requirements and drafts the deck outline and evidence list using the current demo while Douglas's role is pending. Mark claims that need staging evidence.
+
+**Handoff** Share the submission checklist and draft narrative early. The final deck needs verified evidence for its claims or explicit wording about what the current demo shows.
+
 **Acceptance**
 
 - [ ] Confirm the role and verify HumanLoop's fast-track dates, required assets, and pitch format in the portal. Share public-safe results only.
@@ -128,6 +152,10 @@ A team-specific submission checklist and an evidence-backed deck. If Douglas cho
 
 A tested release candidate, a written launch decision, and a complete submission package with a backup video.
 
+**Start now** Dat prepares the shared smoke-test checklist, evidence log, and backup walkthrough from the current demo. Owners can rehearse or test their paths as they land.
+
+**Handoff** Final sign-off needs a named candidate URL and commit, staging evidence, an independent phone and desktop run, and the pitch package. Record any scope reduction before presenting.
+
 **Acceptance**
 
 - [ ] Record the candidate URL and commit. Have someone other than the flow implementer run tests on a phone and desktop with sample data.
@@ -137,4 +165,4 @@ A tested release candidate, a written launch decision, and a complete submission
 
 ## Progress updates
 
-Post an issue update by 21:00 HKT on agreed days using **Done + evidence / Next / Blocked**. If a deadline is at risk, propose a new date for Dat to approve before it passes. Use sample data and keep private evidence outside GitHub.
+Follow the [team update rules](ROADMAP.md#team-updates). Link public-safe evidence and handoff decisions on GitHub. Use your own Google Doc tab for the daily check-in.

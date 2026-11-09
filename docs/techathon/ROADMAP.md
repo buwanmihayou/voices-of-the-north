@@ -1,8 +1,8 @@
 # Techathon+ launch roadmap
 
-GitHub holds work items, decisions, and public-safe evidence. Track delivery in the [GitHub backlog](https://github.com/buwanmihayou/voices-of-the-north/milestone/1). The separate team information document is for private reference.
+GitHub holds work items, decisions, PRs, and public-safe evidence. Track delivery in the [GitHub backlog](https://github.com/buwanmihayou/voices-of-the-north/milestone/1). Use the team Google Doc for daily check-ins in your own tab.
 
-See the [initial work items](WORK-ITEMS.md) for handoff checklists.
+See the [work items](WORK-ITEMS.md) for what each person can start now and what must be ready for final verification. The [main demo flow](DEMO-FLOW.md) defines the handoffs between workstreams.
 
 ## Product scope
 
@@ -22,9 +22,13 @@ All dates below are in HKT. Owners post their handoff by 21:00 on the due date.
 | Dec 20, 2026, then Jan 8, 2027 | Dat until role confirmed | Competition and pitch requirements, evidence, and deck. Douglas is proposed as owner. | Dat for handoff, Steven for demo and deck playback |
 | Jan 8, 2027 | Team, Dat accountable | Tested release candidate, sign-off or read-only decision, backup video, deck, and rehearsed Q&A | Zheng for release evidence, Dat for final sign-off |
 
-Boris and Dat can develop against agreed interfaces with sample fixtures while Zheng prepares staging. Steven can design against those same states while the backend work proceeds. Use staging for end-to-end approval. Confirm review and publication state transitions with Dat and Zheng before relying on them in the UI.
+## Work in parallel
 
-Douglas can also choose Demo Review & Evidence or Business & Impact. If so, Dat tracks submission and covers gaps. Present user demand and who might deploy or pay as hypotheses until supported by user evidence.
+Dat coordinates integration and each work item has one accountable owner. Start from the same baseline on separate branches. Agree on the data, states, and errors passed between workstreams before changing them. Use a shared example and local fixtures so a service or another PR only blocks the checks that require it.
+
+Zheng owns authentication, access control, and storage. Boris owns recording, transcription, and submission behavior. Steven owns screens, layout, and UI states. Dat owns moderation, publication, and visibility. Agree in the issue before two people edit the same module. The [work items](WORK-ITEMS.md) record what each owner hands over and what the reviewer verifies.
+
+Douglas has yet to confirm a role. Competition & Pitch is the proposal, with Demo Review & Evidence or Business & Impact also available. Dat tracks requirements and pitch evidence in the meantime. The technical workstreams can proceed independently of that decision. Present user demand and who might deploy or pay as hypotheses until supported by user evidence.
 
 Jan 8 is the internal deadline. The published submission deadline in the team plan is **Jan 11, 2027 at 23:59 HKT**. Verify HumanLoop's fast-track requirements and dates in the team portal. After submission, rehearse the official format with the backup video. [Techathon+ participation guide](https://hktechathon.com/en/site/join)
 
@@ -41,12 +45,12 @@ Dat approves public recording after access controls, restart/restore, moderation
 
 ## Team updates
 
-Acknowledge work tags within 24 hours. Update the issue by 21:00 HKT on each agreed day.
+Acknowledge work tags in under five hours. Post a daily update in your own Google Doc tab by 21:00 HKT. Link the relevant issue, PR, or test evidence. Keep scope changes, handoffs, and evidence that reviewers need on the GitHub issue or PR.
 
 ```text
-Done + evidence | PR, commit, or safe reproduction and result
-Next          | next step and expected handoff
-Blocked       | dependency and help needed, or none
+Done + proof | PR, commit, or safe reproduction and result
+Next         | next step and expected handoff
+Blocked      | dependency and help needed, or none
 ```
 
 If a deadline is at risk, flag it early and propose a new date for Dat to approve. Discuss a first missed update privately and agree on a recovery step. For repeated misses, split or reassign work that puts shared deadlines at risk.
