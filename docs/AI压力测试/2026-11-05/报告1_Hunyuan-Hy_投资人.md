@@ -2,7 +2,7 @@
 
 - 执行日期：2026-11-05
 - 执行模型：Tencent Hunyuan Hy（CodeBuddy 内置）
-- 项目背景文件：Ready_for_Techathon_plus.txt
+- 项目背景文件：[Ready_for_Techathon_plus.txt](../../archive/interhk-2026/Ready_for_Techathon_plus.txt)
 - 背景快照：背景_Ready_for_Techathon_plus_GoogleDoc_2026-11-05.txt
 - 事实校验：见 `99_执行说明与跨模型对比.md`（共用背景与仓库实际代码存在 4 处不符，本报告按仓库实际状态评审）
 

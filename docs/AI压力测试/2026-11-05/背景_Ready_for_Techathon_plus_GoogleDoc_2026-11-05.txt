@@ -1,4 +1,4 @@
-來源：https://docs.google.com/document/d/14FC-HMG4XN_1__UsnZWDY3Oc1w0eP-351RwGAsLaifo/edit?tab=t.0
+來源：[private link removed]
 文檔標題：準備好Techathon了嗎
 抓取日期：2026-11-05（第二次抓取）
 抓取方式：Google Docs HTML 導出（export?format=html）轉純文本；/export?format=txt 會被截斷
@@ -627,8 +627,8 @@ Prompt 1：香港科技园（HKSTP）/ 早期 VC 投资人极限压力测试
 API 调用不能算作技术壁垒，
 而把手机塞给 80 岁长者更不是合格的产品设计。 
 hkbu GenAI api
-[a]@kakasplayer2266@gmail.com 
-@zhengboxuan27@gmail.com 
+[a]@[private contact removed]
+@[private contact removed]
 这些是可能可行的方案，你们看看如何？
 1. 强化互动感，而不是目前用户孤立使用app的场景
 2. 升级地图，让城市变化更有动态感

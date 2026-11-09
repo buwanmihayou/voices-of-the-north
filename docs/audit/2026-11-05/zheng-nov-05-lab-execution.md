@@ -1,7 +1,7 @@
 # Zheng — Nov 5 測試線執行報告：Google 文檔 4 條已指派方案
 
 - 日期：2026-11-05（HKT）
-- 觸發：`https://docs.google.com/document/d/14FC-HMG4XN_1__UsnZWDY3Oc1w0eP-351RwGAsLaifo/edit?tab=t.0`
+- 觸發：`[private link removed]
   第二次抓取顯示文檔末尾由 `_Assigned to zhengboxuan27@gmail.com_` 改為 **`_已指派給zhengboxuan27@gmail.com_`**，其餘正文不變；快照已同步至 `docs/AI压力测试/2026-11-05/背景_Ready_for_Techathon_plus_GoogleDoc_2026-11-05.txt`。
 - 依據：`docs/AI压力测试/2026-11-05/99_执行说明与跨模型对比.md` 第 3 節嘅評估與依賴鏈。
 - 定位：**測試線／支線原型**，按文檔「Dat 版本為主線，此文檔為測試線；若方案合適，支線匯流主線」嘅紀律實作，**未經 WhatsApp 團體確認前不匯流主線、不改動主線既有 demo 資料**。

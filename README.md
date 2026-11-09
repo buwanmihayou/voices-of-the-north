@@ -1,5 +1,31 @@
 # Voices of the North（北區之聲）
 
+## Start here
+
+Voices of the North is a prototype for preserving Cantonese village oral histories in Hong Kong's Northern Metropolis. It pairs a story map and audio player with timestamp-linked answers in **Ask the Village**. The current demo uses team-written role-play stories. One story includes a sample WAV recording.
+
+- [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
+- [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
+- [Verified demo behavior and test checklist](docs/techathon/DEMO-EVIDENCE.md)
+- [Work items and acceptance criteria](docs/techathon/WORK-ITEMS.md)
+- [Active work and owners](https://github.com/buwanmihayou/voices-of-the-north/issues)
+- [Agent instructions](AGENTS.md) and [InterHK archive](docs/archive/interhk-2026/README.md)
+
+The hosted build is a hackathon demo. The Techathon+ target is a public archive of approved stories with invited contributors and moderation. Production sign-in, durable private storage, and withdrawal checks are launch work. Use role-play samples when testing the current demo.
+
+### Run locally
+
+From the repository root, install the Python requirements and start FastAPI.
+
+```bash
+python -m pip install -r requirements.txt
+python -m uvicorn server:app --host 127.0.0.1 --port 8000
+```
+
+Open [the local app](http://127.0.0.1:8000/voices-of-the-north-app.html). Local browsing and sample playback can be exercised independently of cloud transcription. Use server-side credentials in a test environment when verifying cloud speech. See the Chinese reference below for build commands and environment variables.
+
+For frontend changes, edit `frontend/src/` and regenerate the bundled HTML with `python tools/build_frontend.py`. On Windows, use UTF-8 mode if your terminal cannot print the build messages, for example `python -X utf8 tools/build_frontend.py`.
+
 以生成式 AI 保存新界鄉村長者粵語口述歷史的示範平台：錄音 → 逐字稿 → 可核對的問答 → 四級私隱分享。
 
 > **黑客松示範聲明**：8 則故事全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。
