@@ -1,8 +1,8 @@
 # Techathon+ work items
 
-Use the [GitHub Issues](https://github.com/buwanmihayou/voices-of-the-north/issues) for ownership, current status, and updates. The criteria below describe the initial handoffs.
+Use the [GitHub Issues](https://github.com/buwanmihayou/voices-of-the-north/milestone/1) for ownership, current status, and updates. The criteria below describe the initial handoffs.
 
-## Prepare the repository and agree the launch scope
+## [Prepare the repository and agree the launch scope](https://github.com/buwanmihayou/voices-of-the-north/issues/2)
 
 **Owner** Dat
 
@@ -21,7 +21,7 @@ A reviewed repository setup, a shared demo URL and commit, and named reviewers a
 - [ ] Record the shared test URL and commit, initial demo results, and prioritized issues.
 - [ ] Confirm owners and reviewers for the launch backlog.
 
-## Set up invited Google sign-in and durable staging storage
+## [Set up invited Google sign-in and durable staging storage](https://github.com/buwanmihayou/voices-of-the-north/issues/3)
 
 **Owner** Zheng
 
@@ -40,7 +40,7 @@ An isolated staging environment with server-side account and recording permissio
 - [ ] Verify SQLite and private audio survive restart and a staging backup/restore. Store media outside static file serving and document how withdrawal state survives restore.
 - [ ] Share a public-safe test summary and staging build reference. Get Dat's cost approval before provisioning paid resources.
 
-## Build consent, recording, transcript review, and submission
+## [Build consent, recording, transcript review, and submission](https://github.com/buwanmihayou/voices-of-the-north/issues/4)
 
 **Owner** Boris
 
@@ -59,7 +59,7 @@ An invited contributor can consent, record, transcribe, review the transcript an
 - [ ] The contributor can review the transcript and timestamp links, select the intended sharing scope, and submit for moderation. The story remains private while pending.
 - [ ] Contributor B cannot open the record or audio, and guests cannot discover it. Share reproducible checks and handoff to the moderator flow.
 
-## Finish the mobile guest and contributor UI
+## [Finish the mobile guest and contributor UI](https://github.com/buwanmihayou/voices-of-the-north/issues/5)
 
 **Owner** Steven
 
@@ -78,7 +78,7 @@ Mobile screens for browsing and for invited contributors, with consistent draft,
 - [ ] Test navigation, consent, transcript and timestamp access, and error or retry states on phone and desktop. Dat independently repeats the mobile flow.
 - [ ] Change frontend source in frontend/src and regenerate the bundled HTML.
 
-## Enforce moderation, publication, and withdrawal
+## [Enforce moderation, publication, and withdrawal](https://github.com/buwanmihayou/voices-of-the-north/issues/6)
 
 **Owner** Dat
 
@@ -97,7 +97,7 @@ A reviewer can publish or withdraw a submitted story, with one server-side visib
 - [ ] Withdraw a published sample story. Confirm it disappears from every public surface and old audio URLs stop serving it. Include stale caches, offline fallback, and server errors.
 - [ ] Check that a grounded answer opens the correct audio point and missing evidence leads to a refusal. Share sample-data evidence and an operational takedown handoff.
 
-## Confirm submission requirements and prepare the pitch
+## [Confirm submission requirements and prepare the pitch](https://github.com/buwanmihayou/voices-of-the-north/issues/7)
 
 **Owner** Dat until confirmed. Douglas is proposed for Competition & Pitch.
 
@@ -116,7 +116,7 @@ A team-specific submission checklist and an evidence-backed deck. If Douglas cho
 - [ ] Gather evidence and a draft deck by Dec 20. By Jan 8, supply the final deck, demo or backup references, and Q&A updated after an AI critique reviewed by a teammate.
 - [ ] Verify playback and links as a guest where appropriate. Keep private portal details outside the public issue.
 
-## Run launch sign-off and rehearse the submission
+## [Run launch sign-off and rehearse the submission](https://github.com/buwanmihayou/voices-of-the-north/issues/8)
 
 **Owner** Team, Dat accountable
 

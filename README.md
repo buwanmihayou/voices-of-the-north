@@ -8,7 +8,7 @@ Voices of the North is a prototype for preserving Cantonese village oral histori
 - [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
 - [Verified demo behavior and test checklist](docs/techathon/DEMO-EVIDENCE.md)
 - [Work items and acceptance criteria](docs/techathon/WORK-ITEMS.md)
-- [Active work and owners](https://github.com/buwanmihayou/voices-of-the-north/issues)
+- [Active work and owners](https://github.com/buwanmihayou/voices-of-the-north/milestone/1)
 - [Agent instructions](AGENTS.md) and [InterHK archive](docs/archive/interhk-2026/README.md)
 
 The hosted build is a hackathon demo. The Techathon+ target is a public archive of approved stories with invited contributors and moderation. Production sign-in, durable private storage, and withdrawal checks are launch work. Use role-play samples when testing the current demo.

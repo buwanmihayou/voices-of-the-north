@@ -1,6 +1,6 @@
 # Techathon+ launch roadmap
 
-GitHub holds work items, decisions, and public-safe evidence. Track delivery in the [GitHub backlog](https://github.com/buwanmihayou/voices-of-the-north/issues). The separate team information document is for private reference.
+GitHub holds work items, decisions, and public-safe evidence. Track delivery in the [GitHub backlog](https://github.com/buwanmihayou/voices-of-the-north/milestone/1). The separate team information document is for private reference.
 
 See the [initial work items](WORK-ITEMS.md) for handoff checklists.
 
