@@ -92,11 +92,12 @@
   }
 
   /* 視口查詢：只回已授權、且中心點落在 bbox 內的故事 */
-  function inBbox(bounds) {
-    if (!bounds || bounds.length !== 2) return visible();
+  function inBbox(bounds, stories) {
+    var list = stories || visible();
+    if (!bounds || bounds.length !== 2) return list;
     var sw = bounds[0], ne = bounds[1];
-    if (!sw || !ne || sw.length !== 2 || ne.length !== 2) return visible();
-    return visible().filter(function (story) {
+    if (!sw || !ne || sw.length !== 2 || ne.length !== 2) return list;
+    return list.filter(function (story) {
       var loc = story.location;
       return loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' &&
         loc.lng >= sw[0] && loc.lng <= ne[0] && loc.lat >= sw[1] && loc.lat <= ne[1];
@@ -282,6 +283,27 @@
   }
 
   function filtered() { return sorted(visible().filter(matches)); }
+
+  /* 問題送出時擷取同一份集合，API 與離線檢索沿用；非地圖頁不帶隱藏視口。 */
+  function queryContext(options) {
+    var opts = options || {};
+    var onStories = document.body.getAttribute('data-view') === 'stories';
+    var list = onStories ? filtered() : visible();
+    var bounds = Object.prototype.hasOwnProperty.call(opts, 'bbox') ? opts.bbox :
+      (onStories && state.mode === 'map' && VTN.map && VTN.map.bbox ? VTN.map.bbox() : null);
+    if (!Array.isArray(bounds) || bounds.length !== 2 ||
+        !Array.isArray(bounds[0]) || !Array.isArray(bounds[1]) ||
+        bounds[0].length !== 2 || bounds[1].length !== 2 ||
+        !bounds[0].concat(bounds[1]).every(function (n) { return typeof n === 'number' && isFinite(n); })) {
+      bounds = null;
+    }
+    list = inBbox(bounds, list);
+    return {
+      storyIds: list.map(function (story) { return story.id; }),
+      bbox: bounds ? [bounds[0].slice(), bounds[1].slice()] : null,
+      includeRecords: !onStories
+    };
+  }
 
   function optionsFor(group) {
     var map = {};
@@ -1301,6 +1323,7 @@
     visible: visible,
     filtered: filtered,
     inBbox: inBbox,
+    queryContext: queryContext,
     fuzzGroups: fuzzGroups,
     select: select,
     applyParams: applyParams,

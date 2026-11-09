@@ -69,7 +69,7 @@ python tools/check_frontend_syntax.py              # 檢查單檔內嵌 JS 語�
 
 - **波形**：建置腳本用標準庫 `wave` 實測 PCM，與 `28-waveform.js` 執行期解碼共用 **8 kHz 重採樣網格 + 60 柱 RMS／峰值**，兩條路徑相關係數 **1.000**（舊版 0.918）；播放器標明「構建期 8kHz 取樣」。預設內嵌 `window.VTN_WAVEFORMS`，快取缺失、外置載入失敗或瀏覽器不支援 Web Audio 時回退細進度條，**不生成假波形**。
 - **波形體積**：目前 1 則 × 60 柱 = 358 bytes；故事量增大時用 `--external-waveforms`，單檔只留 `window.VTN_WAVEFORMS_URL`，前端按需 fetch `frontend/waveforms.json` 並寫回快取（50 則約 18 KB，屆時建議切換）。
-- **可見故事集合**：`GET /api/stories?bbox=west,south,east,north` 與 `POST /api/ask-village`（可帶同一 `bbox`）都從 `server.current_visible_stories()` 出發，共用同一份授權／分享範圍／撤回／視口過濾結果；回應回顯 `visibleCount` / `visibleIds`，避免「問答找到 3 則、地圖只有 1 個點」。參數格式錯誤回 400。
+- **可見故事集合**：`GET /api/stories?bbox=west,south,east,north` 與 `POST /api/ask-village`（可帶同一 `bbox`）都從 `server.current_visible_stories()` 出發；`visibleCount` / `visibleIds` 描述裁剪後的結果。問答可另帶 `storyIds` 收窄至前端類型／年代等篩選後的故事，空陣列表示無故事，省略才用全域；後端始終先做授權／分享範圍／撤回過濾。前端在提問時擷取篩選及視口快照，網路失敗後的本機檢索沿用同一範圍；服務端拒答不會被本機全庫故事搜尋覆蓋。首頁與列表不套用隱藏地圖的視口。參數格式錯誤回 400。
 - **指標口徑**：`story.open`（真正打開詳情）才是北極星指標分母；`pin.click`（單點）、`cluster.click`（同圈氣泡／低縮放聚合）只作診斷；另有 `map.view`、`audio.complete`、`audio.progress`、`scene.view`。只記錄數值與故事 ID，送往 `/api/audit`；後端 meta 白名單會丟棄逐字稿、標題等自由文字，離線時僅留本機緩衝。
 - **版位與無障礙**：列表入口在地圖右上角常顯（帶文字，不是降級才出現）；半拉抽屜半開露出 `55dvh`；`prefers-reduced-motion` 下模糊圈呼吸填充降級為靜態虛線圈；3D 書籤只取已有真實故事座標的新市鎮視角。
 - **配音腳本**：`docs/voice-scripts/voice-scripts.md` 由 `tools/export_voice_scripts.py` 從已授權逐字稿匯出每則故事的台詞、時間線與補錄驗收流程。8 則中 7 則仍待真人補錄，介面如實顯示「未附音檔」；**不合成示範音檔、不改寫逐字稿**。
@@ -148,7 +148,7 @@ python tools/test_lab_api.py        # 實驗室 API
 python tools/audit_frontend.mjs     # 前端靜態檢查（需 node）
 ```
 
-本輪評審修復的回歸腳本放在工作區 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`），未納入版本控制；`build_frontend.py` 與 `check_frontend_syntax.py` 則為正式交付工具。
+評審修復的回歸腳本放在 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`）。地圖／問答的視口、篩選、空集合、授權、拒答與離線降級另以 `python tools/verify/story_scope.py` 驗證；測試使用隔離資料庫，不改動現有錄音。
 
 手動驗證要點：三語切換後重整仍保持、錄音停止即存草稿、斷網上傳變「待轉寫」且可重試、來源按鈕跳轉並從指定秒數播放、撤回後來源按鈕變灰。
 

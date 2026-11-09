@@ -206,16 +206,13 @@
 
   function ask(question, options) {
     var body = { question: question, lang: options && options.lang };
-    /* 與地圖共用同一個可見故事集合：問答的來源數量不會比地圖多出視口外的故事 */
-    try {
-      var bbox = (options && options.bbox) ||
-        (VTN.map && VTN.map.bbox ? VTN.map.bbox() : null);
-      if (Array.isArray(bbox) && bbox.length === 2 &&
-        bbox[0].length === 2 && bbox[1].length === 2) {
-        body.bbox = [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]
-          .map(function (n) { return Number(n).toFixed(5); }).join(',');
-      }
-    } catch (e) { /* 地圖未就緒：改用伺服器回傳的全域可見集合 */ }
+    var context = options && options.context || VTN.stories.queryContext(options);
+    body.storyIds = context.storyIds;
+    var bbox = context.bbox;
+    if (bbox) {
+      // 保留原座標精度，避免視口邊界因四捨五入排除已顯示的故事。
+      body.bbox = [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]].join(',');
+    }
     return request('/api/ask-village', {
       method: 'POST',
       body: body,

@@ -69,11 +69,18 @@
     return out;
   }
 
-  function searchStories(question) {
+  function scopedStories(context) {
+    var scope = context || VTN.stories.queryContext();
+    return VTN.stories.visible().filter(function (story) {
+      return scope.storyIds.indexOf(story.id) !== -1;
+    });
+  }
+
+  function searchStories(question, context) {
     var q = normalize(question);
     if (!q) return [];
     var hits = [];
-    VTN.stories.visible().forEach(function (story) {
+    scopedStories(context).forEach(function (story) {
       if (!story.authorized) return;
       (story.segments || []).forEach(function (segment) {
         var score = scoreSegment(q, segment.keywords);
@@ -151,14 +158,24 @@
    * 伺服器回來的答案一律再驗一次：來源必須仍然存在、仍然授權、未被撤回；
    * 否則視為不可信，改用本機語料或如實拒答。
    */
-  function normalizeServerResult(result) {
+  function normalizeServerResult(result, context) {
     if (!result) return null;
     var inScope = result.inScope !== undefined ? result.inScope : result.in_scope;
+    // 服務端已按授權／撤回／視口拒答時，不能再用本機全庫覆蓋。
+    if (inScope === false) {
+      return { inScope: false, answer: outOfScope(), sources: [], mode: 'server' };
+    }
+    if (inScope !== true || !Array.isArray(result.sources)) return null;
+    var allowed = scopedStories(context).map(function (story) { return story.id; });
+    if (Array.isArray(result.visibleIds)) {
+      allowed = allowed.filter(function (id) { return result.visibleIds.indexOf(id) !== -1; });
+    }
     var sources = (result.sources || []).map(function (source) {
+      if (!source) return null;
       var sid = source.storyId || source.story_id;
       if (sid) {
         var story = VTN.stories.get(sid);
-        if (!story || VTN.store.withdrawn.is(sid)) return null;
+        if (!story || allowed.indexOf(sid) === -1) return null;
         var start = Number(source.start) || 0;
         return {
           storyId: sid,
@@ -171,6 +188,7 @@
       }
       var rid = source.recordId || source.record_id;
       if (rid) {
+        if (!context.includeRecords) return null;
         var rec = VTN.store.records.get(rid);
         if (!rec || VTN.store.withdrawn.is(rid)) return null;
         var seconds = Number(source.start) || 0;
@@ -184,6 +202,9 @@
       }
       return null;
     }).filter(Boolean);
+
+    // 不能只刪壞引用而保留可能含該故事文字的整段答案。
+    if (!sources.length || sources.length !== result.sources.length) return null;
 
     return {
       inScope: !!inScope && sources.length > 0,
@@ -230,8 +251,9 @@
     };
   }
 
-  function localAnswer(question) {
-    var hits = searchStories(question);
+  function localAnswer(question, context) {
+    var scope = context || VTN.stories.queryContext();
+    var hits = searchStories(question, scope);
     if (hits.length) {
       return {
         inScope: true,
@@ -242,7 +264,7 @@
         storyId: hits[0].story.id
       };
     }
-    var recordResult = searchRecords(question);
+    var recordResult = scope.includeRecords ? searchRecords(question) : null;
     if (recordResult) return recordResult;
     return { inScope: false, answer: outOfScope(), sources: [], mode: 'local' };
   }
@@ -571,13 +593,22 @@
   }
 
   /* ---------------- 問答 ---------------- */
-  function finish(result, question) {
-    var local = localAnswer(question);
-    var answer = normalizeServerResult(result);
+  function finish(result, question, context) {
+    var answer = normalizeServerResult(result, context);
+    // 個人錄音是另一份本機語料；首頁仍可檢索，但不覆蓋故事庫的拒答範圍。
+    if (answer && !answer.inScope && context.includeRecords) {
+      answer = searchRecords(question) || answer;
+    }
 
-    /* 伺服器答案必須有有效來源，否則改用本機語料，再唔得就如實拒答 */
-    if (!answer || !answer.inScope || !answer.sources || !answer.sources.length) {
-      answer = local.inScope ? local : { inScope: false, answer: outOfScope(), sources: [] };
+    /* 網路失敗或無效答案才降級；沿用送出問題時的篩選與視口快照。 */
+    if (!answer) {
+      var localContext = context;
+      if (result && Array.isArray(result.visibleIds)) {
+        localContext = Object.assign({}, context, {
+          storyIds: context.storyIds.filter(function (id) { return result.visibleIds.indexOf(id) !== -1; })
+        });
+      }
+      answer = localAnswer(question, localContext);
     }
 
     var status = VTN.api.aiState().state;
@@ -609,6 +640,7 @@
   function ask(question) {
     var text = String(question || '').trim();
     if (!text || busy) return;
+    var context = VTN.stories.queryContext();
 
     lastQuestion = text;
     if (!store.messages.length) log.textContent = '';
@@ -625,13 +657,13 @@
 
     var status = VTN.api.aiState().state;
     if (status === 'offline') {
-      setTimeout(function () { finish(null, text); }, 380);
+      setTimeout(function () { finish(null, text, context); }, 380);
       return;
     }
 
-    VTN.api.ask(text, { lang: VTN.i18n.lang() })
-      .then(function (result) { finish(result, text); })
-      .catch(function () { finish(null, text); });
+    VTN.api.ask(text, { lang: VTN.i18n.lang(), context: context })
+      .then(function (result) { finish(result, text, context); })
+      .catch(function () { finish(null, text, context); });
   }
 
   function refresh() {

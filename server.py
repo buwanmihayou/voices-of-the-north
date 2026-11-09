@@ -768,8 +768,8 @@ async def list_stories(request: Request):
     result = {
         "stories": stories,
         "count": len(stories),
-        "visibleCount": len(visible),
-        "visibleIds": [str(s["id"]) for s in visible],
+        "visibleCount": len(stories),
+        "visibleIds": [str(s["id"]) for s in stories],
         "contentVersion": data.get("contentVersion"),
         "consentPolicyVersion": data.get("consentPolicyVersion"),
     }
@@ -793,6 +793,14 @@ async def ask_village(request: Request):
     who = viewer(request)
     bbox = parse_bbox(body.get("bbox"))
     scope = clip_to_bbox(current_visible_stories(request), bbox)
+    # 客戶端的類型／年代等篩選只能收窄可見集合，不能繞過授權或撤回。
+    # 空陣列代表目前沒有故事，與未傳此欄位（全域）不同。
+    if "storyIds" in body:
+        story_ids = body["storyIds"]
+        if not isinstance(story_ids, list) or not all(isinstance(sid, str) for sid in story_ids):
+            raise HTTPException(status_code=400, detail="storyIds 必須是故事 ID 字串陣列")
+        selected = set(story_ids)
+        scope = [s for s in scope if str(s["id"]) in selected]
     result = retrieve_answer(question, lang=lang, stories=scope)
     result["rank"] = who["role"]
     result["visibleCount"] = len(scope)

@@ -483,11 +483,9 @@
     var node = byId('atlasViewport');
     var text = byId('atlasViewportText');
     if (!node || !text) return;
-    if (engine !== 'maplibre' || !ml || !VTN.stories.inBbox) { node.hidden = true; return; }
-    var b = ml.getBounds();
-    var list = VTN.stories.inBbox([
-      [b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]
-    ]);
+    var bounds = currentBbox();
+    if (!bounds || !VTN.stories.inBbox) { node.hidden = true; return; }
+    var list = VTN.stories.inBbox(bounds, state.stories);
     node.hidden = false;
     text.textContent = t('atlas.inView', { n: list.length });
   }
@@ -638,6 +636,7 @@
     syncFuzz();
     if (forceFit) fitAll();
     toggleEmpty();
+    updateViewportCount();
   }
 
   function toggleEmpty() {
@@ -808,8 +807,9 @@
 
   /* 問答與地圖共用同一個視口範圍，避免「來源數量」口徑分叉 */
   function currentBbox() {
-    if (engine !== 'maplibre' || !ml) return null;
-    var b = ml.getBounds();
+    var map = engine === 'maplibre' ? ml : engine === 'leaflet' ? leaflet : null;
+    if (!map) return null;
+    var b = map.getBounds();
     return [[b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]];
   }
 
@@ -856,6 +856,7 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
       }).addTo(leaflet);
       leafletLayer = window.L.featureGroup().addTo(leaflet);
+      leaflet.on('moveend', updateViewportCount);
       el.classList.add('is-ready');
       el.classList.remove('is-failed');
       hideLoading();
@@ -902,6 +903,7 @@
       } catch (e) { /* ignore */ }
     }
     toggleEmpty();
+    updateViewportCount();
   }
 
   /* =========================================================================

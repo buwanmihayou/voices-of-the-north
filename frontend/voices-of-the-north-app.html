@@ -8237,16 +8237,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   function ask(question, options) {
     var body = { question: question, lang: options && options.lang };
-    /* 與地圖共用同一個可見故事集合：問答的來源數量不會比地圖多出視口外的故事 */
-    try {
-      var bbox = (options && options.bbox) ||
-        (VTN.map && VTN.map.bbox ? VTN.map.bbox() : null);
-      if (Array.isArray(bbox) && bbox.length === 2 &&
-        bbox[0].length === 2 && bbox[1].length === 2) {
-        body.bbox = [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]
-          .map(function (n) { return Number(n).toFixed(5); }).join(',');
-      }
-    } catch (e) { /* 地圖未就緒：改用伺服器回傳的全域可見集合 */ }
+    var context = options && options.context || VTN.stories.queryContext(options);
+    body.storyIds = context.storyIds;
+    var bbox = context.bbox;
+    if (bbox) {
+      // 保留原座標精度，避免視口邊界因四捨五入排除已顯示的故事。
+      body.bbox = [bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]].join(',');
+    }
     return request('/api/ask-village', {
       method: 'POST',
       body: body,
@@ -9231,11 +9228,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   /* 視口查詢：只回已授權、且中心點落在 bbox 內的故事 */
-  function inBbox(bounds) {
-    if (!bounds || bounds.length !== 2) return visible();
+  function inBbox(bounds, stories) {
+    var list = stories || visible();
+    if (!bounds || bounds.length !== 2) return list;
     var sw = bounds[0], ne = bounds[1];
-    if (!sw || !ne || sw.length !== 2 || ne.length !== 2) return visible();
-    return visible().filter(function (story) {
+    if (!sw || !ne || sw.length !== 2 || ne.length !== 2) return list;
+    return list.filter(function (story) {
       var loc = story.location;
       return loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' &&
         loc.lng >= sw[0] && loc.lng <= ne[0] && loc.lat >= sw[1] && loc.lat <= ne[1];
@@ -9421,6 +9419,27 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   function filtered() { return sorted(visible().filter(matches)); }
+
+  /* 問題送出時擷取同一份集合，API 與離線檢索沿用；非地圖頁不帶隱藏視口。 */
+  function queryContext(options) {
+    var opts = options || {};
+    var onStories = document.body.getAttribute('data-view') === 'stories';
+    var list = onStories ? filtered() : visible();
+    var bounds = Object.prototype.hasOwnProperty.call(opts, 'bbox') ? opts.bbox :
+      (onStories && state.mode === 'map' && VTN.map && VTN.map.bbox ? VTN.map.bbox() : null);
+    if (!Array.isArray(bounds) || bounds.length !== 2 ||
+        !Array.isArray(bounds[0]) || !Array.isArray(bounds[1]) ||
+        bounds[0].length !== 2 || bounds[1].length !== 2 ||
+        !bounds[0].concat(bounds[1]).every(function (n) { return typeof n === 'number' && isFinite(n); })) {
+      bounds = null;
+    }
+    list = inBbox(bounds, list);
+    return {
+      storyIds: list.map(function (story) { return story.id; }),
+      bbox: bounds ? [bounds[0].slice(), bounds[1].slice()] : null,
+      includeRecords: !onStories
+    };
+  }
 
   function optionsFor(group) {
     var map = {};
@@ -10440,6 +10459,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     visible: visible,
     filtered: filtered,
     inBbox: inBbox,
+    queryContext: queryContext,
     fuzzGroups: fuzzGroups,
     select: select,
     applyParams: applyParams,
@@ -11143,11 +11163,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var node = byId('atlasViewport');
     var text = byId('atlasViewportText');
     if (!node || !text) return;
-    if (engine !== 'maplibre' || !ml || !VTN.stories.inBbox) { node.hidden = true; return; }
-    var b = ml.getBounds();
-    var list = VTN.stories.inBbox([
-      [b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]
-    ]);
+    var bounds = currentBbox();
+    if (!bounds || !VTN.stories.inBbox) { node.hidden = true; return; }
+    var list = VTN.stories.inBbox(bounds, state.stories);
     node.hidden = false;
     text.textContent = t('atlas.inView', { n: list.length });
   }
@@ -11298,6 +11316,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     syncFuzz();
     if (forceFit) fitAll();
     toggleEmpty();
+    updateViewportCount();
   }
 
   function toggleEmpty() {
@@ -11468,8 +11487,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   /* 問答與地圖共用同一個視口範圍，避免「來源數量」口徑分叉 */
   function currentBbox() {
-    if (engine !== 'maplibre' || !ml) return null;
-    var b = ml.getBounds();
+    var map = engine === 'maplibre' ? ml : engine === 'leaflet' ? leaflet : null;
+    if (!map) return null;
+    var b = map.getBounds();
     return [[b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]];
   }
 
@@ -11516,6 +11536,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
       }).addTo(leaflet);
       leafletLayer = window.L.featureGroup().addTo(leaflet);
+      leaflet.on('moveend', updateViewportCount);
       el.classList.add('is-ready');
       el.classList.remove('is-failed');
       hideLoading();
@@ -11562,6 +11583,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       } catch (e) { /* ignore */ }
     }
     toggleEmpty();
+    updateViewportCount();
   }
 
   /* =========================================================================
@@ -13083,11 +13105,18 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     return out;
   }
 
-  function searchStories(question) {
+  function scopedStories(context) {
+    var scope = context || VTN.stories.queryContext();
+    return VTN.stories.visible().filter(function (story) {
+      return scope.storyIds.indexOf(story.id) !== -1;
+    });
+  }
+
+  function searchStories(question, context) {
     var q = normalize(question);
     if (!q) return [];
     var hits = [];
-    VTN.stories.visible().forEach(function (story) {
+    scopedStories(context).forEach(function (story) {
       if (!story.authorized) return;
       (story.segments || []).forEach(function (segment) {
         var score = scoreSegment(q, segment.keywords);
@@ -13165,14 +13194,24 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
    * 伺服器回來的答案一律再驗一次：來源必須仍然存在、仍然授權、未被撤回；
    * 否則視為不可信，改用本機語料或如實拒答。
    */
-  function normalizeServerResult(result) {
+  function normalizeServerResult(result, context) {
     if (!result) return null;
     var inScope = result.inScope !== undefined ? result.inScope : result.in_scope;
+    // 服務端已按授權／撤回／視口拒答時，不能再用本機全庫覆蓋。
+    if (inScope === false) {
+      return { inScope: false, answer: outOfScope(), sources: [], mode: 'server' };
+    }
+    if (inScope !== true || !Array.isArray(result.sources)) return null;
+    var allowed = scopedStories(context).map(function (story) { return story.id; });
+    if (Array.isArray(result.visibleIds)) {
+      allowed = allowed.filter(function (id) { return result.visibleIds.indexOf(id) !== -1; });
+    }
     var sources = (result.sources || []).map(function (source) {
+      if (!source) return null;
       var sid = source.storyId || source.story_id;
       if (sid) {
         var story = VTN.stories.get(sid);
-        if (!story || VTN.store.withdrawn.is(sid)) return null;
+        if (!story || allowed.indexOf(sid) === -1) return null;
         var start = Number(source.start) || 0;
         return {
           storyId: sid,
@@ -13185,6 +13224,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       }
       var rid = source.recordId || source.record_id;
       if (rid) {
+        if (!context.includeRecords) return null;
         var rec = VTN.store.records.get(rid);
         if (!rec || VTN.store.withdrawn.is(rid)) return null;
         var seconds = Number(source.start) || 0;
@@ -13198,6 +13238,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       }
       return null;
     }).filter(Boolean);
+
+    // 不能只刪壞引用而保留可能含該故事文字的整段答案。
+    if (!sources.length || sources.length !== result.sources.length) return null;
 
     return {
       inScope: !!inScope && sources.length > 0,
@@ -13244,8 +13287,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     };
   }
 
-  function localAnswer(question) {
-    var hits = searchStories(question);
+  function localAnswer(question, context) {
+    var scope = context || VTN.stories.queryContext();
+    var hits = searchStories(question, scope);
     if (hits.length) {
       return {
         inScope: true,
@@ -13256,7 +13300,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
         storyId: hits[0].story.id
       };
     }
-    var recordResult = searchRecords(question);
+    var recordResult = scope.includeRecords ? searchRecords(question) : null;
     if (recordResult) return recordResult;
     return { inScope: false, answer: outOfScope(), sources: [], mode: 'local' };
   }
@@ -13585,13 +13629,22 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   /* ---------------- 問答 ---------------- */
-  function finish(result, question) {
-    var local = localAnswer(question);
-    var answer = normalizeServerResult(result);
+  function finish(result, question, context) {
+    var answer = normalizeServerResult(result, context);
+    // 個人錄音是另一份本機語料；首頁仍可檢索，但不覆蓋故事庫的拒答範圍。
+    if (answer && !answer.inScope && context.includeRecords) {
+      answer = searchRecords(question) || answer;
+    }
 
-    /* 伺服器答案必須有有效來源，否則改用本機語料，再唔得就如實拒答 */
-    if (!answer || !answer.inScope || !answer.sources || !answer.sources.length) {
-      answer = local.inScope ? local : { inScope: false, answer: outOfScope(), sources: [] };
+    /* 網路失敗或無效答案才降級；沿用送出問題時的篩選與視口快照。 */
+    if (!answer) {
+      var localContext = context;
+      if (result && Array.isArray(result.visibleIds)) {
+        localContext = Object.assign({}, context, {
+          storyIds: context.storyIds.filter(function (id) { return result.visibleIds.indexOf(id) !== -1; })
+        });
+      }
+      answer = localAnswer(question, localContext);
     }
 
     var status = VTN.api.aiState().state;
@@ -13623,6 +13676,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function ask(question) {
     var text = String(question || '').trim();
     if (!text || busy) return;
+    var context = VTN.stories.queryContext();
 
     lastQuestion = text;
     if (!store.messages.length) log.textContent = '';
@@ -13639,13 +13693,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
     var status = VTN.api.aiState().state;
     if (status === 'offline') {
-      setTimeout(function () { finish(null, text); }, 380);
+      setTimeout(function () { finish(null, text, context); }, 380);
       return;
     }
 
-    VTN.api.ask(text, { lang: VTN.i18n.lang() })
-      .then(function (result) { finish(result, text); })
-      .catch(function () { finish(null, text); });
+    VTN.api.ask(text, { lang: VTN.i18n.lang(), context: context })
+      .then(function (result) { finish(result, text, context); })
+      .catch(function () { finish(null, text, context); });
   }
 
   function refresh() {
