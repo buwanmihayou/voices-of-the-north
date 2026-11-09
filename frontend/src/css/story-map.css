@@ -288,6 +288,21 @@
   flex-direction: column;
   gap: 8px;
 }
+
+/* 320px 小屏：標題與工具列分兩行，避免標題被擠成一字一行；
+   縮放鍵改為橫排放到年代軸上方，不再壓住篩選鍵。 */
+@media (max-width: 359px) {
+  .atlas__top { grid-template-columns: minmax(0, 1fr); }
+  .atlas__title { font-size: 1.42rem; }
+  .atlas__eyebrow { letter-spacing: 0.08em; }
+  .atlas__tools { justify-content: flex-end; margin-top: 6px; }
+  .atlas__searchrow { margin-top: 6px; }
+  .atlas__legend { margin-top: 6px; }
+  .atlas__controls {
+    display: none;                  /* 320px 地圖可視高度不足，改用雙指縮放，避免壓住年代軸 */
+  }
+  .atlas__viewport { display: none !important; }  /* 小屏讓位給年代軸，避免覆蓋「故事年代」標題 */
+}
 .atlas-ctl {
   display: grid;
   place-items: center;
@@ -785,12 +800,13 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   background: var(--cream);
   box-shadow: 0 -18px 46px -22px rgba(18, 36, 26, 0.75);
   transform: translateY(100%);
-  transition: transform 0.42s var(--ease-slow);
+  visibility: hidden;                /* 收起後不可留一幀在底導上 */
+  transition: transform 0.42s var(--ease-slow), visibility 0s linear 0.42s;
   touch-action: none;
   will-change: transform;
 }
-.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); }
-.story-sheet.is-expanded { transform: translateY(0); }
+.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); visibility: visible; transition-delay: 0s; }
+.story-sheet.is-expanded { transform: translateY(0); visibility: visible; transition-delay: 0s; }
 .story-sheet.is-dragging { transition: none; }
 .story-sheet__grab {
   flex: none;

@@ -459,14 +459,14 @@
       'settings.speed': '播放速度',
       'settings.speedHint': '慢速有助聽清長者口音',
       'settings.reset': '恢復預設',
-      'settings.resetHint': '字級、音量、速度、主題全部還原',
+      'settings.resetHint': '字級、音量、速度全部還原',
       'settings.resetBtn': '還原',
       'settings.resetConfirm': '確定把所有顯示與播放設定還原為預設？',
       'settings.resetDone': '已還原預設設定。',
       'settings.saved': '設定已儲存。',
       'settings.on': '開',
       'settings.off': '關',
-      'settings.foot': '設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px；深色模式文字對比不低於 4.5:1。',
+      'settings.foot': '設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。',
 
       'about.title': '關於',
       'about.banner': '黑客松演示，含角色扮演故事，非真實長者訪談。所有示範內容均清楚標示，不會冒充真實口述歷史。',
@@ -515,7 +515,7 @@
       'assistant.myRecordings': '來自我嘅錄音：',
       'assistant.demoDisclosure': '註：此答案引用角色扮演示範故事，並非真實長者訪談。',
       'assistant.degradedLabel': 'AI 降級：以下答案只用本機已授權語料產生，未經語言模型整理。',
-      'assistant.offlineLabel': '離線示範：伺服器未連線，以下答案只用本機已授權語料。',
+      'assistant.offlineLabel': '離線模式：只從本機故事庫檢索，冇 AI 生成，亦冇上網。',
       'assistant.outOfScope': '抱歉，錄製的故事中未包含此資訊。',
       'assistant.avatarAlt': '村落問答助手',
 
@@ -538,6 +538,25 @@
       'village.tai-po': '大埔',
       'village.tin-shui-wai': '天水圍',
       'village.lau-fau-shan': '流浮山',
+      'village.stanley': '赤柱',
+      'village.kowloon-city': '九龍城',
+      'village.tai-o': '大澳',
+      'village.kuk-po': '谷埔',
+      'village.lai-chi-wo': '荔枝窩',
+
+      'onboard.eyebrow': '地圖引導',
+      'onboard.helpAria': '重看地圖引導',
+      'onboard.helpTitle': '重看地圖引導',
+      'onboard.step1Title': '拖動地圖，發現故事',
+      'onboard.step1Body': '縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。',
+      'onboard.step2Title': '點一下圖示，看完整故事',
+      'onboard.step2Body': '點故事圖示會打開半拉抽屜，可看逐字稿、播放原音及核對時間戳。',
+      'onboard.step3Title': '用年代軸，聽不同年代',
+      'onboard.step3Body': '拖動「故事年代」軸，只留下該年代或以前的故事；想找特定村落可用搜尋。',
+      'onboard.next': '下一步',
+      'onboard.start': '開始探索',
+      'onboard.skip': '跳過',
+      'onboard.progress': '第 {n} 步，共 {total} 步',
 
       'topic.community': '社區變遷',
       'topic.agriculture': '農業生活',
@@ -594,7 +613,9 @@
       'privacy.defaultNote': '新增內容預設私人。',
       'privacy.demoNote': '示範故事為演示預設社區，不代表真實長者授權。',
 
-      'lang.yue': '粵語（香港）'
+      'lang.yue': '粵語（香港）',
+      'lang.zh': '華語（國語）',
+      'lang.en': 'English',
     },
 
     'zh-CN': {
@@ -1045,14 +1066,14 @@
       'settings.speed': '播放速度',
       'settings.speedHint': '慢速有助听清长者口音',
       'settings.reset': '恢复默认',
-      'settings.resetHint': '字号、音量、速度、主题全部还原',
+      'settings.resetHint': '字号、音量、速度全部还原',
       'settings.resetBtn': '还原',
       'settings.resetConfirm': '确定把所有显示与播放设置还原为默认？',
       'settings.resetDone': '已还原默认设置。',
       'settings.saved': '设置已保存。',
       'settings.on': '开',
       'settings.off': '关',
-      'settings.foot': '设置只存于这台设备。正文不小于 18px、触控目标不小于 44px；深色模式文字对比不低于 4.5:1。',
+      'settings.foot': '设置只存于这台设备。正文不小于 18px、触控目标不小于 44px。此版本只提供浅色主题。',
 
       'about.title': '关于',
       'about.banner': '黑客松演示，含角色扮演故事，非真实长者访谈。所有示范内容均清楚标示，不会冒充真实口述历史。',
@@ -1101,7 +1122,7 @@
       'assistant.myRecordings': '来自我的录音：',
       'assistant.demoDisclosure': '注：此答案引用角色扮演示范故事，并非真实长者访谈。',
       'assistant.degradedLabel': 'AI 降级：以下答案只用本机已授权语料生成，未经语言模型整理。',
-      'assistant.offlineLabel': '离线示范：服务器未连接，以下答案只用本机已授权语料。',
+      'assistant.offlineLabel': '离线模式：只从本地故事库检索，没有 AI 生成，也没有联网。',
       'assistant.outOfScope': '抱歉，录制的故事中未包含此信息。',
       'assistant.avatarAlt': '村落问答助手',
 
@@ -1124,6 +1145,25 @@
       'village.tai-po': '大埔',
       'village.tin-shui-wai': '天水围',
       'village.lau-fau-shan': '流浮山',
+      'village.stanley': '赤柱',
+      'village.kowloon-city': '九龙城',
+      'village.tai-o': '大澳',
+      'village.kuk-po': '谷埔',
+      'village.lai-chi-wo': '荔枝窝',
+
+      'onboard.eyebrow': '地图引导',
+      'onboard.helpAria': '重看地图引导',
+      'onboard.helpTitle': '重看地图引导',
+      'onboard.step1Title': '拖动地图，发现故事',
+      'onboard.step1Body': '缩放或拖动地图，模糊圆圈就是故事所在的大概范围；圆圈不是长者住址。',
+      'onboard.step2Title': '点一下图标，看完整故事',
+      'onboard.step2Body': '点故事图标会打开半拉抽屉，可看逐字稿、播放原音及核对时间戳。',
+      'onboard.step3Title': '用年代轴，听不同年代',
+      'onboard.step3Body': '拖动「故事年代」轴，只留下该年代或以前的故事；想找特定村落可以用搜索。',
+      'onboard.next': '下一步',
+      'onboard.start': '开始探索',
+      'onboard.skip': '跳过',
+      'onboard.progress': '第 {n} 步，共 {total} 步',
 
       'topic.community': '社区变迁',
       'topic.agriculture': '农业生活',
@@ -1180,7 +1220,9 @@
       'privacy.defaultNote': '新增内容默认私人。',
       'privacy.demoNote': '示范故事为演示默认社区，不代表真实长者授权。',
 
-      'lang.yue': '粤语（香港）'
+      'lang.yue': '粤语（香港）',
+      'lang.zh': '华语（国语）',
+      'lang.en': 'English',
     },
 
     'en': {
@@ -1631,14 +1673,14 @@
       'settings.speed': 'Playback speed',
       'settings.speedHint': 'Slower speed helps with strong accents',
       'settings.reset': 'Reset to defaults',
-      'settings.resetHint': 'Text size, volume, speed and theme',
+      'settings.resetHint': 'Text size, volume and speed',
       'settings.resetBtn': 'Reset',
       'settings.resetConfirm': 'Reset all display and playback settings to their defaults?',
       'settings.resetDone': 'Settings reset to defaults.',
       'settings.saved': 'Settings saved.',
       'settings.on': 'On',
       'settings.off': 'Off',
-      'settings.foot': 'Settings are stored on this device only. Body text is at least 18px, touch targets at least 44px, and dark-mode text contrast is at least 4.5:1.',
+      'settings.foot': 'Settings are stored on this device only. Body text is at least 18px, touch targets at least 44px. This version is light-theme only.',
 
       'about.title': 'About',
       'about.banner': 'Hackathon demo with role-played stories, not real elder interviews. Every demo item is clearly labelled and never presented as real oral history.',
@@ -1687,7 +1729,7 @@
       'assistant.myRecordings': 'From my recordings:',
       'assistant.demoDisclosure': 'Note: this answer cites a role-played demo story, not a real elder interview.',
       'assistant.degradedLabel': 'AI degraded: this answer uses only authorised local transcripts, without the language model.',
-      'assistant.offlineLabel': 'Offline demo: the server is unreachable, so this answer uses only authorised local transcripts.',
+      'assistant.offlineLabel': 'Offline mode: local story library search only — no AI generation and no network.',
       'assistant.outOfScope': 'Sorry, the recorded stories do not contain this information.',
       'assistant.avatarAlt': 'Village Q&A assistant',
 
@@ -1710,6 +1752,25 @@
       'village.tai-po': 'Tai Po',
       'village.tin-shui-wai': 'Tin Shui Wai',
       'village.lau-fau-shan': 'Lau Fau Shan',
+      'village.stanley': 'Stanley',
+      'village.kowloon-city': 'Kowloon City',
+      'village.tai-o': 'Tai O',
+      'village.kuk-po': 'Kuk Po',
+      'village.lai-chi-wo': 'Lai Chi Wo',
+
+      'onboard.eyebrow': 'Map guide',
+      'onboard.helpAria': 'Replay the map guide',
+      'onboard.helpTitle': 'Replay the map guide',
+      'onboard.step1Title': 'Drag the map to find stories',
+      'onboard.step1Body': 'Zoom or drag the map. Each blurred circle is the approximate area of a story — never an elder’s home address.',
+      'onboard.step2Title': 'Tap an icon for the full story',
+      'onboard.step2Body': 'Tapping a story icon opens the half-sheet with the transcript, original audio and verifiable timestamps.',
+      'onboard.step3Title': 'Use the era axis to travel in time',
+      'onboard.step3Body': 'Drag the “Story era” axis to keep stories from that era or earlier; use search to find a particular village.',
+      'onboard.next': 'Next',
+      'onboard.start': 'Start exploring',
+      'onboard.skip': 'Skip',
+      'onboard.progress': 'Step {n} of {total}',
 
       'topic.community': 'Community change',
       'topic.agriculture': 'Farming life',
@@ -1766,7 +1827,9 @@
       'privacy.defaultNote': 'New content is private by default.',
       'privacy.demoNote': 'Demo stories default to Community for the demo only; they do not represent real elders’ consent.',
 
-      'lang.yue': 'Cantonese (Hong Kong)'
+      'lang.yue': 'Cantonese (Hong Kong)',
+      'lang.zh': 'Mandarin',
+      'lang.en': 'English',
     }
   };
 

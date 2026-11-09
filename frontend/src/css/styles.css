@@ -1466,9 +1466,10 @@ body:has(.sheet.is-show) .toast {
   background: var(--cream);
   box-shadow: 0 -18px 44px -18px rgba(28, 44, 35, 0.45);
   transform: translate(-50%, 100%);
-  transition: transform var(--dur) var(--ease-slow);
+  visibility: hidden;
+  transition: transform var(--dur) var(--ease-slow), visibility 0s linear var(--dur);
 }
-.sheet.is-show { transform: translate(-50%, 0); }
+.sheet.is-show { transform: translate(-50%, 0); visibility: visible; transition-delay: 0s; }
 
 .sheet__handle {
   width: 44px;

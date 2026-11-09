@@ -1,8 +1,8 @@
 /* =============================================================================
- * 55-settings — 設定頁：字級、音量、速度、主題、減少動態、高對比、恢復預設
+ * 55-settings — 設定頁：字級、音量、速度、減少動態、高對比、恢復預設
  * -----------------------------------------------------------------------------
  * 底線：正文不小於 18px（標準 = 18px，大 = 20px，特大 = 22px）；
- *       深色模式文字對比 ≥ 4.5:1；所有設定即時生效並只存本機。
+ *       本階段只提供淺色主題，不再跟隨系統深色；所有設定即時生效並只存本機。
  * ========================================================================== */
 
 (function () {
@@ -10,17 +10,16 @@
 
   var VTN = window.VTN;
   var U = VTN.util;
-  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
   function t(key) { return VTN.i18n.t(key); }
 
-  function applyTheme(prefs) {
-    var theme = prefs.theme || 'system';
-    var resolved = theme === 'system' ? (media && media.matches ? 'dark' : 'light') : theme;
-    document.documentElement.setAttribute('data-theme', resolved);
-    document.documentElement.setAttribute('data-theme-preference', theme);
+  /* 2026-11-09：產品拍板本階段只做淺色。即使本機舊設定存了 dark/system，
+     也一律以淺色呈現，避免深色下森林綠被提亮成淺綠、文字對比不足。 */
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.setAttribute('data-theme-preference', 'light');
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#131E18' : '#F6F1E6');
+    if (meta) meta.setAttribute('content', '#F6F1E6');
   }
 
   function apply(prefs) {
@@ -28,7 +27,7 @@
     html.setAttribute('data-font-size', prefs.fontSize || 'md');
     html.setAttribute('data-contrast', prefs.contrast ? 'high' : 'normal');
     html.setAttribute('data-reduce-motion', prefs.reduceMotion ? 'true' : 'false');
-    applyTheme(prefs);
+    applyTheme();
   }
 
   function refreshControls() {
@@ -39,9 +38,6 @@
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
-
-    var theme = document.getElementById('setTheme');
-    if (theme) theme.value = prefs.theme;
 
     var contrast = document.getElementById('setContrast');
     if (contrast) {
@@ -71,14 +67,6 @@
         VTN.ui.toast(t('settings.saved'), 'success');
       });
     });
-
-    var theme = document.getElementById('setTheme');
-    if (theme) {
-      theme.addEventListener('change', function () {
-        VTN.store.setPref('theme', theme.value);
-        refreshControls();
-      });
-    }
 
     var contrast = document.getElementById('setContrast');
     if (contrast) {
@@ -138,14 +126,6 @@
       refreshControls();
     });
     U.on('vtn:lang-changed', refreshControls);
-
-    if (media) {
-      var onChange = function () {
-        if (VTN.store.getPref('theme') === 'system') applyTheme(VTN.store.prefs());
-      };
-      if (media.addEventListener) media.addEventListener('change', onChange);
-      else if (media.addListener) media.addListener(onChange);
-    }
   }
 
   function init() {

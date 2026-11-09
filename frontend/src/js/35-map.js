@@ -443,11 +443,11 @@
       }
       badge.textContent = String(size);
       element.classList.add('vtn-pin--group');
-      element.setAttribute('aria-label', story.title + '・' + t('atlas.groupAria', { n: size }));
+      element.setAttribute('aria-label', VTN.stories.storyTitle(story) + '・' + t('atlas.groupAria', { n: size }));
     } else {
       if (badge) badge.remove();
       element.classList.remove('vtn-pin--group');
-      element.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(typeOf(story)));
+      element.setAttribute('aria-label', VTN.stories.storyTitle(story) + '・' + VTN.stories.typeLabel(typeOf(story)));
     }
   }
 
@@ -468,7 +468,7 @@
       if (!story) return;
       var btn = U.node('button', {
         class: 'vtn-btn vtn-btn--quiet vtn-group-choice',
-        type: 'button', text: story.title
+        type: 'button', text: VTN.stories.storyTitle(story)
       });
       btn.addEventListener('click', function () {
         dlg.close('pick');
@@ -516,11 +516,11 @@
     btn.type = 'button';
     btn.className = 'vtn-pin vtn-type--' + type + (groupSize > 1 ? ' vtn-pin--group' : '');
     btn.setAttribute('data-story', story.id);
-    btn.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(type));
+    btn.setAttribute('aria-label', VTN.stories.storyTitle(story) + '・' + VTN.stories.typeLabel(type));
     btn.innerHTML =
       '<span class="vtn-pin__ring" aria-hidden="true"></span>' +
       '<span class="vtn-pin__disc"><i class="fa-solid ' + iconOf(story) + '" aria-hidden="true"></i></span>' +
-      '<span class="vtn-pin__label">' + U.escapeHtml(story.title) + '</span>';
+      '<span class="vtn-pin__label">' + U.escapeHtml(VTN.stories.storyTitle(story)) + '</span>';
     syncGroupBadge(btn, group, story);
     btn.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -549,6 +549,8 @@
       }
       var element = marker.getElement();
       syncGroupBadge(element, groups[story.id], story);
+      var labelNode = element.querySelector('.vtn-pin__label');
+      if (labelNode) labelNode.textContent = VTN.stories.storyTitle(story);
       element.classList.toggle('is-selected', story.id === state.selectedId);
     });
 
@@ -753,10 +755,11 @@
     if (btn) btn.setAttribute('aria-pressed', is3D ? 'true' : 'false');
   }
 
-  /* 3D 書籤：只取已有真實故事座標的新市鎮／墟市，不新增任何示範資料。
+  /* 3D 書籤：只取已有真實故事座標的村落／新市鎮，不新增任何示範資料。
      鄉村村屋與農田沒有建築高度，55° 俯仰在那些點只會「把山抬起」；
-     示範時按一下就輪播到有樓群可擠出的視角。 */
-  var SCENE_VILLAGES = ['fanling', 'sheung-shui', 'tai-po'];
+     示範時按一下就輪播到有樓群可擠出的視角。谷埔、荔枝窩靠山，先看地形；
+     其餘三個新市鎮有樓群，最後才輪到。 */
+  var SCENE_VILLAGES = ['kuk-po', 'lai-chi-wo', 'fanling', 'sheung-shui', 'tai-po'];
 
   function sceneStops() {
     var list = located();
@@ -887,7 +890,7 @@
         fillColor: '#5E8C70',
         fillOpacity: selected ? 0.18 : 0.08
       });
-      circle.bindTooltip(story.title + '・' + t('atlas.fuzz', { r: radius }), {
+      circle.bindTooltip(VTN.stories.storyTitle(story) + '・' + t('atlas.fuzz', { r: radius }), {
         direction: 'top', opacity: 0.96
       });
       circle.on('click', function () {

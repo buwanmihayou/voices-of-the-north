@@ -35,10 +35,11 @@
   justify-content: center;
   background: rgba(24, 38, 30, 0.46);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
-.vtn-rec-overlay.is-open { opacity: 1; pointer-events: auto; }
+.vtn-rec-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
 
 .vtn-rec-sheet {
   width: 100%;

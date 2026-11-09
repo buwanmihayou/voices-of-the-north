@@ -16,7 +16,7 @@
 
   var VTN = window.VTN = window.VTN || {};
 
-  var APP_VERSION = '2026.11.05';
+  var APP_VERSION = '2026.11.09';
   var DEFAULT_API_BASE = 'http://127.0.0.1:8000';
   var STATIC_PORTS = ['8421', '5500', '5173', '3000', '8080', '8081', '4173'];
 
@@ -78,6 +78,7 @@
     withdrawn: 'vtn.v2.withdrawn',
     scopes: 'vtn.v2.scope-overrides',
     storyPatches: 'vtn.v2.story-versions',
+    onboarded: 'vtn.v2.onboarded',
     session: 'vtn.v2.session',
     chat: 'vtn.v2.chat',
     migration: 'vtn.v2.migrated',

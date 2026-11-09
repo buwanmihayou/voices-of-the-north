@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-HK" data-theme="system" data-font-size="md" data-contrast="normal" data-reduce-motion="false">
+<html lang="zh-Hant-HK" data-theme="light" data-font-size="md" data-contrast="normal" data-reduce-motion="false">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -29,7 +29,7 @@
 <!--@@CSS@@-->
   </style>
 </head>
-<body data-app-version="2026.11.05">
+<body data-app-version="2026.11.09">
 <div class="app-shell" id="appShell">
 
     <header class="topbar">
@@ -202,6 +202,10 @@
                     data-i18n-aria="atlas.listAria" data-i18n-title="atlas.listModeTitle">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
               <span data-i18n="atlas.listShort">列表</span>
+            </button>
+            <button type="button" class="atlas-btn" id="atlasHelpBtn"
+                    data-i18n-aria="onboard.helpAria" data-i18n-title="onboard.helpTitle">
+              <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
             </button>
             <button type="button" class="atlas-btn" id="atlasSceneBtn"
                     data-i18n-aria="atlas.sceneAria" data-i18n-title="atlas.sceneTitle">
@@ -499,20 +503,6 @@
 
         <div class="setting-row">
           <div class="setting-row__text">
-            <span class="setting-row__label" data-i18n="settings.theme">主題</span>
-            <span class="setting-row__hint" data-i18n="settings.themeHint">淺色、深色或跟隨系統</span>
-          </div>
-          <div class="setting-row__control">
-            <select id="setTheme" data-i18n-aria="aria.theme">
-              <option value="system" data-i18n="settings.themeSystem">跟隨系統</option>
-              <option value="light" data-i18n="settings.themeLight">淺色</option>
-              <option value="dark" data-i18n="settings.themeDark">深色</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div class="setting-row__text">
             <span class="setting-row__label" data-i18n="settings.contrast">高對比</span>
             <span class="setting-row__hint" data-i18n="settings.contrastHint">加強邊框與文字對比</span>
           </div>
@@ -566,7 +556,7 @@
         <div class="setting-row">
           <div class="setting-row__text">
             <span class="setting-row__label" data-i18n="settings.reset">恢復預設</span>
-            <span class="setting-row__hint" data-i18n="settings.resetHint">字級、音量、速度、主題全部還原</span>
+            <span class="setting-row__hint" data-i18n="settings.resetHint">字級、音量、速度全部還原</span>
           </div>
           <div class="setting-row__control">
             <button type="button" class="vtn-btn vtn-btn--sm vtn-btn--danger" id="setReset" data-i18n="settings.resetBtn">還原</button>
@@ -574,7 +564,7 @@
         </div>
       </section>
 
-      <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px；深色模式文字對比不低於 4.5:1。</p>
+      <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。</p>
     </main>
 
     <!-- ======================= 分頁：about ======================= -->
@@ -646,6 +636,24 @@
         <p class="about-meta" id="aboutVersion">—</p>
       </section>
     </main>
+
+    <div class="vtn-onboard" id="vtnOnboard" hidden>
+      <div class="vtn-onboard__mask" data-onboard-close></div>
+      <section class="vtn-onboard__card" role="dialog" aria-modal="true"
+               aria-labelledby="onboardTitle" aria-describedby="onboardBody">
+        <p class="vtn-onboard__eyebrow" data-i18n="onboard.eyebrow">地圖引導</p>
+        <h2 class="vtn-onboard__title" id="onboardTitle" data-i18n="onboard.step1Title">拖動地圖，發現故事</h2>
+        <p class="vtn-onboard__body" id="onboardBody" data-i18n="onboard.step1Body">縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。</p>
+        <div class="vtn-onboard__dots" id="onboardDots" aria-hidden="true">
+          <span class="is-active"></span><span></span><span></span>
+        </div>
+        <p class="vtn-onboard__progress" id="onboardProgress" aria-live="polite">第 1 步，共 3 步</p>
+        <div class="vtn-onboard__actions">
+          <button type="button" class="vtn-btn vtn-btn--ghost" id="onboardSkip" data-i18n="onboard.skip">跳過</button>
+          <button type="button" class="vtn-btn vtn-btn--solid" id="onboardNext" data-i18n="onboard.next">下一步</button>
+        </div>
+      </section>
+    </div>
 
     <nav class="bottom-nav" data-i18n-aria="aria.nav">
       <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
