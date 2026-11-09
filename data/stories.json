@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "contentVersion": "2026.11.05",
+  "contentVersion": "2026.11.09",
   "consentPolicyVersion": "CONSENT-2026-11-v2",
   "storyMetaNote": "storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。",
   "outOfScopeMessage": {
@@ -360,6 +360,221 @@
           "end": 49,
           "text": "後來后海灣水質變差，蠔業慢慢式微，好多人轉做酒家生意，不過每年仲有蠔節，好熱鬧。",
           "keywords": ["后海灣", "水質", "蠔業", "式微", "酒家", "生意", "蠔節", "熱鬧", "轉行", "變化"]
+        }
+      ]
+    },
+    {
+      "id": "STN-009",
+      "title": "赤柱・海邊的市集",
+      "titleEn": "Stanley · Market by the Sea",
+      "villageKey": "stanley",
+      "topicKeys": ["market", "community"],
+      "eraKey": "1960s",
+      "storyType": "market",
+      "mood": "reflective",
+      "year": 1965,
+      "languageKey": "en",
+      "teller": "Role-played demo (team-written)",
+      "rolePlayed": true,
+      "authorized": true,
+      "consentRef": "CONSENT-DEMO-009",
+      "scope": "community",
+      "publishedAt": "2026-11-09",
+      "location": { "area": "赤柱", "lat": 22.2185, "lng": 114.213, "radiusM": 800 },
+      "audio": null,
+      "durationSec": 50,
+      "durationSource": "transcript",
+      "cover": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 16,
+          "text": "I grew up in Stanley in the 1960s, when the bay was still working water: fishing boats, the ferry pier, and a market that smelled of dried fish and incense.",
+          "keywords": ["Stanley", "1960s", "bay", "fishing boats", "ferry pier", "market", "dried fish", "incense"]
+        },
+        {
+          "start": 16,
+          "end": 34,
+          "text": "My mother sold vegetables there. She knew every family by name; if someone could not pay that day, she wrote it in a notebook and never mentioned it again.",
+          "keywords": ["mother", "vegetables", "market", "family", "notebook", "credit", "neighbours", "trust"]
+        },
+        {
+          "start": 34,
+          "end": 50,
+          "text": "The buildings have changed, but the sea is the same. When I walk along the promenade, I still hear the market waking up before dawn.",
+          "keywords": ["buildings", "change", "sea", "promenade", "dawn", "memory", "Stanley", "harbour"]
+        }
+      ]
+    },
+    {
+      "id": "KLC-010",
+      "title": "九龍城・啟德機場下的日子",
+      "titleEn": "Kowloon City · Under the Kai Tak Flight Path",
+      "villageKey": "kowloon-city",
+      "topicKeys": ["migration", "community"],
+      "eraKey": "1970s",
+      "storyType": "migration",
+      "mood": "wistful",
+      "year": 1975,
+      "languageKey": "zh",
+      "teller": "角色扮演示範（團隊整理）",
+      "rolePlayed": true,
+      "authorized": true,
+      "consentRef": "CONSENT-DEMO-010",
+      "scope": "community",
+      "publishedAt": "2026-11-09",
+      "location": { "area": "九龍城", "lat": 22.33, "lng": 114.19, "radiusM": 800 },
+      "audio": null,
+      "durationSec": 52,
+      "durationSource": "transcript",
+      "cover": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 17,
+          "text": "我是一九七五年跟着父母从潮州来香港的，第一间屋就在九龙城。飞机低低地飞过头顶，窗框会响，讲话要停一下。",
+          "keywords": ["一九七五年", "潮州", "香港", "九龙城", "飞机", "启德", "窗框", "移民"]
+        },
+        {
+          "start": 17,
+          "end": 35,
+          "text": "妈妈在街市卖粿条，我在旁边写功课。街坊来自很多地方，潮州话、福建话、广东话混在一起，谁也听得懂谁。",
+          "keywords": ["妈妈", "街市", "粿条", "功课", "街坊", "潮州话", "福建话", "广东话"]
+        },
+        {
+          "start": 35,
+          "end": 52,
+          "text": "后来机场搬走了，楼也重建了。我还会回去吃一碗粿条，味道不一样，但那条街还记得我们。",
+          "keywords": ["机场", "搬走", "重建", "粿条", "味道", "那条街", "记得", "九龙城"]
+        }
+      ]
+    },
+    {
+      "id": "TO-011",
+      "title": "大澳・棚屋與潮水",
+      "titleEn": "Tai O · Stilt Houses and the Tide",
+      "villageKey": "tai-o",
+      "topicKeys": ["craft", "ecology"],
+      "eraKey": "1970s",
+      "storyType": "architecture",
+      "mood": "reflective",
+      "year": 1972,
+      "languageKey": "yue",
+      "teller": "角色扮演示範（團隊整理）",
+      "rolePlayed": true,
+      "authorized": true,
+      "consentRef": "CONSENT-DEMO-011",
+      "scope": "community",
+      "publishedAt": "2026-11-09",
+      "location": { "area": "大澳", "lat": 22.253, "lng": 113.852, "radiusM": 800 },
+      "audio": null,
+      "durationSec": 48,
+      "durationSource": "transcript",
+      "cover": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 16,
+          "text": "我喺大澳出世，屋企住棚屋，潮水漲嗰陣，地板下面會咚咚聲，細個會驚，後來就慣咗。",
+          "keywords": ["大澳", "棚屋", "潮水", "地板", "細個", "驚", "海", "水鄉"]
+        },
+        {
+          "start": 16,
+          "end": 33,
+          "text": "阿爸曬蝦醬，成條街都係鹹香；我放學就幫手翻蝦，翻到手都紅，但係好開心。",
+          "keywords": ["蝦醬", "曬蝦", "鹹香", "放學", "幫手", "翻蝦", "手紅", "開心"]
+        },
+        {
+          "start": 33,
+          "end": 48,
+          "text": "而家遊客多咗，棚屋整靚咗，但潮水一樣會入屋。我哋仲係要睇住個海做人。",
+          "keywords": ["遊客", "棚屋", "整靚", "潮水", "入屋", "海", "做人", "變化"]
+        }
+      ]
+    },
+    {
+      "id": "KP-012",
+      "title": "谷埔・稻田與邊境",
+      "titleEn": "Kuk Po · Rice Fields by the Border",
+      "villageKey": "kuk-po",
+      "topicKeys": ["agriculture", "migration"],
+      "eraKey": "1950s",
+      "storyType": "farming",
+      "mood": "proud",
+      "year": 1958,
+      "languageKey": "yue",
+      "teller": "角色扮演示範（團隊整理）",
+      "rolePlayed": true,
+      "authorized": true,
+      "consentRef": "CONSENT-DEMO-012",
+      "scope": "community",
+      "publishedAt": "2026-11-09",
+      "location": { "area": "谷埔", "lat": 22.53, "lng": 114.24, "radiusM": 800 },
+      "audio": null,
+      "durationSec": 50,
+      "durationSource": "transcript",
+      "cover": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 17,
+          "text": "谷埔喺沙頭角入面，成條村靠種田同養魚。我細個跟阿媽插秧，田水凍到入骨，但係冇人嗌辛苦。",
+          "keywords": ["谷埔", "沙頭角", "種田", "養魚", "插秧", "田水", "阿媽", "辛苦"]
+        },
+        {
+          "start": 17,
+          "end": 34,
+          "text": "後來好多人去英國，田就荒咗。返嚟嗰陣，啲祖屋塌咗一半，但祠堂仲喺度，門口啲字仲睇得清。",
+          "keywords": ["英國", "田荒", "祖屋", "祠堂", "門口", "返嚟", "村", "移民"]
+        },
+        {
+          "start": 34,
+          "end": 50,
+          "text": "而家有人返嚟復耕，我哋唔敢講救得返條村，但至少啲田唔會靜到冇聲。",
+          "keywords": ["復耕", "返嚟", "條村", "田", "靜", "聲音", "希望", "而家"]
+        }
+      ]
+    },
+    {
+      "id": "LCW-013",
+      "title": "荔枝窩・圍村與風水林",
+      "titleEn": "Lai Chi Wo · Walled Village and Feng Shui Woods",
+      "villageKey": "lai-chi-wo",
+      "topicKeys": ["clan", "agriculture"],
+      "eraKey": "1960s",
+      "storyType": "oral",
+      "mood": "joyful",
+      "year": 1962,
+      "languageKey": "yue",
+      "teller": "角色扮演示範（團隊整理）",
+      "rolePlayed": true,
+      "authorized": true,
+      "consentRef": "CONSENT-DEMO-013",
+      "scope": "community",
+      "publishedAt": "2026-11-09",
+      "location": { "area": "荔枝窩", "lat": 22.526, "lng": 114.265, "radiusM": 800 },
+      "audio": null,
+      "durationSec": 49,
+      "durationSource": "transcript",
+      "cover": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 16,
+          "text": "荔枝窩係一條客家圍村，村後面有一片風水林，阿婆話啲樹唔斬得，斬咗會衰，所以我哋細個唔敢入去亂咁玩。",
+          "keywords": ["荔枝窩", "客家", "圍村", "風水林", "阿婆", "樹", "細個", "祠堂"]
+        },
+        {
+          "start": 16,
+          "end": 33,
+          "text": "我哋喺禾塘晒穀，夜晚聽蟲叫；條村最多人嗰陣，有幾百人，學校都有兩班。",
+          "keywords": ["禾塘", "晒穀", "夜晚", "蟲叫", "幾百人", "學校", "兩班", "熱鬧"]
+        },
+        {
+          "start": 33,
+          "end": 49,
+          "text": "後來人走晒，學校都閂咗。近年有人返嚟種米，村口間舖又開返，好似有返啲人氣。",
+          "keywords": ["人走", "學校", "閂", "返嚟", "種米", "村口", "舖", "人氣"]
         }
       ]
     }

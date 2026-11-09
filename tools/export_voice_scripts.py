@@ -49,7 +49,7 @@ def render(data: dict) -> str:
     moods = sorted({s.get("mood") or "" for s in stories if s.get("mood")})
 
     lines = [
-        "# 配音腳本：8 則示範故事",
+        f"# 配音腳本：{len(stories)} 則示範故事",
         "",
         "> 來源：`data/stories.json`（前後端單一資料來源）。本文由 "
         "`tools/export_voice_scripts.py` 產生，請改資料檔後重新產生，勿手改本文。",
@@ -76,7 +76,7 @@ def render(data: dict) -> str:
         ) + "；資料契約枚舉共 7 類，圖例只顯示有資料的類目。",
         f"- 表達心情：{len(moods)} 種 — " + "、".join(
             f"{MOOD_LABEL.get(k, k)}（`{k}`）" for k in moods
-        ) + "；枚舉共 5 種，`reflective` 目前未使用。",
+        ) + "；枚舉共 5 種，未使用的枚舉不硬湊。",
         "- 多樣性來自既有示範資料，補錄時沿用原有標註；"
         "不為「湊滿枚舉」改寫逐字稿或增造假故事。",
         f"- 年代分佈：{min(years)}–{max(years)}（跨 {max(years) - min(years)} 年）；"
