@@ -142,6 +142,13 @@
   function eraLabel(key) { return t('era.' + key); }
   function languageLabel(key) { return t('lang.' + key); }
 
+  /* 英文介面優先顯示 titleEn；沒有英文標題時回退中文，不空白。 */
+  function storyTitle(story) {
+    if (!story) return '';
+    if (VTN.i18n.lang() === 'en' && story.titleEn) return story.titleEn;
+    return story.title || '';
+  }
+
   function durationLabel(story) {
     var base = U.fmtTime(story.durationSec);
     return story.durationSource === 'transcript' ? base + ' ' + t('story.transcriptLength') : base;
@@ -558,7 +565,7 @@
     var main = U.node('button', { class: 'story-item__main', type: 'button' });
     main.appendChild(coverNode(story));
     var body = U.node('span', { class: 'story-item__body' });
-    body.appendChild(U.node('span', { class: 'story-item__title', text: story.title }));
+    body.appendChild(U.node('span', { class: 'story-item__title', text: storyTitle(story) }));
     body.appendChild(U.node('span', {
       class: 'story-item__meta',
       text: villageLabel(story.villageKey) + ' ・ ' + eraLabel(story.eraKey) + ' ・ ' +
@@ -646,7 +653,7 @@
     var wrap = U.node('div', { class: 'player', 'data-player-story': story.id });
     var btn = U.node('button', {
       class: 'player__btn', type: 'button', 'data-role': 'play',
-      'aria-label': t('atlas.playAria', { title: story.title })
+      'aria-label': t('atlas.playAria', { title: storyTitle(story) })
     });
     btn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
 
@@ -734,7 +741,7 @@
     if (btn) {
       btn.classList.toggle('is-playing', playing);
       btn.innerHTML = '<i class="fa-solid ' + (playing ? 'fa-pause' : 'fa-play') + '" aria-hidden="true"></i>';
-      btn.setAttribute('aria-label', playing ? t('atlas.pauseAria') : t('atlas.playAria', { title: story.title }));
+      btn.setAttribute('aria-label', playing ? t('atlas.pauseAria') : t('atlas.playAria', { title: storyTitle(story) }));
     }
   }
 
@@ -787,7 +794,7 @@
       text: story.year ? t('atlas.yearLabel', { y: story.year }) : eraLabel(story.eraKey)
     }));
     body.appendChild(kicker);
-    body.appendChild(U.node('h2', { class: 'sheet-hero__title', text: story.title }));
+    body.appendChild(U.node('h2', { class: 'sheet-hero__title', text: storyTitle(story) }));
     body.appendChild(U.node('p', {
       class: 'sheet-hero__sub',
       text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story) + ' ・ ' +
@@ -1025,7 +1032,7 @@
     var main = U.node('button', { class: 'story-item__main', type: 'button' });
     main.appendChild(coverNode(story));
     var body = U.node('span', { class: 'story-item__body' });
-    body.appendChild(U.node('span', { class: 'story-item__title', text: story.title }));
+    body.appendChild(U.node('span', { class: 'story-item__title', text: storyTitle(story) }));
     body.appendChild(U.node('span', {
       class: 'story-item__meta',
       text: story.villageKey ? villageLabel(story.villageKey) + ' ・ ' + durationLabel(story) : ''
@@ -1151,7 +1158,7 @@
         html: '<i class="fa-solid ' + typeIcon(type) + '" aria-hidden="true"></i>'
       }));
       var body = U.node('span', { class: 'peek-card__body' });
-      body.appendChild(U.node('span', { class: 'peek-card__title', text: story.title }));
+      body.appendChild(U.node('span', { class: 'peek-card__title', text: storyTitle(story) }));
       body.appendChild(U.node('span', {
         class: 'peek-card__meta',
         text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story)
@@ -1341,6 +1348,7 @@
     topicLabel: topicLabel,
     eraLabel: eraLabel,
     languageLabel: languageLabel,
+    storyTitle: storyTitle,
     storyTypeOf: storyTypeOf,
     typeLabel: typeLabel,
     moodLabel: moodLabel,

@@ -46,6 +46,7 @@ SCOPES = {"private", "family", "community", "public"}
 # 大量圍繞趁墟、米舖、蠔田買賣，硬塞進「其他」會令地圖失去辨識度）。
 STORY_TYPES = {"festival", "farming", "migration", "architecture", "oral", "market", "other"}
 MOODS = {"wistful", "joyful", "reflective", "heavy", "proud"}
+LANGUAGES = {"yue", "zh", "en"}
 
 
 def load_data() -> dict:
@@ -101,6 +102,9 @@ def validate(data: dict) -> tuple[list[str], list[str]]:
             errors.append(f"{label}: 缺少 consentRef（同意記錄編號）")
         if not story.get("topicKeys"):
             errors.append(f"{label}: 缺少 topicKeys")
+        language = story.get("languageKey")
+        if language not in LANGUAGES:
+            errors.append(f"{label}: languageKey={language!r} 不在 {sorted(LANGUAGES)}")
 
         # 地圖一級資訊：缺欄位只警告（舊資料向後兼容），枚舉錯值即失敗。
         story_type = story.get("storyType")

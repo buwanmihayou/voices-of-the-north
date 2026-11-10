@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-HK" data-theme="system" data-font-size="md" data-contrast="normal" data-reduce-motion="false">
+<html lang="zh-Hant-HK" data-theme="light" data-font-size="md" data-contrast="normal" data-reduce-motion="false">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -1495,9 +1495,10 @@ body:has(.sheet.is-show) .toast {
   background: var(--cream);
   box-shadow: 0 -18px 44px -18px rgba(28, 44, 35, 0.45);
   transform: translate(-50%, 100%);
-  transition: transform var(--dur) var(--ease-slow);
+  visibility: hidden;
+  transition: transform var(--dur) var(--ease-slow), visibility 0s linear var(--dur);
 }
-.sheet.is-show { transform: translate(-50%, 0); }
+.sheet.is-show { transform: translate(-50%, 0); visibility: visible; transition-delay: 0s; }
 
 .sheet__handle {
   width: 44px;
@@ -1708,10 +1709,11 @@ body:has(.sheet.is-show) .toast {
   justify-content: center;
   background: rgba(24, 38, 30, 0.46);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
-.vtn-rec-overlay.is-open { opacity: 1; pointer-events: auto; }
+.vtn-rec-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
 
 .vtn-rec-sheet {
   width: 100%;
@@ -2359,10 +2361,13 @@ body:has(.sheet.is-show) .toast {
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -24px 60px -18px rgba(20, 35, 27, 0.5);
   transform: translateY(100%);
-  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+  visibility: hidden;                /* 關閉後整個面板退出渲染，不留綠色頭條殘影 */
+  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1), visibility 0s linear 0.28s;
 }
 .vtn-ai-root.is-open .vtn-ai-panel {
   transform: translateY(0);
+  visibility: visible;
+  transition-delay: 0s;
   pointer-events: auto;
 }
 
@@ -3060,9 +3065,11 @@ html[data-font-size="xl"] { font-size: 22px; }
   position: absolute; inset: 0; z-index: 70;
   display: flex; align-items: flex-end; justify-content: center;
   background: rgba(20, 32, 26, .5);
-  opacity: 0; transition: opacity .2s ease;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease, visibility 0s linear .2s;
 }
-.vtn-modal-mask.is-open { opacity: 1; }
+.vtn-modal-mask.is-open { opacity: 1; visibility: visible; transition-delay: 0s; }
 .vtn-modal {
   width: 100%; max-height: 88%;
   display: flex; flex-direction: column;
@@ -3307,6 +3314,87 @@ html[data-reduce-motion="true"] *::after {
   .story-item__cover { width: 52px; height: 52px; }
   .ai-status__text { display: none; }
   .ai-status { padding: 0 10px; min-width: 44px; justify-content: center; }
+}
+
+/* ==========================================================================
+   17. 故事地圖首次引導（33-onboarding）
+   ========================================================================== */
+.vtn-onboard {
+  position: absolute;
+  inset: 0 0 var(--vtn-nav-h, 77px) 0;
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+}
+.vtn-onboard[hidden] { display: none !important; }
+.vtn-onboard__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 32, 26, 0.55);
+}
+.vtn-onboard__card {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  padding: 22px 20px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--cream);
+  color: var(--ink-body);
+  box-shadow: 0 24px 60px -24px rgba(18, 36, 26, 0.65);
+}
+.vtn-onboard__eyebrow {
+  margin: 0 0 6px;
+  font-size: var(--fs-min);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.vtn-onboard__title {
+  margin: 0 0 8px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.32rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.vtn-onboard__body {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--ink-body);
+}
+.vtn-onboard__dots {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+.vtn-onboard__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sage-line);
+}
+.vtn-onboard__dots span.is-active {
+  width: 22px;
+  background: var(--forest);
+}
+.vtn-onboard__progress {
+  margin: 0 0 14px;
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+.vtn-onboard__actions {
+  display: flex;
+  gap: 10px;
+}
+.vtn-onboard__actions .vtn-btn {
+  flex: 1 1 0;
+  min-height: 46px;
+}
+@media (max-width: 359px) {
+  .vtn-onboard { padding: 14px; }
+  .vtn-onboard__card { padding: 18px 16px 14px; }
 }
 
 /* ===== src/css/story-map.css ===== */
@@ -3599,6 +3687,21 @@ html[data-reduce-motion="true"] *::after {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* 320px 小屏：標題與工具列分兩行，避免標題被擠成一字一行；
+   縮放鍵改為橫排放到年代軸上方，不再壓住篩選鍵。 */
+@media (max-width: 359px) {
+  .atlas__top { grid-template-columns: minmax(0, 1fr); }
+  .atlas__title { font-size: 1.42rem; }
+  .atlas__eyebrow { letter-spacing: 0.08em; }
+  .atlas__tools { justify-content: flex-end; margin-top: 6px; }
+  .atlas__searchrow { margin-top: 6px; }
+  .atlas__legend { margin-top: 6px; }
+  .atlas__controls {
+    display: none;                  /* 320px 地圖可視高度不足，改用雙指縮放，避免壓住年代軸 */
+  }
+  .atlas__viewport { display: none !important; }  /* 小屏讓位給年代軸，避免覆蓋「故事年代」標題 */
 }
 .atlas-ctl {
   display: grid;
@@ -4097,12 +4200,13 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   background: var(--cream);
   box-shadow: 0 -18px 46px -22px rgba(18, 36, 26, 0.75);
   transform: translateY(100%);
-  transition: transform 0.42s var(--ease-slow);
+  visibility: hidden;                /* 收起後不可留一幀在底導上 */
+  transition: transform 0.42s var(--ease-slow), visibility 0s linear 0.42s;
   touch-action: none;
   will-change: transform;
 }
-.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); }
-.story-sheet.is-expanded { transform: translateY(0); }
+.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); visibility: visible; transition-delay: 0s; }
+.story-sheet.is-expanded { transform: translateY(0); visibility: visible; transition-delay: 0s; }
 .story-sheet.is-dragging { transition: none; }
 .story-sheet__grab {
   flex: none;
@@ -4552,7 +4656,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 
   </style>
 </head>
-<body data-app-version="2026.11.05">
+<body data-app-version="2026.11.09">
 <div class="app-shell" id="appShell">
 
     <header class="topbar">
@@ -4725,6 +4829,10 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
                     data-i18n-aria="atlas.listAria" data-i18n-title="atlas.listModeTitle">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
               <span data-i18n="atlas.listShort">列表</span>
+            </button>
+            <button type="button" class="atlas-btn" id="atlasHelpBtn"
+                    data-i18n-aria="onboard.helpAria" data-i18n-title="onboard.helpTitle">
+              <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
             </button>
             <button type="button" class="atlas-btn" id="atlasSceneBtn"
                     data-i18n-aria="atlas.sceneAria" data-i18n-title="atlas.sceneTitle">
@@ -5022,20 +5130,6 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 
         <div class="setting-row">
           <div class="setting-row__text">
-            <span class="setting-row__label" data-i18n="settings.theme">主題</span>
-            <span class="setting-row__hint" data-i18n="settings.themeHint">淺色、深色或跟隨系統</span>
-          </div>
-          <div class="setting-row__control">
-            <select id="setTheme" data-i18n-aria="aria.theme">
-              <option value="system" data-i18n="settings.themeSystem">跟隨系統</option>
-              <option value="light" data-i18n="settings.themeLight">淺色</option>
-              <option value="dark" data-i18n="settings.themeDark">深色</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div class="setting-row__text">
             <span class="setting-row__label" data-i18n="settings.contrast">高對比</span>
             <span class="setting-row__hint" data-i18n="settings.contrastHint">加強邊框與文字對比</span>
           </div>
@@ -5089,7 +5183,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         <div class="setting-row">
           <div class="setting-row__text">
             <span class="setting-row__label" data-i18n="settings.reset">恢復預設</span>
-            <span class="setting-row__hint" data-i18n="settings.resetHint">字級、音量、速度、主題全部還原</span>
+            <span class="setting-row__hint" data-i18n="settings.resetHint">字級、音量、速度全部還原</span>
           </div>
           <div class="setting-row__control">
             <button type="button" class="vtn-btn vtn-btn--sm vtn-btn--danger" id="setReset" data-i18n="settings.resetBtn">還原</button>
@@ -5097,7 +5191,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
         </div>
       </section>
 
-      <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px；深色模式文字對比不低於 4.5:1。</p>
+      <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。</p>
     </main>
 
     <!-- ======================= 分頁：about ======================= -->
@@ -5170,6 +5264,24 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       </section>
     </main>
 
+    <div class="vtn-onboard" id="vtnOnboard" hidden>
+      <div class="vtn-onboard__mask" data-onboard-close></div>
+      <section class="vtn-onboard__card" role="dialog" aria-modal="true"
+               aria-labelledby="onboardTitle" aria-describedby="onboardBody">
+        <p class="vtn-onboard__eyebrow" data-i18n="onboard.eyebrow">地圖引導</p>
+        <h2 class="vtn-onboard__title" id="onboardTitle" data-i18n="onboard.step1Title">拖動地圖，發現故事</h2>
+        <p class="vtn-onboard__body" id="onboardBody" data-i18n="onboard.step1Body">縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。</p>
+        <div class="vtn-onboard__dots" id="onboardDots" aria-hidden="true">
+          <span class="is-active"></span><span></span><span></span>
+        </div>
+        <p class="vtn-onboard__progress" id="onboardProgress" aria-live="polite">第 1 步，共 3 步</p>
+        <div class="vtn-onboard__actions">
+          <button type="button" class="vtn-btn vtn-btn--ghost" id="onboardSkip" data-i18n="onboard.skip">跳過</button>
+          <button type="button" class="vtn-btn vtn-btn--solid" id="onboardNext" data-i18n="onboard.next">下一步</button>
+        </div>
+      </section>
+    </div>
+
     <nav class="bottom-nav" data-i18n-aria="aria.nav">
       <a class="bottom-nav__item is-active" href="#home" data-nav="home" aria-current="page">
         <span class="bottom-nav__icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
@@ -5196,7 +5308,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
 </div>
 
 <script>
-window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.05","consentPolicyVersion":"CONSENT-2026-11-v2","storyMetaNote":"storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。","outOfScopeMessage":{"zh-HK":"抱歉，錄製的故事中未包含此資訊。","zh-CN":"抱歉，录制的故事中未包含此信息。","en":"Sorry, the recorded stories do not contain this information."},"suggestedQuestions":["細個元朗周邊係點㗎？","以前村民用咩出行？","錦田天后誕會做啲咩？","聯和墟趁墟係點嘅？","石湖墟以前會水浸嗎？","沙頭角中英街係咩地方？","林村河以前可以游水嗎？","天水圍以前係魚塘嗎？"],"stories":[{"id":"YL-001","title":"元朗・村落晨光","titleEn":"Yuen Long · Village Morning","villageKey":"yuen-long","topicKeys":["community","agriculture"],"eraKey":"1960s","storyType":"farming","mood":"wistful","year":1962,"languageKey":"yue","teller":"Boris Lau","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-001","scope":"community","publishedAt":"2026-10-25","location":{"area":"元朗","lat":22.4445,"lng":114.015,"radiusM":800},"audio":"assets/Demo Story.wav","durationSec":46.7,"durationSource":"measured","cover":"assets/story-cover-village.png","segments":[{"start":0,"end":17.5,"text":"細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。","keywords":["細個","童年","元朗","農田","田野","鄉村","鄉郊","單車","踩車","出行","交通"]},{"start":17.5,"end":33,"text":"大學畢業之後，我有時會同朋友返去附近散步，同佢哋介紹樹上雀鳥嘅叫聲，同草叢入面嘅蟲鳴。","keywords":["大學","畢業","朋友","散步","雀鳥","雀仔","叫聲","蟲鳴","昆蟲","草叢","樹木","自然"]},{"start":33,"end":46.7,"text":"近年好多農田同空地都起咗密集樓宇，昔日寧靜自然嘅鄉郊環境慢慢消失，呢個係我印象最深嘅轉變。","keywords":["近年","近排","而家","轉變","變化","發展","起樓","樓宇","大廈","密集","消失","環境"]}]},{"id":"KT-002","title":"錦田・圍村天后誕","titleEn":"Kam Tin · Tin Hau Festival","villageKey":"kam-tin","topicKeys":["festival","clan"],"eraKey":"1950s","storyType":"festival","mood":"joyful","year":1955,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-002","scope":"community","publishedAt":"2026-10-26","location":{"area":"錦田","lat":22.4405,"lng":114.0635,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"我哋錦田圍村最重視天后誕，每年三月尾會搭戲棚、舞獅，仲有搶花炮，全村兄弟都會返嚟。","keywords":["錦田","圍村","天后誕","天后","戲棚","做大戲","舞獅","花炮","節慶","神功戲"]},{"start":16,"end":34,"text":"細個跟阿媽去天后廟上香，之後全村食盆菜，幾十圍擺喺祠堂前面，豬肉同蠔豉最香。","keywords":["細個","阿媽","天后廟","上香","拜神","盆菜","祠堂","豬肉","蠔豉","食"]},{"start":34,"end":50,"text":"近呢二十年儀式簡化咗好多，後生仔女肯返村幫手，已經算好難得，我哋最怕呢啲規矩失傳。","keywords":["近年","而家","儀式","簡化","後生","年輕人","返村","幫手","失傳","傳統","變化"]}]},{"id":"FL-003","title":"粉嶺・聯和墟趁墟日","titleEn":"Fanling · Luen Wo Market Day","villageKey":"fanling","topicKeys":["market","agriculture"],"eraKey":"1960s","storyType":"market","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-003","scope":"community","publishedAt":"2026-10-27","location":{"area":"粉嶺","lat":22.4965,"lng":114.1435,"radiusM":800},"audio":null,"durationSec":48,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"以前趁墟要天未光起身，擔住兩籮菜行去聯和墟，行到嗰陣個天啱啱光，街邊已經擺滿咗人。","keywords":["粉嶺","聯和墟","趁墟","墟市","天未光","擔菜","賣菜","菜農","街市","行路"]},{"start":15,"end":32,"text":"墟市有菜檔、魚檔、布檔，仲有火車站，啲人搭火車去九龍返工，我哋就喺度賣完菜先返屋企。","keywords":["菜檔","魚檔","布檔","火車","火車站","九龍","返工","賣菜","買賣","搭車"]},{"start":32,"end":48,"text":"而家聯和墟街市搬咗入冷氣大樓，乾淨係乾淨，但係以前嗰種人情味同叫賣聲，真係搵唔返。","keywords":["而家","聯和墟","街市","冷氣","大樓","人情味","叫賣","變化","以前","對比"]}]},{"id":"SS-004","title":"上水・石湖墟米舖","titleEn":"Sheung Shui · Shek Wu Hui Rice Shop","villageKey":"sheung-shui","topicKeys":["market","border"],"eraKey":"1940s","storyType":"market","mood":"wistful","year":1948,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-004","scope":"community","publishedAt":"2026-10-28","location":{"area":"上水","lat":22.5025,"lng":114.1285,"radiusM":800},"audio":null,"durationSec":55,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":18,"text":"我阿爸喺石湖墟開米舖，啲米用麻包袋裝，一斗米賣幾個斗零，客人多數係附近鄉村嘅農民。","keywords":["上水","石湖墟","米舖","米","麻包袋","斗零","農民","買米","價錢","生意"]},{"start":18,"end":37,"text":"石湖墟以前成日水浸，一到雨季就要把米搬上閣樓，水退之後成條街都係泥，要好幾日先清得完。","keywords":["水浸","雨季","搬米","閣樓","水退","泥","清理","天災","石湖墟","街"]},{"start":37,"end":55,"text":"後來邊境愈來愈多人，火車運米落嚟，米舖生意好過以前，但係再過幾年，超級市場開張就唔同講法。","keywords":["邊境","火車","運米","生意","超級市場","開張","後來","變化","競爭","米舖"]}]},{"id":"STK-005","title":"沙頭角・中英街邊境","titleEn":"Sha Tau Kok · Chung Ying Street","villageKey":"sha-tau-kok","topicKeys":["border","migration"],"eraKey":"1970s","storyType":"migration","mood":"wistful","year":1972,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-005","scope":"community","publishedAt":"2026-10-29","location":{"area":"沙頭角","lat":22.5475,"lng":114.1495,"radiusM":800},"audio":null,"durationSec":47,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"沙頭角係禁區，入去要禁區紙，我哋細個跟大人去中英街，一條街一邊香港一邊深圳，好特別。","keywords":["沙頭角","禁區","禁區紙","中英街","香港","深圳","邊境","邊界","特別"]},{"start":15,"end":31,"text":"嗰陣去中英街主要係探親同買嘢，兩邊舖頭都做街坊生意，過關要排隊，但唔算好麻煩。","keywords":["探親","買嘢","舖頭","街坊","過關","排隊","中英街","購物","親戚"]},{"start":31,"end":47,"text":"後來邊境政策收緊，沙頭角墟愈來愈靜，年輕人都搬出去市區，剩返老人家守住間屋。","keywords":["後來","邊境政策","收緊","沙頭角墟","靜","年輕人","搬走","市區","老人家","變化"]}]},{"id":"TP-006","title":"大埔・林村河與荔枝園","titleEn":"Tai Po · Lam Tsuen River","villageKey":"tai-po","topicKeys":["ecology","agriculture"],"eraKey":"1950s","storyType":"farming","mood":"joyful","year":1958,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-006","scope":"community","publishedAt":"2026-10-30","location":{"area":"大埔","lat":22.4505,"lng":114.1645,"radiusM":800},"audio":null,"durationSec":51,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"細個喺林村河邊大，夏天成班細路落河游水捉魚，河水好清，洗衫、洗菜都係用河水。","keywords":["大埔","林村河","細個","游水","捉魚","河水","洗衫","洗菜","童年","夏天"]},{"start":16,"end":33,"text":"河兩邊以前係荔枝園同菜田，荔枝熟嘅時候，阿爸會擔去大埔墟賣，我哋就喺樹下執跌落地嘅。","keywords":["荔枝","荔枝園","菜田","果園","大埔墟","賣","擔","生果","務農","收成"]},{"start":33,"end":51,"text":"後來河流整治，石屎化咗，水冇以前咁清；村屋愈起愈多，不過每年端午仲有人扒龍舟。","keywords":["後來","河流整治","石屎","水質","村屋","起屋","端午","龍舟","變化","而家"]}]},{"id":"TSW-007","title":"天水圍・魚塘變高樓","titleEn":"Tin Shui Wai · Fish Ponds to High-rises","villageKey":"tin-shui-wai","topicKeys":["migration","community"],"eraKey":"1980s","storyType":"migration","mood":"heavy","year":1982,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-007","scope":"community","publishedAt":"2026-10-31","location":{"area":"天水圍","lat":22.4595,"lng":114.0045,"radiusM":800},"audio":null,"durationSec":53,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"以前天水圍全部係魚塘同基圍，我屋企養魚，朝早要落塘餵魚，收成季節就抽乾水捉魚去賣。","keywords":["天水圍","魚塘","基圍","養魚","餵魚","捉魚","收成","抽水","賣魚","漁業"]},{"start":17,"end":35,"text":"八十年代政府收地發展新市鎮，我哋條村搬去第二度，魚塘填平起樓，好多鄰居都唔捨得。","keywords":["八十年代","政府","收地","發展","新市鎮","搬村","填塘","起樓","鄰居","唔捨得"]},{"start":35,"end":53,"text":"而家天水圍高樓林立，住咗幾十萬人，交通方便咗，但係細個嗰種塘邊生活，只可以喺記憶度搵。","keywords":["而家","天水圍","高樓","人口","交通","方便","記憶","變化","以前","生活"]}]},{"id":"LFS-008","title":"流浮山・蠔田與鹹水歌","titleEn":"Lau Fau Shan · Oyster Beds","villageKey":"lau-fau-shan","topicKeys":["craft","ecology"],"eraKey":"1960s","storyType":"farming","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-008","scope":"community","publishedAt":"2026-11-01","location":{"area":"流浮山","lat":22.4685,"lng":113.9835,"radiusM":800},"audio":null,"durationSec":49,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"流浮山最有名係蠔，我哋叫蠔田，潮退嘅時候落去撬蠔，潮水一漲就要即刻返上岸，好講究時間。","keywords":["流浮山","蠔","蠔田","養蠔","撬蠔","潮退","潮水","潮汐","上岸","海"]},{"start":16,"end":32,"text":"以前落蠔田會唱鹹水歌，一人一句咁對唱，講天氣、講收成，而家識唱嘅人已經好少。","keywords":["鹹水歌","唱歌","對唱","收成","天氣","漁民","歌謠","傳統","而家","失傳"]},{"start":32,"end":49,"text":"後來后海灣水質變差，蠔業慢慢式微，好多人轉做酒家生意，不過每年仲有蠔節，好熱鬧。","keywords":["后海灣","水質","蠔業","式微","酒家","生意","蠔節","熱鬧","轉行","變化"]}]}]};
+window.VTN_STORY_DATA = {"schemaVersion":2,"contentVersion":"2026.11.09","consentPolicyVersion":"CONSENT-2026-11-v2","storyMetaNote":"storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。","outOfScopeMessage":{"zh-HK":"抱歉，錄製的故事中未包含此資訊。","zh-CN":"抱歉，录制的故事中未包含此信息。","en":"Sorry, the recorded stories do not contain this information."},"suggestedQuestions":["細個元朗周邊係點㗎？","以前村民用咩出行？","錦田天后誕會做啲咩？","聯和墟趁墟係點嘅？","石湖墟以前會水浸嗎？","沙頭角中英街係咩地方？","林村河以前可以游水嗎？","天水圍以前係魚塘嗎？"],"stories":[{"id":"YL-001","title":"元朗・村落晨光","titleEn":"Yuen Long · Village Morning","villageKey":"yuen-long","topicKeys":["community","agriculture"],"eraKey":"1960s","storyType":"farming","mood":"wistful","year":1962,"languageKey":"yue","teller":"Boris Lau","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-001","scope":"community","publishedAt":"2026-10-25","location":{"area":"元朗","lat":22.4445,"lng":114.015,"radiusM":800},"audio":"assets/Demo Story.wav","durationSec":46.7,"durationSource":"measured","cover":"assets/story-cover-village.png","segments":[{"start":0,"end":17.5,"text":"細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。","keywords":["細個","童年","元朗","農田","田野","鄉村","鄉郊","單車","踩車","出行","交通"]},{"start":17.5,"end":33,"text":"大學畢業之後，我有時會同朋友返去附近散步，同佢哋介紹樹上雀鳥嘅叫聲，同草叢入面嘅蟲鳴。","keywords":["大學","畢業","朋友","散步","雀鳥","雀仔","叫聲","蟲鳴","昆蟲","草叢","樹木","自然"]},{"start":33,"end":46.7,"text":"近年好多農田同空地都起咗密集樓宇，昔日寧靜自然嘅鄉郊環境慢慢消失，呢個係我印象最深嘅轉變。","keywords":["近年","近排","而家","轉變","變化","發展","起樓","樓宇","大廈","密集","消失","環境"]}]},{"id":"KT-002","title":"錦田・圍村天后誕","titleEn":"Kam Tin · Tin Hau Festival","villageKey":"kam-tin","topicKeys":["festival","clan"],"eraKey":"1950s","storyType":"festival","mood":"joyful","year":1955,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-002","scope":"community","publishedAt":"2026-10-26","location":{"area":"錦田","lat":22.4405,"lng":114.0635,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"我哋錦田圍村最重視天后誕，每年三月尾會搭戲棚、舞獅，仲有搶花炮，全村兄弟都會返嚟。","keywords":["錦田","圍村","天后誕","天后","戲棚","做大戲","舞獅","花炮","節慶","神功戲"]},{"start":16,"end":34,"text":"細個跟阿媽去天后廟上香，之後全村食盆菜，幾十圍擺喺祠堂前面，豬肉同蠔豉最香。","keywords":["細個","阿媽","天后廟","上香","拜神","盆菜","祠堂","豬肉","蠔豉","食"]},{"start":34,"end":50,"text":"近呢二十年儀式簡化咗好多，後生仔女肯返村幫手，已經算好難得，我哋最怕呢啲規矩失傳。","keywords":["近年","而家","儀式","簡化","後生","年輕人","返村","幫手","失傳","傳統","變化"]}]},{"id":"FL-003","title":"粉嶺・聯和墟趁墟日","titleEn":"Fanling · Luen Wo Market Day","villageKey":"fanling","topicKeys":["market","agriculture"],"eraKey":"1960s","storyType":"market","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-003","scope":"community","publishedAt":"2026-10-27","location":{"area":"粉嶺","lat":22.4965,"lng":114.1435,"radiusM":800},"audio":null,"durationSec":48,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"以前趁墟要天未光起身，擔住兩籮菜行去聯和墟，行到嗰陣個天啱啱光，街邊已經擺滿咗人。","keywords":["粉嶺","聯和墟","趁墟","墟市","天未光","擔菜","賣菜","菜農","街市","行路"]},{"start":15,"end":32,"text":"墟市有菜檔、魚檔、布檔，仲有火車站，啲人搭火車去九龍返工，我哋就喺度賣完菜先返屋企。","keywords":["菜檔","魚檔","布檔","火車","火車站","九龍","返工","賣菜","買賣","搭車"]},{"start":32,"end":48,"text":"而家聯和墟街市搬咗入冷氣大樓，乾淨係乾淨，但係以前嗰種人情味同叫賣聲，真係搵唔返。","keywords":["而家","聯和墟","街市","冷氣","大樓","人情味","叫賣","變化","以前","對比"]}]},{"id":"SS-004","title":"上水・石湖墟米舖","titleEn":"Sheung Shui · Shek Wu Hui Rice Shop","villageKey":"sheung-shui","topicKeys":["market","border"],"eraKey":"1940s","storyType":"market","mood":"wistful","year":1948,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-004","scope":"community","publishedAt":"2026-10-28","location":{"area":"上水","lat":22.5025,"lng":114.1285,"radiusM":800},"audio":null,"durationSec":55,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":18,"text":"我阿爸喺石湖墟開米舖，啲米用麻包袋裝，一斗米賣幾個斗零，客人多數係附近鄉村嘅農民。","keywords":["上水","石湖墟","米舖","米","麻包袋","斗零","農民","買米","價錢","生意"]},{"start":18,"end":37,"text":"石湖墟以前成日水浸，一到雨季就要把米搬上閣樓，水退之後成條街都係泥，要好幾日先清得完。","keywords":["水浸","雨季","搬米","閣樓","水退","泥","清理","天災","石湖墟","街"]},{"start":37,"end":55,"text":"後來邊境愈來愈多人，火車運米落嚟，米舖生意好過以前，但係再過幾年，超級市場開張就唔同講法。","keywords":["邊境","火車","運米","生意","超級市場","開張","後來","變化","競爭","米舖"]}]},{"id":"STK-005","title":"沙頭角・中英街邊境","titleEn":"Sha Tau Kok · Chung Ying Street","villageKey":"sha-tau-kok","topicKeys":["border","migration"],"eraKey":"1970s","storyType":"migration","mood":"wistful","year":1972,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-005","scope":"community","publishedAt":"2026-10-29","location":{"area":"沙頭角","lat":22.5475,"lng":114.1495,"radiusM":800},"audio":null,"durationSec":47,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":15,"text":"沙頭角係禁區，入去要禁區紙，我哋細個跟大人去中英街，一條街一邊香港一邊深圳，好特別。","keywords":["沙頭角","禁區","禁區紙","中英街","香港","深圳","邊境","邊界","特別"]},{"start":15,"end":31,"text":"嗰陣去中英街主要係探親同買嘢，兩邊舖頭都做街坊生意，過關要排隊，但唔算好麻煩。","keywords":["探親","買嘢","舖頭","街坊","過關","排隊","中英街","購物","親戚"]},{"start":31,"end":47,"text":"後來邊境政策收緊，沙頭角墟愈來愈靜，年輕人都搬出去市區，剩返老人家守住間屋。","keywords":["後來","邊境政策","收緊","沙頭角墟","靜","年輕人","搬走","市區","老人家","變化"]}]},{"id":"TP-006","title":"大埔・林村河與荔枝園","titleEn":"Tai Po · Lam Tsuen River","villageKey":"tai-po","topicKeys":["ecology","agriculture"],"eraKey":"1950s","storyType":"farming","mood":"joyful","year":1958,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-006","scope":"community","publishedAt":"2026-10-30","location":{"area":"大埔","lat":22.4505,"lng":114.1645,"radiusM":800},"audio":null,"durationSec":51,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"細個喺林村河邊大，夏天成班細路落河游水捉魚，河水好清，洗衫、洗菜都係用河水。","keywords":["大埔","林村河","細個","游水","捉魚","河水","洗衫","洗菜","童年","夏天"]},{"start":16,"end":33,"text":"河兩邊以前係荔枝園同菜田，荔枝熟嘅時候，阿爸會擔去大埔墟賣，我哋就喺樹下執跌落地嘅。","keywords":["荔枝","荔枝園","菜田","果園","大埔墟","賣","擔","生果","務農","收成"]},{"start":33,"end":51,"text":"後來河流整治，石屎化咗，水冇以前咁清；村屋愈起愈多，不過每年端午仲有人扒龍舟。","keywords":["後來","河流整治","石屎","水質","村屋","起屋","端午","龍舟","變化","而家"]}]},{"id":"TSW-007","title":"天水圍・魚塘變高樓","titleEn":"Tin Shui Wai · Fish Ponds to High-rises","villageKey":"tin-shui-wai","topicKeys":["migration","community"],"eraKey":"1980s","storyType":"migration","mood":"heavy","year":1982,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-007","scope":"community","publishedAt":"2026-10-31","location":{"area":"天水圍","lat":22.4595,"lng":114.0045,"radiusM":800},"audio":null,"durationSec":53,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"以前天水圍全部係魚塘同基圍，我屋企養魚，朝早要落塘餵魚，收成季節就抽乾水捉魚去賣。","keywords":["天水圍","魚塘","基圍","養魚","餵魚","捉魚","收成","抽水","賣魚","漁業"]},{"start":17,"end":35,"text":"八十年代政府收地發展新市鎮，我哋條村搬去第二度，魚塘填平起樓，好多鄰居都唔捨得。","keywords":["八十年代","政府","收地","發展","新市鎮","搬村","填塘","起樓","鄰居","唔捨得"]},{"start":35,"end":53,"text":"而家天水圍高樓林立，住咗幾十萬人，交通方便咗，但係細個嗰種塘邊生活，只可以喺記憶度搵。","keywords":["而家","天水圍","高樓","人口","交通","方便","記憶","變化","以前","生活"]}]},{"id":"LFS-008","title":"流浮山・蠔田與鹹水歌","titleEn":"Lau Fau Shan · Oyster Beds","villageKey":"lau-fau-shan","topicKeys":["craft","ecology"],"eraKey":"1960s","storyType":"farming","mood":"proud","year":1963,"languageKey":"yue","teller":"角色扮演示範（義工整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-008","scope":"community","publishedAt":"2026-11-01","location":{"area":"流浮山","lat":22.4685,"lng":113.9835,"radiusM":800},"audio":null,"durationSec":49,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"流浮山最有名係蠔，我哋叫蠔田，潮退嘅時候落去撬蠔，潮水一漲就要即刻返上岸，好講究時間。","keywords":["流浮山","蠔","蠔田","養蠔","撬蠔","潮退","潮水","潮汐","上岸","海"]},{"start":16,"end":32,"text":"以前落蠔田會唱鹹水歌，一人一句咁對唱，講天氣、講收成，而家識唱嘅人已經好少。","keywords":["鹹水歌","唱歌","對唱","收成","天氣","漁民","歌謠","傳統","而家","失傳"]},{"start":32,"end":49,"text":"後來后海灣水質變差，蠔業慢慢式微，好多人轉做酒家生意，不過每年仲有蠔節，好熱鬧。","keywords":["后海灣","水質","蠔業","式微","酒家","生意","蠔節","熱鬧","轉行","變化"]}]},{"id":"STN-009","title":"赤柱・海邊的市集","titleEn":"Stanley · Market by the Sea","villageKey":"stanley","topicKeys":["market","community"],"eraKey":"1960s","storyType":"market","mood":"reflective","year":1965,"languageKey":"en","teller":"Role-played demo (team-written)","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-009","scope":"community","publishedAt":"2026-11-09","location":{"area":"赤柱","lat":22.2185,"lng":114.213,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"I grew up in Stanley in the 1960s, when the bay was still working water: fishing boats, the ferry pier, and a market that smelled of dried fish and incense.","keywords":["Stanley","1960s","bay","fishing boats","ferry pier","market","dried fish","incense"]},{"start":16,"end":34,"text":"My mother sold vegetables there. She knew every family by name; if someone could not pay that day, she wrote it in a notebook and never mentioned it again.","keywords":["mother","vegetables","market","family","notebook","credit","neighbours","trust"]},{"start":34,"end":50,"text":"The buildings have changed, but the sea is the same. When I walk along the promenade, I still hear the market waking up before dawn.","keywords":["buildings","change","sea","promenade","dawn","memory","Stanley","harbour"]}]},{"id":"KLC-010","title":"九龍城・啟德機場下的日子","titleEn":"Kowloon City · Under the Kai Tak Flight Path","villageKey":"kowloon-city","topicKeys":["migration","community"],"eraKey":"1970s","storyType":"migration","mood":"wistful","year":1975,"languageKey":"zh","teller":"角色扮演示範（團隊整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-010","scope":"community","publishedAt":"2026-11-09","location":{"area":"九龍城","lat":22.33,"lng":114.19,"radiusM":800},"audio":null,"durationSec":52,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"我是一九七五年跟着父母从潮州来香港的，第一间屋就在九龙城。飞机低低地飞过头顶，窗框会响，讲话要停一下。","keywords":["一九七五年","潮州","香港","九龙城","飞机","启德","窗框","移民"]},{"start":17,"end":35,"text":"妈妈在街市卖粿条，我在旁边写功课。街坊来自很多地方，潮州话、福建话、广东话混在一起，谁也听得懂谁。","keywords":["妈妈","街市","粿条","功课","街坊","潮州话","福建话","广东话"]},{"start":35,"end":52,"text":"后来机场搬走了，楼也重建了。我还会回去吃一碗粿条，味道不一样，但那条街还记得我们。","keywords":["机场","搬走","重建","粿条","味道","那条街","记得","九龙城"]}]},{"id":"TO-011","title":"大澳・棚屋與潮水","titleEn":"Tai O · Stilt Houses and the Tide","villageKey":"tai-o","topicKeys":["craft","ecology"],"eraKey":"1970s","storyType":"architecture","mood":"reflective","year":1972,"languageKey":"yue","teller":"角色扮演示範（團隊整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-011","scope":"community","publishedAt":"2026-11-09","location":{"area":"大澳","lat":22.253,"lng":113.852,"radiusM":800},"audio":null,"durationSec":48,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"我喺大澳出世，屋企住棚屋，潮水漲嗰陣，地板下面會咚咚聲，細個會驚，後來就慣咗。","keywords":["大澳","棚屋","潮水","地板","細個","驚","海","水鄉"]},{"start":16,"end":33,"text":"阿爸曬蝦醬，成條街都係鹹香；我放學就幫手翻蝦，翻到手都紅，但係好開心。","keywords":["蝦醬","曬蝦","鹹香","放學","幫手","翻蝦","手紅","開心"]},{"start":33,"end":48,"text":"而家遊客多咗，棚屋整靚咗，但潮水一樣會入屋。我哋仲係要睇住個海做人。","keywords":["遊客","棚屋","整靚","潮水","入屋","海","做人","變化"]}]},{"id":"KP-012","title":"谷埔・稻田與邊境","titleEn":"Kuk Po · Rice Fields by the Border","villageKey":"kuk-po","topicKeys":["agriculture","migration"],"eraKey":"1950s","storyType":"farming","mood":"proud","year":1958,"languageKey":"yue","teller":"角色扮演示範（團隊整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-012","scope":"community","publishedAt":"2026-11-09","location":{"area":"谷埔","lat":22.53,"lng":114.24,"radiusM":800},"audio":null,"durationSec":50,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":17,"text":"谷埔喺沙頭角入面，成條村靠種田同養魚。我細個跟阿媽插秧，田水凍到入骨，但係冇人嗌辛苦。","keywords":["谷埔","沙頭角","種田","養魚","插秧","田水","阿媽","辛苦"]},{"start":17,"end":34,"text":"後來好多人去英國，田就荒咗。返嚟嗰陣，啲祖屋塌咗一半，但祠堂仲喺度，門口啲字仲睇得清。","keywords":["英國","田荒","祖屋","祠堂","門口","返嚟","村","移民"]},{"start":34,"end":50,"text":"而家有人返嚟復耕，我哋唔敢講救得返條村，但至少啲田唔會靜到冇聲。","keywords":["復耕","返嚟","條村","田","靜","聲音","希望","而家"]}]},{"id":"LCW-013","title":"荔枝窩・圍村與風水林","titleEn":"Lai Chi Wo · Walled Village and Feng Shui Woods","villageKey":"lai-chi-wo","topicKeys":["clan","agriculture"],"eraKey":"1960s","storyType":"oral","mood":"joyful","year":1962,"languageKey":"yue","teller":"角色扮演示範（團隊整理）","rolePlayed":true,"authorized":true,"consentRef":"CONSENT-DEMO-013","scope":"community","publishedAt":"2026-11-09","location":{"area":"荔枝窩","lat":22.526,"lng":114.265,"radiusM":800},"audio":null,"durationSec":49,"durationSource":"transcript","cover":null,"segments":[{"start":0,"end":16,"text":"荔枝窩係一條客家圍村，村後面有一片風水林，阿婆話啲樹唔斬得，斬咗會衰，所以我哋細個唔敢入去亂咁玩。","keywords":["荔枝窩","客家","圍村","風水林","阿婆","樹","細個","祠堂"]},{"start":16,"end":33,"text":"我哋喺禾塘晒穀，夜晚聽蟲叫；條村最多人嗰陣，有幾百人，學校都有兩班。","keywords":["禾塘","晒穀","夜晚","蟲叫","幾百人","學校","兩班","熱鬧"]},{"start":33,"end":49,"text":"後來人走晒，學校都閂咗。近年有人返嚟種米，村口間舖又開返，好似有返啲人氣。","keywords":["人走","學校","閂","返嚟","種米","村口","舖","人氣"]}]}]};
 window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,0.582,0.371,0.711,0.576,0.419,0.455,0.472,0.37,0.421,0.532,0.585,0.545,0.579,0.537,0.602,0.556,0.43,0.431,0.358,0.434,0.642,0.46,1.0,0.741,0.466,0.538,0.543,0.548,0.609,0.464,0.417,0.515,0.536,0.51,0.339,0.489,0.456,0.37,0.358,0.811,0.45,0.6,0.442,0.378,0.452,0.526,0.465,0.4,0.405,0.376,0.339,0.149]};
 
 
@@ -5219,7 +5331,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   var VTN = window.VTN = window.VTN || {};
 
-  var APP_VERSION = '2026.11.05';
+  var APP_VERSION = '2026.11.09';
   var DEFAULT_API_BASE = 'http://127.0.0.1:8000';
   var STATIC_PORTS = ['8421', '5500', '5173', '3000', '8080', '8081', '4173'];
 
@@ -5281,6 +5393,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     withdrawn: 'vtn.v2.withdrawn',
     scopes: 'vtn.v2.scope-overrides',
     storyPatches: 'vtn.v2.story-versions',
+    onboarded: 'vtn.v2.onboarded',
     session: 'vtn.v2.session',
     chat: 'vtn.v2.chat',
     migration: 'vtn.v2.migrated',
@@ -5905,14 +6018,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'settings.speed': '播放速度',
       'settings.speedHint': '慢速有助聽清長者口音',
       'settings.reset': '恢復預設',
-      'settings.resetHint': '字級、音量、速度、主題全部還原',
+      'settings.resetHint': '字級、音量、速度全部還原',
       'settings.resetBtn': '還原',
       'settings.resetConfirm': '確定把所有顯示與播放設定還原為預設？',
       'settings.resetDone': '已還原預設設定。',
       'settings.saved': '設定已儲存。',
       'settings.on': '開',
       'settings.off': '關',
-      'settings.foot': '設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px；深色模式文字對比不低於 4.5:1。',
+      'settings.foot': '設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。',
 
       'about.title': '關於',
       'about.banner': '黑客松演示，含角色扮演故事，非真實長者訪談。所有示範內容均清楚標示，不會冒充真實口述歷史。',
@@ -5961,7 +6074,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'assistant.myRecordings': '來自我嘅錄音：',
       'assistant.demoDisclosure': '註：此答案引用角色扮演示範故事，並非真實長者訪談。',
       'assistant.degradedLabel': 'AI 降級：以下答案只用本機已授權語料產生，未經語言模型整理。',
-      'assistant.offlineLabel': '離線示範：伺服器未連線，以下答案只用本機已授權語料。',
+      'assistant.offlineLabel': '離線模式：只從本機故事庫檢索，冇 AI 生成，亦冇上網。',
       'assistant.outOfScope': '抱歉，錄製的故事中未包含此資訊。',
       'assistant.avatarAlt': '村落問答助手',
 
@@ -5984,6 +6097,25 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'village.tai-po': '大埔',
       'village.tin-shui-wai': '天水圍',
       'village.lau-fau-shan': '流浮山',
+      'village.stanley': '赤柱',
+      'village.kowloon-city': '九龍城',
+      'village.tai-o': '大澳',
+      'village.kuk-po': '谷埔',
+      'village.lai-chi-wo': '荔枝窩',
+
+      'onboard.eyebrow': '地圖引導',
+      'onboard.helpAria': '重看地圖引導',
+      'onboard.helpTitle': '重看地圖引導',
+      'onboard.step1Title': '拖動地圖，發現故事',
+      'onboard.step1Body': '縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。',
+      'onboard.step2Title': '點一下圖示，看完整故事',
+      'onboard.step2Body': '點故事圖示會打開半拉抽屜，可看逐字稿、播放原音及核對時間戳。',
+      'onboard.step3Title': '用年代軸，聽不同年代',
+      'onboard.step3Body': '拖動「故事年代」軸，只留下該年代或以前的故事；想找特定村落可用搜尋。',
+      'onboard.next': '下一步',
+      'onboard.start': '開始探索',
+      'onboard.skip': '跳過',
+      'onboard.progress': '第 {n} 步，共 {total} 步',
 
       'topic.community': '社區變遷',
       'topic.agriculture': '農業生活',
@@ -6040,7 +6172,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'privacy.defaultNote': '新增內容預設私人。',
       'privacy.demoNote': '示範故事為演示預設社區，不代表真實長者授權。',
 
-      'lang.yue': '粵語（香港）'
+      'lang.yue': '粵語（香港）',
+      'lang.zh': '華語（國語）',
+      'lang.en': 'English',
     },
 
     'zh-CN': {
@@ -6491,14 +6625,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'settings.speed': '播放速度',
       'settings.speedHint': '慢速有助听清长者口音',
       'settings.reset': '恢复默认',
-      'settings.resetHint': '字号、音量、速度、主题全部还原',
+      'settings.resetHint': '字号、音量、速度全部还原',
       'settings.resetBtn': '还原',
       'settings.resetConfirm': '确定把所有显示与播放设置还原为默认？',
       'settings.resetDone': '已还原默认设置。',
       'settings.saved': '设置已保存。',
       'settings.on': '开',
       'settings.off': '关',
-      'settings.foot': '设置只存于这台设备。正文不小于 18px、触控目标不小于 44px；深色模式文字对比不低于 4.5:1。',
+      'settings.foot': '设置只存于这台设备。正文不小于 18px、触控目标不小于 44px。此版本只提供浅色主题。',
 
       'about.title': '关于',
       'about.banner': '黑客松演示，含角色扮演故事，非真实长者访谈。所有示范内容均清楚标示，不会冒充真实口述历史。',
@@ -6547,7 +6681,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'assistant.myRecordings': '来自我的录音：',
       'assistant.demoDisclosure': '注：此答案引用角色扮演示范故事，并非真实长者访谈。',
       'assistant.degradedLabel': 'AI 降级：以下答案只用本机已授权语料生成，未经语言模型整理。',
-      'assistant.offlineLabel': '离线示范：服务器未连接，以下答案只用本机已授权语料。',
+      'assistant.offlineLabel': '离线模式：只从本地故事库检索，没有 AI 生成，也没有联网。',
       'assistant.outOfScope': '抱歉，录制的故事中未包含此信息。',
       'assistant.avatarAlt': '村落问答助手',
 
@@ -6570,6 +6704,25 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'village.tai-po': '大埔',
       'village.tin-shui-wai': '天水围',
       'village.lau-fau-shan': '流浮山',
+      'village.stanley': '赤柱',
+      'village.kowloon-city': '九龙城',
+      'village.tai-o': '大澳',
+      'village.kuk-po': '谷埔',
+      'village.lai-chi-wo': '荔枝窝',
+
+      'onboard.eyebrow': '地图引导',
+      'onboard.helpAria': '重看地图引导',
+      'onboard.helpTitle': '重看地图引导',
+      'onboard.step1Title': '拖动地图，发现故事',
+      'onboard.step1Body': '缩放或拖动地图，模糊圆圈就是故事所在的大概范围；圆圈不是长者住址。',
+      'onboard.step2Title': '点一下图标，看完整故事',
+      'onboard.step2Body': '点故事图标会打开半拉抽屉，可看逐字稿、播放原音及核对时间戳。',
+      'onboard.step3Title': '用年代轴，听不同年代',
+      'onboard.step3Body': '拖动「故事年代」轴，只留下该年代或以前的故事；想找特定村落可以用搜索。',
+      'onboard.next': '下一步',
+      'onboard.start': '开始探索',
+      'onboard.skip': '跳过',
+      'onboard.progress': '第 {n} 步，共 {total} 步',
 
       'topic.community': '社区变迁',
       'topic.agriculture': '农业生活',
@@ -6626,7 +6779,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'privacy.defaultNote': '新增内容默认私人。',
       'privacy.demoNote': '示范故事为演示默认社区，不代表真实长者授权。',
 
-      'lang.yue': '粤语（香港）'
+      'lang.yue': '粤语（香港）',
+      'lang.zh': '华语（国语）',
+      'lang.en': 'English',
     },
 
     'en': {
@@ -7077,14 +7232,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'settings.speed': 'Playback speed',
       'settings.speedHint': 'Slower speed helps with strong accents',
       'settings.reset': 'Reset to defaults',
-      'settings.resetHint': 'Text size, volume, speed and theme',
+      'settings.resetHint': 'Text size, volume and speed',
       'settings.resetBtn': 'Reset',
       'settings.resetConfirm': 'Reset all display and playback settings to their defaults?',
       'settings.resetDone': 'Settings reset to defaults.',
       'settings.saved': 'Settings saved.',
       'settings.on': 'On',
       'settings.off': 'Off',
-      'settings.foot': 'Settings are stored on this device only. Body text is at least 18px, touch targets at least 44px, and dark-mode text contrast is at least 4.5:1.',
+      'settings.foot': 'Settings are stored on this device only. Body text is at least 18px, touch targets at least 44px. This version is light-theme only.',
 
       'about.title': 'About',
       'about.banner': 'Hackathon demo with role-played stories, not real elder interviews. Every demo item is clearly labelled and never presented as real oral history.',
@@ -7133,7 +7288,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'assistant.myRecordings': 'From my recordings:',
       'assistant.demoDisclosure': 'Note: this answer cites a role-played demo story, not a real elder interview.',
       'assistant.degradedLabel': 'AI degraded: this answer uses only authorised local transcripts, without the language model.',
-      'assistant.offlineLabel': 'Offline demo: the server is unreachable, so this answer uses only authorised local transcripts.',
+      'assistant.offlineLabel': 'Offline mode: local story library search only — no AI generation and no network.',
       'assistant.outOfScope': 'Sorry, the recorded stories do not contain this information.',
       'assistant.avatarAlt': 'Village Q&A assistant',
 
@@ -7156,6 +7311,25 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'village.tai-po': 'Tai Po',
       'village.tin-shui-wai': 'Tin Shui Wai',
       'village.lau-fau-shan': 'Lau Fau Shan',
+      'village.stanley': 'Stanley',
+      'village.kowloon-city': 'Kowloon City',
+      'village.tai-o': 'Tai O',
+      'village.kuk-po': 'Kuk Po',
+      'village.lai-chi-wo': 'Lai Chi Wo',
+
+      'onboard.eyebrow': 'Map guide',
+      'onboard.helpAria': 'Replay the map guide',
+      'onboard.helpTitle': 'Replay the map guide',
+      'onboard.step1Title': 'Drag the map to find stories',
+      'onboard.step1Body': 'Zoom or drag the map. Each blurred circle is the approximate area of a story — never an elder’s home address.',
+      'onboard.step2Title': 'Tap an icon for the full story',
+      'onboard.step2Body': 'Tapping a story icon opens the half-sheet with the transcript, original audio and verifiable timestamps.',
+      'onboard.step3Title': 'Use the era axis to travel in time',
+      'onboard.step3Body': 'Drag the “Story era” axis to keep stories from that era or earlier; use search to find a particular village.',
+      'onboard.next': 'Next',
+      'onboard.start': 'Start exploring',
+      'onboard.skip': 'Skip',
+      'onboard.progress': 'Step {n} of {total}',
 
       'topic.community': 'Community change',
       'topic.agriculture': 'Farming life',
@@ -7212,7 +7386,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'privacy.defaultNote': 'New content is private by default.',
       'privacy.demoNote': 'Demo stories default to Community for the demo only; they do not represent real elders’ consent.',
 
-      'lang.yue': 'Cantonese (Hong Kong)'
+      'lang.yue': 'Cantonese (Hong Kong)',
+      'lang.zh': 'Mandarin',
+      'lang.en': 'English',
     }
   };
 
@@ -7359,7 +7535,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
    * ======================================================================= */
   var PREF_DEFAULTS = {
     fontSize: 'md',
-    theme: 'system',
+    theme: 'light',
     contrast: false,
     reduceMotion: false,
     volume: 100,
@@ -7370,7 +7546,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   var prefs = Object.assign({}, PREF_DEFAULTS, readObject(K.prefs, {}));
   if (VTN.SCOPES.indexOf(prefs.scope) === -1) prefs.scope = 'private';
   if (['md', 'lg', 'xl'].indexOf(prefs.fontSize) === -1) prefs.fontSize = 'md';
-  if (['light', 'dark', 'system'].indexOf(prefs.theme) === -1) prefs.theme = 'system';
+  /* 本階段只提供淺色：舊版本存下的 dark/system 一律收回 light。 */
+  prefs.theme = 'light';
 
   function getPrefs() { return Object.assign({}, prefs); }
 
@@ -9278,6 +9455,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function eraLabel(key) { return t('era.' + key); }
   function languageLabel(key) { return t('lang.' + key); }
 
+  /* 英文介面優先顯示 titleEn；沒有英文標題時回退中文，不空白。 */
+  function storyTitle(story) {
+    if (!story) return '';
+    if (VTN.i18n.lang() === 'en' && story.titleEn) return story.titleEn;
+    return story.title || '';
+  }
+
   function durationLabel(story) {
     var base = U.fmtTime(story.durationSec);
     return story.durationSource === 'transcript' ? base + ' ' + t('story.transcriptLength') : base;
@@ -9694,7 +9878,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var main = U.node('button', { class: 'story-item__main', type: 'button' });
     main.appendChild(coverNode(story));
     var body = U.node('span', { class: 'story-item__body' });
-    body.appendChild(U.node('span', { class: 'story-item__title', text: story.title }));
+    body.appendChild(U.node('span', { class: 'story-item__title', text: storyTitle(story) }));
     body.appendChild(U.node('span', {
       class: 'story-item__meta',
       text: villageLabel(story.villageKey) + ' ・ ' + eraLabel(story.eraKey) + ' ・ ' +
@@ -9782,7 +9966,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var wrap = U.node('div', { class: 'player', 'data-player-story': story.id });
     var btn = U.node('button', {
       class: 'player__btn', type: 'button', 'data-role': 'play',
-      'aria-label': t('atlas.playAria', { title: story.title })
+      'aria-label': t('atlas.playAria', { title: storyTitle(story) })
     });
     btn.innerHTML = '<i class="fa-solid fa-play" aria-hidden="true"></i>';
 
@@ -9870,7 +10054,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     if (btn) {
       btn.classList.toggle('is-playing', playing);
       btn.innerHTML = '<i class="fa-solid ' + (playing ? 'fa-pause' : 'fa-play') + '" aria-hidden="true"></i>';
-      btn.setAttribute('aria-label', playing ? t('atlas.pauseAria') : t('atlas.playAria', { title: story.title }));
+      btn.setAttribute('aria-label', playing ? t('atlas.pauseAria') : t('atlas.playAria', { title: storyTitle(story) }));
     }
   }
 
@@ -9923,7 +10107,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       text: story.year ? t('atlas.yearLabel', { y: story.year }) : eraLabel(story.eraKey)
     }));
     body.appendChild(kicker);
-    body.appendChild(U.node('h2', { class: 'sheet-hero__title', text: story.title }));
+    body.appendChild(U.node('h2', { class: 'sheet-hero__title', text: storyTitle(story) }));
     body.appendChild(U.node('p', {
       class: 'sheet-hero__sub',
       text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story) + ' ・ ' +
@@ -10161,7 +10345,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var main = U.node('button', { class: 'story-item__main', type: 'button' });
     main.appendChild(coverNode(story));
     var body = U.node('span', { class: 'story-item__body' });
-    body.appendChild(U.node('span', { class: 'story-item__title', text: story.title }));
+    body.appendChild(U.node('span', { class: 'story-item__title', text: storyTitle(story) }));
     body.appendChild(U.node('span', {
       class: 'story-item__meta',
       text: story.villageKey ? villageLabel(story.villageKey) + ' ・ ' + durationLabel(story) : ''
@@ -10287,7 +10471,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
         html: '<i class="fa-solid ' + typeIcon(type) + '" aria-hidden="true"></i>'
       }));
       var body = U.node('span', { class: 'peek-card__body' });
-      body.appendChild(U.node('span', { class: 'peek-card__title', text: story.title }));
+      body.appendChild(U.node('span', { class: 'peek-card__title', text: storyTitle(story) }));
       body.appendChild(U.node('span', {
         class: 'peek-card__meta',
         text: villageLabel(story.villageKey) + ' ・ ' + durationLabel(story)
@@ -10477,6 +10661,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     topicLabel: topicLabel,
     eraLabel: eraLabel,
     languageLabel: languageLabel,
+    storyTitle: storyTitle,
     storyTypeOf: storyTypeOf,
     typeLabel: typeLabel,
     moodLabel: moodLabel,
@@ -10674,6 +10859,169 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     isOpen: isOpen,
     isExpanded: isExpanded,
     expand: function (v) { setExpanded(v !== false); }
+  };
+})();
+
+/* ===== src/js/33-onboarding.js ===== */
+/* =============================================================================
+ * 33-onboarding — 故事地圖首次進入引導（3 步）＋「?」重看
+ * -----------------------------------------------------------------------------
+ * 只在地圖頁首次進入時自動彈一次；之後可從地圖右上角的「?」重看。
+ * 不使用假資料、不遮住底導航；Esc／點遮罩／跳過都會關閉並記住。
+ * ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var VTN = window.VTN;
+  var U = VTN.util;
+
+  var SEEN_KEY = (VTN.KEYS && VTN.KEYS.onboarded) || 'vtn.v2.onboarded';
+  var STEPS = [
+    { title: 'onboard.step1Title', body: 'onboard.step1Body' },
+    { title: 'onboard.step2Title', body: 'onboard.step2Body' },
+    { title: 'onboard.step3Title', body: 'onboard.step3Body' }
+  ];
+
+  var root = null;
+  var current = 0;
+  var lastFocus = null;
+  var autoTimer = null;
+
+  function t(key, vars) { return VTN.i18n.t(key, vars); }
+
+  function readSeen() {
+    try { return window.localStorage.getItem(SEEN_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function markSeen() {
+    try { window.localStorage.setItem(SEEN_KEY, '1'); } catch (e) { /* ignore */ }
+  }
+
+  function el(id) { return document.getElementById(id); }
+
+  function render(index) {
+    current = Math.max(0, Math.min(STEPS.length - 1, index));
+    var step = STEPS[current];
+    var title = el('onboardTitle');
+    var body = el('onboardBody');
+    var progress = el('onboardProgress');
+    var next = el('onboardNext');
+    var dots = el('onboardDots');
+    if (title) title.textContent = t(step.title);
+    if (body) body.textContent = t(step.body);
+    if (progress) progress.textContent = t('onboard.progress', { n: current + 1, total: STEPS.length });
+    if (next) next.textContent = current === STEPS.length - 1 ? t('onboard.start') : t('onboard.next');
+    if (dots) {
+      Array.prototype.forEach.call(dots.children, function (dot, i) {
+        dot.classList.toggle('is-active', i === current);
+      });
+    }
+  }
+
+  function focusables() {
+    if (!root) return [];
+    return Array.prototype.filter.call(
+      root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      function (node) { return !node.disabled && node.offsetParent !== null; }
+    );
+  }
+
+  function onKeydown(event) {
+    if (!root || root.hidden) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      close();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    var nodes = focusables();
+    if (!nodes.length) return;
+    var first = nodes[0];
+    var last = nodes[nodes.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function open(index) {
+    root = root || el('vtnOnboard');
+    if (!root) return;
+    lastFocus = document.activeElement;
+    root.hidden = false;
+    root.setAttribute('aria-hidden', 'false');
+    render(typeof index === 'number' ? index : 0);
+    var next = el('onboardNext');
+    if (next) next.focus();
+    document.addEventListener('keydown', onKeydown, true);
+  }
+
+  function close() {
+    if (!root || root.hidden) return;
+    root.hidden = true;
+    root.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onKeydown, true);
+    markSeen();
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  }
+
+  function maybeAutoShow(view) {
+    if (view !== 'stories' || readSeen()) return;
+    if (autoTimer) window.clearTimeout(autoTimer);
+    autoTimer = window.setTimeout(function () {
+      autoTimer = null;
+      if (VTN.router && VTN.router.current().view === 'stories') open(0);
+    }, 700);
+  }
+
+  function bind() {
+    root = el('vtnOnboard');
+    if (!root) return;
+
+    var next = el('onboardNext');
+    var skip = el('onboardSkip');
+    var help = el('atlasHelpBtn');
+    var mask = root.querySelector('[data-onboard-close]');
+
+    if (next) {
+      next.addEventListener('click', function () {
+        if (current >= STEPS.length - 1) close();
+        else render(current + 1);
+      });
+    }
+    if (skip) skip.addEventListener('click', close);
+    if (mask) mask.addEventListener('click', close);
+    if (help) help.addEventListener('click', function () { open(0); });
+
+    U.on('vtn:view-changed', function (event) {
+      var view = event && event.detail ? event.detail.view : null;
+      if (!root.hidden) close();
+      maybeAutoShow(view);
+    });
+    U.on('vtn:lang-changed', function () {
+      if (root && !root.hidden) render(current);
+    });
+  }
+
+  function init() {
+    bind();
+    var route = VTN.router ? VTN.router.current() : null;
+    if (route) maybeAutoShow(route.view);
+  }
+
+  VTN.onboard = {
+    init: init,
+    open: open,
+    close: close,
+    render: render,
+    isSeen: readSeen,
+    reset: function () {
+      try { window.localStorage.removeItem(SEEN_KEY); } catch (e) { /* ignore */ }
+    }
   };
 })();
 
@@ -11123,11 +11471,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       }
       badge.textContent = String(size);
       element.classList.add('vtn-pin--group');
-      element.setAttribute('aria-label', story.title + '・' + t('atlas.groupAria', { n: size }));
+      element.setAttribute('aria-label', VTN.stories.storyTitle(story) + '・' + t('atlas.groupAria', { n: size }));
     } else {
       if (badge) badge.remove();
       element.classList.remove('vtn-pin--group');
-      element.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(typeOf(story)));
+      element.setAttribute('aria-label', VTN.stories.storyTitle(story) + '・' + VTN.stories.typeLabel(typeOf(story)));
     }
   }
 
@@ -11148,7 +11496,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       if (!story) return;
       var btn = U.node('button', {
         class: 'vtn-btn vtn-btn--quiet vtn-group-choice',
-        type: 'button', text: story.title
+        type: 'button', text: VTN.stories.storyTitle(story)
       });
       btn.addEventListener('click', function () {
         dlg.close('pick');
@@ -11196,11 +11544,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     btn.type = 'button';
     btn.className = 'vtn-pin vtn-type--' + type + (groupSize > 1 ? ' vtn-pin--group' : '');
     btn.setAttribute('data-story', story.id);
-    btn.setAttribute('aria-label', story.title + '・' + VTN.stories.typeLabel(type));
+    btn.setAttribute('aria-label', VTN.stories.storyTitle(story) + '・' + VTN.stories.typeLabel(type));
     btn.innerHTML =
       '<span class="vtn-pin__ring" aria-hidden="true"></span>' +
       '<span class="vtn-pin__disc"><i class="fa-solid ' + iconOf(story) + '" aria-hidden="true"></i></span>' +
-      '<span class="vtn-pin__label">' + U.escapeHtml(story.title) + '</span>';
+      '<span class="vtn-pin__label">' + U.escapeHtml(VTN.stories.storyTitle(story)) + '</span>';
     syncGroupBadge(btn, group, story);
     btn.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -11229,6 +11577,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       }
       var element = marker.getElement();
       syncGroupBadge(element, groups[story.id], story);
+      var labelNode = element.querySelector('.vtn-pin__label');
+      if (labelNode) labelNode.textContent = VTN.stories.storyTitle(story);
       element.classList.toggle('is-selected', story.id === state.selectedId);
     });
 
@@ -11433,10 +11783,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     if (btn) btn.setAttribute('aria-pressed', is3D ? 'true' : 'false');
   }
 
-  /* 3D 書籤：只取已有真實故事座標的新市鎮／墟市，不新增任何示範資料。
+  /* 3D 書籤：只取已有真實故事座標的村落／新市鎮，不新增任何示範資料。
      鄉村村屋與農田沒有建築高度，55° 俯仰在那些點只會「把山抬起」；
-     示範時按一下就輪播到有樓群可擠出的視角。 */
-  var SCENE_VILLAGES = ['fanling', 'sheung-shui', 'tai-po'];
+     示範時按一下就輪播到有樓群可擠出的視角。谷埔、荔枝窩靠山，先看地形；
+     其餘三個新市鎮有樓群，最後才輪到。 */
+  var SCENE_VILLAGES = ['kuk-po', 'lai-chi-wo', 'fanling', 'sheung-shui', 'tai-po'];
 
   function sceneStops() {
     var list = located();
@@ -11567,7 +11918,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
         fillColor: '#5E8C70',
         fillOpacity: selected ? 0.18 : 0.08
       });
-      circle.bindTooltip(story.title + '・' + t('atlas.fuzz', { r: radius }), {
+      circle.bindTooltip(VTN.stories.storyTitle(story) + '・' + t('atlas.fuzz', { r: radius }), {
         direction: 'top', opacity: 0.96
       });
       circle.on('click', function () {
@@ -13725,10 +14076,10 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
 /* ===== src/js/55-settings.js ===== */
 /* =============================================================================
- * 55-settings — 設定頁：字級、音量、速度、主題、減少動態、高對比、恢復預設
+ * 55-settings — 設定頁：字級、音量、速度、減少動態、高對比、恢復預設
  * -----------------------------------------------------------------------------
  * 底線：正文不小於 18px（標準 = 18px，大 = 20px，特大 = 22px）；
- *       深色模式文字對比 ≥ 4.5:1；所有設定即時生效並只存本機。
+ *       本階段只提供淺色主題，不再跟隨系統深色；所有設定即時生效並只存本機。
  * ========================================================================== */
 
 (function () {
@@ -13736,17 +14087,16 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   var VTN = window.VTN;
   var U = VTN.util;
-  var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
   function t(key) { return VTN.i18n.t(key); }
 
-  function applyTheme(prefs) {
-    var theme = prefs.theme || 'system';
-    var resolved = theme === 'system' ? (media && media.matches ? 'dark' : 'light') : theme;
-    document.documentElement.setAttribute('data-theme', resolved);
-    document.documentElement.setAttribute('data-theme-preference', theme);
+  /* 2026-11-09：產品拍板本階段只做淺色。即使本機舊設定存了 dark/system，
+     也一律以淺色呈現，避免深色下森林綠被提亮成淺綠、文字對比不足。 */
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.setAttribute('data-theme-preference', 'light');
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#131E18' : '#F6F1E6');
+    if (meta) meta.setAttribute('content', '#F6F1E6');
   }
 
   function apply(prefs) {
@@ -13754,7 +14104,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     html.setAttribute('data-font-size', prefs.fontSize || 'md');
     html.setAttribute('data-contrast', prefs.contrast ? 'high' : 'normal');
     html.setAttribute('data-reduce-motion', prefs.reduceMotion ? 'true' : 'false');
-    applyTheme(prefs);
+    applyTheme();
   }
 
   function refreshControls() {
@@ -13765,9 +14115,6 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
-
-    var theme = document.getElementById('setTheme');
-    if (theme) theme.value = prefs.theme;
 
     var contrast = document.getElementById('setContrast');
     if (contrast) {
@@ -13797,14 +14144,6 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
         VTN.ui.toast(t('settings.saved'), 'success');
       });
     });
-
-    var theme = document.getElementById('setTheme');
-    if (theme) {
-      theme.addEventListener('change', function () {
-        VTN.store.setPref('theme', theme.value);
-        refreshControls();
-      });
-    }
 
     var contrast = document.getElementById('setContrast');
     if (contrast) {
@@ -13864,14 +14203,6 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       refreshControls();
     });
     U.on('vtn:lang-changed', refreshControls);
-
-    if (media) {
-      var onChange = function () {
-        if (VTN.store.getPref('theme') === 'system') applyTheme(VTN.store.prefs());
-      };
-      if (media.addEventListener) media.addEventListener('change', onChange);
-      else if (media.addListener) media.addListener(onChange);
-    }
   }
 
   function init() {
@@ -15164,6 +15495,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       VTN.assistant.mount();
       VTN.router.init();
       VTN.map.init();
+      if (VTN.onboard) VTN.onboard.init();
 
       checkHealth(true);
       startHealthLoop();

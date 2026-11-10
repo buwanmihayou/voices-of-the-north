@@ -2,7 +2,7 @@
 
 ## Start here
 
-Voices of the North is a prototype for preserving Cantonese village oral histories in Hong Kong's Northern Metropolis. It pairs a story map and audio player with timestamp-linked answers in **Ask the Village**. The current demo uses team-written role-play stories. One story includes a sample WAV recording.
+Voices of the North is a prototype for preserving Cantonese village oral histories in Hong Kong's Northern Metropolis. It pairs a story map and audio player with timestamp-linked answers in **Ask the Village**. The current repository includes 13 team-written role-play stories. One includes a sample WAV recording.
 
 - [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
 - [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
@@ -29,9 +29,9 @@ Open [the local app](http://127.0.0.1:8000/voices-of-the-north-app.html). Local 
 
 For frontend changes, edit `frontend/src/` and regenerate the bundled HTML with `python tools/build_frontend.py`. On Windows, use UTF-8 mode if your terminal cannot print the build messages, for example `python -X utf8 tools/build_frontend.py`.
 
-以生成式 AI 保存新界鄉村長者粵語口述歷史的示範平台：錄音 → 逐字稿 → 可核對的問答 → 四級私隱分享。
+以生成式 AI 保存香港鄉村長者口述歷史的示範平台：錄音 → 逐字稿 → 可核對的問答 → 四級私隱分享。示範資料以北區為主，另加赤柱、九龍城、大澳三則北區外故事，以及谷埔、荔枝窩兩則東北鄉郊故事；涵蓋粵語、華語（國語）與 English。
 
-> **黑客松示範聲明**：8 則故事全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。
+> **黑客松示範聲明**：13 則故事全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。
 > 唯一真實音軌為 `frontend/assets/Demo Story.wav`（實測 46.7 秒）。介面會如實標示「未附音檔」「未能取得置信度」。
 
 ## 1. 目錄結構
@@ -50,6 +50,7 @@ frontend/src/                  前端原始碼（CSS / JS / HTML 模板，開發
   js/28-waveform.js            8 kHz 實測振幅（內嵌快取／外置 JSON／執行期解碼三級）
   js/30-stories.js             故事地圖／列表、篩選、年代軸、二級頁內容、波形播放器、來源跳轉
   js/32-sheet.js               半拉抽屜（拖拽、展開、關閉與焦點管理）
+  js/33-onboarding.js         地圖首次進入 3 步引導＋「?」重看
   js/35-map.js                 地圖引擎：MapLibre GL JS 3D ＋ Leaflet／手繪圖三層回退
   js/40-recorder.js            錄音流程（草稿 → 待轉寫 → 已完成）
   js/45-recordings.js          錄音管理三個分頁
@@ -64,10 +65,12 @@ frontend/voices-of-the-north-app.html   交付用單檔（由建置腳本產生�
 frontend/waveforms.json        波形按需載入用（--external-waveforms 時由單檔 fetch）
 frontend/js, frontend/lib      舊版副本，僅供對照（已不參與建置）
 docs/voice-scripts/voice-scripts.md  每則故事的配音文字腳本與時間線
+docs/voice-scripts/Voices_of_the_North_Story_Scripts.docx  供真人補錄的 Word 腳本（13 則）
 server.py                      FastAPI 後端（同時託管 frontend/ 靜態檔）
 story_corpus.py                語料檢索與拒答邏輯（讀 data/stories.json）
 tools/build_frontend.py        建置腳本：驗證資料 → 合併成單檔 → 波形快取
 tools/export_voice_scripts.py  由已授權逐字稿匯出配音腳本
+tools/export_story_scripts_docx.py  由逐字稿產生 Word 補錄腳本（含登記表）
 tools/check_frontend_syntax.py 單檔語法檢查
 tools/audit_frontend.mjs       前端自我檢查（可選）
 ```
@@ -78,7 +81,8 @@ tools/audit_frontend.mjs       前端自我檢查（可選）
 python tools/build_frontend.py                     # 驗證 + 產出單檔（波形內嵌）
 python tools/build_frontend.py --check             # 只驗證資料
 python tools/build_frontend.py --external-waveforms # 波形改為按需載入 waveforms.json
-python tools/export_voice_scripts.py               # 匯出每則故事的配音文字腳本
+python tools/export_voice_scripts.py               # 匯出每則故事的配音文字腳本（Markdown）
+python tools/export_story_scripts_docx.py          # 匯出 Word 補錄腳本（含真實錄音登記表）
 python tools/check_frontend_syntax.py              # 檢查單檔內嵌 JS 語法
 ```
 
@@ -86,6 +90,7 @@ python tools/check_frontend_syntax.py              # 檢查單檔內嵌 JS 語�
 
 - 故事 ID 唯一、`scope` 只能是 `private / family / community / public`
 - 每則故事必須有 `authorized: true` 與 `consentRef`
+- `languageKey` ∈ `yue / zh / en`（粵語、華語、English）
 - 地圖一級資訊：`storyType` ∈ `festival / farming / migration / architecture / oral / market / other`、`mood` ∈ `wistful / joyful / reflective / heavy / proud`、`year` 為 1900–2026 整數；缺欄位只警告（舊資料向後兼容），枚舉錯值即失敗
 - 非私人故事的 `location.lat/lng` 必須在香港範圍，`location.radiusM` 必須 ≥100（模糊範圍不可收窄）
 - 逐字稿段落時間遞增、不重疊，且 `end` 不可超出 `durationSec`
@@ -100,8 +105,8 @@ python tools/check_frontend_syntax.py              # 檢查單檔內嵌 JS 語�
 - **波形體積**：目前 1 則 × 60 柱 = 358 bytes；故事量增大時用 `--external-waveforms`，單檔只留 `window.VTN_WAVEFORMS_URL`，前端按需 fetch `frontend/waveforms.json` 並寫回快取（50 則約 18 KB，屆時建議切換）。
 - **可見故事集合**：`GET /api/stories?bbox=west,south,east,north` 與 `POST /api/ask-village`（可帶同一 `bbox`）都從 `server.current_visible_stories()` 出發；`visibleCount` / `visibleIds` 描述裁剪後的結果。問答可另帶 `storyIds` 收窄至前端類型／年代等篩選後的故事，空陣列表示無故事，省略才用全域；後端始終先做授權／分享範圍／撤回過濾。前端在提問時擷取篩選及視口快照，網路失敗後的本機檢索沿用同一範圍；服務端拒答不會被本機全庫故事搜尋覆蓋。首頁與列表不套用隱藏地圖的視口。參數格式錯誤回 400。
 - **指標口徑**：`story.open`（真正打開詳情）才是北極星指標分母；`pin.click`（單點）、`cluster.click`（同圈氣泡／低縮放聚合）只作診斷；另有 `map.view`、`audio.complete`、`audio.progress`、`scene.view`。只記錄數值與故事 ID，送往 `/api/audit`；後端 meta 白名單會丟棄逐字稿、標題等自由文字，離線時僅留本機緩衝。
-- **版位與無障礙**：列表入口在地圖右上角常顯（帶文字，不是降級才出現）；半拉抽屜半開露出 `55dvh`；`prefers-reduced-motion` 下模糊圈呼吸填充降級為靜態虛線圈；3D 書籤只取已有真實故事座標的新市鎮視角。
-- **配音腳本**：`docs/voice-scripts/voice-scripts.md` 由 `tools/export_voice_scripts.py` 從已授權逐字稿匯出每則故事的台詞、時間線與補錄驗收流程。8 則中 7 則仍待真人補錄，介面如實顯示「未附音檔」；**不合成示範音檔、不改寫逐字稿**。
+- **版位與無障礙**：列表入口在地圖右上角常顯（帶文字，不是降級才出現）；首次進入地圖有 3 步引導，右上角 `?` 可重看，Esc／遮罩／跳過都會關閉並記住；半拉抽屜半開露出 `55dvh`；`prefers-reduced-motion` 下模糊圈呼吸填充降級為靜態虛線圈；3D 書籤輪播谷埔、荔枝窩、粉嶺、上水、大埔五個已有真實故事座標的視角。**本階段只提供淺色主題**，設定頁不再有深色／跟隨系統入口，舊的本機深色設定會自動收回淺色。
+- **配音腳本**：`docs/voice-scripts/voice-scripts.md` 與 `Voices_of_the_North_Story_Scripts.docx` 由 `tools/export_voice_scripts.py`／`tools/export_story_scripts_docx.py` 從已授權逐字稿匯出每則故事的台詞、時間線、補錄驗收與真實錄音登記表。13 則中 12 則仍待真人補錄，介面如實顯示「未附音檔」；**不合成示範音檔、不改寫逐字稿**。
 
 ## 3. 本地運行
 
@@ -177,9 +182,9 @@ python tools/test_lab_api.py        # 實驗室 API
 python tools/audit_frontend.mjs     # 前端靜態檢查（需 node）
 ```
 
-評審修復的回歸腳本放在 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`）。地圖／問答的視口、篩選、空集合、授權、拒答與離線降級另以 `python tools/verify/story_scope.py` 驗證；測試使用隔離資料庫，不改動現有錄音。
+評審修復的回歸腳本放在 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`）。地圖／問答的視口、篩選、空集合、授權、拒答與離線降級另以 `python tools/verify/story_scope.py` 驗證；淺色主題、首次引導、13 則故事／三語與 Word 腳本以 `python tools/verify/light_onboarding.py` 驗證。測試使用隔離資料庫，不改動現有錄音。
 
-手動驗證要點：三語切換後重整仍保持、錄音停止即存草稿、斷網上傳變「待轉寫」且可重試、來源按鈕跳轉並從指定秒數播放、撤回後來源按鈕變灰。
+手動驗證要點：三語切換後重整仍保持、錄音停止即存草稿、斷網上傳變「待轉寫」且可重試、來源按鈕跳轉並從指定秒數播放、撤回後來源按鈕變灰；地圖首次進入自動顯示 3 步引導、`?` 可重看、Esc 可關閉，重整後不再自動彈出；設定頁已無深色入口。
 
 ## 8. 授權與致謝
 

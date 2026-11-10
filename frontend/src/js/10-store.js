@@ -64,7 +64,7 @@
    * ======================================================================= */
   var PREF_DEFAULTS = {
     fontSize: 'md',
-    theme: 'system',
+    theme: 'light',
     contrast: false,
     reduceMotion: false,
     volume: 100,
@@ -75,7 +75,8 @@
   var prefs = Object.assign({}, PREF_DEFAULTS, readObject(K.prefs, {}));
   if (VTN.SCOPES.indexOf(prefs.scope) === -1) prefs.scope = 'private';
   if (['md', 'lg', 'xl'].indexOf(prefs.fontSize) === -1) prefs.fontSize = 'md';
-  if (['light', 'dark', 'system'].indexOf(prefs.theme) === -1) prefs.theme = 'system';
+  /* 本階段只提供淺色：舊版本存下的 dark/system 一律收回 light。 */
+  prefs.theme = 'light';
 
   function getPrefs() { return Object.assign({}, prefs); }
 

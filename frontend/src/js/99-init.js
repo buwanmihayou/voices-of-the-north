@@ -54,6 +54,7 @@
       VTN.assistant.mount();
       VTN.router.init();
       VTN.map.init();
+      if (VTN.onboard) VTN.onboard.init();
 
       checkHealth(true);
       startHealthLoop();

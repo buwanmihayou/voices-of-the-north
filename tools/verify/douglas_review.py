@@ -70,6 +70,7 @@ def backend_checks():
 def frontend_checks():
     warn_if_stale()
     html = (ROOT / "frontend" / "voices-of-the-north-app.html").read_text(encoding="utf-8")
+    total = len(json.loads((ROOT / "data" / "stories.json").read_text(encoding="utf-8"))["stories"])
     check("6. 地圖點位不再輸出心情角標", "vtn-pin__mood" not in html)
     check("11. 減少動態分支存在",
           "atlas--reduced-motion" in html and "prefers-reduced-motion" in html)
@@ -94,12 +95,12 @@ def frontend_checks():
               return out;
             }""")
             check("1. 每一格都改變過濾結果",
-                  len(set(counts)) == len(counts) and counts[-1] == 8, str(counts))
+                  len(set(counts)) == len(counts) and counts[-1] == total, str(counts))
             legacy = page.evaluate("""() => {
               VTN.stories.applyParams({since: '2026'});
               return VTN.stories.filtered().length;
             }""")
-            check("1. 舊連結 since=2026 仍回到全部年代", legacy == 8, str(legacy))
+            check("1. 舊連結 since=2026 仍回到全部年代", legacy == total, str(legacy))
             page.evaluate("() => VTN.stories.clearFilters()")
 
             funnel = page.evaluate("""() => {
@@ -132,8 +133,10 @@ def frontend_checks():
                   list_btn["shown"] and "列表" in list_btn["text"], json.dumps(list_btn, ensure_ascii=False))
             check("7. 3D 書籤按鈕存在", list_btn["scene"])
             scenes = page.evaluate("() => VTN.map.sceneStops()")
-            check("7. 書籤取自有座標的真實故事",
-                  len(scenes) == 3 and all(len(s["center"]) == 2 for s in scenes),
+            scene_keys = [s["key"] for s in scenes]
+            check("7. 書籤取自有座標的真實故事（含谷埔、荔枝窩）",
+                  len(scenes) == 5 and "kuk-po" in scene_keys and "lai-chi-wo" in scene_keys
+                  and all(len(s["center"]) == 2 for s in scenes),
                   json.dumps(scenes, ensure_ascii=False))
 
             wave_json = json.loads((ROOT / "frontend" / "waveforms.json").read_text(encoding="utf-8"))

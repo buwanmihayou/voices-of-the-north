@@ -374,9 +374,11 @@ html[data-font-size="xl"] { font-size: 22px; }
   position: absolute; inset: 0; z-index: 70;
   display: flex; align-items: flex-end; justify-content: center;
   background: rgba(20, 32, 26, .5);
-  opacity: 0; transition: opacity .2s ease;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease, visibility 0s linear .2s;
 }
-.vtn-modal-mask.is-open { opacity: 1; }
+.vtn-modal-mask.is-open { opacity: 1; visibility: visible; transition-delay: 0s; }
 .vtn-modal {
   width: 100%; max-height: 88%;
   display: flex; flex-direction: column;
@@ -621,4 +623,85 @@ html[data-reduce-motion="true"] *::after {
   .story-item__cover { width: 52px; height: 52px; }
   .ai-status__text { display: none; }
   .ai-status { padding: 0 10px; min-width: 44px; justify-content: center; }
+}
+
+/* ==========================================================================
+   17. 故事地圖首次引導（33-onboarding）
+   ========================================================================== */
+.vtn-onboard {
+  position: absolute;
+  inset: 0 0 var(--vtn-nav-h, 77px) 0;
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+}
+.vtn-onboard[hidden] { display: none !important; }
+.vtn-onboard__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 32, 26, 0.55);
+}
+.vtn-onboard__card {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  padding: 22px 20px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--cream);
+  color: var(--ink-body);
+  box-shadow: 0 24px 60px -24px rgba(18, 36, 26, 0.65);
+}
+.vtn-onboard__eyebrow {
+  margin: 0 0 6px;
+  font-size: var(--fs-min);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.vtn-onboard__title {
+  margin: 0 0 8px;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: 1.32rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.vtn-onboard__body {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--ink-body);
+}
+.vtn-onboard__dots {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+.vtn-onboard__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sage-line);
+}
+.vtn-onboard__dots span.is-active {
+  width: 22px;
+  background: var(--forest);
+}
+.vtn-onboard__progress {
+  margin: 0 0 14px;
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+.vtn-onboard__actions {
+  display: flex;
+  gap: 10px;
+}
+.vtn-onboard__actions .vtn-btn {
+  flex: 1 1 0;
+  min-height: 46px;
+}
+@media (max-width: 359px) {
+  .vtn-onboard { padding: 14px; }
+  .vtn-onboard__card { padding: 18px 16px 14px; }
 }
