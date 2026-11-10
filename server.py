@@ -36,7 +36,7 @@ from collections import defaultdict, deque
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -44,7 +44,7 @@ from google.cloud import speech_v1p1beta1 as speech
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from lab_api import router as lab_router
-from story_corpus import load_data, retrieve_answer, visible_stories
+from story_corpus import all_stories, is_visible, load_data, retrieve_answer, visible_stories
 
 APP_VERSION = "2026.11.05"
 DATA_DIR = Path(os.environ.get("VTN_DATA_DIR", "data"))
@@ -392,25 +392,25 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SCOPES = {"private", "family", "community", "public"}
 
 
-def _can_read_record(owner: str, scope: str, who: dict) -> bool:
+def _can_read_record(owner: str, who: dict) -> bool:
+    # Requested sharing scope does not publish a recording.
     if who["role"] == "admin":
         return True
     owner = (owner or "").lower()
-    if owner and who["email"] and owner == who["email"]:
-        return True
-    return scope in ("community", "public")
+    return bool(who["role"] == "member" and owner and owner == who["email"])
 
 
 def _withdrawn_ids() -> set[str]:
     if not storage_ready:
-        return set()
-    conn = _connect()
+        raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE")
     try:
-        return {row[0] for row in conn.execute("SELECT story_id FROM withdrawals")}
-    except Exception:
-        return set()
-    finally:
-        conn.close()
+        conn = _connect()
+        try:
+            return {row[0] for row in conn.execute("SELECT story_id FROM withdrawals")}
+        finally:
+            conn.close()
+    except sqlite3.Error as exc:
+        raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE") from exc
 
 
 def _story_versions() -> dict[str, list[dict]]:
@@ -476,11 +476,14 @@ def _row_to_record(data_json: str, has_audio: int, rid: str, owner: str = "", sc
 
 
 # ---------------------------------------------------------------------------
-# 錄音端點（伺服器端按分享範圍過濾）
+# 錄音端點（原始錄音只對擁有者和審核者開放）
 # ---------------------------------------------------------------------------
 @app.post("/api/records")
 async def create_record(request: Request):
     _check_token(request)
+    who = viewer(request)
+    if who["role"] not in ("member", "admin"):
+        raise HTTPException(status_code=403, detail="請登入後儲存錄音")
     if not storage_ready:
         raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE: " + storage_reason)
 
@@ -494,7 +497,6 @@ async def create_record(request: Request):
     if not isinstance(payload, dict):
         raise HTTPException(status_code=400, detail="錄音資料格式錯誤")
 
-    who = viewer(request)
     rid = str(payload.get("id") or uuid.uuid4().hex)
     if not RECORD_ID_RE.match(rid):
         raise HTTPException(status_code=400, detail="無效的錄音 ID")
@@ -524,7 +526,6 @@ async def create_record(request: Request):
 
     clean = {k: v for k, v in payload.items() if k not in ("audioDataURL", "audioBase64", "owner")}
     clean["id"] = rid
-    clean["owner"] = owner
     clean["scope"] = scope
     clean["sync"] = "synced"
     created_at = int(payload.get("createdAt") or time.time() * 1000)
@@ -539,8 +540,11 @@ async def create_record(request: Request):
             existing = conn.execute(
                 "SELECT audio_path, has_audio, owner FROM records WHERE id=?", (rid,)
             ).fetchone()
-            if existing and existing[2] and who["role"] != "admin" and existing[2] != owner:
+            if existing and not _can_read_record(existing[2], who):
                 raise HTTPException(status_code=403, detail="此錄音屬於其他帳戶")
+            if existing:
+                owner = existing[2]
+            clean["owner"] = owner
             audio_path, has_audio = "", 0
             if audio_bytes:
                 audio_path = str(RECORDS_DIR / (rid + _ext_of_mime(mime)))
@@ -568,8 +572,9 @@ async def create_record(request: Request):
 
 
 @app.get("/api/records")
-async def list_records(request: Request):
+async def list_records(request: Request, response: Response):
     _check_token(request)
+    response.headers["Cache-Control"] = "no-store"
     if not storage_ready:
         raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE: " + storage_reason)
     who = viewer(request)
@@ -579,17 +584,14 @@ async def list_records(request: Request):
             rows = conn.execute(
                 "SELECT id, data_json, has_audio, owner, scope FROM records ORDER BY created_at DESC"
             ).fetchall()
-        elif who["email"]:
+        elif who["role"] == "member" and who["email"]:
             rows = conn.execute(
                 "SELECT id, data_json, has_audio, owner, scope FROM records "
-                "WHERE owner=? OR scope IN ('community','public') ORDER BY created_at DESC",
+                "WHERE owner=? ORDER BY created_at DESC",
                 (who["email"],),
             ).fetchall()
         else:
-            rows = conn.execute(
-                "SELECT id, data_json, has_audio, owner, scope FROM records "
-                "WHERE scope IN ('community','public') ORDER BY created_at DESC"
-            ).fetchall()
+            rows = []
     finally:
         conn.close()
     records = [
@@ -615,22 +617,25 @@ async def get_record_audio(rid: str, request: Request):
     conn = _connect()
     try:
         row = conn.execute(
-            "SELECT audio_path, has_audio, owner, scope FROM records WHERE id=?", (rid,)
+            "SELECT audio_path, has_audio, owner FROM records WHERE id=?", (rid,)
         ).fetchone()
     finally:
         conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="音訊檔不存在")
-    if not _can_read_record(row[2], row[3], who):
+    if not _can_read_record(row[2], who):
         raise HTTPException(status_code=403, detail="未獲授權收聽此錄音")
     if not row[1] or not row[0] or not Path(row[0]).is_file():
         raise HTTPException(status_code=404, detail="音訊檔不存在")
-    return FileResponse(row[0], media_type=_media_type_of_path(row[0]))
+    return FileResponse(
+        row[0], media_type=_media_type_of_path(row[0]), headers={"Cache-Control": "no-store"}
+    )
 
 
 @app.get("/api/records/{rid}")
-async def get_record(rid: str, request: Request):
+async def get_record(rid: str, request: Request, response: Response):
     _check_token(request)
+    response.headers["Cache-Control"] = "no-store"
     if not RECORD_ID_RE.match(rid):
         raise HTTPException(status_code=400, detail="無效的錄音 ID")
     if not storage_ready:
@@ -645,7 +650,7 @@ async def get_record(rid: str, request: Request):
         conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="找不到該錄音")
-    if not _can_read_record(row[2], row[3], who):
+    if not _can_read_record(row[2], who):
         raise HTTPException(status_code=403, detail="未獲授權查看此錄音")
     return _row_to_record(row[0], row[1], rid, row[2], row[3])
 
@@ -670,7 +675,7 @@ async def delete_record(rid: str, request: Request):
             ).fetchone()
             if not row:
                 return {"ok": True, "id": rid, "serverHad": False, "deletedAt": deleted_at}
-            if row[1] and who["role"] != "admin" and row[1] != who["email"]:
+            if not _can_read_record(row[1], who):
                 raise HTTPException(status_code=403, detail="只可刪除自己的錄音")
 
             audio_removed = False
@@ -760,7 +765,8 @@ def current_visible_stories(request: Request) -> list[dict]:
 
 
 @app.get("/api/stories")
-async def list_stories(request: Request):
+async def list_stories(request: Request, response: Response):
+    response.headers["Cache-Control"] = "no-store"
     bbox = parse_bbox(request.query_params.get("bbox"))
     visible = current_visible_stories(request)
     stories = clip_to_bbox(visible, bbox)
@@ -779,7 +785,8 @@ async def list_stories(request: Request):
 
 
 @app.post("/api/ask-village")
-async def ask_village(request: Request):
+async def ask_village(request: Request, response: Response):
+    response.headers["Cache-Control"] = "no-store"
     try:
         body = await request.json()
     except Exception:
@@ -1063,23 +1070,32 @@ async def review_correction(correction_id: str, request: Request):
 # ---------------------------------------------------------------------------
 @app.post("/api/stories/{story_id}/withdraw")
 async def withdraw_story(story_id: str, request: Request):
+    who = viewer(request)
+    if who["role"] != "admin":
+        raise HTTPException(status_code=403, detail="只有審核者可以撤回公開故事")
     if not re.match(r"^[A-Za-z0-9_-]{1,64}$", story_id):
         raise HTTPException(status_code=400, detail="無效的故事 ID")
     if not storage_ready:
         raise HTTPException(status_code=503, detail="撤回服務未就緒")
+    if not any(story["id"] == story_id for story in all_stories()):
+        raise HTTPException(status_code=404, detail="找不到故事")
     try:
         body = await request.json()
     except Exception:
         body = {}
-    who = viewer(request)
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="撤回資料格式錯誤")
     now = datetime.now(timezone.utc).isoformat()
     conn = _connect()
     try:
         with _db_lock:
             conn.execute(
-                "INSERT OR REPLACE INTO withdrawals (story_id, withdrawn_at, by_user, reason) VALUES (?, ?, ?, ?)",
-                (story_id, now, who["email"] or "visitor", str(body.get("reason") or "")[:400]),
+                "INSERT OR IGNORE INTO withdrawals (story_id, withdrawn_at, by_user, reason) VALUES (?, ?, ?, ?)",
+                (story_id, now, who["email"], str(body.get("reason") or "")[:400]),
             )
+            now = conn.execute(
+                "SELECT withdrawn_at FROM withdrawals WHERE story_id=?", (story_id,)
+            ).fetchone()[0]
             conn.commit()
     finally:
         conn.close()
@@ -1209,9 +1225,15 @@ async def process_audio(request: Request, file: UploadFile = File(None)):
         filename = file.filename or ""
         content_type = file.content_type or ""
     else:
+        demo_asset = "assets/Demo Story.wav"
+        if not any(
+            story.get("audio") == demo_asset
+            for story in current_visible_stories(request)
+        ):
+            raise HTTPException(status_code=404, detail="找不到故事音訊")
         demo_paths = [
-            "frontend/assets/Demo Story.wav",
-            "assets/Demo Story.wav",
+            f"frontend/{demo_asset}",
+            demo_asset,
             "Demo Story.wav",
         ]
         content = b""
@@ -1370,6 +1392,28 @@ async def process_audio(request: Request, file: UploadFile = File(None)):
     }
 
 
+class StoryStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        # Existing audio URLs must honor withdrawal, including range requests.
+        requested_path = os.path.normcase(path)
+        stories = [
+            story for story in all_stories()
+            if story.get("audio")
+            and os.path.normcase(os.path.normpath(story["audio"])) == requested_path
+        ]
+        if not stories:
+            return await super().get_response(path, scope)
+        excluded = _withdrawn_ids()
+        who = viewer(Request(scope))
+        if not any(is_visible(story, who["email"], who["role"], excluded) for story in stories):
+            raise HTTPException(
+                status_code=404, detail="找不到故事音訊", headers={"Cache-Control": "no-store"}
+            )
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+
 # 掛載前端靜態目錄（必須最後，否則會攔截 /api）
 if os.path.exists("frontend"):
-    app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+    app.mount("/", StoryStaticFiles(directory="frontend", html=True), name="frontend")
