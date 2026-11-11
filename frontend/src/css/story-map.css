@@ -878,9 +878,8 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   right: 0;
   bottom: 0;
   z-index: 55;
-  /* 相對視口而非父容器：小屏（如 iPhone SE 375×667）半開仍露出 55dvh */
-  height: 90vh;
-  height: 90dvh;
+  /* 以頂欄與底部導航之間的故事頁為界，全開時不裁掉標題及關閉鍵。 */
+  height: 100%;
   display: flex;
   flex-direction: column;
   border-radius: 26px 26px 0 0;
@@ -889,10 +888,15 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   transform: translateY(100%);
   visibility: hidden;                /* 收起後不可留一幀在底導上 */
   transition: transform 0.42s var(--ease-slow), visibility 0s linear 0.42s;
-  touch-action: none;
+  touch-action: pan-y;
   will-change: transform;
 }
-.story-sheet.is-open { transform: translateY(35vh); transform: translateY(35dvh); visibility: visible; transition-delay: 0s; }
+.story-sheet.is-open {
+  transform: translateY(max(0px, calc(100% - 55vh)));
+  transform: translateY(max(0px, calc(100% - 55dvh)));
+  visibility: visible;
+  transition-delay: 0s;
+}
 .story-sheet.is-expanded { transform: translateY(0); visibility: visible; transition-delay: 0s; }
 .story-sheet.is-dragging { transition: none; }
 .story-sheet__grab {
@@ -929,6 +933,7 @@ body:has(.page--stories.is-active) .vtn-ai-hint { display: none; }
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 2px 18px calc(26px + env(safe-area-inset-bottom));
   touch-action: pan-y;
 }

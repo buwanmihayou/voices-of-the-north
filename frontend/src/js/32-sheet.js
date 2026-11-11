@@ -154,7 +154,9 @@
       el.style.transform = '';
     });
 
-    grab.addEventListener('click', function () {
+    grab.addEventListener('click', function (event) {
+      /* 抓手自行切換狀態，不能再冒泡觸發內容區的「點擊展開」。 */
+      event.stopPropagation();
       /* 拖拽後的 click 不應再次切換，否則會「拖上又彈回」 */
       if (Date.now() < suppressGrabClick) return;
       setExpanded(!expanded);

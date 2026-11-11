@@ -167,10 +167,11 @@ def frontend_checks():
               const r = el.getBoundingClientRect();
               const parent = el.offsetParent ? el.offsetParent.getBoundingClientRect() : null;
               return {height: r.height, top: r.top, viewport: window.innerHeight,
+                      parentHeight: parent ? parent.height : null,
                       exposed: (parent ? parent.bottom : window.innerHeight) - r.top};
             }""")
-            check("8. 抽屜高度改為視口相對",
-                  abs(sheet["height"] - sheet["viewport"] * 0.9) < 3,
+            check("8. 抽屜高度限制在頂欄與底導航之間",
+                  abs(sheet["height"] - sheet["parentHeight"]) < 3,
                   json.dumps(sheet))
             check("8. 390×844 半開露出 55dvh",
                   abs(sheet["exposed"] - sheet["viewport"] * 0.55) < 12,
