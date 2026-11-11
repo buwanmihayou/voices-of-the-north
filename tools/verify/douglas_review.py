@@ -86,7 +86,7 @@ def frontend_checks():
             page.wait_for_timeout(3200)
 
             stops = page.evaluate("() => VTN.stories.eraStops()")
-            check("1. 年代刻度由資料分佈產生",
+            check("1. 年代刻度固定為五個年代區間",
                   stops == [1950, 1960, 1970, 1980, 1990], str(stops))
             counts = page.evaluate("""() => {
               const out = [];
@@ -94,8 +94,13 @@ def frontend_checks():
               for (let i = 0; i < n; i++) { VTN.stories.setEra(i); out.push(VTN.stories.filtered().length); }
               return out;
             }""")
-            check("1. 每一格都改變過濾結果",
-                  len(set(counts)) == len(counts) and counts[-1] == total, str(counts))
+            years = [story["year"] for story in json.loads(
+                (ROOT / "data" / "stories.json").read_text(encoding="utf-8"))["stories"]]
+            expected_counts = [sum(year < 1960 for year in years)] + [
+                sum(start <= year < start + 10 for year in years) for start in (1960, 1970, 1980)
+            ] + [sum(year >= 1990 for year in years)]
+            check("1. 每一格只包含所選年代，不累計更早年代",
+                  counts == expected_counts and sum(counts) == total, str(counts))
             legacy = page.evaluate("""() => {
               VTN.stories.applyParams({since: '2026'});
               return VTN.stories.filtered().length;

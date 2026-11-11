@@ -262,14 +262,17 @@
         </div>
 
         <div class="atlas__bottom">
-          <div class="atlas__timeline" id="atlasTimeline">
+          <div class="atlas__timeline is-all" id="atlasTimeline">
             <div class="atlas__timeline-head">
               <span data-i18n="atlas.era">故事年代</span>
-              <b id="atlasEraLabel">全部</b>
+              <button type="button" class="atlas__era-all" id="atlasEraAll" aria-pressed="true">
+                <span class="atlas__era-check" aria-hidden="true">✓</span>
+                <span data-i18n="atlas.eraAll">全部年代</span>
+              </button>
             </div>
-            <input type="range" id="atlasEra" min="0" max="4" step="1" value="4"
+            <input type="range" id="atlasEra" min="0" max="4" step="1" value="0"
                    data-i18n-aria="atlas.eraAria">
-            <div class="atlas__ticks" id="atlasTicks" aria-hidden="true"></div>
+            <div class="atlas__ticks" id="atlasTicks"></div>
           </div>
           <div class="atlas__meta">
             <p class="atlas__privacy">

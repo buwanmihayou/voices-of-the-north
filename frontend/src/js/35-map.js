@@ -979,7 +979,7 @@
       render(false);
     } else if (engine === 'leaflet') {
       renderLeaflet(false);
-    } else if (state.empty) {
+    } else {
       toggleEmpty();
     }
   }

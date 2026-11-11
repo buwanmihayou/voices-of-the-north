@@ -16,27 +16,9 @@
   var U = VTN.util;
   var DATA = window.VTN_STORY_DATA || { stories: [], suggestedQuestions: [] };
 
-  /* 年代軸：只做「故事年代」篩選，不假裝切換歷史底圖。
-     刻度由資料的 year 分佈動態產生，只保留「真的會改變結果」的年份，
-     最後一格＝全部；避免資料全在 1990 前、刻度卻停在 2026 而成為擺設。 */
-  function eraStopsFromData() {
-    var years = (DATA.stories || []).map(yearOf).filter(function (y) {
-      return typeof y === 'number' && isFinite(y);
-    });
-    if (!years.length) return [1950, 1970, 1990, 2010, 2026];
-    var min = Math.min.apply(null, years);
-    var max = Math.max.apply(null, years);
-    var stops = [];
-    for (var y = Math.floor(min / 10) * 10; y <= Math.ceil(max / 10) * 10; y += 10) {
-      var hasBefore = years.some(function (v) { return v <= y; });
-      var hasAfter = years.some(function (v) { return v > y; });
-      if (hasBefore && hasAfter) stops.push(y);
-    }
-    if (!stops.length) stops.push(Math.floor(min / 10) * 10);
-    stops.push(Math.ceil(max / 10) * 10); /* 最後一格：全部年代 */
-    return stops;
-  }
-  var ERA_STOPS = eraStopsFromData();
+  /* 五個固定年代區間；「全部」是獨立狀態，不佔用滑軸刻度。
+     只篩選故事，不假裝切換歷史底圖。 */
+  var ERA_STOPS = [1950, 1960, 1970, 1980, 1990];
   var STORY_TYPE_ORDER = ['festival', 'farming', 'migration', 'architecture', 'oral', 'market', 'other'];
   var TYPE_ICON = {
     festival: 'fa-fire',
@@ -51,7 +33,7 @@
   var state = {
     filters: { type: [], location: [], topic: [], era: [], language: [], keyword: '', sort: 'newest' },
     mode: 'map',              // map | list
-    eraIndex: ERA_STOPS.length - 1,
+    eraIndex: null,           // null = 全部年代；0–4 = 指定年代
     selectedId: null,
     overview: false,
     playingSegment: null,
@@ -163,21 +145,34 @@
   function typeIcon(key) { return TYPE_ICON[key] || TYPE_ICON.other; }
 
   function yearOf(story) {
-    if (typeof story.year === 'number') return story.year;
+    if (typeof story.year === 'number' && isFinite(story.year)) return story.year;
     var era = String(story.eraKey || '').replace(/s$/, '');
     var parsed = parseInt(era, 10);
     return isFinite(parsed) ? parsed + 5 : null;
   }
 
-  function eraCutoff() {
-    return ERA_STOPS[U.clamp(state.eraIndex, 0, ERA_STOPS.length - 1)];
+  function selectedEra() {
+    return state.eraIndex === null ? null : ERA_STOPS[state.eraIndex];
+  }
+
+  function matchesEra(story) {
+    if (state.eraIndex === null) return true;
+    var year = yearOf(story);
+    if (year === null) return false;
+    var era = selectedEra();
+    return state.eraIndex === 0 ? year < 1960 :
+      year >= era && (state.eraIndex === ERA_STOPS.length - 1 || year < era + 10);
+  }
+
+  function eraTickLabel(index) {
+    return String(ERA_STOPS[index]) + (index === ERA_STOPS.length - 1 ? '+' : '');
   }
 
   function eraLabelText() {
-    var cutoff = eraCutoff();
-    return cutoff >= ERA_STOPS[ERA_STOPS.length - 1]
-      ? t('atlas.eraAll')
-      : t('atlas.eraBefore', { y: cutoff });
+    return state.eraIndex === null ? t('atlas.eraAll') :
+      t(state.eraIndex === 0 ? 'atlas.era1950' :
+        state.eraIndex === ERA_STOPS.length - 1 ? 'atlas.era1990' : 'atlas.eraDecade',
+      { y: selectedEra() });
   }
 
   /* =========================================================================
@@ -224,11 +219,11 @@
 
   function clearFilters() {
     state.filters = { type: [], location: [], topic: [], era: [], language: [], keyword: '', sort: state.filters.sort };
-    state.eraIndex = ERA_STOPS.length - 1;
+    state.eraIndex = null;
     var search = document.getElementById('storySearch');
     if (search) search.value = '';
     var era = document.getElementById('atlasEra');
-    if (era) era.value = String(state.eraIndex);
+    if (era) era.value = '0';
     syncUrl();
     render();
     if (VTN.map) VTN.map.fitAll();
@@ -238,7 +233,7 @@
     var f = state.filters;
     var count = f.type.length + f.location.length + f.topic.length + f.era.length +
       f.language.length + (f.keyword ? 1 : 0);
-    if (state.eraIndex < ERA_STOPS.length - 1) count++;
+    if (state.eraIndex !== null) count++;
     return count;
   }
 
@@ -266,9 +261,7 @@
       var needle = f.keyword.toLowerCase();
       if (keywordHaystack(story).indexOf(needle) === -1) return false;
     }
-    var year = yearOf(story);
-    if (state.eraIndex < ERA_STOPS.length - 1 && year !== null && year > eraCutoff()) return false;
-    return true;
+    return matchesEra(story);
   }
 
   function matches(story) {
@@ -342,7 +335,7 @@
     if (f.sort && f.sort !== 'newest') params.sort = f.sort;
     if (state.selectedId) params.story = state.selectedId;
     if (state.mode === 'list') params.view = 'list';
-    if (state.eraIndex < ERA_STOPS.length - 1) params.since = ERA_STOPS[state.eraIndex];
+    if (state.eraIndex !== null) params.decade = selectedEra();
     return params;
   }
 
@@ -372,24 +365,27 @@
     state.overview = false;
     state.selectedId = params.story || null;
 
-    /* 刻度改由資料分佈產生後，舊分享連結的 since（1950/1970/…/2026）
-       可能不在新刻度上：映射到「不大於 since 的最後一格」，超過上限視為全部。 */
+    /* decade 明確表示新的區間語義；舊 since 連結映射到對應年代，
+       舊版最後一格（1990 或以後）仍視為全部。 */
+    var decade = Number(params.decade);
     var since = Number(params.since);
-    if (since && ERA_STOPS.indexOf(since) !== -1) state.eraIndex = ERA_STOPS.indexOf(since);
-    else if (since && isFinite(since)) {
+    state.eraIndex = null;
+    if (params.decade !== undefined) {
+      if (ERA_STOPS.indexOf(decade) !== -1) state.eraIndex = ERA_STOPS.indexOf(decade);
+    } else if (since && isFinite(since) && since < 1990) {
       var mapped = 0;
       ERA_STOPS.forEach(function (year, index) {
-        if (year <= since && index < ERA_STOPS.length - 1) mapped = index;
+        if (year <= since) mapped = index;
       });
-      state.eraIndex = since >= ERA_STOPS[ERA_STOPS.length - 1] ? ERA_STOPS.length - 1 : mapped;
-    } else state.eraIndex = ERA_STOPS.length - 1;
+      state.eraIndex = mapped;
+    }
 
     var search = document.getElementById('storySearch');
     if (search && search.value !== f.keyword) search.value = f.keyword;
     var sortSelect = document.getElementById('filterSort');
     if (sortSelect) sortSelect.value = f.sort;
     var era = document.getElementById('atlasEra');
-    if (era) era.value = String(state.eraIndex);
+    if (era && state.eraIndex !== null) era.value = String(state.eraIndex);
     if (params.story) VTN.router.go('stories', params, { replace: true, silent: true });
   }
 
@@ -1064,42 +1060,58 @@
 
   function renderEraTicks(ticks) {
     if (!ticks) return;
+    /* 保留按鈕節點，拖動重繪與語言切換時不丟失鍵盤焦點。 */
+    if (ticks.children.length === ERA_STOPS.length) return;
     ticks.textContent = '';
     ERA_STOPS.forEach(function (year, index) {
-      ticks.appendChild(U.node('span', {
-        text: index === ERA_STOPS.length - 1 ? t('atlas.eraAll') : String(year)
+      ticks.appendChild(U.node('button', {
+        type: 'button',
+        'class': 'atlas__tick',
+        'data-era-index': index,
+        text: eraTickLabel(index),
+        onclick: function () { filterStoriesByEra(year, { fit: true }); }
       }));
     });
   }
 
   function updateEraUI() {
-    var label = document.getElementById('atlasEraLabel');
-    if (label) label.textContent = eraLabelText();
+    var allEras = state.eraIndex === null;
+    var timeline = document.getElementById('atlasTimeline');
+    if (timeline) timeline.classList.toggle('is-all', allEras);
+    var allButton = document.getElementById('atlasEraAll');
+    if (allButton) allButton.setAttribute('aria-pressed', allEras ? 'true' : 'false');
     var ticks = document.getElementById('atlasTicks');
     if (ticks) {
-      renderEraTicks(ticks); /* 每次重建，語言切換時「全部」也會跟著翻譯 */
+      renderEraTicks(ticks);
       Array.prototype.forEach.call(ticks.children, function (node, index) {
-        node.classList.toggle('is-active', index === state.eraIndex);
+        var active = !allEras && index === state.eraIndex;
+        node.classList.toggle('is-active', active);
+        node.setAttribute('aria-pressed', active ? 'true' : 'false');
+        node.setAttribute('aria-label', t(index === 0 ? 'atlas.era1950' :
+          index === ERA_STOPS.length - 1 ? 'atlas.era1990' : 'atlas.eraDecade',
+        { y: ERA_STOPS[index] }));
       });
     }
     var input = document.getElementById('atlasEra');
     if (input) {
       input.max = String(ERA_STOPS.length - 1);
-      if (input.value !== String(state.eraIndex)) input.value = String(state.eraIndex);
+      if (!allEras && input.value !== String(state.eraIndex)) input.value = String(state.eraIndex);
+      input.setAttribute('aria-valuetext', eraLabelText());
     }
   }
 
   function setEra(index, options) {
-    state.eraIndex = U.clamp(Number(index), 0, ERA_STOPS.length - 1);
-    if (state.selectedId) {
-      var selected = get(state.selectedId);
-      var year = selected ? yearOf(selected) : null;
-      if (year !== null && year > eraCutoff()) state.selectedId = null;
-    }
+    var value = Number(index);
+    state.eraIndex = index === 'all' || index === null || !isFinite(value) ? null :
+      U.clamp(Math.round(value), 0, ERA_STOPS.length - 1);
     syncUrl();
     render();
-    updateEraUI();
     if (options && options.fit && VTN.map) VTN.map.fitAll();
+  }
+
+  function filterStoriesByEra(era, options) {
+    var index = ERA_STOPS.indexOf(Number(String(era).replace(/\+$/, '')));
+    setEra(era === 'all' || index === -1 ? 'all' : index, options);
   }
 
   function toggleType(type) {
@@ -1231,7 +1243,7 @@
         stories: list,
         selectedId: state.selectedId,
         mode: state.mode,
-        eraYear: eraCutoff(),
+        eraYear: selectedEra(),
         empty: list.length === 0
       });
     }
@@ -1293,10 +1305,23 @@
     if (backBtn) backBtn.addEventListener('click', function () { setMode('map'); });
 
     /* 年代軸 */
+    var eraAll = document.getElementById('atlasEraAll');
+    if (eraAll) eraAll.addEventListener('click', function () {
+      filterStoriesByEra('all', { fit: true });
+    });
     var eraInput = document.getElementById('atlasEra');
     if (eraInput) {
       eraInput.addEventListener('input', function () { setEra(eraInput.value, { fit: false }); });
       eraInput.addEventListener('change', function () { setEra(eraInput.value, { fit: true }); });
+      /* 點擊目前滑塊位置、或在端點按 Home/End，也能從「全部」進入年代。 */
+      eraInput.addEventListener('pointerup', function () {
+        if (state.eraIndex === null) setEra(eraInput.value, { fit: true });
+      });
+      eraInput.addEventListener('keyup', function (event) {
+        if (state.eraIndex === null && /^(ArrowLeft|ArrowRight|ArrowUp|ArrowDown|Home|End|PageUp|PageDown)$/.test(event.key)) {
+          setEra(eraInput.value, { fit: true });
+        }
+      });
     }
 
     /* 音訊：進度、段落高亮、播放鍵狀態 */
@@ -1340,6 +1365,7 @@
     shareUrl: shareUrl,
     setMode: setMode,
     setEra: setEra,
+    filterStoriesByEra: filterStoriesByEra,
     eraStops: function () { return ERA_STOPS.slice(); },
     toggleType: toggleType,
     toggleOverview: toggleOverview,
