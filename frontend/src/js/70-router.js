@@ -69,7 +69,11 @@
       VTN.util.emit('vtn:view-changed', { view: route.view });
     }
 
-    if (route.view !== 'stories') VTN.audio.pauseStory();
+    if (route.view !== 'stories') {
+      VTN.audio.pauseStory();
+      if (VTN.stories && VTN.stories.pauseVideo) VTN.stories.pauseVideo();
+      if (VTN.media && VTN.media.close) VTN.media.close();
+    }
 
     try {
       if (route.view === 'home') {

@@ -34,7 +34,9 @@
     timer: null,
     recordId: null,
     selectedCard: null,
-    cards: []
+    cards: [],
+    attachMedia: null,
+    attachUrl: null
   };
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
@@ -183,6 +185,8 @@
     state.durPill = U.node('span', { class: 'vtn-rec-pill' });
     metaRow.appendChild(state.durPill);
     steps.review.appendChild(metaRow);
+
+    steps.review.appendChild(buildAttachBlock());
 
     state.uploadBtn = U.node('button', { class: 'vtn-rec-btn vtn-rec-btn--primary', type: 'button' });
     state.uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i><span>' +
@@ -724,6 +728,15 @@
 
     if (rec.words.length) {
       steps.result.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('rec.wordTitle') }));
+      if (rec.confidenceSource !== 'unavailable') {
+        var csum = 0, cn = 0;
+        rec.words.forEach(function (w) { if (typeof w.confidence === 'number') { csum += w.confidence; cn++; } });
+        var cavg = cn ? csum / cn : null;
+        var badgeRow = U.node('div', { class: 'vtn-rec-meta-row' });
+        badgeRow.appendChild(U.node('span', { class: 'vtn-rec-pill', text: t('rec.confidenceAvg') }));
+        badgeRow.appendChild(recConfidenceBadge(cavg));
+        steps.result.appendChild(badgeRow);
+      }
       steps.result.appendChild(wordCloud(rec.words, steps.result));
       if (rec.confidenceSource === 'unavailable') {
         steps.result.appendChild(U.node('p', { class: 'vtn-rec-note', text: t('rec.confidenceUnavailable') }));
@@ -782,11 +795,77 @@
     return head;
   }
 
+  /* 任務 3：草稿頁附加照片／影片（前端 Mock，僅本地預覽，不真正上傳） */
+  function buildAttachBlock() {
+    var wrap = U.node('div', { class: 'rec-media-attach' });
+    var addBtn = U.node('button', { class: 'rec-media-attach__btn', type: 'button' });
+    addBtn.innerHTML = '<i class="fa-solid fa-camera" aria-hidden="true"></i><span>' +
+      U.escapeHtml(t('rec.attachMedia')) + '</span>';
+    var input = U.node('input', { type: 'file', accept: 'image/*,video/*', class: 'rec-media-attach__input', hidden: 'hidden' });
+    var preview = U.node('div', { class: 'rec-media-attach__preview', hidden: 'hidden' });
+    var mediaSlot = U.node('div', { class: 'rec-media-attach__media' });
+    var name = U.node('span', { class: 'rec-media-attach__name' });
+    var remove = U.node('button', { class: 'rec-media-attach__remove', type: 'button', 'aria-label': t('rec.attachRemove') });
+    remove.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+    var note = U.node('p', { class: 'rec-media-attach__note', hidden: 'hidden', text: t('rec.attachAdded') });
+    note.setAttribute('data-i18n', 'rec.attachAdded');
+
+    preview.appendChild(mediaSlot);
+    preview.appendChild(name);
+    preview.appendChild(remove);
+    wrap.appendChild(addBtn);
+    wrap.appendChild(input);
+    wrap.appendChild(preview);
+    wrap.appendChild(note);
+
+    addBtn.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      if (state.attachUrl) { try { URL.revokeObjectURL(state.attachUrl); } catch (e) { /* ignore */ } }
+      state.attachMedia = { name: file.name, kind: file.type.indexOf('video') === 0 ? 'video' : 'image' };
+      state.attachUrl = URL.createObjectURL(file);
+      mediaSlot.textContent = '';
+      if (state.attachMedia.kind === 'video') {
+        mediaSlot.appendChild(U.node('video', {
+          class: 'rec-media-attach__thumb', src: state.attachUrl, controls: 'controls'
+        }));
+      } else {
+        mediaSlot.appendChild(U.node('img', { class: 'rec-media-attach__thumb', src: state.attachUrl, alt: file.name }));
+      }
+      name.textContent = file.name;
+      preview.hidden = false;
+      note.hidden = false;
+    });
+    remove.addEventListener('click', function () {
+      if (state.attachUrl) { try { URL.revokeObjectURL(state.attachUrl); } catch (e) { /* ignore */ } }
+      state.attachMedia = null; state.attachUrl = null;
+      input.value = '';
+      mediaSlot.textContent = '';
+      preview.hidden = true;
+      note.hidden = true;
+    });
+    return wrap;
+  }
+
+  /* 任務 4：錄製審核區的整體置信度徽章（復用 30-stories 的視覺，但自帶最小實作） */
+  function recConfidenceBadge(avg) {
+    var level = avg == null ? 'none' : (avg >= 0.8 ? 'high' : (avg >= 0.5 ? 'mid' : 'low'));
+    var key = 'conf.' + level;
+    var b = U.node('span', { class: 'confidence-badge confidence-badge--' + level, text: t(key) });
+    b.setAttribute('data-i18n', key);
+    return b;
+  }
+
   function wordCloud(words, scope) {
     var host = U.node('div', { class: 'vtn-rec-words' });
     words.slice(0, 160).forEach(function (word) {
       var low = typeof word.confidence === 'number' && word.confidence < 0.75;
       var chip = U.node('button', { class: 'vtn-rec-word' + (low ? ' is-low' : ''), type: 'button', text: word.word });
+      if (low) {
+        chip.setAttribute('title', t('conf.tooltip'));
+        chip.setAttribute('data-i18n-title', 'conf.tooltip');
+      }
       chip.appendChild(U.node('span', { class: 'w-t', text: U.fmtTime(word.start) }));
       chip.addEventListener('click', function () {
         var audio = scope.querySelector('audio');

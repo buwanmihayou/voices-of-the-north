@@ -82,8 +82,13 @@
       class: 'seg__btn', type: 'button',
       'data-i18n': 'auth.schoolTab', text: t('auth.schoolTab')
     });
+    var mockBtn = U.node('button', {
+      class: 'seg__btn', type: 'button',
+      'data-i18n': 'auth.mockTab', text: t('auth.mockTab')
+    });
     seg.appendChild(emailBtn);
     seg.appendChild(schoolBtn);
+    seg.appendChild(mockBtn);
     body.appendChild(seg);
 
     var host = U.node('div');
@@ -123,6 +128,7 @@
       feedback.hidden = true;
       emailBtn.classList.toggle('is-active', mode === 'email');
       schoolBtn.classList.toggle('is-active', mode === 'school');
+      mockBtn.classList.toggle('is-active', mode === 'mock');
 
       if (mode === 'email') {
         var emailField = U.node('div', { class: 'vtn-field' });
@@ -180,7 +186,7 @@
           });
         });
         host.appendChild(sendBtn);
-      } else {
+      } else if (mode === 'school') {
         var schoolField = U.node('div', { class: 'vtn-field' });
         schoolField.appendChild(U.node('label', {
           class: 'vtn-field__label', 'data-i18n': 'auth.schoolLabel', text: t('auth.schoolLabel')
@@ -204,6 +210,43 @@
         host.appendChild(U.node('p', {
           class: 'vtn-modal__note', 'data-i18n': 'auth.schoolNote', text: t('auth.schoolNote')
         }));
+      } else {
+        var mockUserField = U.node('div', { class: 'vtn-field' });
+        mockUserField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.mockUserLabel', text: t('auth.mockUserLabel')
+        }));
+        mockUserField.appendChild(U.node('input', {
+          type: 'text', id: 'loginMockUser', autocomplete: 'username',
+          'data-i18n-ph': 'auth.mockUserPh', placeholder: t('auth.mockUserPh')
+        }));
+        host.appendChild(mockUserField);
+
+        var mockPassField = U.node('div', { class: 'vtn-field' });
+        mockPassField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.mockPassLabel', text: t('auth.mockPassLabel')
+        }));
+        mockPassField.appendChild(U.node('input', {
+          type: 'password', id: 'loginMockPass', autocomplete: 'current-password',
+          'data-i18n-ph': 'auth.mockPassPh', placeholder: t('auth.mockPassPh')
+        }));
+        host.appendChild(mockPassField);
+
+        var fillBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--quiet vtn-btn--block', type: 'button',
+          'data-i18n': 'auth.mockFill', text: t('auth.mockFill')
+        });
+        fillBtn.addEventListener('click', function () {
+          var userInput = document.getElementById('loginMockUser');
+          var passInput = document.getElementById('loginMockPass');
+          if (userInput) userInput.value = 'contributor';
+          if (passInput) passInput.value = 'demo1234';
+          feedback.hidden = true;
+        });
+        host.appendChild(fillBtn);
+
+        host.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'auth.mockNote', text: t('auth.mockNote')
+        }));
       }
       var first = host.querySelector('input');
       if (first) first.focus();
@@ -211,6 +254,7 @@
 
     emailBtn.addEventListener('click', function () { mode = 'email'; renderMode(); });
     schoolBtn.addEventListener('click', function () { mode = 'school'; renderMode(); });
+    mockBtn.addEventListener('click', function () { mode = 'mock'; renderMode(); });
     renderMode();
 
     var dlg = VTN.ui.dialog({
@@ -245,7 +289,7 @@
                     showError((error && error.detail) || t('auth.invalidCode'));
                   }
                 });
-            } else {
+            } else if (mode === 'school') {
               var schoolId = (document.getElementById('loginSchool').value || '').trim();
               var password = (document.getElementById('loginPassword').value || '').trim();
               if (!schoolId || !password) { showError(t('auth.schoolRequired')); return; }
@@ -265,6 +309,18 @@
                     showError(t('auth.schoolInvalid'));
                   }
                 });
+            } else {
+              /* 純前端 Mock：不呼叫任何 API，直接建立虛擬登入身份 */
+              var mockUser = (document.getElementById('loginMockUser').value || '').trim();
+              var mockPass = (document.getElementById('loginMockPass').value || '').trim();
+              if (!mockUser || !mockPass) { showError(t('auth.mockRequired')); return; }
+              finishLogin({
+                email: mockUser.indexOf('@') !== -1 ? mockUser : mockUser + '@vtn.demo',
+                name: mockUser,
+                role: adminFlag ? 'admin' : 'member',
+                token: 'local-demo',
+                offline: true
+              }, ctx);
             }
           }
         }

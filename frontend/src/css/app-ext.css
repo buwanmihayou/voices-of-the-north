@@ -158,6 +158,28 @@ html[data-font-size="xl"] { font-size: 22px; }
 .filter-actions { display: flex; gap: 8px; margin: 4px 0 10px; }
 .filter-actions .vtn-btn { flex: 1 1 50%; }
 
+/* 26. 媒體類型篩選 chip（2026-11 新增）
+   390px 手機：預設 flex-wrap 換行；極窄時改為橫向滑動，兩者都不撐破面板。
+   觸控區 >= 44px，字級沿用 var(--fs-min)（>= 0.875rem）。 */
+.filter-media { max-width: 100%; box-sizing: border-box; }
+/* 選擇器需壓過 story-map.css 的 .page--stories .filter-panel .chip（min-height:38px） */
+.page--stories .filter-panel .filter-media .chip {
+  flex: 0 1 auto; min-height: 44px; min-width: 44px;
+  padding: 10px 14px; font-size: var(--fs-min); line-height: 1.35;
+  box-sizing: border-box; white-space: normal; text-align: center;
+}
+.page--stories .filter-panel .filter-media .chip.is-active { font-weight: 800; }
+@media (max-width: 400px) {
+  .filter-media {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; scrollbar-width: thin;
+  }
+  .page--stories .filter-panel .filter-media .chip { flex: 0 0 auto; white-space: nowrap; }
+}
+.empty__title--media { margin: 0; }
+.empty__title--media[hidden] { display: none; }
+#storiesEmptyTitle[hidden] { display: none; }
+
 /* ---------- 7. 故事列表 ---------- */
 .story-list { display: flex; flex-direction: column; gap: 12px; margin: var(--space-section) 16px 0; }
 .story-item {
@@ -410,6 +432,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 .vtn-field { margin-bottom: 12px; }
 .vtn-field__label { display: block; margin-bottom: 5px; font-size: var(--fs-min); font-weight: 700; color: var(--muted); }
 .vtn-field input[type="text"], .vtn-field input[type="email"],
+.vtn-field input[type="password"],
 .vtn-field textarea, .vtn-field select {
   width: 100%; min-height: 44px; padding: 9px 12px;
   border: 1.5px solid var(--sage-line); border-radius: 12px;
@@ -418,6 +441,7 @@ html[data-font-size="xl"] { font-size: 22px; }
 }
 .vtn-field textarea { min-height: 92px; resize: vertical; line-height: 1.6; }
 .vtn-field input[type="text"]:focus, .vtn-field input[type="email"]:focus,
+.vtn-field input[type="password"]:focus,
 .vtn-field textarea:focus, .vtn-field select:focus { outline: 3px solid var(--jade-strong); outline-offset: 1px; }
 .radio-card {
   display: flex; align-items: flex-start; gap: 10px;
@@ -705,3 +729,178 @@ html[data-reduce-motion="true"] *::after {
   .vtn-onboard { padding: 14px; }
   .vtn-onboard__card { padding: 18px 16px 14px; }
 }
+
+/* 20. 萬能媒體區塊：二級入口 + 三級全屏 Overlay（2026-11 新增） */
+.story-media-launch { margin: 16px 0 6px; }
+.story-media-launch__btn {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 12px; border: 1px solid var(--sage-line); border-radius: 14px;
+  background: var(--sage-wash); cursor: pointer; text-align: left;
+  transition: border-color .15s ease, transform .1s ease;
+}
+.story-media-launch__btn:hover { border-color: var(--jade-strong); }
+.story-media-launch__btn:active { transform: scale(0.99); }
+.story-media-launch__thumb {
+  position: relative; flex: 0 0 auto; width: 84px; height: 56px;
+  border-radius: 10px; overflow: hidden; background: #131E18;
+  display: flex; align-items: center; justify-content: center;
+}
+.story-media-launch__img { width: 100%; height: 100%; object-fit: cover; }
+.story-media-launch__play { color: #cfe8d8; font-size: 20px; }
+.story-media-launch__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.story-media-launch__title { font-weight: 800; color: var(--forest); font-size: 0.95rem; }
+.story-media-launch__hint { font-size: var(--fs-min); color: var(--muted); }
+
+.player--audio { margin: 16px 0 6px; }
+
+.media-overlay { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: flex-end; justify-content: center; }
+.media-overlay[hidden] { display: none; }
+.media-overlay__scrim { position: absolute; inset: 0; background: rgba(10,18,14,0.55); backdrop-filter: blur(2px); }
+.media-overlay__panel {
+  position: relative; width: 100%; max-width: 720px; max-height: 94vh; overflow-y: auto;
+  background: var(--bg, #fff); border-radius: 18px 18px 0 0; padding: 14px 16px 22px;
+  box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
+}
+.media-overlay__header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.media-overlay__close {
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: 10px;
+  border: 1px solid var(--hairline); background: var(--sage-wash); color: var(--forest); cursor: pointer; font-size: 18px;
+}
+.media-overlay__close:hover { border-color: var(--jade-strong); }
+.media-overlay__kicker { margin: 0; font-size: var(--fs-min); color: var(--jade); font-weight: 700; }
+.media-overlay__title { margin: 2px 0 0; font-size: 1.1rem; color: var(--forest); }
+.media-overlay__media { margin: 4px 0 8px; }
+.media-overlay__transcript { margin-top: 6px; }
+
+.universal-media__frame { position: relative; }
+.universal-media__video, .universal-media__img {
+  display: block; width: 100%; border-radius: 14px; border: 1px solid var(--hairline); background: #131E18;
+}
+.universal-media__video { aspect-ratio: 16 / 9; object-fit: contain; }
+.universal-media__img { max-height: 56vh; width: 100%; object-fit: contain; background: var(--sage-wash); }
+.universal-media__hint {
+  display: flex; align-items: center; gap: 6px; margin: 8px 0 0;
+  font-size: var(--fs-min); color: var(--muted);
+}
+.universal-media__hint .fa-video, .universal-media__hint .fa-image { color: var(--jade); }
+.universal-media__disclosure {
+  margin: 4px 0 0; font-size: var(--fs-min); color: var(--muted); line-height: 1.5; opacity: 0.85;
+}
+.universal-media__3d { margin-top: 10px; }
+.universal-media__fallback {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  min-height: 180px; border-radius: 14px; border: 1px dashed var(--sage-line);
+  background: var(--sage-wash); color: var(--muted); padding: 18px; text-align: center;
+}
+.universal-media__fallbackIcon { font-size: 30px; color: var(--jade); }
+.universal-media__fallbackText { margin: 0; font-size: 0.9rem; }
+body.media-overlay-open { overflow: hidden; }
+
+@media (min-width: 560px) {
+  .media-overlay { align-items: center; }
+  .media-overlay__panel { border-radius: 18px; max-height: 90vh; }
+}
+
+/* 21. 首頁「精選故事」標題與故事卡間距（2026-11 調整） */
+.featured__head { margin-bottom: 14px; }
+#featuredStory .story-item { margin-top: 0; }
+
+/* 22. 「我的故事」篩選切換按鈕（任務 2） */
+.chip--toggle {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 38px; padding: 6px 13px;
+  font-size: var(--fs-min); font-weight: 700;
+  border: 1px solid var(--sage-line); border-radius: 999px;
+  background: var(--cream, #fff); color: var(--forest); cursor: pointer;
+}
+.chip--toggle .fa-user { color: var(--jade); }
+.chip--toggle:hover { border-color: var(--jade-strong); }
+.chip--toggle.is-active { background: #2F6B4F; border-color: #2F6B4F; color: #F4F8F1; }
+.chip--toggle.is-active .fa-user { color: #F4F8F1; }
+
+/* 23. 錄製草稿頁：附加照片／影片（任務 3） */
+.rec-media-attach { margin: 12px 0; padding: 12px; border: 1px dashed var(--sage-line); border-radius: 14px; }
+.rec-media-attach__btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 40px; padding: 8px 14px;
+  border: 1px solid var(--sage-line); border-radius: 10px;
+  background: var(--sage-wash); color: var(--forest);
+  font-size: var(--fs-min); font-weight: 700; cursor: pointer;
+}
+.rec-media-attach__btn:hover { border-color: var(--jade-strong); }
+.rec-media-attach__preview {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px;
+}
+.rec-media-attach__media { flex: 0 0 auto; width: 96px; height: 68px; border-radius: 10px; overflow: hidden; background: var(--sage-wash); }
+.rec-media-attach__thumb { display: block; width: 100%; height: 100%; object-fit: cover; }
+.rec-media-attach__name { flex: 1 1 auto; min-width: 0; font-size: var(--fs-min); color: var(--forest); word-break: break-all; }
+.rec-media-attach__remove {
+  flex: 0 0 auto; width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--hairline); background: var(--cream, #fff); color: var(--muted); cursor: pointer;
+}
+.rec-media-attach__remove:hover { color: #9c4637; border-color: #9c4637; }
+.rec-media-attach__note {
+  display: flex; align-items: center; gap: 6px;
+  margin: 8px 0 0; font-size: var(--fs-min); color: var(--jade);
+}
+
+/* 24. 轉錄置信度徽章（任務 4） */
+.confidence-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin: 4px 0 0; padding: 2px 9px;
+  border: 1px solid transparent; border-radius: 999px;
+  font-size: var(--fs-min); font-weight: 700; line-height: 1.5; white-space: nowrap;
+}
+.confidence-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.confidence-badge--high { background: #e3f2e8; border-color: #a8d5b8; color: #256b45; }
+.confidence-badge--mid  { background: #fbf1d8; border-color: #e3cd8c; color: #8a6a1f; }
+.confidence-badge--low  { background: #efe2d8; border-color: #cbb09a; color: #7a5238; }
+.confidence-badge--none { background: #eceeec; border-color: #cdd2cd; color: #6b736c; }
+html[data-theme="dark"] .confidence-badge--high { background: #23432f; border-color: #3f7a56; color: #b9e6c8; }
+html[data-theme="dark"] .confidence-badge--mid  { background: #4a3d1c; border-color: #8a7332; color: #f0dda0; }
+html[data-theme="dark"] .confidence-badge--low  { background: #493526; border-color: #8c6247; color: #e6c3a9; }
+html[data-theme="dark"] .confidence-badge--none { background: #333833; border-color: #5a605a; color: #cdd2cd; }
+
+/* 25. 低置信逐字稿波浪底線 + 自訂 Tooltip（任務 4） */
+.segment__text--low {
+  text-decoration: underline wavy #d97a4e;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+}
+.segment__text--low[data-conf-tip] { position: relative; cursor: help; }
+.segment__text--low[data-conf-tip]:hover::after,
+.segment__text--low[data-conf-tip]:focus-visible::after {
+  content: attr(data-conf-tip);
+  position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 30;
+  width: max-content; max-width: 240px; padding: 6px 10px;
+  border-radius: 8px; background: #2c3a30; color: #f4f8f1;
+  font-size: var(--fs-min); font-weight: 600; line-height: 1.4;
+  text-decoration: none; white-space: normal;
+  box-shadow: 0 4px 14px rgba(0,0,0,.22); pointer-events: none;
+}
+
+/* 27. 介面微調（2026-11）
+   1) 頂部不再列出「已選篩選條件」的小標籤，只保留漏斗角標數字與面板內選中態 */
+#filterSummary { display: none; }
+
+/* 2) 篩選角標：數字置於紅圈正中央，並讓 [hidden] 真正生效（原本 display:grid 覆蓋了 UA 隱藏樣式） */
+.atlas__top .atlas__filter .filter-toggle-badge,
+.atlas__filter .filter-toggle-badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; min-width: 20px;
+  margin: 0; padding: 0; box-sizing: border-box;
+  line-height: 1; text-align: center;
+  border-radius: 999px;
+}
+.atlas__top .atlas__filter .filter-toggle-badge[hidden],
+.atlas__filter .filter-toggle-badge[hidden] { display: none; }
+
+/* 3) 視口提示獨占一行、按內容撐開，避免末字掉到第二行 */
+.atlas__top .atlas__viewport {
+  grid-column: 1 / -1; justify-self: start;
+  width: max-content; max-width: 100%;
+  white-space: nowrap;
+}
+.atlas__top .atlas__viewport #atlasViewportText { white-space: nowrap; }
+

@@ -308,6 +308,18 @@
           <p class="filter-group__label" data-i18n="filter.language">語言</p>
           <div class="chip-row" id="filterLanguage"></div>
         </div>
+        <div class="filter-group filter-group--media">
+          <p class="filter-group__label" data-i18n="filter.media">媒體類型</p>
+          <div class="chip-row filter-media" id="filterMedia" role="group"
+               data-i18n-aria="filter.mediaAria">
+            <button type="button" class="chip is-active" data-media="all"
+                    aria-pressed="true" data-i18n="filter.mediaAll">全部媒體</button>
+            <button type="button" class="chip" data-media="video"
+                    aria-pressed="false" data-i18n="filter.mediaVideo">只看影片 (Video)</button>
+            <button type="button" class="chip" data-media="image"
+                    aria-pressed="false" data-i18n="filter.mediaImage">只看相片 (Image)</button>
+          </div>
+        </div>
         <div class="filter-sort">
           <label for="filterSort" data-i18n="filter.sort">排序</label>
           <select id="filterSort">
@@ -340,7 +352,8 @@
 
         <section class="empty" id="storiesEmpty" hidden>
           <div class="empty__inner">
-            <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
+            <h2 class="empty__title" id="storiesEmptyTitle" data-i18n="stories.noResult">沒有符合的故事</h2>
+            <p class="empty__title empty__title--media" id="storiesEmptyMedia" hidden></p>
             <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
           </div>
           <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>

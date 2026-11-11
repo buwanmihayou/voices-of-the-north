@@ -82,6 +82,9 @@
     el.style.transform = '';
     scrim.classList.remove('is-open');
     if (VTN.audio && VTN.audio.pauseStory) VTN.audio.pauseStory();
+    var v = byId('storyVideo');
+    if (v && !v.paused) { try { v.pause(); } catch (e) { /* ignore */ } }
+    if (VTN.media && VTN.media.close) VTN.media.close();
     hideTimer = setTimeout(function () {
       el.hidden = true;
       scrim.hidden = true;
@@ -171,7 +174,7 @@
     bindDrag();
     el.addEventListener('click', function (event) {
       /* 半開時，點抽屜內容任何位置都展開（不影響按鈕本身） */
-      if (!expanded && event.target.closest('button, a, input, .player, .segment')) return;
+      if (!expanded && event.target.closest('button, a, input, .player, .segment, .story-media-launch')) return;
       if (!expanded) setExpanded(true);
     });
   }
