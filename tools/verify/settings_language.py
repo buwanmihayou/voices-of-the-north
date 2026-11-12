@@ -48,7 +48,7 @@ def capture_general(page, width, suffix):
     page.mouse.move(width // 2, 260)
     page.mouse.wheel(0, -2000)
     page.wait_for_function("document.querySelector('main[data-view=\"settings\"]').scrollTop === 0")
-    page.screenshot(path=str(OUTPUT / f"settings-corrected-general-{width}-{suffix}.png"), full_page=True)
+    page.screenshot(path=str(OUTPUT / f"settings-final-display-{width}-{suffix}.png"), full_page=True)
 
 
 def run():
@@ -71,8 +71,9 @@ def run():
                 if page.locator(".vtn-ai-hint-close").is_visible():
                     page.click(".vtn-ai-hint-close")
                 page.click("#meEntrySettings")
-                check(prefix + ": Settings opens General", is_general(page)
-                      and page.locator("#settingsGeneralTitle").is_visible())
+                check(prefix + ": Settings opens Display directly", is_general(page)
+                      and page.locator("#setDisplay").is_visible()
+                      and page.locator("#settingsGeneralTitle").count() == 0)
                 check(prefix + ": no duplicate top language tab or Me language entry",
                       page.locator('main[data-view="settings"] [role="tablist"]').count() == 0
                       and page.locator("#meEntryLanguage").count() == 0)
@@ -128,7 +129,7 @@ def run():
                       and page.locator('#settingsLanguageOptions [data-lang="en"]').get_attribute("aria-pressed") == "true")
                 if width == 390:
                     wait_for_toast(page)
-                    page.screenshot(path=str(OUTPUT / "settings-corrected-language-390-en.png"), full_page=True)
+                    page.screenshot(path=str(OUTPUT / "settings-final-language-390-en.png"), full_page=True)
                 page.click("#settingsBack")
                 check(prefix + ": Language Back returns to General with row focus", is_general(page)
                       and focused(page, "#setLanguageEntry"))

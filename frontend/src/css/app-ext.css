@@ -329,7 +329,6 @@ html[data-font-size="xl"] { font-size: 22px; }
   cursor: pointer;
 }
 .page-head__title { margin: 0; font-size: 1.15rem; font-weight: 900; color: var(--ink); }
-.settings-section-title { margin: 12px 22px 0; font-size: .95rem; color: var(--muted); }
 .settings-panel[hidden] { display: none; }
 #settingsLanguageOptions { margin-top: 14px; }
 .settings-group {

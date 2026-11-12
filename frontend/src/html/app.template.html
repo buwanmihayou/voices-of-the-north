@@ -488,13 +488,12 @@
         <button type="button" class="page-head__back" id="settingsBack" data-i18n-aria="common.back">
           <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
         </button>
-        <h1 class="page-head__title" data-i18n="settings.title">設定</h1>
+        <h1 class="page-head__title" id="settingsTitle" data-i18n="settings.title" tabindex="-1">設定</h1>
       </div>
 
-      <div class="settings-panel" id="settingsPanelGeneral" role="region" aria-labelledby="settingsGeneralTitle">
-      <h2 class="settings-section-title" id="settingsGeneralTitle" data-i18n="settings.general" tabindex="-1">一般</h2>
+      <div class="settings-panel" id="settingsPanelGeneral">
       <section class="settings-group" aria-labelledby="setDisplay">
-        <h3 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h3>
+        <h2 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h2>
 
         <button type="button" class="setting-row setting-row--link" id="setLanguageEntry" aria-labelledby="setLanguageLabel setLanguageCurrent" aria-controls="settingsPanelLanguage">
           <span class="setting-row__text">
@@ -542,7 +541,7 @@
       </section>
 
       <section class="settings-group" aria-labelledby="setPlayback">
-        <h3 class="settings-group__title" id="setPlayback" data-i18n="settings.playback">播放</h3>
+        <h2 class="settings-group__title" id="setPlayback" data-i18n="settings.playback">播放</h2>
 
         <div class="setting-row">
           <div class="setting-row__text">

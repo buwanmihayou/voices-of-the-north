@@ -20,7 +20,7 @@
     if (generalPanel) generalPanel.hidden = language;
     if (languagePanel) languagePanel.hidden = !language;
     refreshControls();
-    var heading = document.getElementById(language ? 'setLanguage' : 'settingsGeneralTitle');
+    var heading = document.getElementById(language ? 'setLanguage' : 'settingsTitle');
     if (heading) heading.focus();
   }
 
