@@ -3050,6 +3050,13 @@ html[data-font-size="xl"] { font-size: 22px; }
 .setting-row__label { display: block; font-size: .95rem; font-weight: 700; color: var(--ink-body); }
 .setting-row__hint { display: block; margin-top: 2px; font-size: var(--fs-min); color: var(--muted); line-height: 1.5; }
 .setting-row__control { flex: none; display: flex; align-items: center; gap: 8px; }
+.setting-row--link {
+  width: 100%; min-height: 64px; border-right: 0; border-bottom: 0; border-left: 0;
+  background: transparent; color: var(--muted); font: inherit; text-align: left; cursor: pointer;
+}
+.setting-row--link .setting-row__control { flex: 0 1 auto; min-width: 0; }
+.setting-row__value { min-width: 0; font-size: var(--fs-min); text-align: right; overflow-wrap: anywhere; }
+.setting-row--link:focus-visible { outline: 3px solid var(--jade-strong); outline-offset: 2px; }
 .seg { display: inline-flex; border: 1.5px solid var(--sage-line); border-radius: 999px; overflow: hidden; }
 .seg__btn {
   min-height: 38px; padding: 0 12px; border: 0; background: transparent;
@@ -5429,6 +5436,16 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       <div class="settings-panel" id="settingsPanelGeneral" role="tabpanel" aria-labelledby="settingsTabGeneral">
       <section class="settings-group" aria-labelledby="setDisplay">
         <h2 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h2>
+
+        <button type="button" class="setting-row setting-row--link" id="setLanguageEntry" aria-labelledby="setLanguageLabel setLanguageCurrent" aria-controls="settingsPanelLanguage">
+          <span class="setting-row__text">
+            <span class="setting-row__label" id="setLanguageLabel" data-i18n="settings.language">語言</span>
+          </span>
+          <span class="setting-row__control">
+            <span class="setting-row__value" id="setLanguageCurrent">繁體中文（香港）</span>
+            <span aria-hidden="true">›</span>
+          </span>
+        </button>
 
         <div class="setting-row">
           <div class="setting-row__text">
@@ -15109,6 +15126,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function refreshControls() {
     var prefs = VTN.store.prefs();
 
+    var languageCurrent = document.getElementById('setLanguageCurrent');
+    if (languageCurrent) languageCurrent.textContent = t('lang.name.' + VTN.i18n.lang());
+
     Array.prototype.forEach.call(document.querySelectorAll('#settingsLanguageOptions [data-lang]'), function (btn) {
       var active = btn.getAttribute('data-lang') === VTN.i18n.lang();
       btn.classList.toggle('is-selected', active);
@@ -15144,6 +15164,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   function bind() {
+    var languageEntry = document.getElementById('setLanguageEntry');
+    if (languageEntry) languageEntry.addEventListener('click', function () {
+      VTN.router.go('settings', { tab: 'language' });
+      var languageTab = document.getElementById('settingsTabLanguage');
+      if (languageTab) languageTab.focus();
+    });
+
     var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-settings-tab]'));
     tabs.forEach(function (btn, index) {
       btn.addEventListener('click', function () {

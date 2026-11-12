@@ -25,6 +25,31 @@ def selected_tab(page):
     return page.locator('[data-settings-tab][aria-selected="true"]').get_attribute("data-settings-tab")
 
 
+def wait_for_toast(page):
+    page.wait_for_function("""() => {
+      const toast = document.querySelector('#appToast');
+      return !toast.classList.contains('is-show') && getComputedStyle(toast).opacity === '0';
+    }""")
+
+
+def language_row(page):
+    return page.locator('.settings-group[aria-labelledby="setDisplay"] > .setting-row').filter(
+        has=page.locator('[data-i18n="settings.language"]'))
+
+
+def check_display_language_row(page, prefix):
+    structure = language_row(page).evaluate("""row => {
+      const group = row.parentElement;
+      const font = group.querySelector('[data-font-size]');
+      const contrast = group.querySelector('#setContrast');
+      return {displayGroup: group.getAttribute('aria-labelledby') === 'setDisplay',
+        fontPeer: font && font.closest('.setting-row').parentElement === group,
+        contrastPeer: contrast && contrast.closest('.setting-row').parentElement === group};
+    }""")
+    check(prefix + ": Language is a peer of text size and contrast in Display",
+          all(structure.values()), structure)
+
+
 def run():
     warn_if_stale()
     with frontend_server() as base, sync_playwright() as p:
@@ -49,7 +74,10 @@ def run():
                 check(prefix + ": Settings opens General", selected_tab(page) == "general")
                 check(prefix + ": only General panel is visible", page.locator("#settingsPanelGeneral").is_visible()
                       and not page.locator("#settingsPanelLanguage").is_visible())
-                page.click("#settingsTabLanguage")
+                check_display_language_row(page, prefix)
+                page.click("#setLanguageEntry")
+                check(prefix + ": Display Language row opens the existing Language subpage",
+                      page.url.endswith("#settings?tab=language") and selected_tab(page) == "language")
                 check(prefix + ": Language is a Settings subpage", page.url.endswith("#settings?tab=language")
                       and selected_tab(page) == "language"
                       and page.locator('main[data-view="settings"]').is_visible())
@@ -76,6 +104,15 @@ def run():
                     check(prefix + f": {code} translates nested title", page.locator("#setLanguage").inner_text() == label)
                     check(prefix + f": {code} stays in Language", selected_tab(page) == "language")
                     check(prefix + f": {code} has no untranslated keys", not state["missing"], state["missing"])
+                    expected_current = page.evaluate("() => VTN.i18n.t('lang.name.' + VTN.i18n.lang())")
+                    check(prefix + f": {code} updates Display current-language value",
+                          page.locator("#setLanguageCurrent").inner_text() == expected_current)
+                    page.click("#settingsTabGeneral")
+                    check(prefix + f": {code} current value is visible in General",
+                          page.locator("#setLanguageCurrent").is_visible())
+                    page.click("#setLanguageEntry")
+                    check(prefix + f": {code} row normally opens Language",
+                          selected_tab(page) == "language")
 
                 page.click('#settingsLanguageOptions [data-lang="en"]')
                 page.reload(wait_until="domcontentloaded")
@@ -113,7 +150,7 @@ def run():
                 check(prefix + ": no browser errors", not errors, errors)
                 output = ROOT / "docs" / "audit" / "2026-11-12"
                 output.mkdir(parents=True, exist_ok=True)
-                page.wait_for_function("getComputedStyle(document.querySelector('#appToast')).opacity === '0'")
+                wait_for_toast(page)
                 page.screenshot(path=str(output / f"settings-language-{width}-en.png"), full_page=True)
                 if width == 320:
                     page.mouse.move(160, 300)
@@ -123,11 +160,47 @@ def run():
                     check(prefix + ": normal scroll reveals the complete English choice", True)
                     page.screenshot(path=str(output / "settings-language-320-en-scrolled.png"), full_page=True)
                 page.click('#settingsLanguageOptions [data-lang="zh-HK"]')
-                page.wait_for_function("getComputedStyle(document.querySelector('#appToast')).opacity === '0'")
+                wait_for_toast(page)
                 page.screenshot(path=str(output / f"settings-language-{width}-zh.png"), full_page=True)
-                if width == 390:
+                for code, suffix in (("zh-HK", "zh"), ("en", "en")):
+                    page.click(f'#settingsLanguageOptions [data-lang="{code}"]')
+                    wait_for_toast(page)
                     page.click("#settingsTabGeneral")
-                    page.screenshot(path=str(output / "settings-general-390-zh.png"), full_page=True)
+                    page.mouse.move(width // 2, 280)
+                    page.mouse.wheel(0, -2000)
+                    page.wait_for_function("document.querySelector('main[data-view=\"settings\"]').scrollTop === 0")
+                    page.screenshot(path=str(output / f"settings-general-{width}-{suffix}.png"), full_page=True)
+                    language_row(page).scroll_into_view_if_needed()
+                    geometry = page.locator("#setLanguageEntry").evaluate("""button => {
+                      const r = button.getBoundingClientRect();
+                      const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+                      return {height: r.height, left: r.left, right: r.right, width: innerWidth,
+                        reachable: r.top >= 0 && r.bottom <= nav.top};
+                    }""")
+                    check(prefix + f": {code} Language row fits and is reachable by scrolling",
+                          geometry["height"] >= 44 and geometry["left"] >= 0
+                          and geometry["right"] <= geometry["width"] and geometry["reachable"], geometry)
+                    page.screenshot(path=str(output / f"settings-general-display-{width}-{suffix}.png"), full_page=True)
+                    page.click("#setLanguageEntry")
+                    check(prefix + f": {code} visible Display row accepts normal click", selected_tab(page) == "language")
+                if width == 320:
+                    page.click('#settingsLanguageOptions [data-lang="zh-HK"]')
+                    wait_for_toast(page)
+                    page.click("#settingsTabGeneral")
+                    page.click('[data-font-size="xl"]')
+                    language_row(page).scroll_into_view_if_needed()
+                    large_layout = page.locator("#setLanguageEntry").evaluate("""row => {
+                      const value = row.querySelector('#setLanguageCurrent');
+                      const r = row.getBoundingClientRect(), v = value.getBoundingClientRect();
+                      return {rowOverflow: row.scrollWidth > row.clientWidth,
+                        valueOverflow: value.scrollWidth > value.clientWidth,
+                        outsideRow: v.left < r.left || v.right > r.right || v.bottom > r.bottom,
+                        pageOverflow: document.documentElement.scrollWidth > innerWidth};
+                    }""")
+                    check(prefix + ": extra-large text keeps current language fully readable",
+                          not any(large_layout.values()), large_layout)
+                    wait_for_toast(page)
+                    page.screenshot(path=str(output / "settings-general-display-320-zh-xl.png"), full_page=True)
                 context.close()
         finally:
             browser.close()

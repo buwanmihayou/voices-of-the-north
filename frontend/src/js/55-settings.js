@@ -46,6 +46,9 @@
   function refreshControls() {
     var prefs = VTN.store.prefs();
 
+    var languageCurrent = document.getElementById('setLanguageCurrent');
+    if (languageCurrent) languageCurrent.textContent = t('lang.name.' + VTN.i18n.lang());
+
     Array.prototype.forEach.call(document.querySelectorAll('#settingsLanguageOptions [data-lang]'), function (btn) {
       var active = btn.getAttribute('data-lang') === VTN.i18n.lang();
       btn.classList.toggle('is-selected', active);
@@ -81,6 +84,13 @@
   }
 
   function bind() {
+    var languageEntry = document.getElementById('setLanguageEntry');
+    if (languageEntry) languageEntry.addEventListener('click', function () {
+      VTN.router.go('settings', { tab: 'language' });
+      var languageTab = document.getElementById('settingsTabLanguage');
+      if (languageTab) languageTab.focus();
+    });
+
     var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-settings-tab]'));
     tabs.forEach(function (btn, index) {
       btn.addEventListener('click', function () {
