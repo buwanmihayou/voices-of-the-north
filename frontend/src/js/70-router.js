@@ -96,7 +96,7 @@
       } else if (route.view === 'me') {
         VTN.account.render();
       } else if (route.view === 'settings') {
-        VTN.settings.refresh();
+        VTN.settings.show(route.params);
       } else if (route.view === 'about') {
         VTN.about.render();
       }

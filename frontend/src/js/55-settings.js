@@ -1,5 +1,5 @@
 /* =============================================================================
- * 55-settings — 設定頁：字級、音量、速度、減少動態、高對比、恢復預設
+ * 55-settings — 設定頁：一般／語言二級分頁與本機偏好
  * -----------------------------------------------------------------------------
  * 底線：正文不小於 18px（標準 = 18px，大 = 20px，特大 = 22px）；
  *       本階段只提供淺色主題，不再跟隨系統深色；所有設定即時生效並只存本機。
@@ -12,6 +12,19 @@
   var U = VTN.util;
 
   function t(key) { return VTN.i18n.t(key); }
+
+  function show(params) {
+    var selected = params && params.tab === 'language' ? 'language' : 'general';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-settings-tab]'), function (btn) {
+      var active = btn.getAttribute('data-settings-tab') === selected;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      btn.tabIndex = active ? 0 : -1;
+      var panel = document.getElementById(btn.getAttribute('aria-controls'));
+      if (panel) panel.hidden = !active;
+    });
+    refreshControls();
+  }
 
   /* 2026-11-09：產品拍板本階段只做淺色。即使本機舊設定存了 dark/system，
      也一律以淺色呈現，避免深色下森林綠被提亮成淺綠、文字對比不足。 */
@@ -32,6 +45,14 @@
 
   function refreshControls() {
     var prefs = VTN.store.prefs();
+
+    Array.prototype.forEach.call(document.querySelectorAll('#settingsLanguageOptions [data-lang]'), function (btn) {
+      var active = btn.getAttribute('data-lang') === VTN.i18n.lang();
+      btn.classList.toggle('is-selected', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      var mark = btn.querySelector('.lang-option__check');
+      if (mark) mark.textContent = active ? '✓' : '';
+    });
 
     Array.prototype.forEach.call(document.querySelectorAll('button[data-font-size]'), function (btn) {
       var active = btn.getAttribute('data-font-size') === prefs.fontSize;
@@ -60,6 +81,36 @@
   }
 
   function bind() {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-settings-tab]'));
+    tabs.forEach(function (btn, index) {
+      btn.addEventListener('click', function () {
+        var tab = btn.getAttribute('data-settings-tab');
+        VTN.router.go('settings', tab === 'language' ? { tab: tab } : {});
+      });
+      btn.addEventListener('keydown', function (event) {
+        var next;
+        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        tabs[next].click();
+        tabs[next].focus();
+      });
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll('#settingsLanguageOptions [data-lang]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var code = btn.getAttribute('data-lang');
+        if (VTN.i18n.langs.indexOf(code) === -1) return;
+        VTN.i18n.setLang(code);
+        VTN.store.setPref('lang', code);
+        VTN.ui.toast(t('lang.switched'), 'success');
+        if (VTN.assistant) VTN.assistant.refresh();
+      });
+    });
+
     Array.prototype.forEach.call(document.querySelectorAll('button[data-font-size]'), function (btn) {
       btn.addEventListener('click', function () {
         VTN.store.setPref('fontSize', btn.getAttribute('data-font-size'));
@@ -134,5 +185,5 @@
     refreshControls();
   }
 
-  VTN.settings = { init: init, apply: apply, refresh: refreshControls };
+  VTN.settings = { init: init, apply: apply, refresh: refreshControls, show: show };
 })();

@@ -261,7 +261,6 @@
     if (era) era.value = '0';
     syncUrl();
     render();
-    if (VTN.map) VTN.map.fitAll();
   }
 
   function activeCount() {
@@ -1216,7 +1215,7 @@
         'class': 'atlas__tick',
         'data-era-index': index,
         text: eraTickLabel(index),
-        onclick: function () { filterStoriesByEra(year, { fit: true }); }
+        onclick: function () { filterStoriesByEra(year); }
       }));
     });
   }
@@ -1247,18 +1246,18 @@
     }
   }
 
-  function setEra(index, options) {
+  /* 年代只改故事集合；視角由使用者縮放、拖動及重新置中控制。 */
+  function setEra(index) {
     var value = Number(index);
     state.eraIndex = index === 'all' || index === null || !isFinite(value) ? null :
       U.clamp(Math.round(value), 0, ERA_STOPS.length - 1);
     syncUrl();
     render();
-    if (options && options.fit && VTN.map) VTN.map.fitAll();
   }
 
-  function filterStoriesByEra(era, options) {
+  function filterStoriesByEra(era) {
     var index = ERA_STOPS.indexOf(Number(String(era).replace(/\+$/, '')));
-    setEra(era === 'all' || index === -1 ? 'all' : index, options);
+    setEra(era === 'all' || index === -1 ? 'all' : index);
   }
 
   function toggleType(type) {
@@ -1435,7 +1434,6 @@
       panel.hidden = true;
       if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
       if (refocus && toggleBtn) toggleBtn.focus();
-      if (VTN.map) VTN.map.fitAll();
     }
 
     var doneBtn = document.getElementById('filterDone');
@@ -1463,19 +1461,19 @@
     /* 年代軸 */
     var eraAll = document.getElementById('atlasEraAll');
     if (eraAll) eraAll.addEventListener('click', function () {
-      filterStoriesByEra('all', { fit: true });
+      filterStoriesByEra('all');
     });
     var eraInput = document.getElementById('atlasEra');
     if (eraInput) {
-      eraInput.addEventListener('input', function () { setEra(eraInput.value, { fit: false }); });
-      eraInput.addEventListener('change', function () { setEra(eraInput.value, { fit: true }); });
+      eraInput.addEventListener('input', function () { setEra(eraInput.value); });
+      eraInput.addEventListener('change', function () { setEra(eraInput.value); });
       /* 點擊目前滑塊位置、或在端點按 Home/End，也能從「全部」進入年代。 */
       eraInput.addEventListener('pointerup', function () {
-        if (state.eraIndex === null) setEra(eraInput.value, { fit: true });
+        if (state.eraIndex === null) setEra(eraInput.value);
       });
       eraInput.addEventListener('keyup', function (event) {
         if (state.eraIndex === null && /^(ArrowLeft|ArrowRight|ArrowUp|ArrowDown|Home|End|PageUp|PageDown)$/.test(event.key)) {
-          setEra(eraInput.value, { fit: true });
+          setEra(eraInput.value);
         }
       });
     }

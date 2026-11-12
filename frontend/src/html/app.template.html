@@ -456,20 +456,11 @@
           <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
         </button>
 
-        <button type="button" class="me-item" id="meEntryLanguage" aria-haspopup="dialog">
-          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-language"></i></span>
-          <span class="me-item__text">
-            <span class="me-item__title" data-i18n="me.language">語言 Language</span>
-            <span class="me-item__sub" id="meLanguageCurrent">繁體中文（香港）</span>
-          </span>
-          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
-        </button>
-
         <button type="button" class="me-item" id="meEntrySettings">
           <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-sliders"></i></span>
           <span class="me-item__text">
             <span class="me-item__title" data-i18n="me.settings">設定</span>
-            <span class="me-item__sub" data-i18n="me.settingsSub">字級、音量、速度、主題與無障礙</span>
+            <span class="me-item__sub" data-i18n="me.settingsSub">語言、字級、音量、速度與無障礙</span>
           </span>
           <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
         </button>
@@ -500,6 +491,12 @@
         <h1 class="page-head__title" data-i18n="settings.title">設定</h1>
       </div>
 
+      <div class="settings-tabs" role="tablist" data-i18n-aria="settings.sections">
+        <button type="button" class="settings-tabs__tab is-active" id="settingsTabGeneral" role="tab" aria-controls="settingsPanelGeneral" aria-selected="true" data-settings-tab="general" data-i18n="settings.general">一般</button>
+        <button type="button" class="settings-tabs__tab" id="settingsTabLanguage" role="tab" aria-controls="settingsPanelLanguage" aria-selected="false" tabindex="-1" data-settings-tab="language" data-i18n="settings.language">語言</button>
+      </div>
+
+      <div class="settings-panel" id="settingsPanelGeneral" role="tabpanel" aria-labelledby="settingsTabGeneral">
       <section class="settings-group" aria-labelledby="setDisplay">
         <h2 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h2>
 
@@ -581,6 +578,20 @@
       </section>
 
       <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。</p>
+      </div>
+
+      <div class="settings-panel" id="settingsPanelLanguage" role="tabpanel" aria-labelledby="settingsTabLanguage" hidden>
+        <section class="settings-group" aria-labelledby="setLanguage">
+          <h2 class="settings-group__title" id="setLanguage" data-i18n="settings.language">語言</h2>
+          <p class="setting-row__hint" data-i18n="settings.languageHint">選擇介面顯示語言</p>
+          <div id="settingsLanguageOptions" role="group" data-i18n-aria="settings.language">
+            <button type="button" class="lang-option" data-lang="zh-HK" aria-pressed="true"><span data-i18n="lang.name.zh-HK">繁體中文（香港）</span><span class="lang-option__check" aria-hidden="true">✓</span></button>
+            <button type="button" class="lang-option" data-lang="zh-CN" aria-pressed="false"><span data-i18n="lang.name.zh-CN">简体中文</span><span class="lang-option__check" aria-hidden="true"></span></button>
+            <button type="button" class="lang-option" data-lang="en" aria-pressed="false"><span data-i18n="lang.name.en">English</span><span class="lang-option__check" aria-hidden="true"></span></button>
+          </div>
+        </section>
+        <p class="settings-foot" data-i18n="lang.note">介面語言會即時切換；逐字稿保留長者原本的粵語用字，不自動改寫。</p>
+      </div>
     </main>
 
     <!-- ======================= 分頁：about ======================= -->

@@ -46,7 +46,18 @@ def static_checks() -> None:
         check(f"引導文案 {lang}", sample in I18N)
 
     stories = DATA["stories"]
-    check("故事總數 13", len(stories) == 13, str(len(stories)))
+    check("原有故事與新增九十年代故事齊全", len(stories) >= 14, str(len(stories)))
+    modern = next((story for story in stories if story["id"] == "FL-014"), None)
+    check("九十年代示範有可見年代與授權", bool(modern) and
+          modern["year"] >= 1990 and modern["eraKey"] == "1990s" and
+          modern["authorized"] is True and modern["scope"] == "community")
+    check("新增故事如實標示虛構且沒有假音檔", bool(modern) and
+          modern["rolePlayed"] is True and modern["audio"] is None and
+          modern["confidence"] is None and
+          "虛構" in modern["title"] and "Fictional" in modern["titleEn"] and
+          "虛構" in modern["sourceNote"] and
+          all("虛構" in segment["text"] and segment["confidence"] is None
+              for segment in modern["segments"]))
     languages = {story.get("languageKey") for story in stories}
     check("三種故事語言", {"yue", "zh", "en"} <= languages, str(sorted(languages)))
     villages = {story.get("villageKey") for story in stories}
@@ -66,7 +77,7 @@ def static_checks() -> None:
         document = Document(DOCX)
         headings = [p.text for p in document.paragraphs if p.style.name == "Heading 1"]
         story_headings = [h for h in headings if "·" in h]
-        check("Word 腳本 13 則齊全", len(story_headings) == 13, str(len(story_headings)))
+        check("歷史 Word 補錄批次仍保留 13 則", len(story_headings) == 13, str(len(story_headings)))
         check("Word 腳本含總表與登記表", len(document.tables) >= 20, str(len(document.tables)))
 
 
@@ -128,7 +139,9 @@ def browser_checks() -> None:
                   page.evaluate("() => VTN.stories.storyTitle(VTN.stories.get('STN-009'))")
                   == "Stanley · Market by the Sea")
             count = page.evaluate("() => VTN.stories.filtered().length")
-            check("地圖可見 13 則故事", count == 13, str(count))
+            expected_count = sum(story.get("authorized") is True and story.get("scope") != "private"
+                                 for story in DATA["stories"])
+            check("地圖可見故事與目前資料一致", count == expected_count, str(count))
             check("英語故事可讀取",
                   page.evaluate("() => VTN.stories.get('STN-009').segments[0].text.startsWith('I grew up in Stanley')"))
             check("華語故事可讀取",

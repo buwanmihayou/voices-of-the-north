@@ -56,9 +56,6 @@
     if (saved) saved.textContent = counts.done;
     if (pending) pending.textContent = counts.draft + counts.pending;
     if (shared) shared.textContent = counts.shared;
-
-    var langEl = document.getElementById('meLanguageCurrent');
-    if (langEl) langEl.textContent = t('lang.name.' + VTN.i18n.lang());
   }
 
   /* =========================================================================
@@ -938,57 +935,9 @@
   /* =========================================================================
    * 7. 語言
    * ======================================================================= */
-  /* 每次都按「當下語言」重算勾選、選中樣式與 aria-pressed，不再只算一次。 */
-  function renderLanguageBody(body) {
-    var current = VTN.i18n.lang();
-    body.textContent = '';
-    [
-      ['zh-HK', 'lang.name.zh-HK'],
-      ['zh-CN', 'lang.name.zh-CN'],
-      ['en', 'lang.name.en']
-    ].forEach(function (def) {
-      var active = def[0] === current;
-      var btn = U.node('button', {
-        class: 'lang-option' + (active ? ' is-selected' : ''),
-        type: 'button',
-        'data-lang': def[0],
-        'aria-pressed': active ? 'true' : 'false'
-      });
-      btn.appendChild(U.node('span', { 'data-i18n': def[1], text: t(def[1]) }));
-      btn.appendChild(U.node('span', {
-        class: 'lang-option__check', 'aria-hidden': 'true', text: active ? '✓' : ''
-      }));
-      body.appendChild(btn);
-    });
-    body.appendChild(U.node('p', {
-      class: 'vtn-modal__note', 'data-i18n': 'lang.note', text: t('lang.note')
-    }));
-  }
-
+  /* 保留既有呼叫入口，統一導向設定內的語言二級分頁。 */
   function openLanguage() {
-    var body = U.node('div');
-    /* 事件委托：重繪後不用逐個重新綁定，也不會累積監聽器。 */
-    body.addEventListener('click', function (event) {
-      var target = event.target;
-      var btn = target && target.closest
-        ? target.closest('button.lang-option[data-lang]') : null;
-      if (!btn || !body.contains(btn)) return;
-      var code = btn.getAttribute('data-lang');
-      if (VTN.i18n.langs.indexOf(code) === -1) return;
-      VTN.i18n.setLang(code);
-      VTN.store.setPref('lang', code);
-      renderMe();
-      VTN.ui.toast(t('lang.switched'), 'success');
-      if (VTN.assistant) VTN.assistant.refresh();
-    });
-    renderLanguageBody(body);
-
-    VTN.ui.dialog({
-      titleKey: 'me.language',
-      body: body,
-      actions: [{ labelKey: 'common.close', kind: 'solid' }],
-      i18nRefresh: function () { renderLanguageBody(body); }
-    });
+    VTN.router.go('settings', { tab: 'language' });
   }
 
   /* =========================================================================
@@ -1013,7 +962,6 @@
     bind('meEntryPrivacy', openPrivacy);
     bind('meEntryCorrection', openCorrectionPicker);
     bind('meEntryExport', openExport);
-    bind('meEntryLanguage', openLanguage);
     bind('meEntrySettings', function () { VTN.router.go('settings', {}); });
     bind('meEntryAbout', function () { VTN.router.go('about', {}); });
 

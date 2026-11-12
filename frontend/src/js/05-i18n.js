@@ -338,7 +338,7 @@
       'me.exportSub': '隨時取回原音、逐字稿與時間戳',
       'me.language': '語言 Language',
       'me.settings': '設定',
-      'me.settingsSub': '字級、音量、速度、主題與無障礙',
+      'me.settingsSub': '語言、字級、音量、速度與無障礙',
       'me.locationNote': '故事地點以模糊範圍呈現，保護講述者私隱。',
       'me.about': '關於 Voices of the North',
       'me.visitorId': '錄音只存喺呢部裝置',
@@ -467,6 +467,10 @@
       'delete.serverFailed': '本機已刪除，但伺服器刪除失敗；請稍後在「匯出」確認或再試。',
 
       'settings.title': '設定',
+      'settings.sections': '設定內的二級分頁',
+      'settings.general': '一般',
+      'settings.language': '語言',
+      'settings.languageHint': '選擇介面顯示語言',
       'settings.display': '顯示',
       'settings.fontSize': '字級',
       'settings.fontSizeHint': '正文最小 18px，照顧長者閱讀',
@@ -602,6 +606,7 @@
       'era.1960s': '1960 年代',
       'era.1970s': '1970 年代',
       'era.1980s': '1980 年代',
+      'era.1990s': '1990 年代',
 
       /* ---- 11.08 修復：讀屏標籤、區塊小標題、披露卡、私隱預設 ---- */
       'app.logoAlt': 'Voices of the North 標誌',
@@ -990,7 +995,7 @@
       'me.exportSub': '随时取回原音、逐字稿与时间戳',
       'me.language': '语言 Language',
       'me.settings': '设置',
-      'me.settingsSub': '字号、音量、速度、主题与无障碍',
+      'me.settingsSub': '语言、字号、音量、速度与无障碍',
       'me.locationNote': '故事地点以模糊范围呈现，保护讲述者隐私。',
       'me.about': '关于 Voices of the North',
       'me.visitorId': '录音只存于这台设备',
@@ -1119,6 +1124,10 @@
       'delete.serverFailed': '本机已删除，但服务器删除失败；请稍后在「导出」确认或再试。',
 
       'settings.title': '设置',
+      'settings.sections': '设置内的二级分页',
+      'settings.general': '常规',
+      'settings.language': '语言',
+      'settings.languageHint': '选择界面显示语言',
       'settings.display': '显示',
       'settings.fontSize': '字号',
       'settings.fontSizeHint': '正文最小 18px，照顾长者阅读',
@@ -1254,6 +1263,7 @@
       'era.1960s': '1960 年代',
       'era.1970s': '1970 年代',
       'era.1980s': '1980 年代',
+      'era.1990s': '1990 年代',
 
       /* ---- 11.08 修复：读屏标签、区块小标题、披露卡、隐私预设 ---- */
       'app.logoAlt': 'Voices of the North 标志',
@@ -1642,7 +1652,7 @@
       'me.exportSub': 'Take back the original audio, transcript and timestamps',
       'me.language': 'Language 語言',
       'me.settings': 'Settings',
-      'me.settingsSub': 'Text size, volume, speed, theme and accessibility',
+      'me.settingsSub': 'Language, text size, volume, speed and accessibility',
       'me.locationNote': 'Story locations are shown as approximate areas to protect narrators.',
       'me.about': 'About Voices of the North',
       'me.visitorId': 'Recordings are stored on this device only',
@@ -1771,6 +1781,10 @@
       'delete.serverFailed': 'Deleted locally, but the server deletion failed. Check the export or try again later.',
 
       'settings.title': 'Settings',
+      'settings.sections': 'Settings subpages',
+      'settings.general': 'General',
+      'settings.language': 'Language',
+      'settings.languageHint': 'Choose the interface language',
       'settings.display': 'Display',
       'settings.fontSize': 'Text size',
       'settings.fontSizeHint': 'Body text is at least 18px for older readers',
@@ -1906,6 +1920,7 @@
       'era.1960s': '1960s',
       'era.1970s': '1970s',
       'era.1980s': '1980s',
+      'era.1990s': '1990s',
 
       /* ---- 11.08 fixes: screen-reader labels, section captions, disclosure, privacy preset ---- */
       'app.logoAlt': 'Voices of the North logo',
