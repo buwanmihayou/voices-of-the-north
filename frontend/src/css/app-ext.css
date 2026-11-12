@@ -329,17 +329,7 @@ html[data-font-size="xl"] { font-size: 22px; }
   cursor: pointer;
 }
 .page-head__title { margin: 0; font-size: 1.15rem; font-weight: 900; color: var(--ink); }
-.settings-tabs {
-  display: flex; gap: 6px; margin: 12px 16px 0; padding: 5px;
-  border: 1.5px solid var(--hairline); border-radius: 16px; background: var(--cream);
-}
-.settings-tabs__tab {
-  flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px;
-  border: 0; border-radius: 11px; background: transparent; color: var(--muted);
-  font: inherit; font-weight: 700; cursor: pointer;
-}
-.settings-tabs__tab.is-active { background: var(--forest); color: #F4F8F1; }
-.settings-tabs__tab:focus-visible { outline: 3px solid var(--jade-strong); outline-offset: 2px; }
+.settings-section-title { margin: 12px 22px 0; font-size: .95rem; color: var(--muted); }
 .settings-panel[hidden] { display: none; }
 #settingsLanguageOptions { margin-top: 14px; }
 .settings-group {

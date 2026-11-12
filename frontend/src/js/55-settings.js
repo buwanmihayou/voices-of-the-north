@@ -1,5 +1,5 @@
 /* =============================================================================
- * 55-settings — 設定頁：一般／語言二級分頁與本機偏好
+ * 55-settings — 設定頁：一般設定與語言詳情、本機偏好
  * -----------------------------------------------------------------------------
  * 底線：正文不小於 18px（標準 = 18px，大 = 20px，特大 = 22px）；
  *       本階段只提供淺色主題，不再跟隨系統深色；所有設定即時生效並只存本機。
@@ -14,16 +14,14 @@
   function t(key) { return VTN.i18n.t(key); }
 
   function show(params) {
-    var selected = params && params.tab === 'language' ? 'language' : 'general';
-    Array.prototype.forEach.call(document.querySelectorAll('[data-settings-tab]'), function (btn) {
-      var active = btn.getAttribute('data-settings-tab') === selected;
-      btn.classList.toggle('is-active', active);
-      btn.setAttribute('aria-selected', active ? 'true' : 'false');
-      btn.tabIndex = active ? 0 : -1;
-      var panel = document.getElementById(btn.getAttribute('aria-controls'));
-      if (panel) panel.hidden = !active;
-    });
+    var language = !!(params && params.tab === 'language');
+    var generalPanel = document.getElementById('settingsPanelGeneral');
+    var languagePanel = document.getElementById('settingsPanelLanguage');
+    if (generalPanel) generalPanel.hidden = language;
+    if (languagePanel) languagePanel.hidden = !language;
     refreshControls();
+    var heading = document.getElementById(language ? 'setLanguage' : 'settingsGeneralTitle');
+    if (heading) heading.focus();
   }
 
   /* 2026-11-09：產品拍板本階段只做淺色。即使本機舊設定存了 dark/system，
@@ -84,30 +82,18 @@
   }
 
   function bind() {
+    var back = document.getElementById('settingsBack');
+    if (back) back.addEventListener('click', function () {
+      var languagePanel = document.getElementById('settingsPanelLanguage');
+      var fromLanguage = languagePanel && !languagePanel.hidden;
+      VTN.router.go(fromLanguage ? 'settings' : 'me', {});
+      var target = document.getElementById(fromLanguage ? 'setLanguageEntry' : 'meEntrySettings');
+      if (target) target.focus();
+    });
+
     var languageEntry = document.getElementById('setLanguageEntry');
     if (languageEntry) languageEntry.addEventListener('click', function () {
       VTN.router.go('settings', { tab: 'language' });
-      var languageTab = document.getElementById('settingsTabLanguage');
-      if (languageTab) languageTab.focus();
-    });
-
-    var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-settings-tab]'));
-    tabs.forEach(function (btn, index) {
-      btn.addEventListener('click', function () {
-        var tab = btn.getAttribute('data-settings-tab');
-        VTN.router.go('settings', tab === 'language' ? { tab: tab } : {});
-      });
-      btn.addEventListener('keydown', function (event) {
-        var next;
-        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
-        else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
-        else if (event.key === 'Home') next = 0;
-        else if (event.key === 'End') next = tabs.length - 1;
-        else return;
-        event.preventDefault();
-        tabs[next].click();
-        tabs[next].focus();
-      });
     });
 
     Array.prototype.forEach.call(document.querySelectorAll('#settingsLanguageOptions [data-lang]'), function (btn) {

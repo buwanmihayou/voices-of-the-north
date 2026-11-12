@@ -3020,17 +3020,7 @@ html[data-font-size="xl"] { font-size: 22px; }
   cursor: pointer;
 }
 .page-head__title { margin: 0; font-size: 1.15rem; font-weight: 900; color: var(--ink); }
-.settings-tabs {
-  display: flex; gap: 6px; margin: 12px 16px 0; padding: 5px;
-  border: 1.5px solid var(--hairline); border-radius: 16px; background: var(--cream);
-}
-.settings-tabs__tab {
-  flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px;
-  border: 0; border-radius: 11px; background: transparent; color: var(--muted);
-  font: inherit; font-weight: 700; cursor: pointer;
-}
-.settings-tabs__tab.is-active { background: var(--forest); color: #F4F8F1; }
-.settings-tabs__tab:focus-visible { outline: 3px solid var(--jade-strong); outline-offset: 2px; }
+.settings-section-title { margin: 12px 22px 0; font-size: .95rem; color: var(--muted); }
 .settings-panel[hidden] { display: none; }
 #settingsLanguageOptions { margin-top: 14px; }
 .settings-group {
@@ -5422,20 +5412,16 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
     <!-- ======================= 分頁：settings ======================= -->
     <main class="page vtn-view" data-view="settings">
       <div class="page-head">
-        <button type="button" class="page-head__back" data-back="me" data-i18n-aria="common.back">
+        <button type="button" class="page-head__back" id="settingsBack" data-i18n-aria="common.back">
           <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
         </button>
         <h1 class="page-head__title" data-i18n="settings.title">設定</h1>
       </div>
 
-      <div class="settings-tabs" role="tablist" data-i18n-aria="settings.sections">
-        <button type="button" class="settings-tabs__tab is-active" id="settingsTabGeneral" role="tab" aria-controls="settingsPanelGeneral" aria-selected="true" data-settings-tab="general" data-i18n="settings.general">一般</button>
-        <button type="button" class="settings-tabs__tab" id="settingsTabLanguage" role="tab" aria-controls="settingsPanelLanguage" aria-selected="false" tabindex="-1" data-settings-tab="language" data-i18n="settings.language">語言</button>
-      </div>
-
-      <div class="settings-panel" id="settingsPanelGeneral" role="tabpanel" aria-labelledby="settingsTabGeneral">
+      <div class="settings-panel" id="settingsPanelGeneral" role="region" aria-labelledby="settingsGeneralTitle">
+      <h2 class="settings-section-title" id="settingsGeneralTitle" data-i18n="settings.general" tabindex="-1">一般</h2>
       <section class="settings-group" aria-labelledby="setDisplay">
-        <h2 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h2>
+        <h3 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h3>
 
         <button type="button" class="setting-row setting-row--link" id="setLanguageEntry" aria-labelledby="setLanguageLabel setLanguageCurrent" aria-controls="settingsPanelLanguage">
           <span class="setting-row__text">
@@ -5483,7 +5469,7 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       </section>
 
       <section class="settings-group" aria-labelledby="setPlayback">
-        <h2 class="settings-group__title" id="setPlayback" data-i18n="settings.playback">播放</h2>
+        <h3 class="settings-group__title" id="setPlayback" data-i18n="settings.playback">播放</h3>
 
         <div class="setting-row">
           <div class="setting-row__text">
@@ -5527,9 +5513,9 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。</p>
       </div>
 
-      <div class="settings-panel" id="settingsPanelLanguage" role="tabpanel" aria-labelledby="settingsTabLanguage" hidden>
+      <div class="settings-panel" id="settingsPanelLanguage" role="region" aria-labelledby="setLanguage" hidden>
         <section class="settings-group" aria-labelledby="setLanguage">
-          <h2 class="settings-group__title" id="setLanguage" data-i18n="settings.language">語言</h2>
+          <h2 class="settings-group__title" id="setLanguage" data-i18n="settings.language" tabindex="-1">語言</h2>
           <p class="setting-row__hint" data-i18n="settings.languageHint">選擇介面顯示語言</p>
           <div id="settingsLanguageOptions" role="group" data-i18n-aria="settings.language">
             <button type="button" class="lang-option" data-lang="zh-HK" aria-pressed="true"><span data-i18n="lang.name.zh-HK">繁體中文（香港）</span><span class="lang-option__check" aria-hidden="true">✓</span></button>
@@ -15079,7 +15065,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
 /* ===== src/js/55-settings.js ===== */
 /* =============================================================================
- * 55-settings — 設定頁：一般／語言二級分頁與本機偏好
+ * 55-settings — 設定頁：一般設定與語言詳情、本機偏好
  * -----------------------------------------------------------------------------
  * 底線：正文不小於 18px（標準 = 18px，大 = 20px，特大 = 22px）；
  *       本階段只提供淺色主題，不再跟隨系統深色；所有設定即時生效並只存本機。
@@ -15094,16 +15080,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function t(key) { return VTN.i18n.t(key); }
 
   function show(params) {
-    var selected = params && params.tab === 'language' ? 'language' : 'general';
-    Array.prototype.forEach.call(document.querySelectorAll('[data-settings-tab]'), function (btn) {
-      var active = btn.getAttribute('data-settings-tab') === selected;
-      btn.classList.toggle('is-active', active);
-      btn.setAttribute('aria-selected', active ? 'true' : 'false');
-      btn.tabIndex = active ? 0 : -1;
-      var panel = document.getElementById(btn.getAttribute('aria-controls'));
-      if (panel) panel.hidden = !active;
-    });
+    var language = !!(params && params.tab === 'language');
+    var generalPanel = document.getElementById('settingsPanelGeneral');
+    var languagePanel = document.getElementById('settingsPanelLanguage');
+    if (generalPanel) generalPanel.hidden = language;
+    if (languagePanel) languagePanel.hidden = !language;
     refreshControls();
+    var heading = document.getElementById(language ? 'setLanguage' : 'settingsGeneralTitle');
+    if (heading) heading.focus();
   }
 
   /* 2026-11-09：產品拍板本階段只做淺色。即使本機舊設定存了 dark/system，
@@ -15164,30 +15148,18 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   function bind() {
+    var back = document.getElementById('settingsBack');
+    if (back) back.addEventListener('click', function () {
+      var languagePanel = document.getElementById('settingsPanelLanguage');
+      var fromLanguage = languagePanel && !languagePanel.hidden;
+      VTN.router.go(fromLanguage ? 'settings' : 'me', {});
+      var target = document.getElementById(fromLanguage ? 'setLanguageEntry' : 'meEntrySettings');
+      if (target) target.focus();
+    });
+
     var languageEntry = document.getElementById('setLanguageEntry');
     if (languageEntry) languageEntry.addEventListener('click', function () {
       VTN.router.go('settings', { tab: 'language' });
-      var languageTab = document.getElementById('settingsTabLanguage');
-      if (languageTab) languageTab.focus();
-    });
-
-    var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-settings-tab]'));
-    tabs.forEach(function (btn, index) {
-      btn.addEventListener('click', function () {
-        var tab = btn.getAttribute('data-settings-tab');
-        VTN.router.go('settings', tab === 'language' ? { tab: tab } : {});
-      });
-      btn.addEventListener('keydown', function (event) {
-        var next;
-        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
-        else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
-        else if (event.key === 'Home') next = 0;
-        else if (event.key === 'End') next = tabs.length - 1;
-        else return;
-        event.preventDefault();
-        tabs[next].click();
-        tabs[next].focus();
-      });
     });
 
     Array.prototype.forEach.call(document.querySelectorAll('#settingsLanguageOptions [data-lang]'), function (btn) {

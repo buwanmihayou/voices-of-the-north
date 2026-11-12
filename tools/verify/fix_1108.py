@@ -262,7 +262,7 @@ def browser_checks() -> None:
         page.goto(base + "#me")
         page.wait_for_timeout(350)
         page.click("#meEntrySettings")
-        page.click("#settingsTabLanguage")
+        page.click("#setLanguageEntry")
         page.wait_for_timeout(250)
         states = page.evaluate("""() => Array.from(document.querySelectorAll('.lang-option')).map(b => ({
             lang: b.dataset.lang,
@@ -302,7 +302,8 @@ def browser_checks() -> None:
               ["en", "true"] in en_state["pressed"] and
               en_state["title"] == "Language" and
               "interface switches instantly" in en_state["note"], str(en_state))
-        page.click('[data-view="settings"] [data-back="me"]')
+        page.click("#settingsBack")
+        page.click("#settingsBack")
         page.wait_for_timeout(300)
 
         # ---- 隱私彈層：預設 / 例外 / 套用全部 / 重設 ----
