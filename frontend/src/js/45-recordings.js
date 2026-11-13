@@ -335,13 +335,22 @@
       danger: true
     }).then(function (ok) {
       if (!ok) return;
-      VTN.store.records.remove(rec.id);
-      VTN.store.audit.log('record.delete', { id: rec.id, synced: rec.sync === 'synced' });
-      renderAll();
+      function removeLocal() {
+        VTN.store.records.remove(rec.id);
+        VTN.store.audit.log('record.delete', { id: rec.id, synced: rec.sync === 'synced' });
+        renderAll();
+      }
+      if (rec.sync !== 'synced') {
+        removeLocal();
+        VTN.ui.toast(t('delete.localOnly'), 'success');
+        return;
+      }
       VTN.api.records.remove(rec.id).then(function () {
+        removeLocal();
         VTN.ui.toast(t('delete.serverOk'), 'success');
       }).catch(function (error) {
         if (error && error.status === 404) {
+          removeLocal();
           VTN.ui.toast(t('delete.localOnly'), 'success');
         } else {
           VTN.ui.toast(t('delete.serverFailed'), 'error');
