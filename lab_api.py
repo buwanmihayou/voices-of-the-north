@@ -23,21 +23,19 @@ from __future__ import annotations
 import json
 import os
 import re
-import sqlite3
 import threading
 import time
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
-
 from fastapi import APIRouter, HTTPException, Request
+
+from storage import connect as db_connect, is_postgres, safe_error
 
 router = APIRouter(prefix="/api/lab", tags=["lab-test-line"])
 
-LAB_DB_PATH = Path(os.environ.get("VTN_LAB_DB", "lab.db"))
-# 與 server.py 的 VTN_DB_PATH 預設一致，只作「回答必須來自已保存錄音」的存在性校驗
-RECORDS_DB_PATH = Path(os.environ.get("VTN_DB_PATH", "records.db"))
 _lock = threading.Lock()
+lab_storage_ready = False
+lab_storage_reason = ""
 
 QUESTION_CARDS = [
     {"id": "C01", "category": "暖身", "prompt": "你細個最記得屋企邊件物件？", "hint": "可以係一張櫈、一個碗、一張相"},
@@ -109,11 +107,10 @@ ILLUSTRATIVE_TIMELINE = {
 # ---------------------------------------------------------------------------
 
 def _connect():
-    return sqlite3.connect(LAB_DB_PATH, timeout=5)
+    return db_connect()
 
 
 def _init():
-    LAB_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = _connect()
     try:
         conn.execute("""CREATE TABLE IF NOT EXISTS card_selections (
@@ -128,12 +125,19 @@ def _init():
             status TEXT NOT NULL, created_at TEXT NOT NULL,
             answer_record_id TEXT, answer_timestamp REAL, answer_citation TEXT,
             answered_at TEXT)""")
+        if is_postgres():
+            for table in ("card_selections", "metadata_reviews", "questions"):
+                conn.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
         conn.commit()
     finally:
         conn.close()
 
 
-_init()
+try:
+    _init()
+    lab_storage_ready = True
+except Exception as exc:
+    lab_storage_reason = safe_error(exc)
 
 
 def _now():
@@ -151,17 +155,15 @@ async def _body(request: Request) -> dict:
 
 
 def _record_exists(record_id: str) -> bool:
-    if not RECORDS_DB_PATH.is_file():
-        return False
     try:
-        conn = sqlite3.connect(RECORDS_DB_PATH, timeout=5)
+        conn = _connect()
         try:
             return conn.execute(
                 "SELECT 1 FROM records WHERE id=?", (record_id,)
             ).fetchone() is not None
         finally:
             conn.close()
-    except sqlite3.Error:
+    except Exception:
         return False
 
 
@@ -293,9 +295,15 @@ async def classify_record(request: Request):
         conn = _connect()
         try:
             conn.execute(
-                """INSERT OR REPLACE INTO metadata_reviews
+                """INSERT INTO metadata_reviews
                    (record_id, suggested_json, confirmed_json, status, classifier, reviewer, created_at, updated_at)
-                   VALUES (?, ?, NULL, 'pending', ?, NULL, ?, ?)""",
+                   VALUES (?, ?, NULL, 'pending', ?, NULL, ?, ?)
+                   ON CONFLICT(record_id) DO UPDATE SET
+                     suggested_json=excluded.suggested_json,
+                     status=excluded.status,
+                     classifier=excluded.classifier,
+                     created_at=excluded.created_at,
+                     updated_at=excluded.updated_at""",
                 (record_id, json.dumps(suggested, ensure_ascii=False), classifier, now, now),
             )
             conn.commit()

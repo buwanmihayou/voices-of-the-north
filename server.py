@@ -28,7 +28,6 @@ import json
 import os
 import re
 import secrets
-import sqlite3
 import threading
 import time
 import uuid
@@ -44,6 +43,14 @@ from google.cloud import speech_v1p1beta1 as speech
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from lab_api import router as lab_router
+from storage import (
+    Connection,
+    backend_name,
+    connect as db_connect,
+    is_postgres,
+    safe_error,
+    schema_for,
+)
 from story_corpus import load_data, retrieve_answer, visible_stories
 
 APP_VERSION = "2026.11.05"
@@ -184,7 +191,6 @@ if gemini_api_key:
 # SQLite：錄音、帳戶、更正、撤回、同意、稽核
 # ---------------------------------------------------------------------------
 RECORDS_DIR = Path(os.environ.get("VTN_RECORDS_DIR", "records"))
-DB_PATH = Path(os.environ.get("VTN_DB_PATH", "records.db"))
 RECORD_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 STORAGE_MODE = "token" if RECORDS_TOKEN else "scoped"
 _db_lock = threading.Lock()
@@ -200,7 +206,9 @@ CREATE TABLE IF NOT EXISTS records (
     source TEXT,
     has_audio INTEGER NOT NULL DEFAULT 0,
     audio_path TEXT,
-    data_json TEXT NOT NULL
+    data_json TEXT NOT NULL,
+    owner TEXT DEFAULT '',
+    scope TEXT DEFAULT 'private'
 );
 CREATE TABLE IF NOT EXISTS deletion_events (
     log_id TEXT PRIMARY KEY,
@@ -273,22 +281,39 @@ CREATE TABLE IF NOT EXISTS consent_log (
 );
 """
 
+RLS_TABLES = (
+    "records",
+    "deletion_events",
+    "auth_codes",
+    "users",
+    "corrections",
+    "story_versions",
+    "withdrawals",
+    "audit_log",
+    "consent_log",
+)
 
-def _connect():
-    return sqlite3.connect(DB_PATH, timeout=5)
+
+def _connect() -> Connection:
+    return db_connect()
 
 
 def _init_storage():
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = _connect()
     try:
-        conn.executescript(SCHEMA)
-        columns = {row[1] for row in conn.execute("PRAGMA table_info(records)")}
-        if "owner" not in columns:
-            conn.execute("ALTER TABLE records ADD COLUMN owner TEXT DEFAULT ''")
-        if "scope" not in columns:
-            conn.execute("ALTER TABLE records ADD COLUMN scope TEXT DEFAULT 'private'")
+        conn.executescript(schema_for(SCHEMA))
+        if is_postgres():
+            conn.execute("ALTER TABLE records ADD COLUMN IF NOT EXISTS owner TEXT DEFAULT ''")
+            conn.execute("ALTER TABLE records ADD COLUMN IF NOT EXISTS scope TEXT DEFAULT 'private'")
+            for table in RLS_TABLES:
+                conn.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
+        else:
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(records)")}
+            if "owner" not in columns:
+                conn.execute("ALTER TABLE records ADD COLUMN owner TEXT DEFAULT ''")
+            if "scope" not in columns:
+                conn.execute("ALTER TABLE records ADD COLUMN scope TEXT DEFAULT 'private'")
         conn.commit()
     finally:
         conn.close()
@@ -298,7 +323,7 @@ try:
     _init_storage()
     storage_ready = True
 except Exception as exc:
-    storage_reason = str(exc)[:300]
+    storage_reason = safe_error(exc)
 
 
 def _records_count() -> int:
@@ -532,6 +557,11 @@ async def create_record(request: Request):
     mime = str(clean.get("mime") or "audio/webm")
     status = str(clean.get("status") or "done")
     source = str(clean.get("source") or "live")
+    if status != "done":
+        raise HTTPException(
+            status_code=400,
+            detail="只會將已完成錄音寫入正式資料庫；草稿及待轉寫內容只保留在瀏覽器",
+        )
 
     conn = _connect()
     try:
@@ -551,9 +581,19 @@ async def create_record(request: Request):
             elif existing and existing[0]:
                 audio_path, has_audio = existing[0], existing[1]
             conn.execute(
-                """INSERT OR REPLACE INTO records
+                """INSERT INTO records
                    (id, created_at, updated_at, status, source, has_audio, audio_path, data_json, owner, scope)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(id) DO UPDATE SET
+                     created_at=excluded.created_at,
+                     updated_at=excluded.updated_at,
+                     status=excluded.status,
+                     source=excluded.source,
+                     has_audio=excluded.has_audio,
+                     audio_path=excluded.audio_path,
+                     data_json=excluded.data_json,
+                     owner=excluded.owner,
+                     scope=excluded.scope""",
                 (rid, created_at, updated_at, status, source, has_audio, audio_path,
                  json.dumps(clean, ensure_ascii=False), owner, scope),
             )
@@ -831,8 +871,11 @@ async def request_code(request: Request):
     try:
         with _db_lock:
             conn.execute(
-                "INSERT OR REPLACE INTO auth_codes (email, code_hash, expires_at, attempts, created_at) "
-                "VALUES (?, ?, ?, 0, ?)",
+                "INSERT INTO auth_codes (email, code_hash, expires_at, attempts, created_at) "
+                "VALUES (?, ?, ?, 0, ?) "
+                "ON CONFLICT(email) DO UPDATE SET "
+                "code_hash=excluded.code_hash, expires_at=excluded.expires_at, "
+                "attempts=excluded.attempts, created_at=excluded.created_at",
                 (email, _email_hash(code), now + 600, now),
             )
             conn.commit()
@@ -909,7 +952,10 @@ async def verify_login(request: Request):
         try:
             with _db_lock:
                 conn.execute(
-                    "INSERT OR REPLACE INTO users (email, name, school, role, created_at) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO users (email, name, school, role, created_at) VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(email) DO UPDATE SET "
+                    "name=excluded.name, school=excluded.school, role=excluded.role, "
+                    "created_at=excluded.created_at",
                     (email, name, school, role, datetime.now(timezone.utc).isoformat()),
                 )
                 conn.commit()
@@ -1077,7 +1123,9 @@ async def withdraw_story(story_id: str, request: Request):
     try:
         with _db_lock:
             conn.execute(
-                "INSERT OR REPLACE INTO withdrawals (story_id, withdrawn_at, by_user, reason) VALUES (?, ?, ?, ?)",
+                "INSERT INTO withdrawals (story_id, withdrawn_at, by_user, reason) VALUES (?, ?, ?, ?) "
+                "ON CONFLICT(story_id) DO UPDATE SET "
+                "withdrawn_at=excluded.withdrawn_at, by_user=excluded.by_user, reason=excluded.reason",
                 (story_id, now, who["email"] or "visitor", str(body.get("reason") or "")[:400]),
             )
             conn.commit()
@@ -1171,6 +1219,7 @@ async def health_check():
         "storage_ready": storage_ready,
         "storage_reason": storage_reason,
         "storage_mode": STORAGE_MODE,
+        "database_backend": backend_name(),
         "records_count": _records_count(),
         "ask_village_ready": story_count > 0,
         "story_count": story_count,
