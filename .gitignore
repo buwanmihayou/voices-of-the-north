@@ -82,3 +82,7 @@ node_modules/
 # OS
 Thumbs.db
 desktop.ini
+
+# Test evidence — screenshots/webm are large; keep only README in git
+evidence/
+!evidence/README.md
