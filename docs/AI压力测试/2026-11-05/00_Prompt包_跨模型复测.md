@@ -81,7 +81,7 @@
 
 - 执行日期：<YYYY-MM-DD>
 - 执行模型：<模型名>
-- 项目背景文件：Ready_for_Techathon_plus.txt
+- 项目背景文件：[Ready_for_Techathon_plus.txt](../../archive/interhk-2026/Ready_for_Techathon_plus.txt)
 
 ## 本次执行的 Prompt 原文
 <完整粘贴 Prompt X>

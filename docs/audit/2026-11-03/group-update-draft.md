@@ -10,7 +10,7 @@ Main issues: source citation clicks lead to a 404; Gemini is not ready, so gener
 Still demo: one role-played Boris story, embedded transcript/map data and keyword retrieval. This is not elder validation or vector RAG. Backend recording storage/access/deletion is not implemented.
 
 Full audit and evidence: shared document, Thẻ 17, “Zheng deployed version audit for 3 November 2026”.
-https://docs.google.com/document/d/1-mhun2m9eFutDfRszEcHqNkjwI11nre4IHqDm5JpI9s/edit?tab=t.1fvegji6c0kn
+[private link removed]
 
 Next: agree the recording → review → save → reopen → delete flow with Steven on Nov 4. Phone/live-microphone and manually checked transcript testing are still pending.
 

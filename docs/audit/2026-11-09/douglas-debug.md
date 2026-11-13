@@ -1,6 +1,6 @@
 # Douglas 清单复查与补修
 
-日期：2026-11-09。来源：[Ready for Techathon+ → 2026.11.7 Douglas_待完成](https://docs.google.com/document/d/14FC-HMG4XN_1__UsnZWDY3Oc1w0eP-351RwGAsLaifo/edit?tab=t.jz2nzsa6ty7w)。原文共 12 项，编号跳过 3。逐项历史处理见 [11 月 7 日评审记录](../2026-11-07/story-map-prd-review.md#8-第四轮douglas-评审意见逐条回复)。
+日期：2026-11-09。来源：Ready for Techathon+ → 2026.11.7 Douglas_待完成。原文共 12 项，编号跳过 3。逐项历史处理见 [11 月 7 日评审记录](../2026-11-07/story-map-prd-review.md#8-第四轮douglas-评审意见逐条回复)。
 
 ## 本次发现并修复
 

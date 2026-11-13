@@ -1,5 +1,35 @@
 # Voices of the North（北區之聲）
 
+## Start here
+
+Voices of the North is a prototype for preserving Cantonese village oral histories in Hong Kong's Northern Metropolis. It pairs a story map and audio player with timestamp-linked answers in **Ask the Village**. The current repository includes 14 role-play demo stories. One includes a measured sample WAV recording. See the reference below for the fictional sample designation.
+
+- [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
+- [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
+- [Verified demo behavior and test checklist](docs/techathon/DEMO-EVIDENCE.md)
+- [Deployment verification and remaining handoff](docs/techathon/DEPLOYMENT.md)
+- [Work items, independent first steps, and handoffs](docs/techathon/WORK-ITEMS.md)
+- [Main demo flow and shared interfaces](docs/techathon/DEMO-FLOW.md)
+- [Active work and owners](https://github.com/phatdat220707/voices-of-the-north/milestone/1)
+- [Agent instructions](AGENTS.md) and [InterHK archive](docs/archive/interhk-2026/README.md)
+
+The hosted build is a hackathon demo. The Techathon+ target is a public archive of approved stories with invited contributors and moderation. Production sign-in, durable private storage, and withdrawal checks are launch work. Use role-play samples when testing the current demo.
+
+Start from your issue and check what you can deliver locally with sample data. Use the demo flow to agree on what your part receives and hands off. Put decisions, PRs, and public-safe evidence on GitHub. Post your daily status in your own tab in the team Google Doc.
+
+### Run locally
+
+From the repository root, install the Python requirements and start FastAPI.
+
+```bash
+python -m pip install -r requirements.txt
+python -m uvicorn server:app --host 127.0.0.1 --port 8000
+```
+
+Open [the local app](http://127.0.0.1:8000/voices-of-the-north-app.html). Local browsing and sample playback can be exercised independently of cloud transcription. Use server-side credentials in a test environment when verifying cloud speech. See the Chinese reference below for build commands and environment variables.
+
+For frontend changes, edit `frontend/src/` and regenerate the bundled HTML with `python tools/build_frontend.py`. On Windows, use UTF-8 mode if your terminal cannot print the build messages, for example `python -X utf8 tools/build_frontend.py`.
+
 以生成式 AI 保存香港鄉村長者口述歷史的示範平台：錄音 → 逐字稿 → 可核對的問答 → 四級私隱分享。示範資料以北區為主，另加赤柱、九龍城、大澳三則北區外故事，以及谷埔、荔枝窩兩則東北鄉郊故事；涵蓋粵語、華語（國語）與 English。
 
 > **黑客松示範聲明**：14 則故事全部標記為「角色扮演示範故事」，並非真實長者訪談。其中 `FL-014` 為 AI 編寫的 1994 年虛構示範，人物與事件均為虛構，用於展示 1990 年代至今的篩選結果。
