@@ -165,6 +165,13 @@ def main() -> None:
         audio = client.get(story_audio, headers={"Range": "bytes=0-31"})
         check("published audio supports seeking", audio.status_code == 206 and len(audio.content) == 32)
         check("published audio is not cached", audio.headers.get("cache-control") == "no-store")
+        audio_aliases = []
+        if os.name == "nt":
+            audio_aliases = [story_audio + ".", story_audio + "%20"]
+            for alias in audio_aliases:
+                check("Windows alias resolves to published audio", client.get(
+                    alias, headers={"Range": "bytes=0-3"}
+                ).content == b"RIFF")
         check("guest cannot withdraw", client.post(withdrawal_url, json={}).status_code == 403)
         check("member cannot withdraw", client.post(withdrawal_url, headers=owner, json={}).status_code == 403)
         check("client role headers cannot grant withdrawal", client.post(withdrawal_url, headers=forged, json={}).status_code == 403)
@@ -181,6 +188,10 @@ def main() -> None:
         check("withdrawn story no longer cited", result["inScope"] is False and result["sources"] == [])
         check("old URL blocked", client.get(story_audio).status_code == 404)
         check("old URL blocked for ranges", client.get(story_audio, headers={"Range": "bytes=0-31"}).status_code == 404)
+        for alias in audio_aliases:
+            denied_alias = client.get(alias, headers={"Range": "bytes=0-3"})
+            check("Windows alias cannot restore withdrawn audio", denied_alias.status_code == 404)
+            check("Windows alias denial is not cached", denied_alias.headers.get("cache-control") == "no-store")
         check("conditional requests cannot restore withdrawn audio", client.get(
             story_audio, headers={"If-None-Match": audio.headers["etag"]}
         ).status_code == 404)

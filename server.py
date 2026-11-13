@@ -1394,13 +1394,17 @@ async def process_audio(request: Request, file: UploadFile = File(None)):
 
 class StoryStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
-        # Existing audio URLs must honor withdrawal, including range requests.
-        requested_path = os.path.normcase(path)
-        stories = [
-            story for story in all_stories()
-            if story.get("audio")
-            and os.path.normcase(os.path.normpath(story["audio"])) == requested_path
-        ]
+        # Compare file identities so Windows aliases cannot bypass withdrawal.
+        _, requested_stat = self.lookup_path(path)
+        if requested_stat is None:
+            return await super().get_response(path, scope)
+        stories = []
+        for story in all_stories():
+            if not story.get("audio"):
+                continue
+            _, audio_stat = self.lookup_path(str(story["audio"]))
+            if audio_stat is not None and os.path.samestat(requested_stat, audio_stat):
+                stories.append(story)
         if not stories:
             return await super().get_response(path, scope)
         excluded = _withdrawn_ids()
