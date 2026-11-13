@@ -205,6 +205,104 @@
     body.appendChild(actions);
   }
 
+  function openSubmission(rec) {
+    var body = U.node('div');
+    body.appendChild(U.node('p', {
+      class: 'vtn-rec-desc',
+      text: t('review.intro')
+    }));
+    body.appendChild(U.node('label', { class: 'vtn-rec-subhead', text: t('review.scope') }));
+    var scopeSelect = U.node('select', {
+      id: 'contributionRequestedScope',
+      'aria-label': t('review.scope')
+    }, VTN.SCOPES.map(function (scope) {
+      return U.node('option', {
+        value: scope,
+        text: t(VTN.SCOPE_META[scope].labelKey)
+      });
+    }));
+    scopeSelect.value = rec.requestedScope || rec.scope || 'private';
+    body.appendChild(scopeSelect);
+    var confirmWrap = U.node('label', { class: 'vtn-rec-note' });
+    var confirmed = U.node('input', { type: 'checkbox' });
+    confirmWrap.appendChild(confirmed);
+    confirmWrap.appendChild(document.createTextNode(' ' + t('review.confirm')));
+    body.appendChild(confirmWrap);
+    var feedback = U.node('p', { class: 'vtn-rec-note', role: 'alert', hidden: 'hidden' });
+    body.appendChild(feedback);
+
+    var dlg = VTN.ui.dialog({
+      titleKey: 'review.title',
+      body: body,
+      actions: [
+        { labelKey: 'common.cancel', kind: 'quiet' },
+        {
+          labelKey: 'review.submit',
+          kind: 'solid',
+          keepOpen: true,
+          onClick: function (ctx) {
+            if (!confirmed.checked) {
+              feedback.textContent = t('review.confirm');
+              feedback.hidden = false;
+              confirmed.focus();
+              return;
+            }
+            VTN.api.contributions.submit(rec.id, {
+              transcriptConfirmed: true,
+              requestedScope: scopeSelect.value,
+              policyVersion: VTN.config.consentPolicyVersion
+            }).then(function (response) {
+              var updated = response && response.record || {};
+              VTN.store.records.patch(rec.id, {
+                scope: 'private',
+                requestedScope: updated.requestedScope || scopeSelect.value,
+                reviewStatus: updated.reviewStatus || 'submitted',
+                submittedAt: updated.submittedAt
+              });
+              VTN.ui.toast(t('review.submitted'), 'success');
+              ctx.close('submitted');
+              renderAll();
+              pullAndRender();
+            }).catch(function () {
+              feedback.textContent = t('review.failed');
+              feedback.hidden = false;
+            });
+          }
+        }
+      ]
+    });
+    return dlg;
+  }
+
+  function pullAndRender() {
+    VTN.api.records.pull().then(function () {
+      renderAll();
+    }).catch(function () { /* 保留本機狀態 */ });
+  }
+
+  function reviewSubmission(rec, approved) {
+    VTN.ui.confirm({
+      titleKey: approved ? 'review.approve' : 'review.reject',
+      messageKey: 'review.intro',
+      confirmLabelKey: approved ? 'review.approve' : 'review.reject',
+      cancelLabelKey: 'common.cancel',
+      danger: !approved
+    }).then(function (ok) {
+      if (!ok) return;
+      VTN.api.contributions.review(
+        rec.id,
+        approved,
+        approved ? (rec.requestedScope || 'private') : 'private',
+        ''
+      ).then(function () {
+        VTN.ui.toast(t(approved ? 'review.approvedToast' : 'review.rejectedToast'), 'success');
+        pullAndRender();
+      }).catch(function () {
+        VTN.ui.toast(t('review.failed'), 'error');
+      });
+    });
+  }
+
   function renderDoneBody(rec, body) {
     var tags = U.node('div', { class: 'vtn-rec-card__tags' });
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive') }));
@@ -218,6 +316,12 @@
       text: t('scope.label', { scope: t(VTN.SCOPE_META[VTN.store.scopeOf(rec)].labelKey) })
     }));
     if (rec.rolePlayed) tags.appendChild(U.node('span', { class: 'vtn-rec-pill vtn-rec-pill--gold', text: t('story.rolePlayed') }));
+    if (rec.reviewStatus && t('review.status.' + rec.reviewStatus) !== 'review.status.' + rec.reviewStatus) {
+      tags.appendChild(U.node('span', {
+        class: 'vtn-rec-pill',
+        text: t('review.status.' + rec.reviewStatus)
+      }));
+    }
     body.appendChild(tags);
 
     if (rec.audioDataURL) {
@@ -299,6 +403,31 @@
     actions2.appendChild(correct);
     actions2.appendChild(withdraw);
     body.appendChild(actions2);
+
+    if (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected') {
+      var reviewActions = U.node('div', { class: 'vtn-rec-card__actions' });
+      var submit = U.node('button', {
+        class: 'vtn-rec-card__retry', type: 'button', text: t('review.submit')
+      });
+      submit.addEventListener('click', function () { openSubmission(rec); });
+      reviewActions.appendChild(submit);
+      body.appendChild(reviewActions);
+    }
+
+    if (VTN.store.role() === 'admin' && rec.reviewStatus === 'submitted') {
+      var moderation = U.node('div', { class: 'vtn-rec-card__actions' });
+      var approve = U.node('button', {
+        class: 'vtn-rec-card__retry', type: 'button', text: t('review.approve')
+      });
+      approve.addEventListener('click', function () { reviewSubmission(rec, true); });
+      var reject = U.node('button', {
+        class: 'vtn-rec-card__remove', type: 'button', text: t('review.reject')
+      });
+      reject.addEventListener('click', function () { reviewSubmission(rec, false); });
+      moderation.appendChild(approve);
+      moderation.appendChild(reject);
+      body.appendChild(moderation);
+    }
 
     var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
     var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });

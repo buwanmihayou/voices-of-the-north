@@ -182,6 +182,31 @@
     return request('/api/records/' + encodeURIComponent(id), { method: 'DELETE', timeout: 12000 });
   }
 
+  function submitContribution(id, payload) {
+    return request('/api/contributions/' + encodeURIComponent(id) + '/submit', {
+      method: 'POST',
+      body: payload,
+      timeout: 12000
+    });
+  }
+
+  function listContributions(status) {
+    var suffix = status ? '?status=' + encodeURIComponent(status) : '';
+    return request('/api/contributions' + suffix, { timeout: 12000 });
+  }
+
+  function reviewContribution(id, approved, approvedScope, note) {
+    return request('/api/contributions/' + encodeURIComponent(id) + '/review', {
+      method: 'POST',
+      body: {
+        approved: !!approved,
+        approvedScope: approvedScope || 'private',
+        note: note || ''
+      },
+      timeout: 12000
+    });
+  }
+
   /* ---------------- 帳戶 ---------------- */
   function requestLoginCode(email) {
     return request('/api/auth/request-code', { method: 'POST', body: { email: email } });
@@ -260,6 +285,11 @@
       sync: syncRecord,
       pull: pullRecords,
       remove: deleteRecord
+    },
+    contributions: {
+      submit: submitContribution,
+      list: listContributions,
+      review: reviewContribution
     },
     auth: { requestCode: requestLoginCode, verify: verifyLogin },
     stories: fetchStories,
