@@ -3691,6 +3691,15 @@ body .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
   color: var(--forest); font-size: var(--fs-min); font-weight: 700;
 }
 
+/* 31. 示例 / Mock 低調標籤（任務 4：標識示例媒體與演示置信度；不動數據、不動閾值、不動 UI 瘦身） */
+.vtn-demo-tag {
+  display: inline-flex; align-items: center;
+  padding: 1px 7px; border-radius: 999px;
+  background: #ECEEEC; color: #6b736c; border: 1px solid #cdd2cd;
+  font-size: var(--fs-min); font-weight: 700; line-height: 1.5;
+}
+.confidence-badge-wrap { display: inline-flex; align-items: center; gap: 6px; }
+
 /* ===== src/css/story-map.css ===== */
 /* =============================================================================
  * story-map.css — 故事 Tab「地圖優先」重構
@@ -5237,7 +5246,8 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
                      data-i18n-ph="atlas.searchPh" data-i18n-aria="stories.searchAria">
             </label>
             <button type="button" class="atlas__filter" id="filterToggle"
-                    aria-expanded="false" aria-controls="filterPanel">
+                    aria-expanded="false" aria-controls="filterPanel"
+                    data-i18n-aria="stories.filterAria">
               <i class="fa-solid fa-sliders" aria-hidden="true"></i>
               <span class="filter-toggle-badge" id="filterBadge" hidden>0</span>
             </button>
@@ -6128,6 +6138,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'conf.mid': '中置信度（建議核對）',
       'conf.low': '低置信度（難以聽懂）',
       'conf.none': '無數據',
+      'conf.unavailable': '無法取得',
+      'badge.demo': '示範',
       'conf.tooltip': 'AI 識別可能有誤，請確認識別結果',
       'conf.ariaPrefix': '轉錄置信度：',
       'rec.goRecordings': '去我的錄音',
@@ -6228,6 +6240,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'stories.sub': '聽聽長者分享的地方記憶',
       'stories.searchPh': '搜尋村落、人物、關鍵詞',
       'stories.searchAria': '搜尋故事',
+      'stories.filterAria': '篩選',
       'stories.filter': '篩選',
       'stories.noResult': '沒有符合的故事',
       'stories.noResultHint': '試下減少篩選條件，或者清除全部再搵一次。',
@@ -6790,6 +6803,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'conf.mid': '中置信度（建议核对）',
       'conf.low': '低置信度（难以听懂）',
       'conf.none': '无数据',
+      'conf.unavailable': '无法获取',
+      'badge.demo': '示例',
       'conf.tooltip': 'AI 识别可能有误，请确认识别结果',
       'conf.ariaPrefix': '转录置信度：',
       'rec.goRecordings': '去我的录音',
@@ -6890,6 +6905,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'stories.sub': '听听长者分享的地方记忆',
       'stories.searchPh': '搜索村落、人物、关键词',
       'stories.searchAria': '搜索故事',
+      'stories.filterAria': '筛选',
       'stories.filter': '筛选',
       'stories.noResult': '没有符合的故事',
       'stories.noResultHint': '试试减少筛选条件，或者清除全部再找一次。',
@@ -7452,6 +7468,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'conf.mid': 'Medium (please verify)',
       'conf.low': 'Low (hard to hear)',
       'conf.none': 'No data',
+      'conf.unavailable': 'unavailable',
+      'badge.demo': 'Demo',
       'conf.tooltip': 'AI transcription may be inaccurate; please verify.',
       'conf.ariaPrefix': 'Transcription confidence: ',
       'rec.goRecordings': 'Go to my recordings',
@@ -7552,6 +7570,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'stories.sub': 'Local memories shared by elders',
       'stories.searchPh': 'Search village, narrator, keywords',
       'stories.searchAria': 'Search stories',
+      'stories.filterAria': 'Filter',
       'stories.filter': 'Filter',
       'stories.noResult': 'No matching stories',
       'stories.noResultHint': 'Try fewer filters, or clear them all and search again.',
@@ -10775,12 +10794,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function confidenceBadge(story) {
     var c = (story && typeof story.confidence === 'number') ? story.confidence : null;
     var level = c == null ? 'none' : (c >= 0.8 ? 'high' : (c >= 0.5 ? 'mid' : 'low'));
-    var key = 'conf.' + level;
+    var key = (level === 'none') ? 'conf.unavailable' : 'conf.' + level;
+    var wrap = U.node('span', { class: 'confidence-badge-wrap' });
     var b = U.node('span', { class: 'confidence-badge confidence-badge--' + level, text: t(key) });
     b.setAttribute('data-i18n', key);
     b.setAttribute('title', t('conf.ariaPrefix') + t(key));
     b.setAttribute('aria-label', t('conf.ariaPrefix') + t(key));
-    return b;
+    wrap.appendChild(b);
+    wrap.appendChild(U.node('span', { class: 'vtn-demo-tag', text: t('badge.demo') }));
+    return wrap;
   }
 
   /* 任務 2：「我的故事」切換按鈕（篩選列） */
@@ -11764,6 +11786,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   }
 
   function appendMediaFooter(box, story, type) {
+    box.appendChild(U.node('span', { class: 'vtn-demo-tag', text: t('badge.demo') }));
     var hint = U.node('p', { class: 'universal-media__hint' });
     hint.innerHTML = '<i class="fa-solid ' + (type === 'image' ? 'fa-image' : 'fa-video') +
       '" aria-hidden="true"></i><span>' +
@@ -13997,7 +14020,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   /* 任務 4：錄製審核區的整體置信度徽章（復用 30-stories 的視覺，但自帶最小實作） */
   function recConfidenceBadge(avg) {
     var level = avg == null ? 'none' : (avg >= 0.8 ? 'high' : (avg >= 0.5 ? 'mid' : 'low'));
-    var key = 'conf.' + level;
+    var key = (level === 'none') ? 'conf.unavailable' : 'conf.' + level;
     var b = U.node('span', { class: 'confidence-badge confidence-badge--' + level, text: t(key) });
     b.setAttribute('data-i18n', key);
     return b;
@@ -14928,6 +14951,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     window.addEventListener('resize', syncNavHeight);
     window.addEventListener('load', syncNavHeight);
     U.on('vtn:health', renderStatusChip);
+    U.on('vtn:lang-changed', refresh);
     U.on('vtn:withdrawn', function () {
       VTN.store.chat.prune();
       if (root.classList.contains('is-open')) renderHistory();
@@ -15235,6 +15259,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function refresh() {
     if (root && root.classList.contains('is-open')) renderHistory();
     renderStatusChip();
+    if (fab) fab.setAttribute('aria-label', t('assistant.fabAria'));
+    if (hint && !hint.hidden) hint.innerHTML = U.escapeHtml(t('assistant.hint')) + '<small>' + U.escapeHtml(t('assistant.hintSub')) + '</small>';
   }
 
   function mount() {

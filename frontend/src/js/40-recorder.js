@@ -917,7 +917,7 @@
   /* 任務 4：錄製審核區的整體置信度徽章（復用 30-stories 的視覺，但自帶最小實作） */
   function recConfidenceBadge(avg) {
     var level = avg == null ? 'none' : (avg >= 0.8 ? 'high' : (avg >= 0.5 ? 'mid' : 'low'));
-    var key = 'conf.' + level;
+    var key = (level === 'none') ? 'conf.unavailable' : 'conf.' + level;
     var b = U.node('span', { class: 'confidence-badge confidence-badge--' + level, text: t(key) });
     b.setAttribute('data-i18n', key);
     return b;

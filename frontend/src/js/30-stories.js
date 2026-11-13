@@ -868,12 +868,15 @@
   function confidenceBadge(story) {
     var c = (story && typeof story.confidence === 'number') ? story.confidence : null;
     var level = c == null ? 'none' : (c >= 0.8 ? 'high' : (c >= 0.5 ? 'mid' : 'low'));
-    var key = 'conf.' + level;
+    var key = (level === 'none') ? 'conf.unavailable' : 'conf.' + level;
+    var wrap = U.node('span', { class: 'confidence-badge-wrap' });
     var b = U.node('span', { class: 'confidence-badge confidence-badge--' + level, text: t(key) });
     b.setAttribute('data-i18n', key);
     b.setAttribute('title', t('conf.ariaPrefix') + t(key));
     b.setAttribute('aria-label', t('conf.ariaPrefix') + t(key));
-    return b;
+    wrap.appendChild(b);
+    wrap.appendChild(U.node('span', { class: 'vtn-demo-tag', text: t('badge.demo') }));
+    return wrap;
   }
 
   /* 任務 2：「我的故事」切換按鈕（篩選列） */
