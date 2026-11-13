@@ -362,6 +362,7 @@
     window.addEventListener('resize', syncNavHeight);
     window.addEventListener('load', syncNavHeight);
     U.on('vtn:health', renderStatusChip);
+    U.on('vtn:lang-changed', refresh);
     U.on('vtn:withdrawn', function () {
       VTN.store.chat.prune();
       if (root.classList.contains('is-open')) renderHistory();
@@ -669,6 +670,8 @@
   function refresh() {
     if (root && root.classList.contains('is-open')) renderHistory();
     renderStatusChip();
+    if (fab) fab.setAttribute('aria-label', t('assistant.fabAria'));
+    if (hint && !hint.hidden) hint.innerHTML = U.escapeHtml(t('assistant.hint')) + '<small>' + U.escapeHtml(t('assistant.hintSub')) + '</small>';
   }
 
   function mount() {
