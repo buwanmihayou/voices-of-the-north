@@ -115,6 +115,7 @@
   }
 
   function appendMediaFooter(box, story, type) {
+    box.appendChild(U.node('span', { class: 'vtn-demo-tag', text: t('badge.demo') }));
     var hint = U.node('p', { class: 'universal-media__hint' });
     hint.innerHTML = '<i class="fa-solid ' + (type === 'image' ? 'fa-image' : 'fa-video') +
       '" aria-hidden="true"></i><span>' +

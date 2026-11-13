@@ -1000,3 +1000,12 @@ body .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
   color: var(--forest); font-size: var(--fs-min); font-weight: 700;
 }
 
+/* 31. 示例 / Mock 低調標籤（任務 4：標識示例媒體與演示置信度；不動數據、不動閾值、不動 UI 瘦身） */
+.vtn-demo-tag {
+  display: inline-flex; align-items: center;
+  padding: 1px 7px; border-radius: 999px;
+  background: #ECEEEC; color: #6b736c; border: 1px solid #cdd2cd;
+  font-size: var(--fs-min); font-weight: 700; line-height: 1.5;
+}
+.confidence-badge-wrap { display: inline-flex; align-items: center; gap: 6px; }
+
