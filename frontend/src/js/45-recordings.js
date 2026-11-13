@@ -110,6 +110,15 @@
     meta.push(rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive'));
     main.appendChild(U.node('p', { class: 'vtn-rec-card__meta', text: meta.join('　・　') }));
 
+    if (rec.iconKey && VTN.recIcons) {
+      var chosen = U.node('span', {
+        class: 'vtn-rec-card__chosen', title: VTN.recIcons.labelOf(rec.iconKey)
+      });
+      chosen.innerHTML = '<i class="fa-solid ' + VTN.recIcons.iconOf(rec.iconKey) + '" aria-hidden="true"></i>';
+      chosen.appendChild(U.node('span', { text: VTN.recIcons.labelOf(rec.iconKey) }));
+      main.appendChild(chosen);
+    }
+
     var sync = syncLabel(rec);
     main.appendChild(U.node('span', { class: sync.cls, text: sync.text }));
     var chevron = U.node('span', { class: 'vtn-rec-card__chevron' });
@@ -126,6 +135,13 @@
     if (state === 'draft') renderDraftBody(rec, body);
     else if (state === 'pending') renderPendingBody(rec, body);
     else renderDoneBody(rec, body);
+
+    if (VTN.recIcons) {
+      body.appendChild(VTN.recIcons.build(rec.iconKey, function (key) {
+        VTN.store.records.patch(rec.id, { iconKey: key });
+        VTN.ui.toast(t('rec.iconSaved'), 'success');
+      }));
+    }
 
     head.addEventListener('click', function () {
       var open = body.hidden;

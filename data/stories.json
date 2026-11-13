@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "contentVersion": "2026.11.09",
+  "contentVersion": "2026.11.12",
   "consentPolicyVersion": "CONSENT-2026-11-v2",
   "storyMetaNote": "storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。",
   "outOfScopeMessage": {
@@ -575,6 +575,54 @@
           "end": 49,
           "text": "後來人走晒，學校都閂咗。近年有人返嚟種米，村口間舖又開返，好似有返啲人氣。",
           "keywords": ["人走", "學校", "閂", "返嚟", "種米", "村口", "舖", "人氣"]
+        }
+      ]
+    },
+    {
+      "id": "FL-014",
+      "title": "粉嶺・一九九四年的村口書桌（虛構示範）",
+      "titleEn": "Fanling · The Village Homework Table, 1994 (Fictional Demo)",
+      "villageKey": "fanling",
+      "topicKeys": ["community"],
+      "eraKey": "1990s",
+      "storyType": "oral",
+      "mood": "joyful",
+      "year": 1994,
+      "languageKey": "yue",
+      "teller": "虛構街坊（AI 編寫角色扮演示範，非真實訪談）",
+      "rolePlayed": true,
+      "sourceNote": "AI 編寫的虛構示範故事；人物、事件與對話均為虛構，並非長者訪談或歷史證言。AI-written fictional demo; people, events and dialogue are invented, not an interview or historical testimony.",
+      "authorized": true,
+      "consentRef": "CONSENT-DEMO-014-FICTION",
+      "scope": "community",
+      "publishedAt": "2026-11-12",
+      "location": { "area": "粉嶺（虛構故事的模糊示意範圍）", "lat": 22.4945, "lng": 114.1445, "radiusM": 800 },
+      "audio": null,
+      "confidence": null,
+      "durationSec": 54,
+      "durationSource": "transcript",
+      "cover": null,
+      "segments": [
+        {
+          "start": 0,
+          "end": 18,
+          "text": "呢段係 AI 編寫嘅虛構角色故事，唔係訪談紀錄。假想返一九九四年，我放學返粉嶺條村，會同表妹喺村口張摺枱做功課。",
+          "confidence": null,
+          "keywords": ["虛構", "AI", "示範", "一九九四年", "1994", "粉嶺", "放學", "村口", "功課"]
+        },
+        {
+          "start": 18,
+          "end": 36,
+          "text": "喺呢個虛構場景入面，隔籬婆婆拎住把葵扇坐低，教我哋用廣東話讀課文。有人踩單車經過，就停低問一句今日學咗啲乜。",
+          "confidence": null,
+          "keywords": ["虛構", "婆婆", "葵扇", "廣東話", "課文", "單車", "街坊", "學習"]
+        },
+        {
+          "start": 36,
+          "end": 54,
+          "text": "故事想像多年之後，我再返去，張摺枱已經收起，但仲記得大家圍住讀書嘅笑聲。人物同經歷都係虛構，只用嚟示範九十年代嘅故事篩選。",
+          "confidence": null,
+          "keywords": ["虛構", "多年之後", "摺枱", "讀書", "笑聲", "九十年代", "1990", "年代篩選"]
         }
       ]
     }

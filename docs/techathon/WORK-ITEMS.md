@@ -1,8 +1,8 @@
 # Techathon+ work items
 
-Open your [GitHub issue](https://github.com/buwanmihayou/voices-of-the-north/milestone/1), then use the independent first step below and the [shared demo example](DEMO-FLOW.md). A handoff can block a specific check while local work proceeds. Use the issue to agree on interface changes and link PRs.
+Open your [GitHub issue](https://github.com/phatdat220707/voices-of-the-north/milestone/1), then use the independent first step below and the [shared demo example](DEMO-FLOW.md). A handoff can block a specific check while local work proceeds. Use the issue to agree on interface changes and link PRs.
 
-## [Prepare the repository and agree the launch scope](https://github.com/buwanmihayou/voices-of-the-north/issues/2)
+## [Prepare the repository and agree the launch scope](https://github.com/phatdat220707/voices-of-the-north/issues/2)
 
 **Owner** Dat
 
@@ -25,7 +25,7 @@ A reviewed repository setup, a shared demo URL and commit, and named reviewers a
 - [ ] Record the shared test URL and commit, initial demo results, and prioritized issues.
 - [ ] Confirm owners and reviewers for the launch backlog.
 
-## [Set up invited Google sign-in and durable staging storage](https://github.com/buwanmihayou/voices-of-the-north/issues/3)
+## [Set up invited Google sign-in and durable staging storage](https://github.com/phatdat220707/voices-of-the-north/issues/3)
 
 **Owner** Zheng
 
@@ -48,7 +48,7 @@ An isolated staging environment with server-side account and recording permissio
 - [ ] Verify SQLite and private audio survive restart and a staging backup/restore. Store media outside static file serving and document how withdrawal state survives restore.
 - [ ] Share a public-safe test summary and staging build reference. Get Dat's cost approval before provisioning paid resources.
 
-## [Build consent, recording, transcript review, and submission](https://github.com/buwanmihayou/voices-of-the-north/issues/4)
+## [Build consent, recording, transcript review, and submission](https://github.com/phatdat220707/voices-of-the-north/issues/4)
 
 **Owner** Boris
 
@@ -71,7 +71,7 @@ An invited contributor can consent, record, transcribe, review the transcript an
 - [ ] The contributor can review the transcript and timestamp links, select the intended sharing scope, and submit for moderation. The story remains private while pending.
 - [ ] Contributor B cannot open the record or audio, and guests cannot discover it. Share reproducible checks and handoff to the moderator flow.
 
-## [Finish the mobile guest and contributor UI](https://github.com/buwanmihayou/voices-of-the-north/issues/5)
+## [Finish the mobile guest and contributor UI](https://github.com/phatdat220707/voices-of-the-north/issues/5)
 
 **Owner** Steven
 
@@ -94,7 +94,7 @@ Mobile screens for browsing and for invited contributors, with consistent draft,
 - [ ] Test navigation, consent, transcript and timestamp access, and error or retry states on phone and desktop. Dat independently repeats the mobile flow.
 - [ ] Change frontend source in frontend/src and regenerate the bundled HTML.
 
-## [Enforce moderation, publication, and withdrawal](https://github.com/buwanmihayou/voices-of-the-north/issues/6)
+## [Enforce moderation, publication, and withdrawal](https://github.com/phatdat220707/voices-of-the-north/issues/6)
 
 **Owner** Dat
 
@@ -117,9 +117,9 @@ A reviewer can publish or withdraw a submitted story, with one server-side visib
 - [ ] Withdraw a published sample story. Confirm it disappears from every public surface and old audio URLs stop serving it. Include stale caches, offline fallback, and server errors.
 - [ ] Check that a grounded answer opens the correct audio point and missing evidence leads to a refusal. Share sample-data evidence and an operational takedown handoff.
 
-## [Confirm submission requirements and prepare the pitch](https://github.com/buwanmihayou/voices-of-the-north/issues/7)
+## [Confirm submission requirements and prepare the pitch](https://github.com/phatdat220707/voices-of-the-north/issues/7)
 
-**Owner** Dat until confirmed. Douglas is proposed for Competition & Pitch.
+**Owner** Douglas, confirmed for Competition & Pitch
 
 **Due** 2026-12-20, with final update 2027-01-08 at 21:00 HKT
 
@@ -127,20 +127,20 @@ A reviewer can publish or withdraw a submitted story, with one server-side visib
 
 **Deliverable**
 
-A team-specific submission checklist and an evidence-backed deck. If Douglas chooses Demo Review & Evidence or Business & Impact, Dat keeps the submission checklist and fills any ownership gap.
+A team-specific submission checklist and an evidence-backed deck, with accessible research and PRD references for the reviewers.
 
-**Start now** Dat verifies portal requirements and drafts the deck outline and evidence list using the current demo while Douglas's role is pending. Mark claims that need staging evidence.
+**Start now** Share the research and PRD links and draft the deck outline and evidence list using the current demo. Record the organizer-confirmed Jan 11, 2027 at 23:59 HKT pitch deck deadline and track-change process. Mark claims that need staging evidence.
 
 **Handoff** Share the submission checklist and draft narrative early. The final deck needs verified evidence for its claims or explicit wording about what the current demo shows.
 
 **Acceptance**
 
-- [ ] Confirm the role and verify HumanLoop's fast-track dates, required assets, and pitch format in the portal. Share public-safe results only.
+- [ ] Maintain HumanLoop's organizer-confirmed fast-track deadline and verify required assets, portal status, and pitch format. Share public-safe results only.
 - [ ] Match each demo claim to tested behavior and distinguish sample stories, launch plans, and untested demand or payment hypotheses.
 - [ ] Gather evidence and a draft deck by Dec 20. By Jan 8, supply the final deck, demo or backup references, and Q&A updated after an AI critique reviewed by a teammate.
 - [ ] Verify playback and links as a guest where appropriate. Keep private portal details outside the public issue.
 
-## [Run launch sign-off and rehearse the submission](https://github.com/buwanmihayou/voices-of-the-north/issues/8)
+## [Run launch sign-off and rehearse the submission](https://github.com/phatdat220707/voices-of-the-north/issues/8)
 
 **Owner** Team, Dat accountable
 

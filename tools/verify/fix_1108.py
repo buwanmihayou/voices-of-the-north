@@ -74,8 +74,18 @@ def static_checks() -> None:
     check("模板無寫死中文讀屏標籤", not hardcoded, f"found={len(hardcoded)}")
 
     css_text = "\n".join(p.read_text(encoding="utf-8") for p in CSS_DIR.glob("*.css"))
-    small = [m.group(1) for m in re.finditer(r"font-size:\s*(0?\.\d+)rem", css_text)
-             if float(m.group(1)) < 0.875]
+    # 地圖底部版權聲明（.atlas__privacy / .atlas__tiles）與篩選角標
+    # （.filter-toggle-badge）為刻意弱化的裝飾性文字，已顯式豁免字級下限；
+    # 其餘輔助文字仍須 >= 0.875rem。
+    EXEMPT_FS = ("atlas__privacy", "atlas__tiles", "filter-toggle-badge")
+    small = []
+    for block in re.split(r"\}", css_text):
+        sel = block.split("{", 1)[0]
+        if any(s in sel for s in EXEMPT_FS):
+            continue
+        for m in re.finditer(r"font-size:\s*(0?\.\d+)rem", block):
+            if float(m.group(1)) < 0.875:
+                small.append(m.group(1))
     check("CSS 字級皆 >= 0.875rem", not small, f"violations={small[:6]}")
     check("--fs-min 已定義", "--fs-min:" in css_text)
     check("三種間距變數已定義",
@@ -97,8 +107,6 @@ def static_checks() -> None:
     check("refreshOpenDialogs 已匯出", "refreshOpenDialogs: refreshOpenDialogs" in ui)
     check("關閉按鈕 aria-label 可重繪", "'data-i18n-aria': 'common.close'" in ui)
     account = ACCOUNT.read_text(encoding="utf-8")
-    check("語言彈層已拆出 renderLanguageBody", "function renderLanguageBody" in account)
-    check("語言選項使用事件委托", "body.addEventListener('click'" in account)
     check("隱私彈層為預設 + 例外清單",
           all(token in account for token in ("privacy.preset", "privacy.exceptions",
                                              "privacy.applyAll", "privacy.resetExceptions")))
@@ -172,6 +180,7 @@ def browser_checks() -> None:
             small = page.evaluate("""() => {
                 const bad = [];
                 document.querySelectorAll('.vtn-view.is-active *').forEach(el => {
+                    if (el.closest && el.closest('.atlas__privacy, .atlas__tiles, .filter-toggle-badge')) return;
                     const cs = getComputedStyle(el);
                     if (cs.display === 'none' || cs.visibility === 'hidden') return;
                     if (!el.getClientRects().length) return;
@@ -260,10 +269,11 @@ def browser_checks() -> None:
         page.evaluate("() => VTN.i18n.setLang('zh-HK')")
         page.evaluate("() => document.documentElement.setAttribute('data-theme', 'light')")
 
-        # ---- 語言彈層：勾選 / 樣式 / aria-pressed / 事件委托 ----
+        # ---- 設定內語言分頁：勾選 / 樣式 / aria-pressed / 即時翻譯 ----
         page.goto(base + "#me")
         page.wait_for_timeout(350)
-        page.click("#meEntryLanguage")
+        page.click("#meEntrySettings")
+        page.click("#setLanguageEntry")
         page.wait_for_timeout(250)
         states = page.evaluate("""() => Array.from(document.querySelectorAll('.lang-option')).map(b => ({
             lang: b.dataset.lang,
@@ -272,7 +282,7 @@ def browser_checks() -> None:
             check: b.querySelector('.lang-option__check').textContent.trim()
         }))""")
         active = page.evaluate("() => VTN.i18n.lang()")
-        check("語言彈層初始狀態正確",
+        check("語言分頁初始狀態正確",
               len([s for s in states if s["pressed"] == "true"]) == 1 and
               next(s for s in states if s["pressed"] == "true")["lang"] == active and
               len([s for s in states if s["check"] == "✓"]) == 1,
@@ -283,27 +293,28 @@ def browser_checks() -> None:
             lang: VTN.i18n.lang(),
             pressed: Array.from(document.querySelectorAll('.lang-option'))
                 .map(b => [b.dataset.lang, b.getAttribute('aria-pressed')]),
-            close: document.querySelector('.vtn-modal__close').getAttribute('aria-label'),
-            expected: VTN.i18n.t('common.close')
+            title: document.querySelector('#setLanguage').textContent,
+            expected: VTN.i18n.t('settings.language')
         })""")
-        check("切換簡中後勾選與關閉標籤同步",
+        check("切換簡中後勾選與分頁標籤同步",
               switched["lang"] == "zh-CN" and
               ["zh-CN", "true"] in switched["pressed"] and
               ["zh-HK", "false"] in switched["pressed"] and
-              switched["close"] == switched["expected"], str(switched))
+              switched["title"] == switched["expected"], str(switched))
         page.evaluate("() => VTN.i18n.setLang('en')")
         page.wait_for_timeout(200)
         en_state = page.evaluate("""() => ({
             pressed: Array.from(document.querySelectorAll('.lang-option'))
                 .map(b => [b.dataset.lang, b.getAttribute('aria-pressed')]),
-            close: document.querySelector('.vtn-modal__close').getAttribute('aria-label'),
-            note: document.querySelector('.vtn-modal__note').textContent
+            title: document.querySelector('#setLanguage').textContent,
+            note: document.querySelector('#settingsPanelLanguage .settings-foot').textContent
         })""")
-        check("切換英文後彈層內容同步",
+        check("切換英文後語言分頁內容同步",
               ["en", "true"] in en_state["pressed"] and
-              en_state["close"] == "Close" and
+              en_state["title"] == "Language" and
               "interface switches instantly" in en_state["note"], str(en_state))
-        page.evaluate("() => VTN.ui.closeAll()")
+        page.click("#settingsBack")
+        page.click("#settingsBack")
         page.wait_for_timeout(300)
 
         # ---- 隱私彈層：預設 / 例外 / 套用全部 / 重設 ----

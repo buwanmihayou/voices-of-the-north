@@ -1,8 +1,8 @@
 # Demo baseline and test evidence
 
-**Baseline reviewed** Nov 9, 2026. The Render frontend matched repository commit [`76b0d1e`](https://github.com/buwanmihayou/voices-of-the-north/commit/76b0d1e46a45c3c44852a7ff8fde920cd7cfaa5c). Recheck the deployed build before using this evidence for a different commit. [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
+**Baseline reviewed** Nov 9, 2026. The Render frontend matched repository commit [`76b0d1e`](https://github.com/phatdat220707/voices-of-the-north/commit/76b0d1e46a45c3c44852a7ff8fde920cd7cfaa5c). Recheck the deployed build before using this evidence for a different commit. [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
 
-The repository contains eight team-written role-play stories and one measured sample WAV of approximately 46.7 seconds. Use the sample designation in the demo and pitch. The checks below were performed on the existing demo. Launch requirements are tracked in the [roadmap](ROADMAP.md).
+At that baseline, the repository contained eight team-written role-play stories and one measured sample WAV of approximately 46.7 seconds. Use the sample designation in the demo and pitch. The checks below were performed on the existing demo. Launch requirements are tracked in the [roadmap](ROADMAP.md).
 
 | Check | Evidence at the baseline |
 | --- | --- |
@@ -13,6 +13,16 @@ The repository contains eight team-written role-play stories and one measured sa
 | Live microphone and transcript review | Full Nov 9 end-to-end run pending. |
 | Independent phone test | Pending at the Nov 9 baseline. |
 | Account isolation, persistence, moderation, and withdrawal | Require dedicated staging evidence before launch. |
+
+## Nov 13 local review
+
+Repository main at [`0cc1701`](https://github.com/phatdat220707/voices-of-the-north/commit/0cc17019aaa44ec21b0bb3dc19040db1f77e41c0) contains 14 role-play demo stories and one measured sample WAV. This repository snapshot does not establish which build is deployed on Render.
+
+[Draft PR #10](https://github.com/phatdat220707/voices-of-the-north/pull/10), head `206301a`, adds partial Issue #6 protections on that main snapshot. Local Windows tests used synthetic identities and isolated temporary SQLite databases. The recording API suite passed 74 checks, the lab API suite passed 48, and the backend part of the story-scope suite passed 14. Data validation passed for 14 stories and the bundled JavaScript parsed successfully.
+
+The tested API behavior includes owner/reviewer access to stored recordings, rejection of a contributor-supplied public scope as a publication decision, reviewer-only withdrawal, removal from catalog and retrieval, and denial of the old WAV URL after withdrawal. Range and conditional requests were checked. Catalog, retrieval and the story audio return an error when withdrawal state is unavailable.
+
+Publication from Boris's submitted sample, invited sign-in, persistent staging, Supabase integration, and independent browser/offline withdrawal checks remain pending. The frontend contains mock media and confidence examples, which require explicit mock-mode handling before those displays can support production claims.
 
 ## Repeatable checks
 

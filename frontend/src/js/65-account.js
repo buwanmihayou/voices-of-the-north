@@ -56,9 +56,6 @@
     if (saved) saved.textContent = counts.done;
     if (pending) pending.textContent = counts.draft + counts.pending;
     if (shared) shared.textContent = counts.shared;
-
-    var langEl = document.getElementById('meLanguageCurrent');
-    if (langEl) langEl.textContent = t('lang.name.' + VTN.i18n.lang());
   }
 
   /* =========================================================================
@@ -82,8 +79,13 @@
       class: 'seg__btn', type: 'button',
       'data-i18n': 'auth.schoolTab', text: t('auth.schoolTab')
     });
+    var mockBtn = U.node('button', {
+      class: 'seg__btn', type: 'button',
+      'data-i18n': 'auth.mockTab', text: t('auth.mockTab')
+    });
     seg.appendChild(emailBtn);
     seg.appendChild(schoolBtn);
+    seg.appendChild(mockBtn);
     body.appendChild(seg);
 
     var host = U.node('div');
@@ -123,6 +125,7 @@
       feedback.hidden = true;
       emailBtn.classList.toggle('is-active', mode === 'email');
       schoolBtn.classList.toggle('is-active', mode === 'school');
+      mockBtn.classList.toggle('is-active', mode === 'mock');
 
       if (mode === 'email') {
         var emailField = U.node('div', { class: 'vtn-field' });
@@ -180,7 +183,7 @@
           });
         });
         host.appendChild(sendBtn);
-      } else {
+      } else if (mode === 'school') {
         var schoolField = U.node('div', { class: 'vtn-field' });
         schoolField.appendChild(U.node('label', {
           class: 'vtn-field__label', 'data-i18n': 'auth.schoolLabel', text: t('auth.schoolLabel')
@@ -204,6 +207,43 @@
         host.appendChild(U.node('p', {
           class: 'vtn-modal__note', 'data-i18n': 'auth.schoolNote', text: t('auth.schoolNote')
         }));
+      } else {
+        var mockUserField = U.node('div', { class: 'vtn-field' });
+        mockUserField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.mockUserLabel', text: t('auth.mockUserLabel')
+        }));
+        mockUserField.appendChild(U.node('input', {
+          type: 'text', id: 'loginMockUser', autocomplete: 'username',
+          'data-i18n-ph': 'auth.mockUserPh', placeholder: t('auth.mockUserPh')
+        }));
+        host.appendChild(mockUserField);
+
+        var mockPassField = U.node('div', { class: 'vtn-field' });
+        mockPassField.appendChild(U.node('label', {
+          class: 'vtn-field__label', 'data-i18n': 'auth.mockPassLabel', text: t('auth.mockPassLabel')
+        }));
+        mockPassField.appendChild(U.node('input', {
+          type: 'password', id: 'loginMockPass', autocomplete: 'current-password',
+          'data-i18n-ph': 'auth.mockPassPh', placeholder: t('auth.mockPassPh')
+        }));
+        host.appendChild(mockPassField);
+
+        var fillBtn = U.node('button', {
+          class: 'vtn-btn vtn-btn--quiet vtn-btn--block', type: 'button',
+          'data-i18n': 'auth.mockFill', text: t('auth.mockFill')
+        });
+        fillBtn.addEventListener('click', function () {
+          var userInput = document.getElementById('loginMockUser');
+          var passInput = document.getElementById('loginMockPass');
+          if (userInput) userInput.value = 'contributor';
+          if (passInput) passInput.value = 'demo1234';
+          feedback.hidden = true;
+        });
+        host.appendChild(fillBtn);
+
+        host.appendChild(U.node('p', {
+          class: 'vtn-modal__note', 'data-i18n': 'auth.mockNote', text: t('auth.mockNote')
+        }));
       }
       var first = host.querySelector('input');
       if (first) first.focus();
@@ -211,6 +251,7 @@
 
     emailBtn.addEventListener('click', function () { mode = 'email'; renderMode(); });
     schoolBtn.addEventListener('click', function () { mode = 'school'; renderMode(); });
+    mockBtn.addEventListener('click', function () { mode = 'mock'; renderMode(); });
     renderMode();
 
     var dlg = VTN.ui.dialog({
@@ -245,7 +286,7 @@
                     showError((error && error.detail) || t('auth.invalidCode'));
                   }
                 });
-            } else {
+            } else if (mode === 'school') {
               var schoolId = (document.getElementById('loginSchool').value || '').trim();
               var password = (document.getElementById('loginPassword').value || '').trim();
               if (!schoolId || !password) { showError(t('auth.schoolRequired')); return; }
@@ -265,6 +306,18 @@
                     showError(t('auth.schoolInvalid'));
                   }
                 });
+            } else {
+              /* 純前端 Mock：不呼叫任何 API，直接建立虛擬登入身份 */
+              var mockUser = (document.getElementById('loginMockUser').value || '').trim();
+              var mockPass = (document.getElementById('loginMockPass').value || '').trim();
+              if (!mockUser || !mockPass) { showError(t('auth.mockRequired')); return; }
+              finishLogin({
+                email: mockUser.indexOf('@') !== -1 ? mockUser : mockUser + '@vtn.demo',
+                name: mockUser,
+                role: adminFlag ? 'admin' : 'member',
+                token: 'local-demo',
+                offline: true
+              }, ctx);
             }
           }
         }
@@ -882,57 +935,9 @@
   /* =========================================================================
    * 7. 語言
    * ======================================================================= */
-  /* 每次都按「當下語言」重算勾選、選中樣式與 aria-pressed，不再只算一次。 */
-  function renderLanguageBody(body) {
-    var current = VTN.i18n.lang();
-    body.textContent = '';
-    [
-      ['zh-HK', 'lang.name.zh-HK'],
-      ['zh-CN', 'lang.name.zh-CN'],
-      ['en', 'lang.name.en']
-    ].forEach(function (def) {
-      var active = def[0] === current;
-      var btn = U.node('button', {
-        class: 'lang-option' + (active ? ' is-selected' : ''),
-        type: 'button',
-        'data-lang': def[0],
-        'aria-pressed': active ? 'true' : 'false'
-      });
-      btn.appendChild(U.node('span', { 'data-i18n': def[1], text: t(def[1]) }));
-      btn.appendChild(U.node('span', {
-        class: 'lang-option__check', 'aria-hidden': 'true', text: active ? '✓' : ''
-      }));
-      body.appendChild(btn);
-    });
-    body.appendChild(U.node('p', {
-      class: 'vtn-modal__note', 'data-i18n': 'lang.note', text: t('lang.note')
-    }));
-  }
-
+  /* 保留既有呼叫入口，統一導向設定內的語言二級分頁。 */
   function openLanguage() {
-    var body = U.node('div');
-    /* 事件委托：重繪後不用逐個重新綁定，也不會累積監聽器。 */
-    body.addEventListener('click', function (event) {
-      var target = event.target;
-      var btn = target && target.closest
-        ? target.closest('button.lang-option[data-lang]') : null;
-      if (!btn || !body.contains(btn)) return;
-      var code = btn.getAttribute('data-lang');
-      if (VTN.i18n.langs.indexOf(code) === -1) return;
-      VTN.i18n.setLang(code);
-      VTN.store.setPref('lang', code);
-      renderMe();
-      VTN.ui.toast(t('lang.switched'), 'success');
-      if (VTN.assistant) VTN.assistant.refresh();
-    });
-    renderLanguageBody(body);
-
-    VTN.ui.dialog({
-      titleKey: 'me.language',
-      body: body,
-      actions: [{ labelKey: 'common.close', kind: 'solid' }],
-      i18nRefresh: function () { renderLanguageBody(body); }
-    });
+    VTN.router.go('settings', { tab: 'language' });
   }
 
   /* =========================================================================
@@ -957,7 +962,6 @@
     bind('meEntryPrivacy', openPrivacy);
     bind('meEntryCorrection', openCorrectionPicker);
     bind('meEntryExport', openExport);
-    bind('meEntryLanguage', openLanguage);
     bind('meEntrySettings', function () { VTN.router.go('settings', {}); });
     bind('meEntryAbout', function () { VTN.router.go('about', {}); });
 

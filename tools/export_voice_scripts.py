@@ -2,7 +2,7 @@
 
 用法：python tools/export_voice_scripts.py
 
-誠實性紅線：不新增台詞、不改寫逐字稿、不合成示範音檔。腳本就是資料契約裡的
+匯出時不新增台詞、不改寫示範稿、不合成音檔。腳本就是資料契約裡的
 segments[].text，補錄時照稿錄音；錄好後才實測 durationSec、把 durationSource
 改成 measured，並重新執行 python tools/build_frontend.py 驗證時間戳。
 """
@@ -54,15 +54,15 @@ def render(data: dict) -> str:
         "> 來源：`data/stories.json`（前後端單一資料來源）。本文由 "
         "`tools/export_voice_scripts.py` 產生，請改資料檔後重新產生，勿手改本文。",
         ">",
-        "> **紅線**：不合成假音檔、不為湊數改寫台詞、不把逐字稿當成真實長者訪談。"
-        "以下是已授權逐字稿的原句，補錄時照稿錄音即可。",
+        "> **來源說明**：以下是已授權角色扮演示範稿的原句，並非真實長者訪談。"
+        "新增的 AI 虛構故事會明確標示來源；匯出不改寫台詞或合成音檔，補錄時照稿錄音即可。",
         "",
         "## 1. 現況與驗收口徑",
         "",
         f"- 故事總數：{len(stories)} 則；已有實測音檔：{len(with_audio)} 則；"
         f"待補錄：{len(stories) - len(with_audio)} 則。",
-        f"- 待補錄的 {len(stories) - len(with_audio)} 則在介面如實顯示「未附音檔」，"
-        "主播放鍵為灰態；這是資料現況，不是播放器的 bug。",
+        f"- {len(stories) - len(with_audio)} 則尚未附故事音檔；走音訊介面的故事會顯示「未附音檔」並停用播放。"
+        "前端部分故事另有示範影片／圖片，這些展示媒體不代表已補錄故事音軌。",
         "- 補錄前後都不改 `segments` 的文字；若錄音與時間軸有出入，"
         "應重新標時間戳並實測長度，而不是改稿遷就音檔。",
         "- 錄好後：把 `audio` 指向新檔、`durationSec` 改成實測值、"
@@ -77,10 +77,11 @@ def render(data: dict) -> str:
         f"- 表達心情：{len(moods)} 種 — " + "、".join(
             f"{MOOD_LABEL.get(k, k)}（`{k}`）" for k in moods
         ) + "；枚舉共 5 種，未使用的枚舉不硬湊。",
-        "- 多樣性來自既有示範資料，補錄時沿用原有標註；"
-        "不為「湊滿枚舉」改寫逐字稿或增造假故事。",
+        "- 資料包含團隊角色扮演稿，以及按使用者要求新增、明確標為 AI 虛構示範的 `FL-014`（1994 年）。"
+        "補錄時沿用各則示範稿的文字與標註，不把虛構故事當成歷史證言。",
         f"- 年代分佈：{min(years)}–{max(years)}（跨 {max(years) - min(years)} 年）；"
-        "年代軸刻度由 `30-stories.js` 依此分佈動態產生，每格都會改變過濾結果。",
+        "年代軸為五個互斥區間：1950 年代及以前、1960、1970、1980 年代、1990 年代至今；"
+        "另設「全部年代」重設，不隨資料分佈改變刻度。",
         f"- 時長分佈：{min(durations):.1f}–{max(durations):.1f} 秒；"
         "各則故事的段落邊界不同，時間線不是同一個模板複製。",
         "- 每段 `start < end`、`end <= durationSec`、段落不重疊，"
@@ -95,7 +96,7 @@ def render(data: dict) -> str:
         has_audio = bool(story.get("audio"))
         status = (
             f"已有實測音檔 `{story['audio']}`（{duration:.1f} 秒）"
-            if has_audio else "**待補錄**：目前無音檔，播放器顯示「未附音檔」"
+            if has_audio else "**待補錄**：目前未附故事音檔；若頁面有示範影片／圖片，並非本段錄音"
         )
         lines += [
             f"### {index}. {story['id']}　{story['title']}",

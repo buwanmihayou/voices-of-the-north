@@ -2,14 +2,14 @@
 
 ## Start here
 
-Voices of the North is a prototype for preserving Cantonese village oral histories in Hong Kong's Northern Metropolis. It pairs a story map and audio player with timestamp-linked answers in **Ask the Village**. The current repository includes 13 team-written role-play stories. One includes a sample WAV recording.
+Voices of the North is a prototype for preserving Cantonese village oral histories in Hong Kong's Northern Metropolis. It pairs a story map and audio player with timestamp-linked answers in **Ask the Village**. The current repository includes 14 role-play demo stories. One includes a measured sample WAV recording. See the reference below for the fictional sample designation.
 
 - [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
 - [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
 - [Verified demo behavior and test checklist](docs/techathon/DEMO-EVIDENCE.md)
 - [Work items, independent first steps, and handoffs](docs/techathon/WORK-ITEMS.md)
 - [Main demo flow and shared interfaces](docs/techathon/DEMO-FLOW.md)
-- [Active work and owners](https://github.com/buwanmihayou/voices-of-the-north/milestone/1)
+- [Active work and owners](https://github.com/phatdat220707/voices-of-the-north/milestone/1)
 - [Agent instructions](AGENTS.md) and [InterHK archive](docs/archive/interhk-2026/README.md)
 
 The hosted build is a hackathon demo. The Techathon+ target is a public archive of approved stories with invited contributors and moderation. Production sign-in, durable private storage, and withdrawal checks are launch work. Use role-play samples when testing the current demo.
@@ -31,7 +31,7 @@ For frontend changes, edit `frontend/src/` and regenerate the bundled HTML with 
 
 以生成式 AI 保存香港鄉村長者口述歷史的示範平台：錄音 → 逐字稿 → 可核對的問答 → 四級私隱分享。示範資料以北區為主，另加赤柱、九龍城、大澳三則北區外故事，以及谷埔、荔枝窩兩則東北鄉郊故事；涵蓋粵語、華語（國語）與 English。
 
-> **黑客松示範聲明**：13 則故事全部標記為「角色扮演示範故事」，由團隊撰寫，並非真實長者訪談。
+> **黑客松示範聲明**：14 則故事全部標記為「角色扮演示範故事」，並非真實長者訪談。其中 `FL-014` 為 AI 編寫的 1994 年虛構示範，人物與事件均為虛構，用於展示 1990 年代至今的篩選結果。
 > 唯一真實音軌為 `frontend/assets/Demo Story.wav`（實測 46.7 秒）。介面會如實標示「未附音檔」「未能取得置信度」。
 
 ## 1. 目錄結構
@@ -65,7 +65,7 @@ frontend/voices-of-the-north-app.html   交付用單檔（由建置腳本產生�
 frontend/waveforms.json        波形按需載入用（--external-waveforms 時由單檔 fetch）
 frontend/js, frontend/lib      舊版副本，僅供對照（已不參與建置）
 docs/voice-scripts/voice-scripts.md  每則故事的配音文字腳本與時間線
-docs/voice-scripts/Voices_of_the_North_Story_Scripts.docx  供真人補錄的 Word 腳本（13 則）
+docs/voice-scripts/Voices_of_the_North_Story_Scripts.docx  歷史 Word 補錄批次（13 則；新增 FL-014 見 Markdown）
 server.py                      FastAPI 後端（同時託管 frontend/ 靜態檔）
 story_corpus.py                語料檢索與拒答邏輯（讀 data/stories.json）
 tools/build_frontend.py        建置腳本：驗證資料 → 合併成單檔 → 波形快取
@@ -106,7 +106,7 @@ python tools/check_frontend_syntax.py              # 檢查單檔內嵌 JS 語�
 - **可見故事集合**：`GET /api/stories?bbox=west,south,east,north` 與 `POST /api/ask-village`（可帶同一 `bbox`）都從 `server.current_visible_stories()` 出發；`visibleCount` / `visibleIds` 描述裁剪後的結果。問答可另帶 `storyIds` 收窄至前端類型／年代等篩選後的故事，空陣列表示無故事，省略才用全域；後端始終先做授權／分享範圍／撤回過濾。前端在提問時擷取篩選及視口快照，網路失敗後的本機檢索沿用同一範圍；服務端拒答不會被本機全庫故事搜尋覆蓋。首頁與列表不套用隱藏地圖的視口。參數格式錯誤回 400。
 - **指標口徑**：`story.open`（真正打開詳情）才是北極星指標分母；`pin.click`（單點）、`cluster.click`（同圈氣泡／低縮放聚合）只作診斷；另有 `map.view`、`audio.complete`、`audio.progress`、`scene.view`。只記錄數值與故事 ID，送往 `/api/audit`；後端 meta 白名單會丟棄逐字稿、標題等自由文字，離線時僅留本機緩衝。
 - **版位與無障礙**：列表入口在地圖右上角常顯（帶文字，不是降級才出現）；首次進入地圖有 3 步引導，右上角 `?` 可重看，Esc／遮罩／跳過都會關閉並記住；半拉抽屜半開露出 `55dvh`；`prefers-reduced-motion` 下模糊圈呼吸填充降級為靜態虛線圈；3D 書籤輪播谷埔、荔枝窩、粉嶺、上水、大埔五個已有真實故事座標的視角。**本階段只提供淺色主題**，設定頁不再有深色／跟隨系統入口，舊的本機深色設定會自動收回淺色。
-- **配音腳本**：`docs/voice-scripts/voice-scripts.md` 與 `Voices_of_the_North_Story_Scripts.docx` 由 `tools/export_voice_scripts.py`／`tools/export_story_scripts_docx.py` 從已授權逐字稿匯出每則故事的台詞、時間線、補錄驗收與真實錄音登記表。13 則中 12 則仍待真人補錄，介面如實顯示「未附音檔」；**不合成示範音檔、不改寫逐字稿**。
+- **配音腳本**：目前的 `docs/voice-scripts/voice-scripts.md` 由 `tools/export_voice_scripts.py` 從已授權示範稿匯出全部 14 則故事的台詞與時間線；14 則中 13 則仍待真人補錄，介面如實顯示「未附音檔」。`Voices_of_the_North_Story_Scripts.docx` 是先前 13 則的歷史 Word 補錄批次，未含新增的虛構故事 `FL-014`，該則請使用 Markdown。**不合成示範音檔、不改寫既有逐字稿**。
 
 ## 3. 本地運行
 
@@ -182,7 +182,7 @@ python tools/test_lab_api.py        # 實驗室 API
 python tools/audit_frontend.mjs     # 前端靜態檢查（需 node）
 ```
 
-評審修復的回歸腳本放在 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`）。地圖／問答的視口、篩選、空集合、授權、拒答與離線降級另以 `python tools/verify/story_scope.py` 驗證；淺色主題、首次引導、13 則故事／三語與 Word 腳本以 `python tools/verify/light_onboarding.py` 驗證。測試使用隔離資料庫，不改動現有錄音。
+評審修復的回歸腳本放在 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`）。地圖／問答的視口、篩選、空集合、授權、拒答與離線降級另以 `python tools/verify/story_scope.py` 驗證；淺色主題、首次引導、現有故事／三語與歷史 Word 腳本以 `python tools/verify/light_onboarding.py` 驗證。測試使用隔離資料庫，不改動現有錄音。
 
 手動驗證要點：三語切換後重整仍保持、錄音停止即存草稿、斷網上傳變「待轉寫」且可重試、來源按鈕跳轉並從指定秒數播放、撤回後來源按鈕變灰；地圖首次進入自動顯示 3 步引導、`?` 可重看、Esc 可關閉，重整後不再自動彈出；設定頁已無深色入口。
 

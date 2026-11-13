@@ -69,7 +69,11 @@
       VTN.util.emit('vtn:view-changed', { view: route.view });
     }
 
-    if (route.view !== 'stories') VTN.audio.pauseStory();
+    if (route.view !== 'stories') {
+      VTN.audio.pauseStory();
+      if (VTN.stories && VTN.stories.pauseVideo) VTN.stories.pauseVideo();
+      if (VTN.media && VTN.media.close) VTN.media.close();
+    }
 
     try {
       if (route.view === 'home') {
@@ -92,7 +96,7 @@
       } else if (route.view === 'me') {
         VTN.account.render();
       } else if (route.view === 'settings') {
-        VTN.settings.refresh();
+        VTN.settings.show(route.params);
       } else if (route.view === 'about') {
         VTN.about.render();
       }

@@ -198,6 +198,12 @@
     return lastQuotaReport;
   }
 
+  /* 錄音自選小圖示：沿用故事類別的 7 個 Font Awesome 圖示。
+     白名單以外的值一律清掉，避免舊資料／同步資料注入任意 class。 */
+  var RECORD_ICON_KEYS = [
+    'festival', 'farming', 'migration', 'architecture', 'oral', 'market', 'other'
+  ];
+
   function normalizeRecord(rec) {
     var now = Date.now();
     var out = Object.assign({}, rec);
@@ -214,6 +220,7 @@
     out.durationSec = Number(out.durationSec) || 0;
     out.durationSource = out.durationSource || (out.audioDataURL || out.audioUrl ? 'measured' : 'transcript');
     out.title = out.title || deriveTitle(out);
+    out.iconKey = RECORD_ICON_KEYS.indexOf(out.iconKey) === -1 ? null : out.iconKey;
     if (out.sync === 'synced' && out.syncAt) out.syncAt = Number(out.syncAt);
     return out;
   }
@@ -706,7 +713,8 @@
       merge: mergeRemote,
       migrate: migrateToAccount,
       quota: lastQuota,
-      deletedIds: deletedIds
+      deletedIds: deletedIds,
+      iconKeys: function () { return RECORD_ICON_KEYS.slice(); }
     },
     /* 私隱 */
     scopeOf: scopeOf,

@@ -262,14 +262,17 @@
         </div>
 
         <div class="atlas__bottom">
-          <div class="atlas__timeline" id="atlasTimeline">
+          <div class="atlas__timeline is-all" id="atlasTimeline">
             <div class="atlas__timeline-head">
               <span data-i18n="atlas.era">故事年代</span>
-              <b id="atlasEraLabel">全部</b>
+              <button type="button" class="atlas__era-all" id="atlasEraAll" aria-pressed="true">
+                <span class="atlas__era-check" aria-hidden="true">✓</span>
+                <span data-i18n="atlas.eraAll">全部年代</span>
+              </button>
             </div>
-            <input type="range" id="atlasEra" min="0" max="4" step="1" value="4"
+            <input type="range" id="atlasEra" min="0" max="4" step="1" value="0"
                    data-i18n-aria="atlas.eraAria">
-            <div class="atlas__ticks" id="atlasTicks" aria-hidden="true"></div>
+            <div class="atlas__ticks" id="atlasTicks"></div>
           </div>
           <div class="atlas__meta">
             <p class="atlas__privacy">
@@ -305,6 +308,18 @@
           <p class="filter-group__label" data-i18n="filter.language">語言</p>
           <div class="chip-row" id="filterLanguage"></div>
         </div>
+        <div class="filter-group filter-group--media">
+          <p class="filter-group__label" data-i18n="filter.media">媒體類型</p>
+          <div class="chip-row filter-media" id="filterMedia" role="group"
+               data-i18n-aria="filter.mediaAria">
+            <button type="button" class="chip is-active" data-media="all"
+                    aria-pressed="true" data-i18n="filter.mediaAll">全部媒體</button>
+            <button type="button" class="chip" data-media="video"
+                    aria-pressed="false" data-i18n="filter.mediaVideo">只看影片 (Video)</button>
+            <button type="button" class="chip" data-media="image"
+                    aria-pressed="false" data-i18n="filter.mediaImage">只看相片 (Image)</button>
+          </div>
+        </div>
         <div class="filter-sort">
           <label for="filterSort" data-i18n="filter.sort">排序</label>
           <select id="filterSort">
@@ -337,7 +352,8 @@
 
         <section class="empty" id="storiesEmpty" hidden>
           <div class="empty__inner">
-            <h2 class="empty__title" data-i18n="stories.noResult">沒有符合的故事</h2>
+            <h2 class="empty__title" id="storiesEmptyTitle" data-i18n="stories.noResult">沒有符合的故事</h2>
+            <p class="empty__title empty__title--media" id="storiesEmptyMedia" hidden></p>
             <p class="empty__text" data-i18n="stories.noResultHint">試下減少篩選條件，或者清除全部再搵一次。</p>
           </div>
           <button type="button" class="vtn-btn vtn-btn--solid" id="storiesEmptyClear" data-i18n="filter.clearAll">清除全部篩選</button>
@@ -440,20 +456,11 @@
           <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
         </button>
 
-        <button type="button" class="me-item" id="meEntryLanguage" aria-haspopup="dialog">
-          <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-language"></i></span>
-          <span class="me-item__text">
-            <span class="me-item__title" data-i18n="me.language">語言 Language</span>
-            <span class="me-item__sub" id="meLanguageCurrent">繁體中文（香港）</span>
-          </span>
-          <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
-        </button>
-
         <button type="button" class="me-item" id="meEntrySettings">
           <span class="me-item__icon" aria-hidden="true"><i class="fa-solid fa-sliders"></i></span>
           <span class="me-item__text">
             <span class="me-item__title" data-i18n="me.settings">設定</span>
-            <span class="me-item__sub" data-i18n="me.settingsSub">字級、音量、速度、主題與無障礙</span>
+            <span class="me-item__sub" data-i18n="me.settingsSub">語言、字級、音量、速度與無障礙</span>
           </span>
           <span class="me-item__chevron" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
         </button>
@@ -478,14 +485,25 @@
     <!-- ======================= 分頁：settings ======================= -->
     <main class="page vtn-view" data-view="settings">
       <div class="page-head">
-        <button type="button" class="page-head__back" data-back="me" data-i18n-aria="common.back">
+        <button type="button" class="page-head__back" id="settingsBack" data-i18n-aria="common.back">
           <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
         </button>
-        <h1 class="page-head__title" data-i18n="settings.title">設定</h1>
+        <h1 class="page-head__title" id="settingsTitle" data-i18n="settings.title" tabindex="-1">設定</h1>
       </div>
 
+      <div class="settings-panel" id="settingsPanelGeneral">
       <section class="settings-group" aria-labelledby="setDisplay">
         <h2 class="settings-group__title" id="setDisplay" data-i18n="settings.display">顯示</h2>
+
+        <button type="button" class="setting-row setting-row--link" id="setLanguageEntry" aria-labelledby="setLanguageLabel setLanguageCurrent" aria-controls="settingsPanelLanguage">
+          <span class="setting-row__text">
+            <span class="setting-row__label" id="setLanguageLabel" data-i18n="settings.language">語言</span>
+          </span>
+          <span class="setting-row__control">
+            <span class="setting-row__value" id="setLanguageCurrent">繁體中文（香港）</span>
+            <span aria-hidden="true">›</span>
+          </span>
+        </button>
 
         <div class="setting-row">
           <div class="setting-row__text">
@@ -565,6 +583,20 @@
       </section>
 
       <p class="settings-foot" data-i18n="settings.foot">設定只存喺呢部裝置。正文不小於 18px、觸控目標不小於 44px。此版本只提供淺色主題。</p>
+      </div>
+
+      <div class="settings-panel" id="settingsPanelLanguage" role="region" aria-labelledby="setLanguage" hidden>
+        <section class="settings-group" aria-labelledby="setLanguage">
+          <h2 class="settings-group__title" id="setLanguage" data-i18n="settings.language" tabindex="-1">語言</h2>
+          <p class="setting-row__hint" data-i18n="settings.languageHint">選擇介面顯示語言</p>
+          <div id="settingsLanguageOptions" role="group" data-i18n-aria="settings.language">
+            <button type="button" class="lang-option" data-lang="zh-HK" aria-pressed="true"><span data-i18n="lang.name.zh-HK">繁體中文（香港）</span><span class="lang-option__check" aria-hidden="true">✓</span></button>
+            <button type="button" class="lang-option" data-lang="zh-CN" aria-pressed="false"><span data-i18n="lang.name.zh-CN">简体中文</span><span class="lang-option__check" aria-hidden="true"></span></button>
+            <button type="button" class="lang-option" data-lang="en" aria-pressed="false"><span data-i18n="lang.name.en">English</span><span class="lang-option__check" aria-hidden="true"></span></button>
+          </div>
+        </section>
+        <p class="settings-foot" data-i18n="lang.note">介面語言會即時切換；逐字稿保留長者原本的粵語用字，不自動改寫。</p>
+      </div>
     </main>
 
     <!-- ======================= 分頁：about ======================= -->
