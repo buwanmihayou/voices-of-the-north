@@ -7,6 +7,7 @@ Voices of the North is a prototype for preserving Cantonese village oral histori
 - [Hosted demo](https://voices-of-the-north.onrender.com/voices-of-the-north-app.html)
 - [Techathon+ roadmap and team workflow](docs/techathon/ROADMAP.md)
 - [Verified demo behavior and test checklist](docs/techathon/DEMO-EVIDENCE.md)
+- [Deployment verification and remaining handoff](docs/techathon/DEPLOYMENT.md)
 - [Work items, independent first steps, and handoffs](docs/techathon/WORK-ITEMS.md)
 - [Main demo flow and shared interfaces](docs/techathon/DEMO-FLOW.md)
 - [Active work and owners](https://github.com/phatdat220707/voices-of-the-north/milestone/1)

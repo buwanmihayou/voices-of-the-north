@@ -18,11 +18,29 @@ At that baseline, the repository contained eight team-written role-play stories 
 
 Repository main at [`0cc1701`](https://github.com/phatdat220707/voices-of-the-north/commit/0cc17019aaa44ec21b0bb3dc19040db1f77e41c0) contains 14 role-play demo stories and one measured sample WAV. This repository snapshot does not establish which build is deployed on Render.
 
-[Draft PR #10](https://github.com/phatdat220707/voices-of-the-north/pull/10), head `206301a`, adds partial Issue #6 protections on that main snapshot. Local Windows tests used synthetic identities and isolated temporary SQLite databases. The recording API suite passed 74 checks, the lab API suite passed 48, and the backend part of the story-scope suite passed 14. Data validation passed for 14 stories and the bundled JavaScript parsed successfully.
+[Draft PR #10](https://github.com/phatdat220707/voices-of-the-north/pull/10), head `6bfc491`, adds partial Issue #6 protections on that main snapshot. Local Windows tests used synthetic identities and isolated temporary SQLite databases. After fixing the Windows filename-alias issue reported by Zheng, the recording API suite passed 80 checks and the lab API suite passed 48. The backend part of the story-scope suite passed 14 checks at the earlier head `206301a`. Data validation passed for 14 stories and the bundled JavaScript parsed successfully.
+
+The Windows validation environment used Python 3.14.6, FastAPI 0.139.0, Starlette 1.3.1, HTTPX 0.28.1 and Uvicorn 0.50.1. Reproduce the recording and lab checks from the repository root using `python tools/test_records_api.py` and `python tools/test_lab_api.py`. These scripts create temporary databases. Provider credentials were disabled for this run. The recording suite includes six Windows-specific alias checks, and 74 checks on other platforms.
+
+The backend-only story-scope check was run with the following Python snippet, from the repository root.
+
+```python
+import os
+from pathlib import Path
+import runpy
+import tempfile
+
+with tempfile.TemporaryDirectory(prefix="vtn-scope-check-") as tmp:
+    os.environ["VTN_DB_PATH"] = str(Path(tmp) / "records.db")
+    os.environ["VTN_RECORDS_DIR"] = str(Path(tmp) / "records")
+    os.environ["VTN_LAB_DB"] = str(Path(tmp) / "lab.db")
+    checks = runpy.run_path("tools/verify/story_scope.py")
+    checks["backend_checks"]()
+```
 
 The tested API behavior includes owner/reviewer access to stored recordings, rejection of a contributor-supplied public scope as a publication decision, reviewer-only withdrawal, removal from catalog and retrieval, and denial of the old WAV URL after withdrawal. Range and conditional requests were checked. Catalog, retrieval and the story audio return an error when withdrawal state is unavailable.
 
-Publication from Boris's submitted sample, invited sign-in, persistent staging, Supabase integration, and independent browser/offline withdrawal checks remain pending. The frontend contains mock media and confidence examples, which require explicit mock-mode handling before those displays can support production claims.
+Publication from Boris's submitted sample, invited sign-in, persistent staging, Supabase integration, and independent browser/offline withdrawal checks remain pending. Database outages are mocked, API identities are signed local fixtures, and no real Google, Supabase or STT integration is established by these tests. The frontend contains mock media and confidence examples, which require explicit mock-mode handling before those displays can support production claims. See the [deployment verification handoff](DEPLOYMENT.md).
 
 ## Repeatable checks
 
