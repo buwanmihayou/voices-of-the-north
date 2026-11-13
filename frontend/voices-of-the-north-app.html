@@ -6142,6 +6142,21 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'rec.status.draft': '草稿',
       'rec.status.pending': '待轉寫',
       'rec.status.done': '已完成',
+      'review.status.ready': '待提交審核',
+      'review.status.submitted': '待審核',
+      'review.status.approved': '已核准',
+      'review.status.rejected': '已退回',
+      'review.submit': '提交私人故事',
+      'review.title': '提交故事審核',
+      'review.intro': '故事提交後會保持私人，只有你和審核員可查看；核准後才按指定範圍分享。',
+      'review.scope': '希望核准後分享至',
+      'review.confirm': '我已核對逐字稿及時間戳',
+      'review.submitted': '故事已提交，現時保持私人並等待審核。',
+      'review.approve': '核准公開',
+      'review.reject': '退回提交',
+      'review.approvedToast': '故事已核准，並按指定範圍分享。',
+      'review.rejectedToast': '故事已退回，仍然保持私人。',
+      'review.failed': '提交失敗，內容仍保存在本機。',
       'rec.draftMissing': '搵唔到草稿，請重新錄音。',
       'rec.pendingBody': '上傳未成功，但錄音已完整保存喺本機。',
       'rec.audioLocalNote': '音訊只存喺本機瀏覽器，唔會自動同步到雲端。',
@@ -6804,6 +6819,21 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'rec.status.draft': '草稿',
       'rec.status.pending': '待转写',
       'rec.status.done': '已完成',
+      'review.status.ready': '待提交审核',
+      'review.status.submitted': '待审核',
+      'review.status.approved': '已核准',
+      'review.status.rejected': '已退回',
+      'review.submit': '提交私人故事',
+      'review.title': '提交故事审核',
+      'review.intro': '提交后故事保持私人，只有你和审核员可查看；核准后才按指定范围分享。',
+      'review.scope': '希望核准后分享至',
+      'review.confirm': '我已核对逐字稿及时间戳',
+      'review.submitted': '故事已提交，目前保持私人并等待审核。',
+      'review.approve': '核准公开',
+      'review.reject': '退回提交',
+      'review.approvedToast': '故事已核准，并按指定范围分享。',
+      'review.rejectedToast': '故事已退回，仍然保持私人。',
+      'review.failed': '提交失败，内容仍保存在本机。',
       'rec.draftMissing': '找不到草稿，请重新录音。',
       'rec.pendingBody': '上传未成功，但录音已完整保存在本机。',
       'rec.audioLocalNote': '音频只存于本机浏览器，不会自动同步到云端。',
@@ -7466,6 +7496,21 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'rec.status.draft': 'Draft',
       'rec.status.pending': 'Pending',
       'rec.status.done': 'Finished',
+      'review.status.ready': 'Ready to submit',
+      'review.status.submitted': 'Pending review',
+      'review.status.approved': 'Approved',
+      'review.status.rejected': 'Returned',
+      'review.submit': 'Submit private story',
+      'review.title': 'Submit story for review',
+      'review.intro': 'The story remains private after submission. Only you and reviewers can access it; the approved scope applies only after review.',
+      'review.scope': 'Requested scope after approval',
+      'review.confirm': 'I have checked the transcript and timestamps',
+      'review.submitted': 'Story submitted. It remains private pending review.',
+      'review.approve': 'Approve',
+      'review.reject': 'Reject',
+      'review.approvedToast': 'Story approved with the selected scope.',
+      'review.rejectedToast': 'Story returned and remains private.',
+      'review.failed': 'Submission failed; your content remains on this device.',
       'rec.draftMissing': 'Draft not found. Please record again.',
       'rec.pendingBody': 'Upload did not succeed, but the recording is fully saved on this device.',
       'rec.audioLocalNote': 'Audio is kept only in this browser; it is not synced to the cloud.',
@@ -8984,6 +9029,31 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     return request('/api/records/' + encodeURIComponent(id), { method: 'DELETE', timeout: 12000 });
   }
 
+  function submitContribution(id, payload) {
+    return request('/api/contributions/' + encodeURIComponent(id) + '/submit', {
+      method: 'POST',
+      body: payload,
+      timeout: 12000
+    });
+  }
+
+  function listContributions(status) {
+    var suffix = status ? '?status=' + encodeURIComponent(status) : '';
+    return request('/api/contributions' + suffix, { timeout: 12000 });
+  }
+
+  function reviewContribution(id, approved, approvedScope, note) {
+    return request('/api/contributions/' + encodeURIComponent(id) + '/review', {
+      method: 'POST',
+      body: {
+        approved: !!approved,
+        approvedScope: approvedScope || 'private',
+        note: note || ''
+      },
+      timeout: 12000
+    });
+  }
+
   /* ---------------- 帳戶 ---------------- */
   function requestLoginCode(email) {
     return request('/api/auth/request-code', { method: 'POST', body: { email: email } });
@@ -9062,6 +9132,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       sync: syncRecord,
       pull: pullRecords,
       remove: deleteRecord
+    },
+    contributions: {
+      submit: submitContribution,
+      list: listContributions,
+      review: reviewContribution
     },
     auth: { requestCode: requestLoginCode, verify: verifyLogin },
     stories: fetchStories,
@@ -13718,6 +13793,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       var words = normalizeWords(data.words);
       var updated = VTN.store.records.patch(rec.id, {
         status: 'done',
+        contributionFlow: true,
+        reviewStatus: 'ready',
+        requestedScope: rec.scope || VTN.store.getPref('scope') || 'private',
         mode: data.mode || 'online',
         rawText: data.raw_text || '',
         words: words,
@@ -14285,6 +14363,104 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     body.appendChild(actions);
   }
 
+  function openSubmission(rec) {
+    var body = U.node('div');
+    body.appendChild(U.node('p', {
+      class: 'vtn-rec-desc',
+      text: t('review.intro')
+    }));
+    body.appendChild(U.node('label', { class: 'vtn-rec-subhead', text: t('review.scope') }));
+    var scopeSelect = U.node('select', {
+      id: 'contributionRequestedScope',
+      'aria-label': t('review.scope')
+    }, VTN.SCOPES.map(function (scope) {
+      return U.node('option', {
+        value: scope,
+        text: t(VTN.SCOPE_META[scope].labelKey)
+      });
+    }));
+    scopeSelect.value = rec.requestedScope || rec.scope || 'private';
+    body.appendChild(scopeSelect);
+    var confirmWrap = U.node('label', { class: 'vtn-rec-note' });
+    var confirmed = U.node('input', { type: 'checkbox' });
+    confirmWrap.appendChild(confirmed);
+    confirmWrap.appendChild(document.createTextNode(' ' + t('review.confirm')));
+    body.appendChild(confirmWrap);
+    var feedback = U.node('p', { class: 'vtn-rec-note', role: 'alert', hidden: 'hidden' });
+    body.appendChild(feedback);
+
+    var dlg = VTN.ui.dialog({
+      titleKey: 'review.title',
+      body: body,
+      actions: [
+        { labelKey: 'common.cancel', kind: 'quiet' },
+        {
+          labelKey: 'review.submit',
+          kind: 'solid',
+          keepOpen: true,
+          onClick: function (ctx) {
+            if (!confirmed.checked) {
+              feedback.textContent = t('review.confirm');
+              feedback.hidden = false;
+              confirmed.focus();
+              return;
+            }
+            VTN.api.contributions.submit(rec.id, {
+              transcriptConfirmed: true,
+              requestedScope: scopeSelect.value,
+              policyVersion: VTN.config.consentPolicyVersion
+            }).then(function (response) {
+              var updated = response && response.record || {};
+              VTN.store.records.patch(rec.id, {
+                scope: 'private',
+                requestedScope: updated.requestedScope || scopeSelect.value,
+                reviewStatus: updated.reviewStatus || 'submitted',
+                submittedAt: updated.submittedAt
+              });
+              VTN.ui.toast(t('review.submitted'), 'success');
+              ctx.close('submitted');
+              renderAll();
+              pullAndRender();
+            }).catch(function () {
+              feedback.textContent = t('review.failed');
+              feedback.hidden = false;
+            });
+          }
+        }
+      ]
+    });
+    return dlg;
+  }
+
+  function pullAndRender() {
+    VTN.api.records.pull().then(function () {
+      renderAll();
+    }).catch(function () { /* 保留本機狀態 */ });
+  }
+
+  function reviewSubmission(rec, approved) {
+    VTN.ui.confirm({
+      titleKey: approved ? 'review.approve' : 'review.reject',
+      messageKey: 'review.intro',
+      confirmLabelKey: approved ? 'review.approve' : 'review.reject',
+      cancelLabelKey: 'common.cancel',
+      danger: !approved
+    }).then(function (ok) {
+      if (!ok) return;
+      VTN.api.contributions.review(
+        rec.id,
+        approved,
+        approved ? (rec.requestedScope || 'private') : 'private',
+        ''
+      ).then(function () {
+        VTN.ui.toast(t(approved ? 'review.approvedToast' : 'review.rejectedToast'), 'success');
+        pullAndRender();
+      }).catch(function () {
+        VTN.ui.toast(t('review.failed'), 'error');
+      });
+    });
+  }
+
   function renderDoneBody(rec, body) {
     var tags = U.node('div', { class: 'vtn-rec-card__tags' });
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive') }));
@@ -14298,6 +14474,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       text: t('scope.label', { scope: t(VTN.SCOPE_META[VTN.store.scopeOf(rec)].labelKey) })
     }));
     if (rec.rolePlayed) tags.appendChild(U.node('span', { class: 'vtn-rec-pill vtn-rec-pill--gold', text: t('story.rolePlayed') }));
+    if (rec.reviewStatus && t('review.status.' + rec.reviewStatus) !== 'review.status.' + rec.reviewStatus) {
+      tags.appendChild(U.node('span', {
+        class: 'vtn-rec-pill',
+        text: t('review.status.' + rec.reviewStatus)
+      }));
+    }
     body.appendChild(tags);
 
     if (rec.audioDataURL) {
@@ -14379,6 +14561,31 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     actions2.appendChild(correct);
     actions2.appendChild(withdraw);
     body.appendChild(actions2);
+
+    if (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected') {
+      var reviewActions = U.node('div', { class: 'vtn-rec-card__actions' });
+      var submit = U.node('button', {
+        class: 'vtn-rec-card__retry', type: 'button', text: t('review.submit')
+      });
+      submit.addEventListener('click', function () { openSubmission(rec); });
+      reviewActions.appendChild(submit);
+      body.appendChild(reviewActions);
+    }
+
+    if (VTN.store.role() === 'admin' && rec.reviewStatus === 'submitted') {
+      var moderation = U.node('div', { class: 'vtn-rec-card__actions' });
+      var approve = U.node('button', {
+        class: 'vtn-rec-card__retry', type: 'button', text: t('review.approve')
+      });
+      approve.addEventListener('click', function () { reviewSubmission(rec, true); });
+      var reject = U.node('button', {
+        class: 'vtn-rec-card__remove', type: 'button', text: t('review.reject')
+      });
+      reject.addEventListener('click', function () { reviewSubmission(rec, false); });
+      moderation.appendChild(approve);
+      moderation.appendChild(reject);
+      body.appendChild(moderation);
+    }
 
     var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
     var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
