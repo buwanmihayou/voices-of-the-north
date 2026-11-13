@@ -109,8 +109,8 @@ a { text-decoration: none; }
 
 @media (min-width: 480px) {
   .app-shell {
-    height: calc(100dvh - 48px);
-    margin: 24px 0;
+    height: 100dvh;
+    margin: 0;
     border-radius: 30px;
     box-shadow: 0 30px 80px -30px rgba(50, 60, 45, 0.45),
                 0 0 0 1px rgba(120, 110, 80, 0.18);

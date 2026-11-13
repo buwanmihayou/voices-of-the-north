@@ -138,8 +138,8 @@ a { text-decoration: none; }
 
 @media (min-width: 480px) {
   .app-shell {
-    height: calc(100dvh - 48px);
-    margin: 24px 0;
+    height: 100dvh;
+    margin: 0;
     border-radius: 30px;
     box-shadow: 0 30px 80px -30px rgba(50, 60, 45, 0.45),
                 0 0 0 1px rgba(120, 110, 80, 0.18);
@@ -3453,11 +3453,19 @@ html[data-reduce-motion="true"] *::after {
 
 .player--audio { margin: 16px 0 6px; }
 
-.media-overlay { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: flex-end; justify-content: center; }
+/* 多媒體 Overlay 掛在 body 上，原本 fixed inset:0 會以整個視口為範圍，
+   桌面預覽時面板 720px 遠寬於 430px 手機外殼。這裡收斂成與 .app-shell 同寬且同樣置中，
+   讓遮罩與面板都嚴格落在手機螢幕內（真機 100vw 時仍為全螢幕）。 */
+.media-overlay {
+  position: fixed; top: 0; bottom: 0; left: 50%; right: auto;
+  transform: translateX(-50%);
+  width: min(430px, 100vw);
+  z-index: 1200; display: flex; align-items: flex-end; justify-content: center;
+}
 .media-overlay[hidden] { display: none; }
 .media-overlay__scrim { position: absolute; inset: 0; background: rgba(10,18,14,0.55); backdrop-filter: blur(2px); }
 .media-overlay__panel {
-  position: relative; width: 100%; max-width: 720px; max-height: 94vh; overflow-y: auto;
+  position: relative; width: 100%; max-width: 430px; max-height: 94vh; overflow-y: auto;
   background: var(--bg, #fff); border-radius: 18px 18px 0 0; padding: 14px 16px 22px;
   box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
 }
@@ -3588,10 +3596,13 @@ html[data-theme="dark"] .confidence-badge--none { background: #333833; border-co
 .atlas__top .atlas__filter .filter-toggle-badge,
 .atlas__filter .filter-toggle-badge {
   display: flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; min-width: 20px;
+  top: -6px; right: -6px;
+  width: 14px; height: 14px; min-width: 14px;
   margin: 0; padding: 0; box-sizing: border-box;
   line-height: 1; text-align: center;
   border-radius: 999px;
+  font-size: 0.6875rem; font-weight: 800;
+  box-shadow: 0 0 0 1.5px var(--ivory);
 }
 .atlas__top .atlas__filter .filter-toggle-badge[hidden],
 .atlas__filter .filter-toggle-badge[hidden] { display: none; }
@@ -3603,6 +3614,82 @@ html[data-theme="dark"] .confidence-badge--none { background: #333833; border-co
   white-space: nowrap;
 }
 .atlas__top .atlas__viewport #atlasViewportText { white-space: nowrap; }
+
+/* 28. Stories 頁 UI 瘦身（全視口生效）
+   注意：桌面預覽下 .app-shell 仍為 430px 手機佈局，若包在 @media (max-width:480px)
+   會因外層視口寬度 >480 而完全不命中，故這裡不使用媒體查詢。
+   版權聲明與篩選角標降字級已於 fix_1108 顯式豁免（裝飾性文字，非功能性輔助文案）。 */
+/* 滿版地圖：以等量負 margin 抵消滾動頁預留的 --nav-safe 下內距，
+   讓 .atlas 向下延伸至 tab bar，消除米色空白；padding-bottom 仍保留以符合全站節奏檢查。 */
+.page--stories .atlas { margin-bottom: calc(-1 * var(--nav-safe)); }
+.page--stories .atlas__top { padding: 8px 10px 2px; gap: 2px 6px; }
+.page--stories .atlas__eyebrow { margin: 0; letter-spacing: 0.12em; }
+.page--stories .atlas__titles { min-width: 0; margin-top: -5px; }
+.page--stories .atlas__title {
+  font-size: 1.0625rem; line-height: 1.05; margin: 0;
+  white-space: nowrap;
+}
+.page--stories .atlas__tools { gap: 5px; }
+.page--stories .atlas-btn { width: 34px; height: 34px; border-radius: 10px; padding: 0; font-size: var(--fs-min); }
+/* 「列表」按鈕含圖示＋文字，還原自適應寬度並禁止換行，避免文字溢出按鈕 */
+.page--stories .atlas__tools .atlas-btn--list {
+  width: auto; min-width: 56px; height: 34px;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px; padding: 0 8px; white-space: nowrap;
+}
+.page--stories .atlas__searchrow { margin-top: 5px; gap: 5px; }
+.page--stories .atlas__search { min-height: 34px; padding: 0 10px; font-size: var(--fs-min); }
+.page--stories .atlas__filter { width: 34px; height: 34px; }
+.page--stories .chip--toggle { min-height: 34px; padding: 4px 9px; font-size: var(--fs-min); }
+.page--stories .atlas__legend { gap: 4px; margin-top: 5px; }
+.page--stories .legend-chip { min-height: 26px; padding: 2px 8px 2px 4px; font-size: var(--fs-min); }
+.page--stories .atlas__viewport { margin-top: 5px; padding: 2px 7px; font-size: var(--fs-min); }
+
+/* 故事年代卡片：再減負 */
+.page--stories .atlas__timeline { padding: 2px 18px 0; }
+.page--stories .atlas__timeline-head { min-height: 28px; font-size: var(--fs-min); }
+.page--stories .atlas__era-all { min-height: 28px; padding: 0 8px; font-size: var(--fs-min); }
+.page--stories #atlasEra { height: 40px; margin: -10px 0 -8px; }
+.page--stories #atlasEra::-webkit-slider-thumb { width: 16px; height: 16px; }
+.page--stories #atlasEra::-moz-range-thumb { width: 16px; height: 16px; }
+.page--stories .atlas__ticks { height: 26px; }
+.page--stories .atlas__tick { min-height: 26px; width: 38px; font-size: var(--fs-min); }
+/* 首尾年代刻度向內收，避免 1950 / 1990+ 貼邊或被卡片圓角裁切 */
+.page--stories .atlas__tick:nth-child(1) { left: 16px; }
+.page--stories .atlas__tick:nth-child(5) { left: calc(100% - 16px); }
+
+/* 地圖底部聲明：非常小 + 低對比 */
+.page--stories .atlas__bottom { padding-top: 12px; }
+.page--stories .atlas__meta { gap: 0; margin-top: 2px; }
+.page--stories .atlas__privacy { font-size: 0.625rem; line-height: 1.15; color: rgba(246, 241, 230, 0.58); }
+.page--stories .atlas__privacy i { margin: 0 3px 0 0; font-size: 0.625rem; }
+.page--stories .atlas__tiles { font-size: 0.625rem; line-height: 1.15; color: rgba(246, 241, 230, 0.5); }
+
+/* 29. 消除底部白邊：tab bar 只保留安全區；桌面預覽不再預留底部 48px */
+body .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+@media (min-width: 480px) { html body .app-shell { height: 100dvh; margin: 0; } }
+:root { --vtn-nav-h: calc(72px + env(safe-area-inset-bottom)); }
+
+/* 30. 錄音自選小圖示（裝飾性標記，只喺「我的錄音」顯示，不進地圖） */
+.vtn-rec-icons { margin: 12px 0 2px; }
+.vtn-rec-icons__row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.vtn-rec-icon {
+  width: 40px; height: 40px; display: grid; place-items: center;
+  border: 1.5px solid var(--sage-line); border-radius: 12px;
+  background: var(--cream); color: var(--forest);
+  font-family: inherit; font-size: 1rem; cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.vtn-rec-icon:hover { transform: translateY(-1px); }
+.vtn-rec-icon.is-active { background: var(--forest); border-color: var(--forest); color: #F6F1E6; }
+.vtn-rec-icon:focus-visible { outline: 3px solid var(--jade-strong); outline-offset: 2px; }
+.vtn-rec-icons__current { margin: 4px 0 0; font-size: var(--fs-min); color: var(--muted); }
+.vtn-rec-card__chosen {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 4px; padding: 2px 8px;
+  border-radius: 999px; background: var(--sage-wash);
+  color: var(--forest); font-size: var(--fs-min); font-weight: 700;
+}
 
 /* ===== src/css/story-map.css ===== */
 /* =============================================================================
@@ -5996,6 +6083,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'rec.upload': '上傳並轉寫',
       'rec.rerecord': '重新錄音',
       'rec.backToPrep': '返回準備',
+      'rec.iconTitle': '自選小圖示',
+      'rec.iconHint': '揀一個鍾意嘅圖示代表呢段錄音；只會喺「我的錄音」顯示，唔會放上地圖。',
+      'rec.iconNone': '未選擇',
+      'rec.iconCurrent': '已選：{name}',
+      'rec.iconSaved': '圖示已更新',
       'rec.processingLead': '正在處理你嘅錄音…',
       'rec.stepUpload': '上傳音訊',
       'rec.stepStt': '粵語轉寫',
@@ -6653,6 +6745,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'rec.upload': '上传并转写',
       'rec.rerecord': '重新录音',
       'rec.backToPrep': '返回准备',
+      'rec.iconTitle': '自选小图标',
+      'rec.iconHint': '挑一个喜欢的图标代表这段录音；只会在「我的录音」显示，不会放到地图。',
+      'rec.iconNone': '未选择',
+      'rec.iconCurrent': '已选：{name}',
+      'rec.iconSaved': '图标已更新',
       'rec.processingLead': '正在处理你的录音…',
       'rec.stepUpload': '上传音频',
       'rec.stepStt': '粤语转写',
@@ -7310,6 +7407,11 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'rec.upload': 'Upload & transcribe',
       'rec.rerecord': 'Record again',
       'rec.backToPrep': 'Back to setup',
+      'rec.iconTitle': 'Pick an icon',
+      'rec.iconHint': 'Choose an icon for this recording. It appears only in My Recordings, never on the map.',
+      'rec.iconNone': 'Not set',
+      'rec.iconCurrent': 'Selected: {name}',
+      'rec.iconSaved': 'Icon updated',
       'rec.processingLead': 'Processing your recording…',
       'rec.stepUpload': 'Uploading audio',
       'rec.stepStt': 'Cantonese transcription',
@@ -8153,6 +8255,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     return lastQuotaReport;
   }
 
+  /* 錄音自選小圖示：沿用故事類別的 7 個 Font Awesome 圖示。
+     白名單以外的值一律清掉，避免舊資料／同步資料注入任意 class。 */
+  var RECORD_ICON_KEYS = [
+    'festival', 'farming', 'migration', 'architecture', 'oral', 'market', 'other'
+  ];
+
   function normalizeRecord(rec) {
     var now = Date.now();
     var out = Object.assign({}, rec);
@@ -8169,6 +8277,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     out.durationSec = Number(out.durationSec) || 0;
     out.durationSource = out.durationSource || (out.audioDataURL || out.audioUrl ? 'measured' : 'transcript');
     out.title = out.title || deriveTitle(out);
+    out.iconKey = RECORD_ICON_KEYS.indexOf(out.iconKey) === -1 ? null : out.iconKey;
     if (out.sync === 'synced' && out.syncAt) out.syncAt = Number(out.syncAt);
     return out;
   }
@@ -8661,7 +8770,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       merge: mergeRemote,
       migrate: migrateToAccount,
       quota: lastQuota,
-      deletedIds: deletedIds
+      deletedIds: deletedIds,
+      iconKeys: function () { return RECORD_ICON_KEYS.slice(); }
     },
     /* 私隱 */
     scopeOf: scopeOf,
@@ -13011,6 +13121,56 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
 
+  /* ---- 錄音自選小圖示（40-recorder 與 45-recordings 共用）-----------------
+     純裝飾性標記：存落 record.iconKey，只喺「我的錄音」顯示；
+     唔寫入地圖、唔補座標（私隱紅線：位置只顯示 800m 模糊範圍）。 */
+  function iconKeys() {
+    return VTN.store.records.iconKeys ? VTN.store.records.iconKeys() : [];
+  }
+  function iconOf(key) {
+    try { return VTN.stories.typeIcon(key) || 'fa-feather-pointed'; }
+    catch (e) { return 'fa-feather-pointed'; }
+  }
+  function iconLabel(key) { return t('storyType.' + key); }
+
+  function buildIconPicker(currentKey, onPick) {
+    var wrap = U.node('div', { class: 'vtn-rec-icons' });
+    wrap.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('rec.iconTitle') }));
+    wrap.appendChild(U.node('p', { class: 'vtn-rec-note', text: t('rec.iconHint') }));
+    var row = U.node('div', {
+      class: 'vtn-rec-icons__row', role: 'group', 'aria-label': t('rec.iconTitle')
+    });
+    var current = U.node('p', { class: 'vtn-rec-icons__current' });
+    function refresh(key) {
+      Array.prototype.forEach.call(row.children, function (btn) {
+        var active = btn.getAttribute('data-icon-key') === key;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      current.textContent = key ? t('rec.iconCurrent', { name: iconLabel(key) }) : t('rec.iconNone');
+    }
+    iconKeys().forEach(function (key) {
+      var btn = U.node('button', {
+        type: 'button', class: 'vtn-rec-icon',
+        'data-icon-key': key, 'aria-label': iconLabel(key), title: iconLabel(key)
+      });
+      btn.innerHTML = '<i class="fa-solid ' + iconOf(key) + '" aria-hidden="true"></i>';
+      btn.addEventListener('click', function () {
+        refresh(key);
+        if (onPick) onPick(key);
+      });
+      row.appendChild(btn);
+    });
+    wrap.appendChild(row);
+    wrap.appendChild(current);
+    refresh(currentKey || null);
+    return wrap;
+  }
+
+  VTN.recIcons = {
+    keys: iconKeys, iconOf: iconOf, labelOf: iconLabel, build: buildIconPicker
+  };
+
   function apiHost() {
     try { return new URL(VTN.api.base()).host; } catch (e) { return VTN.api.base(); }
   }
@@ -13157,6 +13317,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     steps.review.appendChild(metaRow);
 
     steps.review.appendChild(buildAttachBlock());
+    state.iconHost = U.node('div', { class: 'vtn-rec-icons-host' });
+    steps.review.appendChild(state.iconHost);
 
     state.uploadBtn = U.node('button', { class: 'vtn-rec-btn vtn-rec-btn--primary', type: 'button' });
     state.uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i><span>' +
@@ -13480,6 +13642,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       note.textContent = t('rec.draftSaved', { time: U.fmtTime(state.duration) });
     }
     applyQuotaWarning(saved.quota);
+    if (state.iconHost) {
+      var recordId = saved && saved.record ? saved.record.id : state.recordId;
+      var chosen = saved && saved.record ? saved.record.iconKey : null;
+      state.iconHost.textContent = '';
+      state.iconHost.appendChild(buildIconPicker(chosen, function (key) {
+        VTN.store.records.patch(recordId, { iconKey: key });
+      }));
+    }
     showStep('review');
   }
 
@@ -13666,6 +13836,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: t('scope.label', {
       scope: t(VTN.SCOPE_META[VTN.store.scopeOf(rec)].labelKey)
     }) }));
+    if (rec.iconKey) {
+      var iconPill = U.node('span', { class: 'vtn-rec-pill' });
+      iconPill.innerHTML = '<i class="fa-solid ' + iconOf(rec.iconKey) + '" aria-hidden="true"></i> ' +
+        U.escapeHtml(iconLabel(rec.iconKey));
+      tags.appendChild(iconPill);
+    }
     steps.result.appendChild(tags);
 
     if (rec.audioDataURL || rec.audioUrl) {
@@ -14014,6 +14190,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     meta.push(rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive'));
     main.appendChild(U.node('p', { class: 'vtn-rec-card__meta', text: meta.join('　・　') }));
 
+    if (rec.iconKey && VTN.recIcons) {
+      var chosen = U.node('span', {
+        class: 'vtn-rec-card__chosen', title: VTN.recIcons.labelOf(rec.iconKey)
+      });
+      chosen.innerHTML = '<i class="fa-solid ' + VTN.recIcons.iconOf(rec.iconKey) + '" aria-hidden="true"></i>';
+      chosen.appendChild(U.node('span', { text: VTN.recIcons.labelOf(rec.iconKey) }));
+      main.appendChild(chosen);
+    }
+
     var sync = syncLabel(rec);
     main.appendChild(U.node('span', { class: sync.cls, text: sync.text }));
     var chevron = U.node('span', { class: 'vtn-rec-card__chevron' });
@@ -14030,6 +14215,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     if (state === 'draft') renderDraftBody(rec, body);
     else if (state === 'pending') renderPendingBody(rec, body);
     else renderDoneBody(rec, body);
+
+    if (VTN.recIcons) {
+      body.appendChild(VTN.recIcons.build(rec.iconKey, function (key) {
+        VTN.store.records.patch(rec.id, { iconKey: key });
+        VTN.ui.toast(t('rec.iconSaved'), 'success');
+      }));
+    }
 
     head.addEventListener('click', function () {
       var open = body.hidden;

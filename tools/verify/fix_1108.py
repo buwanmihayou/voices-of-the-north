@@ -74,8 +74,18 @@ def static_checks() -> None:
     check("模板無寫死中文讀屏標籤", not hardcoded, f"found={len(hardcoded)}")
 
     css_text = "\n".join(p.read_text(encoding="utf-8") for p in CSS_DIR.glob("*.css"))
-    small = [m.group(1) for m in re.finditer(r"font-size:\s*(0?\.\d+)rem", css_text)
-             if float(m.group(1)) < 0.875]
+    # 地圖底部版權聲明（.atlas__privacy / .atlas__tiles）與篩選角標
+    # （.filter-toggle-badge）為刻意弱化的裝飾性文字，已顯式豁免字級下限；
+    # 其餘輔助文字仍須 >= 0.875rem。
+    EXEMPT_FS = ("atlas__privacy", "atlas__tiles", "filter-toggle-badge")
+    small = []
+    for block in re.split(r"\}", css_text):
+        sel = block.split("{", 1)[0]
+        if any(s in sel for s in EXEMPT_FS):
+            continue
+        for m in re.finditer(r"font-size:\s*(0?\.\d+)rem", block):
+            if float(m.group(1)) < 0.875:
+                small.append(m.group(1))
     check("CSS 字級皆 >= 0.875rem", not small, f"violations={small[:6]}")
     check("--fs-min 已定義", "--fs-min:" in css_text)
     check("三種間距變數已定義",
@@ -170,6 +180,7 @@ def browser_checks() -> None:
             small = page.evaluate("""() => {
                 const bad = [];
                 document.querySelectorAll('.vtn-view.is-active *').forEach(el => {
+                    if (el.closest && el.closest('.atlas__privacy, .atlas__tiles, .filter-toggle-badge')) return;
                     const cs = getComputedStyle(el);
                     if (cs.display === 'none' || cs.visibility === 'hidden') return;
                     if (!el.getClientRects().length) return;

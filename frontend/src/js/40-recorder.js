@@ -41,6 +41,56 @@
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
 
+  /* ---- 錄音自選小圖示（40-recorder 與 45-recordings 共用）-----------------
+     純裝飾性標記：存落 record.iconKey，只喺「我的錄音」顯示；
+     唔寫入地圖、唔補座標（私隱紅線：位置只顯示 800m 模糊範圍）。 */
+  function iconKeys() {
+    return VTN.store.records.iconKeys ? VTN.store.records.iconKeys() : [];
+  }
+  function iconOf(key) {
+    try { return VTN.stories.typeIcon(key) || 'fa-feather-pointed'; }
+    catch (e) { return 'fa-feather-pointed'; }
+  }
+  function iconLabel(key) { return t('storyType.' + key); }
+
+  function buildIconPicker(currentKey, onPick) {
+    var wrap = U.node('div', { class: 'vtn-rec-icons' });
+    wrap.appendChild(U.node('p', { class: 'vtn-rec-subhead', text: t('rec.iconTitle') }));
+    wrap.appendChild(U.node('p', { class: 'vtn-rec-note', text: t('rec.iconHint') }));
+    var row = U.node('div', {
+      class: 'vtn-rec-icons__row', role: 'group', 'aria-label': t('rec.iconTitle')
+    });
+    var current = U.node('p', { class: 'vtn-rec-icons__current' });
+    function refresh(key) {
+      Array.prototype.forEach.call(row.children, function (btn) {
+        var active = btn.getAttribute('data-icon-key') === key;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      current.textContent = key ? t('rec.iconCurrent', { name: iconLabel(key) }) : t('rec.iconNone');
+    }
+    iconKeys().forEach(function (key) {
+      var btn = U.node('button', {
+        type: 'button', class: 'vtn-rec-icon',
+        'data-icon-key': key, 'aria-label': iconLabel(key), title: iconLabel(key)
+      });
+      btn.innerHTML = '<i class="fa-solid ' + iconOf(key) + '" aria-hidden="true"></i>';
+      btn.addEventListener('click', function () {
+        refresh(key);
+        if (onPick) onPick(key);
+      });
+      row.appendChild(btn);
+    });
+    wrap.appendChild(row);
+    wrap.appendChild(current);
+    refresh(currentKey || null);
+    return wrap;
+  }
+
+  VTN.recIcons = {
+    keys: iconKeys, iconOf: iconOf, labelOf: iconLabel, build: buildIconPicker
+  };
+
   function apiHost() {
     try { return new URL(VTN.api.base()).host; } catch (e) { return VTN.api.base(); }
   }
@@ -187,6 +237,8 @@
     steps.review.appendChild(metaRow);
 
     steps.review.appendChild(buildAttachBlock());
+    state.iconHost = U.node('div', { class: 'vtn-rec-icons-host' });
+    steps.review.appendChild(state.iconHost);
 
     state.uploadBtn = U.node('button', { class: 'vtn-rec-btn vtn-rec-btn--primary', type: 'button' });
     state.uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i><span>' +
@@ -510,6 +562,14 @@
       note.textContent = t('rec.draftSaved', { time: U.fmtTime(state.duration) });
     }
     applyQuotaWarning(saved.quota);
+    if (state.iconHost) {
+      var recordId = saved && saved.record ? saved.record.id : state.recordId;
+      var chosen = saved && saved.record ? saved.record.iconKey : null;
+      state.iconHost.textContent = '';
+      state.iconHost.appendChild(buildIconPicker(chosen, function (key) {
+        VTN.store.records.patch(recordId, { iconKey: key });
+      }));
+    }
     showStep('review');
   }
 
@@ -696,6 +756,12 @@
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: t('scope.label', {
       scope: t(VTN.SCOPE_META[VTN.store.scopeOf(rec)].labelKey)
     }) }));
+    if (rec.iconKey) {
+      var iconPill = U.node('span', { class: 'vtn-rec-pill' });
+      iconPill.innerHTML = '<i class="fa-solid ' + iconOf(rec.iconKey) + '" aria-hidden="true"></i> ' +
+        U.escapeHtml(iconLabel(rec.iconKey));
+      tags.appendChild(iconPill);
+    }
     steps.result.appendChild(tags);
 
     if (rec.audioDataURL || rec.audioUrl) {

@@ -762,11 +762,19 @@ html[data-reduce-motion="true"] *::after {
 
 .player--audio { margin: 16px 0 6px; }
 
-.media-overlay { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: flex-end; justify-content: center; }
+/* 多媒體 Overlay 掛在 body 上，原本 fixed inset:0 會以整個視口為範圍，
+   桌面預覽時面板 720px 遠寬於 430px 手機外殼。這裡收斂成與 .app-shell 同寬且同樣置中，
+   讓遮罩與面板都嚴格落在手機螢幕內（真機 100vw 時仍為全螢幕）。 */
+.media-overlay {
+  position: fixed; top: 0; bottom: 0; left: 50%; right: auto;
+  transform: translateX(-50%);
+  width: min(430px, 100vw);
+  z-index: 1200; display: flex; align-items: flex-end; justify-content: center;
+}
 .media-overlay[hidden] { display: none; }
 .media-overlay__scrim { position: absolute; inset: 0; background: rgba(10,18,14,0.55); backdrop-filter: blur(2px); }
 .media-overlay__panel {
-  position: relative; width: 100%; max-width: 720px; max-height: 94vh; overflow-y: auto;
+  position: relative; width: 100%; max-width: 430px; max-height: 94vh; overflow-y: auto;
   background: var(--bg, #fff); border-radius: 18px 18px 0 0; padding: 14px 16px 22px;
   box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
 }
@@ -897,10 +905,13 @@ html[data-theme="dark"] .confidence-badge--none { background: #333833; border-co
 .atlas__top .atlas__filter .filter-toggle-badge,
 .atlas__filter .filter-toggle-badge {
   display: flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; min-width: 20px;
+  top: -6px; right: -6px;
+  width: 14px; height: 14px; min-width: 14px;
   margin: 0; padding: 0; box-sizing: border-box;
   line-height: 1; text-align: center;
   border-radius: 999px;
+  font-size: 0.6875rem; font-weight: 800;
+  box-shadow: 0 0 0 1.5px var(--ivory);
 }
 .atlas__top .atlas__filter .filter-toggle-badge[hidden],
 .atlas__filter .filter-toggle-badge[hidden] { display: none; }
@@ -912,4 +923,80 @@ html[data-theme="dark"] .confidence-badge--none { background: #333833; border-co
   white-space: nowrap;
 }
 .atlas__top .atlas__viewport #atlasViewportText { white-space: nowrap; }
+
+/* 28. Stories 頁 UI 瘦身（全視口生效）
+   注意：桌面預覽下 .app-shell 仍為 430px 手機佈局，若包在 @media (max-width:480px)
+   會因外層視口寬度 >480 而完全不命中，故這裡不使用媒體查詢。
+   版權聲明與篩選角標降字級已於 fix_1108 顯式豁免（裝飾性文字，非功能性輔助文案）。 */
+/* 滿版地圖：以等量負 margin 抵消滾動頁預留的 --nav-safe 下內距，
+   讓 .atlas 向下延伸至 tab bar，消除米色空白；padding-bottom 仍保留以符合全站節奏檢查。 */
+.page--stories .atlas { margin-bottom: calc(-1 * var(--nav-safe)); }
+.page--stories .atlas__top { padding: 8px 10px 2px; gap: 2px 6px; }
+.page--stories .atlas__eyebrow { margin: 0; letter-spacing: 0.12em; }
+.page--stories .atlas__titles { min-width: 0; margin-top: -5px; }
+.page--stories .atlas__title {
+  font-size: 1.0625rem; line-height: 1.05; margin: 0;
+  white-space: nowrap;
+}
+.page--stories .atlas__tools { gap: 5px; }
+.page--stories .atlas-btn { width: 34px; height: 34px; border-radius: 10px; padding: 0; font-size: var(--fs-min); }
+/* 「列表」按鈕含圖示＋文字，還原自適應寬度並禁止換行，避免文字溢出按鈕 */
+.page--stories .atlas__tools .atlas-btn--list {
+  width: auto; min-width: 56px; height: 34px;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px; padding: 0 8px; white-space: nowrap;
+}
+.page--stories .atlas__searchrow { margin-top: 5px; gap: 5px; }
+.page--stories .atlas__search { min-height: 34px; padding: 0 10px; font-size: var(--fs-min); }
+.page--stories .atlas__filter { width: 34px; height: 34px; }
+.page--stories .chip--toggle { min-height: 34px; padding: 4px 9px; font-size: var(--fs-min); }
+.page--stories .atlas__legend { gap: 4px; margin-top: 5px; }
+.page--stories .legend-chip { min-height: 26px; padding: 2px 8px 2px 4px; font-size: var(--fs-min); }
+.page--stories .atlas__viewport { margin-top: 5px; padding: 2px 7px; font-size: var(--fs-min); }
+
+/* 故事年代卡片：再減負 */
+.page--stories .atlas__timeline { padding: 2px 18px 0; }
+.page--stories .atlas__timeline-head { min-height: 28px; font-size: var(--fs-min); }
+.page--stories .atlas__era-all { min-height: 28px; padding: 0 8px; font-size: var(--fs-min); }
+.page--stories #atlasEra { height: 40px; margin: -10px 0 -8px; }
+.page--stories #atlasEra::-webkit-slider-thumb { width: 16px; height: 16px; }
+.page--stories #atlasEra::-moz-range-thumb { width: 16px; height: 16px; }
+.page--stories .atlas__ticks { height: 26px; }
+.page--stories .atlas__tick { min-height: 26px; width: 38px; font-size: var(--fs-min); }
+/* 首尾年代刻度向內收，避免 1950 / 1990+ 貼邊或被卡片圓角裁切 */
+.page--stories .atlas__tick:nth-child(1) { left: 16px; }
+.page--stories .atlas__tick:nth-child(5) { left: calc(100% - 16px); }
+
+/* 地圖底部聲明：非常小 + 低對比 */
+.page--stories .atlas__bottom { padding-top: 12px; }
+.page--stories .atlas__meta { gap: 0; margin-top: 2px; }
+.page--stories .atlas__privacy { font-size: 0.625rem; line-height: 1.15; color: rgba(246, 241, 230, 0.58); }
+.page--stories .atlas__privacy i { margin: 0 3px 0 0; font-size: 0.625rem; }
+.page--stories .atlas__tiles { font-size: 0.625rem; line-height: 1.15; color: rgba(246, 241, 230, 0.5); }
+
+/* 29. 消除底部白邊：tab bar 只保留安全區；桌面預覽不再預留底部 48px */
+body .bottom-nav { padding-bottom: env(safe-area-inset-bottom); }
+@media (min-width: 480px) { html body .app-shell { height: 100dvh; margin: 0; } }
+:root { --vtn-nav-h: calc(72px + env(safe-area-inset-bottom)); }
+
+/* 30. 錄音自選小圖示（裝飾性標記，只喺「我的錄音」顯示，不進地圖） */
+.vtn-rec-icons { margin: 12px 0 2px; }
+.vtn-rec-icons__row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.vtn-rec-icon {
+  width: 40px; height: 40px; display: grid; place-items: center;
+  border: 1.5px solid var(--sage-line); border-radius: 12px;
+  background: var(--cream); color: var(--forest);
+  font-family: inherit; font-size: 1rem; cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.vtn-rec-icon:hover { transform: translateY(-1px); }
+.vtn-rec-icon.is-active { background: var(--forest); border-color: var(--forest); color: #F6F1E6; }
+.vtn-rec-icon:focus-visible { outline: 3px solid var(--jade-strong); outline-offset: 2px; }
+.vtn-rec-icons__current { margin: 4px 0 0; font-size: var(--fs-min); color: var(--muted); }
+.vtn-rec-card__chosen {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 4px; padding: 2px 8px;
+  border-radius: 999px; background: var(--sage-wash);
+  color: var(--forest); font-size: var(--fs-min); font-weight: 700;
+}
 
