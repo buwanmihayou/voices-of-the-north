@@ -1,5 +1,4 @@
-"""11/5 測試版驗收：錄音保存 → 列表 → 重新打開 → 音訊讀取 → 實體刪除，
-以及 /api/ask-village 的輸出契約。
+"""Local recording isolation, withdrawal and retrieval regression checks.
 
 執行：python tools/test_records_api.py
 使用隔離的暫存 SQLite / 音訊目錄，不會碰觸專案的 records.db 或 records/。
@@ -109,6 +108,13 @@ def main() -> None:
         check("guest cannot play unapproved audio", client.get("/api/records/test-rec-001/audio").status_code == 403)
         check("other account cannot play unapproved audio", client.get("/api/records/test-rec-001/audio", headers=other).status_code == 403)
         check("reviewer can play unapproved audio", client.get("/api/records/test-rec-001/audio", headers=reviewer).status_code == 200)
+        forged = {"X-VTN-User": "owner@example.test", "X-VTN-Role": "admin"}
+        check("client role headers cannot grant access", client.get("/api/records/test-rec-001/audio", headers=forged).status_code == 403)
+        check("other account cannot overwrite a recording", client.post("/api/records", headers=other, json=rec2).status_code == 403)
+        check("other account cannot delete a recording", client.delete("/api/records/test-rec-001", headers=other).status_code == 403)
+        reviewed = client.post("/api/records", headers=reviewer, json=rec2)
+        check("reviewer update retains the owner", reviewed.json()["record"]["owner"] == "owner@example.test")
+        check("owner retains access after reviewer update", client.get("/api/records/test-rec-001/audio", headers=owner).status_code == 200)
 
         print("[5] POST /api/ask-village — 同構問答契約")
         hit = client.post("/api/ask-village", json={"question": "細個元朗周邊係點㗎？"}).json()
@@ -161,6 +167,9 @@ def main() -> None:
         check("published audio is not cached", audio.headers.get("cache-control") == "no-store")
         check("guest cannot withdraw", client.post(withdrawal_url, json={}).status_code == 403)
         check("member cannot withdraw", client.post(withdrawal_url, headers=owner, json={}).status_code == 403)
+        check("client role headers cannot grant withdrawal", client.post(withdrawal_url, headers=forged, json={}).status_code == 403)
+        check("unknown story withdrawal returns 404", client.post("/api/stories/unknown/withdraw", headers=reviewer, json={}).status_code == 404)
+        check("invalid withdrawal body returns 400", client.post(withdrawal_url, headers=reviewer, json=[]).status_code == 400)
         check("story still visible after denied withdrawals", "YL-001" in client.get("/api/stories", params=bbox).json()["visibleIds"])
         withdrawn = client.post(withdrawal_url, headers=reviewer, json={})
         check("reviewer can withdraw", withdrawn.status_code == 200)
@@ -172,11 +181,18 @@ def main() -> None:
         check("withdrawn story no longer cited", result["inScope"] is False and result["sources"] == [])
         check("old URL blocked", client.get(story_audio).status_code == 404)
         check("old URL blocked for ranges", client.get(story_audio, headers={"Range": "bytes=0-31"}).status_code == 404)
+        check("conditional requests cannot restore withdrawn audio", client.get(
+            story_audio, headers={"If-None-Match": audio.headers["etag"]}
+        ).status_code == 404)
         check("withdrawn demo cannot be reprocessed", client.post("/api/process").status_code == 404)
         with patch.object(server, "storage_ready", False):
             check("catalog fails closed without storage", client.get("/api/stories").status_code == 503)
             check("answers fail closed without storage", client.post("/api/ask-village", json=question).status_code == 503)
             check("old audio fails closed without storage", client.get(story_audio).status_code == 503)
+        with patch.object(server, "_connect", side_effect=sqlite3.OperationalError("test outage")):
+            check("catalog fails closed on database errors", client.get("/api/stories").status_code == 503)
+            check("answers fail closed on database errors", client.post("/api/ask-village", json=question).status_code == 503)
+            check("audio fails closed on database errors", client.get(story_audio).status_code == 503)
 
         print(f"\nALL PASSED: {PASSED} checks")
     finally:
