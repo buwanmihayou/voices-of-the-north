@@ -3356,78 +3356,159 @@ html[data-reduce-motion="true"] *::after {
   position: absolute;
   inset: 0 0 var(--vtn-nav-h, 77px) 0;
   z-index: 65;
-  display: grid;
-  place-items: center;
-  padding: 22px;
+  overflow: hidden;
+  pointer-events: none;
 }
 .vtn-onboard[hidden] { display: none !important; }
-.vtn-onboard__mask {
+.vtn-onboard__shade,
+.vtn-onboard__pointer {
   position: absolute;
   inset: 0;
-  background: rgba(20, 32, 26, 0.55);
-}
-.vtn-onboard__card {
-  position: relative;
+  display: block;
   width: 100%;
-  max-width: 340px;
-  padding: 22px 20px 16px;
-  border: 1px solid var(--hairline);
-  border-radius: 24px;
+  height: 100%;
+  pointer-events: none;
+}
+.vtn-onboard__shade { z-index: 0; }
+.vtn-onboard__scrim { fill: rgba(17, 35, 26, 0.58); }
+.vtn-onboard__block {
+  position: absolute;
+  z-index: 1;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+}
+.vtn-onboard__pointer { z-index: 2; overflow: visible; }
+#onboardRing {
+  fill: none;
+  stroke: var(--forest);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 6;
+  filter: drop-shadow(0 0 2px var(--cream));
+}
+#onboardArrowHalo,
+#onboardArrow,
+.vtn-onboard__head-halo,
+.vtn-onboard__head {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#onboardArrowHalo,
+.vtn-onboard__head-halo { stroke: var(--cream); stroke-width: 8; }
+#onboardArrow,
+.vtn-onboard__head { stroke: var(--forest); stroke-width: 3; }
+#onboardArrowHalo,
+#onboardArrow { stroke-dasharray: 7 8; }
+.vtn-onboard__head-halo,
+.vtn-onboard__head { stroke-dasharray: none; }
+.vtn-onboard__card {
+  position: absolute;
+  z-index: 3;
+  left: 12px;
+  top: 12px;
+  width: min(312px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1.5px solid var(--forest);
+  border-radius: 18px;
   background: var(--cream);
   color: var(--ink-body);
-  box-shadow: 0 24px 60px -24px rgba(18, 36, 26, 0.65);
+  box-shadow: 0 14px 32px -14px rgba(18, 36, 26, 0.55);
+  pointer-events: auto;
+  overflow-wrap: anywhere;
+}
+.vtn-onboard__card:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 3px;
+}
+.vtn-onboard__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-bottom: 6px;
 }
 .vtn-onboard__eyebrow {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: var(--fs-min);
   font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  letter-spacing: 0.06em;
+  color: var(--forest);
 }
 .vtn-onboard__title {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-family: "Noto Serif TC", "Songti TC", serif;
-  font-size: 1.32rem;
-  line-height: 1.35;
+  font-size: 1.15rem;
+  line-height: 1.4;
   color: var(--ink);
 }
 .vtn-onboard__body {
-  margin: 0 0 14px;
-  font-size: 0.95rem;
-  line-height: 1.65;
+  margin: 0 0 8px;
+  font-size: max(16px, 0.95rem);
+  line-height: 1.55;
   color: var(--ink-body);
 }
 .vtn-onboard__dots {
   display: flex;
-  gap: 7px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 .vtn-onboard__dots span {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: var(--sage-line);
 }
 .vtn-onboard__dots span.is-active {
-  width: 22px;
+  width: 18px;
   background: var(--forest);
 }
 .vtn-onboard__progress {
-  margin: 0 0 14px;
+  margin: 0;
   font-size: var(--fs-min);
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 .vtn-onboard__actions {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .vtn-onboard__actions .vtn-btn {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 46px;
+  padding: 4px 12px;
+  font-size: max(16px, 0.875rem);
 }
+.vtn-onboard__actions .vtn-btn:focus-visible {
+  outline: 3px solid var(--forest);
+  outline-offset: 3px;
+}
+.vtn-onboard[data-paused="true"] .vtn-onboard__shade,
+.vtn-onboard[data-paused="true"] .vtn-onboard__pointer,
+.vtn-onboard[data-paused="true"] .vtn-onboard__block,
+.vtn-onboard[data-paused="true"] .vtn-onboard__dots,
+.vtn-onboard[data-paused="true"] #onboardBack,
+.vtn-onboard[data-paused="true"] #onboardNext { display: none; }
 @media (max-width: 359px) {
-  .vtn-onboard { padding: 14px; }
-  .vtn-onboard__card { padding: 18px 16px 14px; }
+  .vtn-onboard__card { padding: 12px; }
+  .vtn-onboard__actions { gap: 6px; }
+  .vtn-onboard__actions .vtn-btn { padding-inline: 10px; }
+}
+html[data-reduce-motion="true"] .vtn-onboard__card,
+html[data-reduce-motion="true"] .vtn-onboard__pointer {
+  animation: none;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vtn-onboard__card,
+  .vtn-onboard__pointer { animation: none; transition: none; }
 }
 
 /* 20. 萬能媒體區塊：二級入口 + 三級全屏 Overlay（2026-11 新增） */
@@ -5682,22 +5763,57 @@ html[data-theme="dark"] .story-sheet .segment { background: rgba(255, 255, 255, 
       </section>
     </main>
 
-    <div class="vtn-onboard" id="vtnOnboard" hidden>
-      <div class="vtn-onboard__mask" data-onboard-close></div>
-      <section class="vtn-onboard__card" role="dialog" aria-modal="true"
+    <div class="vtn-onboard" id="vtnOnboard" aria-hidden="true" hidden>
+      <svg class="vtn-onboard__shade" width="100%" height="100%" preserveAspectRatio="none"
+           aria-hidden="true" focusable="false">
+        <defs>
+          <mask id="onboardMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"
+                style="mask-type: luminance;">
+            <rect x="0" y="0" width="100%" height="100%" fill="white"></rect>
+            <rect id="onboardHole" x="0" y="0" width="0" height="0" rx="18" fill="black"></rect>
+          </mask>
+        </defs>
+        <rect class="vtn-onboard__scrim" x="0" y="0" width="100%" height="100%"
+              mask="url(#onboardMask)"></rect>
+      </svg>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="top" aria-hidden="true"></div>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="bottom" aria-hidden="true"></div>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="left" aria-hidden="true"></div>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="right" aria-hidden="true"></div>
+      <svg class="vtn-onboard__pointer" width="100%" height="100%" preserveAspectRatio="none"
+           aria-hidden="true" focusable="false">
+        <defs>
+          <marker id="onboardArrowHeadHalo" markerUnits="userSpaceOnUse" markerWidth="18" markerHeight="18"
+                  viewBox="0 0 16 16" refX="11" refY="8" orient="auto" overflow="visible">
+            <path d="M2 2 L11 8 L2 14" class="vtn-onboard__head-halo"></path>
+          </marker>
+          <marker id="onboardArrowHead" markerUnits="userSpaceOnUse" markerWidth="18" markerHeight="18"
+                  viewBox="0 0 16 16" refX="11" refY="8" orient="auto" overflow="visible">
+            <path d="M2 2 L11 8 L2 14" class="vtn-onboard__head"></path>
+          </marker>
+        </defs>
+        <rect id="onboardRing" x="0" y="0" width="0" height="0" rx="18"></rect>
+        <path id="onboardArrowHalo" d="" marker-end="url(#onboardArrowHeadHalo)"></path>
+        <path id="onboardArrow" d="" marker-end="url(#onboardArrowHead)"></path>
+      </svg>
+      <section class="vtn-onboard__card" id="onboardCard" role="dialog" aria-modal="false" tabindex="-1"
                aria-labelledby="onboardTitle" aria-describedby="onboardBody">
-        <p class="vtn-onboard__eyebrow" data-i18n="onboard.eyebrow">地圖引導</p>
+        <div class="vtn-onboard__meta">
+          <p class="vtn-onboard__eyebrow" data-i18n="onboard.eyebrow">地圖引導</p>
+          <p class="vtn-onboard__progress" id="onboardProgress">第 1 步，共 3 步</p>
+        </div>
         <h2 class="vtn-onboard__title" id="onboardTitle" data-i18n="onboard.step1Title">拖動地圖，發現故事</h2>
         <p class="vtn-onboard__body" id="onboardBody" data-i18n="onboard.step1Body">縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。</p>
         <div class="vtn-onboard__dots" id="onboardDots" aria-hidden="true">
           <span class="is-active"></span><span></span><span></span>
         </div>
-        <p class="vtn-onboard__progress" id="onboardProgress" aria-live="polite">第 1 步，共 3 步</p>
         <div class="vtn-onboard__actions">
+          <button type="button" class="vtn-btn vtn-btn--ghost" id="onboardBack" data-i18n="onboard.back" hidden>上一步</button>
           <button type="button" class="vtn-btn vtn-btn--ghost" id="onboardSkip" data-i18n="onboard.skip">跳過</button>
           <button type="button" class="vtn-btn vtn-btn--solid" id="onboardNext" data-i18n="onboard.next">下一步</button>
         </div>
       </section>
+      <p class="vtn-sr" id="onboardAnnouncement" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
 
     <nav class="bottom-nav" data-i18n-aria="aria.nav">
@@ -6578,11 +6694,19 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'onboard.helpAria': '重看地圖引導',
       'onboard.helpTitle': '重看地圖引導',
       'onboard.step1Title': '拖動地圖，發現故事',
-      'onboard.step1Body': '縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。',
-      'onboard.step2Title': '點一下圖示，看完整故事',
-      'onboard.step2Body': '點故事圖示會打開半拉抽屜，可看逐字稿、播放原音及核對時間戳。',
-      'onboard.step3Title': '用年代軸，聽不同年代',
-      'onboard.step3Body': '拖動「故事年代」軸或點選年份，查看該年代的故事；點「全部年代」還原，亦可搜尋特定村落。',
+      'onboard.step1Body': '試試拖動地圖或按＋放大，尋找模糊故事圈。',
+      'onboard.step2Title': '揀一種故事類型',
+      'onboard.step2Body': '點一個類型，地圖就只留下相關故事。',
+      'onboard.step3Title': '試試底部年代軸',
+      'onboard.step3Body': '拖滑桿或點年份，查看那個年代的故事。',
+      'onboard.back': '上一步',
+      'onboard.mapFallbackTitle': '地圖未能載入',
+      'onboard.mapFallbackBody': '按列表查看故事，或繼續學習篩選。',
+      'onboard.listTitle': '返回故事地圖',
+      'onboard.listBody': '按返回地圖，試試類型與年代篩選。',
+      'onboard.mapLoadingBody': '地圖準備中；可以先按下一步學習篩選。',
+      'onboard.moreRoomTitle': '引導需要多一點空間',
+      'onboard.moreRoomBody': '轉直裝置或增加視窗高度，即可繼續。',
       'onboard.next': '下一步',
       'onboard.start': '開始探索',
       'onboard.skip': '跳過',
@@ -7255,11 +7379,19 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'onboard.helpAria': '重看地图引导',
       'onboard.helpTitle': '重看地图引导',
       'onboard.step1Title': '拖动地图，发现故事',
-      'onboard.step1Body': '缩放或拖动地图，模糊圆圈就是故事所在的大概范围；圆圈不是长者住址。',
-      'onboard.step2Title': '点一下图标，看完整故事',
-      'onboard.step2Body': '点故事图标会打开半拉抽屉，可看逐字稿、播放原音及核对时间戳。',
-      'onboard.step3Title': '用年代轴，听不同年代',
-      'onboard.step3Body': '拖动「故事年代」轴或点击年份，查看该年代的故事；点“全部年代”还原，也可搜索特定村落。',
+      'onboard.step1Body': '试试拖动地图或按＋放大，寻找模糊故事圈。',
+      'onboard.step2Title': '选一种故事类型',
+      'onboard.step2Body': '点一个类型，地图就只留下相关故事。',
+      'onboard.step3Title': '试试底部年代轴',
+      'onboard.step3Body': '拖滑杆或点年份，查看那个年代的故事。',
+      'onboard.back': '上一步',
+      'onboard.mapFallbackTitle': '地图未能加载',
+      'onboard.mapFallbackBody': '按列表查看故事，或继续学习筛选。',
+      'onboard.listTitle': '返回故事地图',
+      'onboard.listBody': '按返回地图，试试类型与年代筛选。',
+      'onboard.mapLoadingBody': '地图准备中；可以先按下一步学习筛选。',
+      'onboard.moreRoomTitle': '引导需要多一点空间',
+      'onboard.moreRoomBody': '转直设备或增加窗口高度，即可继续。',
       'onboard.next': '下一步',
       'onboard.start': '开始探索',
       'onboard.skip': '跳过',
@@ -7931,12 +8063,20 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       'onboard.eyebrow': 'Map guide',
       'onboard.helpAria': 'Replay the map guide',
       'onboard.helpTitle': 'Replay the map guide',
-      'onboard.step1Title': 'Drag the map to find stories',
-      'onboard.step1Body': 'Zoom or drag the map. Each blurred circle is the approximate area of a story — never an elder’s home address.',
-      'onboard.step2Title': 'Tap an icon for the full story',
-      'onboard.step2Body': 'Tapping a story icon opens the half-sheet with the transcript, original audio and verifiable timestamps.',
-      'onboard.step3Title': 'Use the era axis to travel in time',
-      'onboard.step3Body': 'Drag the “Story era” slider or choose a year to explore that decade. Choose “All eras” to reset, or search for a village.',
+      'onboard.step1Title': 'Explore the story map',
+      'onboard.step1Body': 'Drag the map or tap + to find the blurred story circles.',
+      'onboard.step2Title': 'Pick a story type',
+      'onboard.step2Body': 'Tap a type to keep related stories on the map.',
+      'onboard.step3Title': 'Try the era slider',
+      'onboard.step3Body': 'Drag the slider or tap a year to see that era.',
+      'onboard.back': 'Back',
+      'onboard.mapFallbackTitle': 'Map unavailable',
+      'onboard.mapFallbackBody': 'Use the list for stories, or continue to try the filters.',
+      'onboard.listTitle': 'Return to the map',
+      'onboard.listBody': 'Go back to try story types and eras.',
+      'onboard.mapLoadingBody': 'The map is loading. You can try the filters next.',
+      'onboard.moreRoomTitle': 'A little more room',
+      'onboard.moreRoomBody': 'Turn your device upright or make the window taller to continue.',
       'onboard.next': 'Next',
       'onboard.start': 'Start exploring',
       'onboard.skip': 'Skip',
@@ -11989,164 +12129,363 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 })();
 
 /* ===== src/js/33-onboarding.js ===== */
-/* =============================================================================
- * 33-onboarding — 故事地圖首次進入引導（3 步）＋「?」重看
- * -----------------------------------------------------------------------------
- * 只在地圖頁首次進入時自動彈一次；之後可從地圖右上角的「?」重看。
- * 不使用假資料、不遮住底導航；Esc／點遮罩／跳過都會關閉並記住。
- * ========================================================================== */
-
+/* Story-map coach marks: spotlight, anchored arrow and live controls. */
 (function () {
   'use strict';
-
   var VTN = window.VTN;
   var U = VTN.util;
-
   var SEEN_KEY = (VTN.KEYS && VTN.KEYS.onboarded) || 'vtn.v2.onboarded';
   var STEPS = [
-    { title: 'onboard.step1Title', body: 'onboard.step1Body' },
-    { title: 'onboard.step2Title', body: 'onboard.step2Body' },
-    { title: 'onboard.step3Title', body: 'onboard.step3Body' }
+    { id: 'map', title: 'onboard.step1Title', body: 'onboard.step1Body', edge: 'top' },
+    { id: 'type', title: 'onboard.step2Title', body: 'onboard.step2Body', edge: 'bottom' },
+    { id: 'era', title: 'onboard.step3Title', body: 'onboard.step3Body', edge: 'top' }
   ];
-
   var root = null;
   var current = 0;
   var lastFocus = null;
   var autoTimer = null;
-
+  var advanceTimer = null;
+  var frame = null;
+  var observer = null;
+  var resizeObserver = null;
+  var pointer = null;
+  var bound = false;
   function t(key, vars) { return VTN.i18n.t(key, vars); }
-
-  function readSeen() {
+  function el(id) { return document.getElementById(id); }
+  function active() { return !!(root && !root.hidden); }
+  function paused() { return !!(root && root.getAttribute('data-paused') === 'true'); }
+  function seen() {
     try { return window.localStorage.getItem(SEEN_KEY) === '1'; } catch (e) { return false; }
   }
-
   function markSeen() {
-    try { window.localStorage.setItem(SEEN_KEY, '1'); } catch (e) { /* ignore */ }
+    try { window.localStorage.setItem(SEEN_KEY, '1'); } catch (e) { /* optional storage */ }
   }
-
-  function el(id) { return document.getElementById(id); }
-
-  function render(index) {
-    current = Math.max(0, Math.min(STEPS.length - 1, index));
-    var step = STEPS[current];
-    var title = el('onboardTitle');
-    var body = el('onboardBody');
-    var progress = el('onboardProgress');
-    var next = el('onboardNext');
-    var dots = el('onboardDots');
-    if (title) title.textContent = t(step.title);
-    if (body) body.textContent = t(step.body);
-    if (progress) progress.textContent = t('onboard.progress', { n: current + 1, total: STEPS.length });
-    if (next) next.textContent = current === STEPS.length - 1 ? t('onboard.start') : t('onboard.next');
-    if (dots) {
-      Array.prototype.forEach.call(dots.children, function (dot, i) {
-        dot.classList.toggle('is-active', i === current);
-      });
+  function visible(node) {
+    if (!node || !node.isConnected) return false;
+    var rect = node.getBoundingClientRect();
+    return rect.width > 1 && rect.height > 1 &&
+      window.getComputedStyle(node).visibility !== 'hidden';
+  }
+  function focus(node) {
+    if (!visible(node) || node.disabled) return;
+    try { node.focus({ preventScroll: true }); } catch (e) { node.focus(); }
+  }
+  function mapReady() {
+    return VTN.map && /^(maplibre|leaflet)$/.test(VTN.map.status());
+  }
+  function buttons(node) {
+    return node ? Array.prototype.slice.call(node.querySelectorAll('button, input, [tabindex="0"]')) : [];
+  }
+  function target(index) {
+    var node;
+    if (VTN.stories && VTN.stories.mode() === 'list') {
+      node = el('atlasListBack');
+      return index === 0 && visible(node) ?
+        { node: node, rect: node.getBoundingClientRect(), nodes: [node], kind: 'list' } : null;
     }
+    if (index === 0) {
+      if (VTN.map && VTN.map.status() === 'failed') {
+        node = el('atlasViewBtn');
+        return visible(node) ?
+          { node: node, rect: node.getBoundingClientRect(), nodes: [node], kind: 'fallback' } : null;
+      }
+      node = el('vtnMap');
+      var atlas = el('storyAtlas');
+      if (!visible(atlas)) return null;
+      var rect = atlas.getBoundingClientRect();
+      var top = atlas.querySelector('.atlas__top');
+      var bottom = atlas.querySelector('.atlas__bottom');
+      var start = visible(top) ? top.getBoundingClientRect().bottom + 8 : rect.top + 16;
+      var end = visible(bottom) ? bottom.getBoundingClientRect().top - 8 : rect.bottom - 16;
+      if (end <= start) return null;
+      var core = { left: rect.left + 12, top: start, width: rect.width - 24, height: end - start };
+      return {
+        node: node || atlas, rect: core,
+        nodes: [node && node.querySelector('canvas[tabindex]'), el('atlasZoomIn'),
+          el('atlasZoomOut'), el('atlasRecenter')].filter(Boolean),
+        kind: mapReady() ? 'map' : 'loading'
+      };
+    }
+    node = el(index === 1 ? 'atlasLegend' : 'atlasTimeline');
+    return visible(node) && (index !== 1 || node.querySelector('button')) ?
+      { node: node, rect: node.getBoundingClientRect(), nodes: buttons(node), kind: STEPS[index].id } : null;
   }
-
-  function focusables() {
-    if (!root) return [];
-    return Array.prototype.filter.call(
-      root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
-      function (node) { return !node.disabled && node.offsetParent !== null; }
-    );
+  function text(id, value) {
+    var node = el(id);
+    if (node && node.textContent !== value) node.textContent = value;
   }
-
-  function onKeydown(event) {
-    if (!root || root.hidden) return;
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      close();
+  function copy(info, announce) {
+    var title = STEPS[current].title;
+    var body = STEPS[current].body;
+    if (info && info.kind === 'fallback') {
+      title = 'onboard.mapFallbackTitle'; body = 'onboard.mapFallbackBody';
+    } else if (info && info.kind === 'list') {
+      title = 'onboard.listTitle'; body = 'onboard.listBody';
+    } else if (info && info.kind === 'loading') {
+      body = 'onboard.mapLoadingBody';
+    }
+    text('onboardTitle', t(title));
+    text('onboardBody', t(body));
+    text('onboardProgress', t('onboard.progress', { n: current + 1, total: STEPS.length }));
+    text('onboardNext', t(current === STEPS.length - 1 ? 'onboard.start' : 'onboard.next'));
+    if (announce) text('onboardAnnouncement',
+      t('onboard.progress', { n: current + 1, total: STEPS.length }) + '. ' + t(title) + '. ' + t(body));
+  }
+  function box(node, x, y, width, height) {
+    if (!node) return;
+    node.style.left = x + 'px'; node.style.top = y + 'px';
+    node.style.width = Math.max(0, width) + 'px';
+    node.style.height = Math.max(0, height) + 'px';
+  }
+  function svgRect(node, rect) {
+    if (!node) return;
+    ['x', 'y', 'width', 'height'].forEach(function (key) { node.setAttribute(key, rect[key]); });
+  }
+  function layout() {
+    frame = null;
+    if (!active()) return;
+    var bounds = root.getBoundingClientRect();
+    var card = el('onboardCard');
+    if (!card || bounds.width < 1 || bounds.height < 1) return;
+    var w = bounds.width;
+    var h = bounds.height;
+    var wasPaused = paused();
+    if (h < 440) {
+      cancelAdvance(); pointer = null;
+      root.setAttribute('data-paused', 'true');
+      text('onboardTitle', t('onboard.moreRoomTitle'));
+      text('onboardBody', t('onboard.moreRoomBody'));
+      text('onboardAnnouncement', t('onboard.moreRoomTitle') + '. ' + t('onboard.moreRoomBody'));
+      card.style.left = '12px'; card.style.top = '12px';
+      card.style.maxHeight = Math.max(60, h - 24) + 'px';
+      if (!wasPaused) {
+        if (/^onboard(Back|Next)$/.test(document.activeElement.id)) focus(el('onboardSkip'));
+      }
       return;
     }
-    if (event.key !== 'Tab') return;
+    root.removeAttribute('data-paused');
+    if (wasPaused) card.scrollTop = 0;
+    var info = target(current);
+    if (!info) {
+      if (current < STEPS.length - 1) render(current + 1, false);
+      else close();
+      return;
+    }
+    copy(info, wasPaused);
+    card.style.maxHeight = Math.max(60, h - 24) + 'px';
+    var naturalHeight = card.getBoundingClientRect().height;
+    var raw = info.rect;
+    var r = { x: Math.max(0, raw.left - bounds.left), y: Math.max(0, raw.top - bounds.top),
+      width: Math.min(raw.width, w), height: Math.min(raw.height, h) };
+    r.width = Math.max(1, Math.min(r.width, w - r.x));
+    r.height = Math.max(1, Math.min(r.height, h - r.y));
+    // On short screens keep a usable map strip below the complete bubble.
+    // Never spotlight the whole atlas merely because the map strip is short.
+    if (current === 0 && (info.kind === 'map' || info.kind === 'loading')) {
+      var endY = r.y + r.height;
+      r.y = Math.min(Math.max(r.y, naturalHeight + 33), endY - Math.min(56, r.height));
+      r.height = endY - r.y;
+    }
+    var hole = { x: Math.max(0, r.x - 7), y: Math.max(0, r.y - 7) };
+    hole.width = Math.min(w - hole.x, r.width + 14);
+    hole.height = Math.min(h - hole.y, r.height + 14);
+    root.setAttribute('data-step', STEPS[current].id);
+    root.setAttribute('data-target', info.node.id || STEPS[current].id);
+    Array.prototype.forEach.call(root.querySelectorAll('svg.vtn-onboard__shade, svg.vtn-onboard__pointer'),
+      function (svg) { svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h); });
+    svgRect(el('onboardHole'), hole);
+    svgRect(el('onboardRing'), hole);
+    box(root.querySelector('[data-onboard-block="top"]'), 0, 0, w, hole.y);
+    box(root.querySelector('[data-onboard-block="bottom"]'), 0, hole.y + hole.height,
+      w, h - hole.y - hole.height);
+    box(root.querySelector('[data-onboard-block="left"]'), 0, hole.y, hole.x, hole.height);
+    box(root.querySelector('[data-onboard-block="right"]'), hole.x + hole.width, hole.y,
+      w - hole.x - hole.width, hole.height);
+    // Keep the bubble at an edge, outside the actual spotlight.
+    var above = Math.max(0, hole.y - 26);
+    var below = Math.max(0, h - hole.y - hole.height - 26);
+    card.style.maxHeight = Math.max(60, Math.min(h - 24, Math.max(above, below))) + 'px';
+    var size = card.getBoundingClientRect();
+    var topEdge = STEPS[current].edge === 'top';
+    if (topEdge && above < size.height) topEdge = false;
+    if (!topEdge && below < size.height) topEdge = true;
+    var x = current === 2 ? w - size.width - 12 : 12;
+    var y = topEdge ? 12 : h - size.height - 12;
+    card.style.left = Math.max(12, Math.min(x, w - size.width - 12)) + 'px';
+    card.style.top = Math.max(12, Math.min(y, h - size.height - 12)) + 'px';
+    card.setAttribute('data-placement', topEdge ? 'above' : 'below');
+    var sx = Math.max(18, Math.min(w - 18, x + size.width / 2));
+    var sy = topEdge ? y + size.height + 3 : y - 3;
+    var tx = Math.max(12, Math.min(w - 12, r.x + r.width / 2));
+    var ty = topEdge ? r.y - 11 : r.y + r.height + 11;
+    var bend = Math.max(12, Math.min(w - 12, sx + (current === 1 ? -32 : 32)));
+    var d = 'M ' + sx + ' ' + sy + ' Q ' + bend + ' ' + ((sy + ty) / 2) + ' ' + tx + ' ' + ty;
+    ['onboardArrowHalo', 'onboardArrow'].forEach(function (id) {
+      var path = el(id); if (path) path.setAttribute('d', d);
+    });
+  }
+  function queueLayout() {
+    if (active() && frame === null) frame = window.requestAnimationFrame(layout);
+  }
+  function cancelAdvance() {
+    if (advanceTimer) window.clearTimeout(advanceTimer);
+    advanceTimer = null;
+  }
+  function render(index, moveFocus) {
+    cancelAdvance(); pointer = null;
+    current = Math.max(0, Math.min(STEPS.length - 1, index));
+    var back = el('onboardBack');
+    if (back) back.hidden = current === 0;
+    var dots = el('onboardDots');
+    if (dots) Array.prototype.forEach.call(dots.children, function (dot, i) {
+      dot.classList.toggle('is-active', i === current);
+    });
+    copy(target(current), true);
+    layout();
+    if (moveFocus !== false && active()) focus(el('onboardCard'));
+  }
+  function advance(interaction) {
+    if (!active() || paused()) return;
+    if (current === STEPS.length - 1) close({ restoreFocus: !interaction });
+    else render(current + 1);
+  }
+  function learned() {
+    if (advanceTimer || !active() || paused()) return;
+    advanceTimer = window.setTimeout(function () {
+      advanceTimer = null; advance(true);
+    }, 450);
+  }
+  function focusables() {
+    var info = target(current);
+    return (info ? info.nodes : []).concat(buttons(el('onboardCard'))).filter(function (node, i, all) {
+      return visible(node) && !node.disabled && all.indexOf(node) === i;
+    });
+  }
+  function onKeydown(event) {
+    if (!active()) return;
+    if (event.key === 'Escape') {
+      event.preventDefault(); event.stopPropagation(); close(); return;
+    }
+    if (event.key !== 'Tab' || paused()) return;
     var nodes = focusables();
     if (!nodes.length) return;
-    var first = nodes[0];
-    var last = nodes[nodes.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    var index = nodes.indexOf(document.activeElement);
+    var next = event.shiftKey ? (index <= 0 ? nodes.length - 1 : index - 1) : (index + 1) % nodes.length;
+    event.preventDefault(); focus(nodes[next]);
   }
-
   function open(index) {
     root = root || el('vtnOnboard');
     if (!root) return;
-    lastFocus = document.activeElement;
-    root.hidden = false;
-    root.setAttribute('aria-hidden', 'false');
+    if (active()) { render(typeof index === 'number' ? index : 0); return; }
+    if (autoTimer) window.clearTimeout(autoTimer);
+    autoTimer = null; lastFocus = document.activeElement;
+    root.hidden = false; root.setAttribute('aria-hidden', 'false');
     render(typeof index === 'number' ? index : 0);
-    var next = el('onboardNext');
-    if (next) next.focus();
+    if (!active()) return;
+    if (window.MutationObserver && el('storyAtlas')) {
+      observer = new MutationObserver(queueLayout);
+      observer.observe(el('storyAtlas'), { subtree: true, childList: true,
+        attributes: true, attributeFilter: ['hidden', 'class'] });
+    }
+    if (window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(queueLayout);
+      resizeObserver.observe(el('appShell')); resizeObserver.observe(el('onboardCard'));
+    }
     document.addEventListener('keydown', onKeydown, true);
   }
-
-  function close() {
-    if (!root || root.hidden) return;
-    root.hidden = true;
-    root.setAttribute('aria-hidden', 'true');
+  function close(options) {
+    if (!active()) return;
+    var restore = !options || options.restoreFocus !== false;
+    root.hidden = true; root.setAttribute('aria-hidden', 'true');
+    cancelAdvance(); pointer = null;
+    if (frame !== null) window.cancelAnimationFrame(frame);
+    frame = null;
+    if (observer) observer.disconnect();
+    if (resizeObserver) resizeObserver.disconnect();
+    observer = null; resizeObserver = null;
     document.removeEventListener('keydown', onKeydown, true);
     markSeen();
-    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+    if (restore) focus(lastFocus);
   }
-
   function maybeAutoShow(view) {
-    if (view !== 'stories' || readSeen()) return;
     if (autoTimer) window.clearTimeout(autoTimer);
+    autoTimer = null;
+    if (view !== 'stories' || seen() || active()) return;
+    var route = VTN.router && VTN.router.current();
+    if (route && route.params && route.params.story) return;
+    if (VTN.stories && VTN.stories.mode() === 'list') return;
     autoTimer = window.setTimeout(function () {
       autoTimer = null;
-      if (VTN.router && VTN.router.current().view === 'stories') open(0);
+      if (VTN.router && VTN.router.current().view === 'stories' && !seen()) open(0);
     }, 700);
   }
-
   function bind() {
     root = el('vtnOnboard');
-    if (!root) return;
-
-    var next = el('onboardNext');
-    var skip = el('onboardSkip');
-    var help = el('atlasHelpBtn');
-    var mask = root.querySelector('[data-onboard-close]');
-
-    if (next) {
-      next.addEventListener('click', function () {
-        if (current >= STEPS.length - 1) close();
-        else render(current + 1);
-      });
+    if (!root || bound) return;
+    bound = true;
+    el('onboardNext').addEventListener('click', function () { advance(false); });
+    el('onboardBack').addEventListener('click', function () { render(current - 1); });
+    el('onboardSkip').addEventListener('click', function () { close(); });
+    el('atlasHelpBtn').addEventListener('click', function () { open(0); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-onboard-close]'), function (mask) {
+      mask.addEventListener('click', function () { close(); });
+    });
+    document.addEventListener('click', function (event) {
+      if (!active() || !event.target.closest) return;
+      var node = event.target;
+      if (node.closest('.vtn-pin, #storyList .story-item__main')) {
+        close({ restoreFocus: false }); return;
+      }
+      if (current === 0 && mapReady() && node.closest('#atlasZoomIn, #atlasZoomOut, #atlasRecenter')) learned();
+      if (current === 1 && node.closest('#atlasLegend .legend-chip')) learned();
+      if (current === 2 && node.closest('#atlasTicks button, #atlasEraAll')) learned();
+    }, true);
+    ['input', 'change'].forEach(function (name) {
+      document.addEventListener(name, function (event) {
+        if (active() && current === 2 && event.target.id === 'atlasEra') learned();
+      }, true);
+    });
+    document.addEventListener('pointerdown', function (event) {
+      if (active() && current === 0 && mapReady() && event.target.closest &&
+          event.target.closest('#vtnMap') && !event.target.closest('.vtn-pin')) {
+        pointer = { x: event.clientX, y: event.clientY };
+      }
+    }, true);
+    document.addEventListener('pointerup', function (event) {
+      if (pointer && Math.abs(event.clientX - pointer.x) + Math.abs(event.clientY - pointer.y) > 12) learned();
+      pointer = null;
+    }, true);
+    document.addEventListener('pointercancel', function () { pointer = null; }, true);
+    document.addEventListener('wheel', function (event) {
+      if (active() && current === 0 && mapReady() && event.target.closest &&
+          event.target.closest('#vtnMap') && event.deltaY) learned();
+    }, { capture: true, passive: true });
+    window.addEventListener('resize', queueLayout);
+    window.addEventListener('orientationchange', queueLayout);
+    document.addEventListener('scroll', queueLayout, true);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', queueLayout);
+      window.visualViewport.addEventListener('scroll', queueLayout);
     }
-    if (skip) skip.addEventListener('click', close);
-    if (mask) mask.addEventListener('click', close);
-    if (help) help.addEventListener('click', function () { open(0); });
-
     U.on('vtn:view-changed', function (event) {
-      var view = event && event.detail ? event.detail.view : null;
-      if (!root.hidden) close();
+      var view = event && event.detail && event.detail.view;
+      var route = VTN.router && VTN.router.current();
+      if (active() && (view !== 'stories' || (route && route.params && route.params.story))) {
+        close({ restoreFocus: false });
+      }
       maybeAutoShow(view);
     });
-    U.on('vtn:lang-changed', function () {
-      if (root && !root.hidden) render(current);
+    U.on('vtn:stories-mode', function (event) {
+      if (active() && event.detail && event.detail.mode === 'list') close({ restoreFocus: false });
+      else queueLayout();
     });
+    U.on('vtn:lang-changed', function () { if (active()) render(current, false); });
   }
-
-  function init() {
-    bind();
-    var route = VTN.router ? VTN.router.current() : null;
-    if (route) maybeAutoShow(route.view);
-  }
-
   VTN.onboard = {
-    init: init,
-    open: open,
-    close: close,
-    render: render,
-    isSeen: readSeen,
+    init: function () { bind(); if (VTN.router) maybeAutoShow(VTN.router.current().view); },
+    open: open, close: close, render: render, isSeen: seen,
     reset: function () {
-      try { window.localStorage.removeItem(SEEN_KEY); } catch (e) { /* ignore */ }
+      try { window.localStorage.removeItem(SEEN_KEY); } catch (e) { /* optional storage */ }
     }
   };
 })();

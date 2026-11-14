@@ -665,78 +665,159 @@ html[data-reduce-motion="true"] *::after {
   position: absolute;
   inset: 0 0 var(--vtn-nav-h, 77px) 0;
   z-index: 65;
-  display: grid;
-  place-items: center;
-  padding: 22px;
+  overflow: hidden;
+  pointer-events: none;
 }
 .vtn-onboard[hidden] { display: none !important; }
-.vtn-onboard__mask {
+.vtn-onboard__shade,
+.vtn-onboard__pointer {
   position: absolute;
   inset: 0;
-  background: rgba(20, 32, 26, 0.55);
-}
-.vtn-onboard__card {
-  position: relative;
+  display: block;
   width: 100%;
-  max-width: 340px;
-  padding: 22px 20px 16px;
-  border: 1px solid var(--hairline);
-  border-radius: 24px;
+  height: 100%;
+  pointer-events: none;
+}
+.vtn-onboard__shade { z-index: 0; }
+.vtn-onboard__scrim { fill: rgba(17, 35, 26, 0.58); }
+.vtn-onboard__block {
+  position: absolute;
+  z-index: 1;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+}
+.vtn-onboard__pointer { z-index: 2; overflow: visible; }
+#onboardRing {
+  fill: none;
+  stroke: var(--forest);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 6;
+  filter: drop-shadow(0 0 2px var(--cream));
+}
+#onboardArrowHalo,
+#onboardArrow,
+.vtn-onboard__head-halo,
+.vtn-onboard__head {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#onboardArrowHalo,
+.vtn-onboard__head-halo { stroke: var(--cream); stroke-width: 8; }
+#onboardArrow,
+.vtn-onboard__head { stroke: var(--forest); stroke-width: 3; }
+#onboardArrowHalo,
+#onboardArrow { stroke-dasharray: 7 8; }
+.vtn-onboard__head-halo,
+.vtn-onboard__head { stroke-dasharray: none; }
+.vtn-onboard__card {
+  position: absolute;
+  z-index: 3;
+  left: 12px;
+  top: 12px;
+  width: min(312px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  padding: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1.5px solid var(--forest);
+  border-radius: 18px;
   background: var(--cream);
   color: var(--ink-body);
-  box-shadow: 0 24px 60px -24px rgba(18, 36, 26, 0.65);
+  box-shadow: 0 14px 32px -14px rgba(18, 36, 26, 0.55);
+  pointer-events: auto;
+  overflow-wrap: anywhere;
+}
+.vtn-onboard__card:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 3px;
+}
+.vtn-onboard__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-bottom: 6px;
 }
 .vtn-onboard__eyebrow {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: var(--fs-min);
   font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  letter-spacing: 0.06em;
+  color: var(--forest);
 }
 .vtn-onboard__title {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-family: "Noto Serif TC", "Songti TC", serif;
-  font-size: 1.32rem;
-  line-height: 1.35;
+  font-size: 1.15rem;
+  line-height: 1.4;
   color: var(--ink);
 }
 .vtn-onboard__body {
-  margin: 0 0 14px;
-  font-size: 0.95rem;
-  line-height: 1.65;
+  margin: 0 0 8px;
+  font-size: max(16px, 0.95rem);
+  line-height: 1.55;
   color: var(--ink-body);
 }
 .vtn-onboard__dots {
   display: flex;
-  gap: 7px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 .vtn-onboard__dots span {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: var(--sage-line);
 }
 .vtn-onboard__dots span.is-active {
-  width: 22px;
+  width: 18px;
   background: var(--forest);
 }
 .vtn-onboard__progress {
-  margin: 0 0 14px;
+  margin: 0;
   font-size: var(--fs-min);
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 .vtn-onboard__actions {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .vtn-onboard__actions .vtn-btn {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 46px;
+  padding: 4px 12px;
+  font-size: max(16px, 0.875rem);
 }
+.vtn-onboard__actions .vtn-btn:focus-visible {
+  outline: 3px solid var(--forest);
+  outline-offset: 3px;
+}
+.vtn-onboard[data-paused="true"] .vtn-onboard__shade,
+.vtn-onboard[data-paused="true"] .vtn-onboard__pointer,
+.vtn-onboard[data-paused="true"] .vtn-onboard__block,
+.vtn-onboard[data-paused="true"] .vtn-onboard__dots,
+.vtn-onboard[data-paused="true"] #onboardBack,
+.vtn-onboard[data-paused="true"] #onboardNext { display: none; }
 @media (max-width: 359px) {
-  .vtn-onboard { padding: 14px; }
-  .vtn-onboard__card { padding: 18px 16px 14px; }
+  .vtn-onboard__card { padding: 12px; }
+  .vtn-onboard__actions { gap: 6px; }
+  .vtn-onboard__actions .vtn-btn { padding-inline: 10px; }
+}
+html[data-reduce-motion="true"] .vtn-onboard__card,
+html[data-reduce-motion="true"] .vtn-onboard__pointer {
+  animation: none;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vtn-onboard__card,
+  .vtn-onboard__pointer { animation: none; transition: none; }
 }
 
 /* 20. 萬能媒體區塊：二級入口 + 三級全屏 Overlay（2026-11 新增） */

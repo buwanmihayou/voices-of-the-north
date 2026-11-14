@@ -669,22 +669,57 @@
       </section>
     </main>
 
-    <div class="vtn-onboard" id="vtnOnboard" hidden>
-      <div class="vtn-onboard__mask" data-onboard-close></div>
-      <section class="vtn-onboard__card" role="dialog" aria-modal="true"
+    <div class="vtn-onboard" id="vtnOnboard" aria-hidden="true" hidden>
+      <svg class="vtn-onboard__shade" width="100%" height="100%" preserveAspectRatio="none"
+           aria-hidden="true" focusable="false">
+        <defs>
+          <mask id="onboardMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"
+                style="mask-type: luminance;">
+            <rect x="0" y="0" width="100%" height="100%" fill="white"></rect>
+            <rect id="onboardHole" x="0" y="0" width="0" height="0" rx="18" fill="black"></rect>
+          </mask>
+        </defs>
+        <rect class="vtn-onboard__scrim" x="0" y="0" width="100%" height="100%"
+              mask="url(#onboardMask)"></rect>
+      </svg>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="top" aria-hidden="true"></div>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="bottom" aria-hidden="true"></div>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="left" aria-hidden="true"></div>
+      <div class="vtn-onboard__block" data-onboard-close data-onboard-block="right" aria-hidden="true"></div>
+      <svg class="vtn-onboard__pointer" width="100%" height="100%" preserveAspectRatio="none"
+           aria-hidden="true" focusable="false">
+        <defs>
+          <marker id="onboardArrowHeadHalo" markerUnits="userSpaceOnUse" markerWidth="18" markerHeight="18"
+                  viewBox="0 0 16 16" refX="11" refY="8" orient="auto" overflow="visible">
+            <path d="M2 2 L11 8 L2 14" class="vtn-onboard__head-halo"></path>
+          </marker>
+          <marker id="onboardArrowHead" markerUnits="userSpaceOnUse" markerWidth="18" markerHeight="18"
+                  viewBox="0 0 16 16" refX="11" refY="8" orient="auto" overflow="visible">
+            <path d="M2 2 L11 8 L2 14" class="vtn-onboard__head"></path>
+          </marker>
+        </defs>
+        <rect id="onboardRing" x="0" y="0" width="0" height="0" rx="18"></rect>
+        <path id="onboardArrowHalo" d="" marker-end="url(#onboardArrowHeadHalo)"></path>
+        <path id="onboardArrow" d="" marker-end="url(#onboardArrowHead)"></path>
+      </svg>
+      <section class="vtn-onboard__card" id="onboardCard" role="dialog" aria-modal="false" tabindex="-1"
                aria-labelledby="onboardTitle" aria-describedby="onboardBody">
-        <p class="vtn-onboard__eyebrow" data-i18n="onboard.eyebrow">地圖引導</p>
+        <div class="vtn-onboard__meta">
+          <p class="vtn-onboard__eyebrow" data-i18n="onboard.eyebrow">地圖引導</p>
+          <p class="vtn-onboard__progress" id="onboardProgress">第 1 步，共 3 步</p>
+        </div>
         <h2 class="vtn-onboard__title" id="onboardTitle" data-i18n="onboard.step1Title">拖動地圖，發現故事</h2>
         <p class="vtn-onboard__body" id="onboardBody" data-i18n="onboard.step1Body">縮放或拖動地圖，模糊圓圈就是故事所在的大約範圍；圓圈不是長者住址。</p>
         <div class="vtn-onboard__dots" id="onboardDots" aria-hidden="true">
           <span class="is-active"></span><span></span><span></span>
         </div>
-        <p class="vtn-onboard__progress" id="onboardProgress" aria-live="polite">第 1 步，共 3 步</p>
         <div class="vtn-onboard__actions">
+          <button type="button" class="vtn-btn vtn-btn--ghost" id="onboardBack" data-i18n="onboard.back" hidden>上一步</button>
           <button type="button" class="vtn-btn vtn-btn--ghost" id="onboardSkip" data-i18n="onboard.skip">跳過</button>
           <button type="button" class="vtn-btn vtn-btn--solid" id="onboardNext" data-i18n="onboard.next">下一步</button>
         </div>
       </section>
+      <p class="vtn-sr" id="onboardAnnouncement" role="status" aria-live="polite" aria-atomic="true"></p>
     </div>
 
     <nav class="bottom-nav" data-i18n-aria="aria.nav">
