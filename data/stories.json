@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "contentVersion": "2026.11.12",
+  "contentVersion": "2026.11.14",
   "consentPolicyVersion": "CONSENT-2026-11-v2",
   "storyMetaNote": "storyType / mood / year 由團隊按逐字稿標註，示範資料，並非 AI 情緒推斷。",
   "outOfScopeMessage": {
@@ -46,7 +46,7 @@
           "start": 0,
           "end": 17.5,
           "text": "細個我住喺元朗一帶，周圍仲有好多農田，鄉村氣息好濃，大家出入多數都係踩單車。",
-          "keywords": ["細個", "童年", "元朗", "農田", "田野", "鄉村", "鄉郊", "單車", "踩車", "出行", "交通"]
+          "keywords": ["細個", "童年", "元朗", "Yuen Long", "農田", "田野", "鄉村", "鄉郊", "單車", "踩車", "出行", "交通"]
         },
         {
           "start": 17.5,
