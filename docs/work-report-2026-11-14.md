@@ -97,7 +97,7 @@
 ## Next（待办，非阻塞）
 1. 在 GitHub 网页打开 PR（链接见上），body 可整段粘贴本文件。
 2. 上传 `evidence/` 截图 + `walkthrough.webm` 至 Drive，替换 README 的 `[待补 Drive 链接]`。
-3. （可选）删除冗余旧分支 `fix/demo-labels-and-a11y`（内容同新分支、未开 PR）。
+3. （已完成）删除冗余旧分支 `fix/demo-labels-and-a11y`（内容同新分支、未开 PR）。
 
 ## Blocked
 - **无**。全部 9 任务均可交付；仅 PR 合并需 reviewer，证据 Drive 链接待补（不阻塞代码交付）。
