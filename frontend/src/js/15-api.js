@@ -162,6 +162,18 @@
       });
   }
 
+  function syncIfSynced(id) {
+    var rec = VTN.store.records.get(id);
+    if (!rec || rec.sync !== 'synced') return Promise.resolve(null);
+    return syncRecord(rec).catch(function (error) {
+      VTN.store.records.patch(rec.id, {
+        sync: 'failed',
+        syncError: error && error.status ? String(error.status) : 'network'
+      });
+      throw error;
+    });
+  }
+
   function tokenizeAudioUrl(url) {
     if (!url) return url;
     var session = VTN.store.session();
@@ -283,6 +295,7 @@
     viewerHeaders: viewerHeaders,
     records: {
       sync: syncRecord,
+      syncIfSynced: syncIfSynced,
       pull: pullRecords,
       remove: deleteRecord
     },

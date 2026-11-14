@@ -980,6 +980,7 @@
     close();
     VTN.router.go('recording', { tab: 'done' });
     applyQuotaWarning(saved.quota);
+    syncToServer(saved.record);
   }
 
   /* =========================================================================
