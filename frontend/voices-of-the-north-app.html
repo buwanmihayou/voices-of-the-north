@@ -3640,6 +3640,12 @@ html[data-theme="dark"] .confidence-badge--none { background: #333833; border-co
 .page--stories .atlas__searchrow { margin-top: 5px; gap: 5px; }
 .page--stories .atlas__search { min-height: 34px; padding: 0 10px; font-size: var(--fs-min); }
 .page--stories .atlas__filter { width: 34px; height: 34px; }
+/* 任務2：擴大觸控熱區至 ≥44×44（WCAG 2.5.5），視覺維持 34×34、不造成布局位移、不重排 UI 瘦身規則 */
+.page--stories .atlas__filter::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
 .page--stories .chip--toggle { min-height: 34px; padding: 4px 9px; font-size: var(--fs-min); }
 .page--stories .atlas__legend { gap: 4px; margin-top: 5px; }
 .page--stories .legend-chip { min-height: 26px; padding: 2px 8px 2px 4px; font-size: var(--fs-min); }
