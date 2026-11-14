@@ -475,6 +475,31 @@ def _row_to_record(data_json: str, has_audio: int, rid: str, owner: str = "", sc
     return rec
 
 
+CONTRIBUTION_STATUSES = {"ready", "submitted", "approved", "rejected"}
+
+
+def _load_contribution(conn, rid: str):
+    return conn.execute(
+        "SELECT data_json, has_audio, owner, scope, updated_at FROM records WHERE id=?",
+        (rid,),
+    ).fetchone()
+
+
+def _json_record(data_json: str) -> dict:
+    try:
+        payload = json.loads(data_json)
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_contribution(conn, rid: str, payload: dict, scope: str) -> None:
+    conn.execute(
+        "UPDATE records SET data_json=?, scope=?, updated_at=? WHERE id=?",
+        (json.dumps(payload, ensure_ascii=False), scope, int(time.time() * 1000), rid),
+    )
+
+
 # ---------------------------------------------------------------------------
 # 錄音端點（原始錄音只對擁有者和審核者開放）
 # ---------------------------------------------------------------------------
@@ -533,6 +558,20 @@ async def create_record(request: Request):
     mime = str(clean.get("mime") or "audio/webm")
     status = str(clean.get("status") or "done")
     source = str(clean.get("source") or "live")
+    requested_scope = str(payload.get("requestedScope") or payload.get("scope") or "private")
+    if requested_scope not in SCOPES:
+        requested_scope = "private"
+    contribution_flow = bool(payload.get("contributionFlow"))
+    if contribution_flow:
+        # A contributor may request a scope, but the story stays private until review.
+        scope = "private"
+        clean["scope"] = "private"
+        clean["requestedScope"] = requested_scope
+        clean["reviewStatus"] = "ready"
+    clean.pop("submittedAt", None)
+    clean.pop("reviewedBy", None)
+    clean.pop("reviewedAt", None)
+    clean.pop("reviewNote", None)
 
     conn = _connect()
     try:
@@ -703,6 +742,165 @@ async def delete_record(rid: str, request: Request):
         "deletedAt": deleted_at,
         "deletionLogId": log_id,
     }
+
+
+# ---------------------------------------------------------------------------
+# Contributor submission and moderation
+# ---------------------------------------------------------------------------
+@app.post("/api/contributions/{rid}/submit")
+async def submit_contribution(rid: str, request: Request):
+    if not RECORD_ID_RE.match(rid):
+        raise HTTPException(status_code=400, detail="無效的錄音 ID")
+    if not storage_ready:
+        raise HTTPException(status_code=503, detail="提交服務未就緒")
+    who = viewer(request)
+    if who["role"] not in ("member", "admin") or not who["email"]:
+        raise HTTPException(status_code=401, detail="請先以受邀帳戶登入")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    if body.get("transcriptConfirmed") is not True:
+        raise HTTPException(status_code=400, detail="提交前必須先確認逐字稿")
+    requested_scope = str(body.get("requestedScope") or "private")
+    if requested_scope not in SCOPES:
+        raise HTTPException(status_code=400, detail="無效的分享範圍")
+    policy_version = str(body.get("policyVersion") or "")
+    expected_policy = str(load_data().get("consentPolicyVersion") or "")
+
+    conn = _connect()
+    try:
+        with _db_lock:
+            row = _load_contribution(conn, rid)
+            if not row:
+                raise HTTPException(status_code=404, detail="找不到該錄音")
+            payload = _json_record(row[0])
+            owner = row[2] or payload.get("owner") or ""
+            if who["role"] != "admin" and owner != who["email"]:
+                raise HTTPException(status_code=403, detail="只可提交自己的錄音")
+            if not policy_version or policy_version != expected_policy:
+                raise HTTPException(status_code=400, detail="同意書版本已變更，請重新確認")
+            if payload.get("status") != "done":
+                raise HTTPException(status_code=409, detail="只有已完成錄音可以提交")
+            if payload.get("consentRef") != expected_policy:
+                raise HTTPException(status_code=409, detail="錄音缺少目前版本的同意記錄")
+            if not (payload.get("formalText") or payload.get("rawText")):
+                raise HTTPException(status_code=409, detail="提交前必須有逐字稿")
+            if payload.get("reviewStatus") == "submitted":
+                raise HTTPException(status_code=409, detail="此錄音已在待審核佇列")
+            payload["scope"] = "private"
+            payload["requestedScope"] = requested_scope
+            payload["reviewStatus"] = "submitted"
+            payload["submittedAt"] = datetime.now(timezone.utc).isoformat()
+            payload["reviewedBy"] = None
+            payload["reviewedAt"] = None
+            payload["reviewNote"] = None
+            _save_contribution(conn, rid, payload, "private")
+            conn.commit()
+            updated = _load_contribution(conn, rid)
+    finally:
+        conn.close()
+    data_json, has_audio, owner, scope, _updated_at = updated
+    record = _row_to_record(data_json, has_audio, rid, owner, scope)
+    record["id"] = rid
+    return {"ok": True, "record": record}
+
+
+@app.get("/api/contributions")
+async def list_contributions(request: Request, status: str = "submitted"):
+    if not storage_ready:
+        raise HTTPException(status_code=503, detail="審核服務未就緒")
+    who = viewer(request)
+    if who["role"] != "admin":
+        raise HTTPException(status_code=403, detail="只有審核員可以查看待審核內容")
+    if status not in CONTRIBUTION_STATUSES:
+        raise HTTPException(status_code=400, detail="無效的審核狀態")
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            "SELECT id, data_json, has_audio, owner, scope FROM records ORDER BY created_at DESC"
+        ).fetchall()
+    finally:
+        conn.close()
+    records = []
+    for rid, data_json, has_audio, owner, scope in rows:
+        payload = _json_record(data_json)
+        if payload.get("reviewStatus") != status:
+            continue
+        record = _row_to_record(data_json, has_audio, rid, owner, scope)
+        record["id"] = rid
+        records.append(record)
+    return {"records": records, "count": len(records), "status": status}
+
+
+@app.get("/api/contributions/{rid}")
+async def get_contribution(rid: str, request: Request):
+    if not RECORD_ID_RE.match(rid):
+        raise HTTPException(status_code=400, detail="無效的錄音 ID")
+    if not storage_ready:
+        raise HTTPException(status_code=503, detail="提交服務未就緒")
+    who = viewer(request)
+    conn = _connect()
+    try:
+        row = _load_contribution(conn, rid)
+    finally:
+        conn.close()
+    if not row:
+        raise HTTPException(status_code=404, detail="找不到該錄音")
+    if who["role"] != "admin" and (not who["email"] or row[2] != who["email"]):
+        raise HTTPException(status_code=403, detail="未獲授權查看此提交")
+    data_json, has_audio, owner, scope, _updated_at = row
+    record = _row_to_record(data_json, has_audio, rid, owner, scope)
+    record["id"] = rid
+    return record
+
+
+@app.post("/api/contributions/{rid}/review")
+async def review_contribution(rid: str, request: Request):
+    if not RECORD_ID_RE.match(rid):
+        raise HTTPException(status_code=400, detail="無效的錄音 ID")
+    if not storage_ready:
+        raise HTTPException(status_code=503, detail="審核服務未就緒")
+    who = viewer(request)
+    if who["role"] != "admin":
+        raise HTTPException(status_code=403, detail="只有審核員可以處理提交")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    approved = bool(body.get("approved"))
+    approved_scope = str(body.get("approvedScope") or "private")
+    if approved_scope not in SCOPES:
+        raise HTTPException(status_code=400, detail="無效的核准分享範圍")
+    note = str(body.get("note") or "")[:400]
+    conn = _connect()
+    try:
+        with _db_lock:
+            row = _load_contribution(conn, rid)
+            if not row:
+                raise HTTPException(status_code=404, detail="找不到該錄音")
+            payload = _json_record(row[0])
+            if payload.get("reviewStatus") != "submitted":
+                raise HTTPException(status_code=409, detail="此錄音不在待審核狀態")
+            now = datetime.now(timezone.utc).isoformat()
+            payload["reviewStatus"] = "approved" if approved else "rejected"
+            payload["scope"] = approved_scope if approved else "private"
+            payload["reviewedBy"] = who["email"]
+            payload["reviewedAt"] = now
+            payload["reviewNote"] = note
+            _save_contribution(conn, rid, payload, payload["scope"])
+            conn.commit()
+            updated = _load_contribution(conn, rid)
+    finally:
+        conn.close()
+    data_json, has_audio, owner, scope, _updated_at = updated
+    record = _row_to_record(data_json, has_audio, rid, owner, scope)
+    record["id"] = rid
+    return {"ok": True, "approved": approved, "record": record}
 
 
 # ---------------------------------------------------------------------------
