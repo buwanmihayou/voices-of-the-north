@@ -118,7 +118,9 @@ def main() -> None:
             "formalText": "村口以前好熱鬧。", "words": [], "qaList": [],
             "audioBase64": base64.b64encode(b"RIFF-fake-audio").decode("ascii"),
         }
-        check("主線保存錄音 200", client.post("/api/records", json=rec).status_code == 200)
+        token = server.make_token("lab-contributor@example.test", "member")
+        saved = client.post("/api/records", headers={"Authorization": "Bearer " + token}, json=rec)
+        check("主線保存錄音 200", saved.status_code == 200)
         ans = client.post(f"/api/lab/questions/{q['id']}/answer", json={
             "recordId": "lab-answer-001", "timestamp": 17.5
         }).json()
