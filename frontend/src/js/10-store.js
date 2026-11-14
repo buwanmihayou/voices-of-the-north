@@ -272,11 +272,17 @@
   /**
    * 局部更新（狀態機轉換用），回傳更新後紀錄。
    */
-  function patchRecord(id, patch) {
+  function patchRecord(id, patch, options) {
     var rec = getRecord(id);
     if (!rec) return null;
     var merged = Object.assign({}, rec, patch, { updatedAt: Date.now() });
-    return saveRecord(merged).record;
+    var updated = saveRecord(merged).record;
+    U.emit('vtn:record-updated', {
+      record: updated,
+      patch: Object.assign({}, patch || {}),
+      suppressSync: !!(options && options.suppressSync)
+    });
+    return updated;
   }
 
   function removeRecord(id) {

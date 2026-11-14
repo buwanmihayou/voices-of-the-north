@@ -13,6 +13,8 @@
 
   var expanded = {};
   var currentTab = 'drafts';
+  var reviewerQueue = [];
+  var reviewerQueueLoading = false;
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
 
@@ -89,7 +91,7 @@
     return { cls: 'vtn-rec-card__icon', icon: 'fa-file-lines' };
   }
 
-  function buildCard(rec) {
+  function buildCard(rec, options) {
     var state = rec.status;
     var card = U.node('article', {
       class: 'vtn-rec-card' + (state === 'pending' ? ' is-pending' : ''),
@@ -134,9 +136,9 @@
 
     if (state === 'draft') renderDraftBody(rec, body);
     else if (state === 'pending') renderPendingBody(rec, body);
-    else renderDoneBody(rec, body);
+    else renderDoneBody(rec, body, options);
 
-    if (VTN.recIcons) {
+    if (VTN.recIcons && !(options && options.reviewOnly)) {
       body.appendChild(VTN.recIcons.build(rec.iconKey, function (key) {
         VTN.store.records.patch(rec.id, { iconKey: key });
         VTN.ui.toast(t('rec.iconSaved'), 'success');
@@ -205,7 +207,108 @@
     body.appendChild(actions);
   }
 
-  function renderDoneBody(rec, body) {
+  function openSubmission(rec) {
+    var body = U.node('div');
+    body.appendChild(U.node('p', {
+      class: 'vtn-rec-desc',
+      text: t('review.intro')
+    }));
+    body.appendChild(U.node('label', { class: 'vtn-rec-subhead', text: t('review.scope') }));
+    var scopeSelect = U.node('select', {
+      id: 'contributionRequestedScope',
+      'aria-label': t('review.scope')
+    }, VTN.SCOPES.map(function (scope) {
+      return U.node('option', {
+        value: scope,
+        text: t(VTN.SCOPE_META[scope].labelKey)
+      });
+    }));
+    scopeSelect.value = rec.requestedScope || rec.scope || 'private';
+    body.appendChild(scopeSelect);
+    var confirmWrap = U.node('label', { class: 'vtn-rec-note' });
+    var confirmed = U.node('input', { type: 'checkbox' });
+    confirmWrap.appendChild(confirmed);
+    confirmWrap.appendChild(document.createTextNode(' ' + t('review.confirm')));
+    body.appendChild(confirmWrap);
+    var feedback = U.node('p', { class: 'vtn-rec-note', role: 'alert', hidden: 'hidden' });
+    body.appendChild(feedback);
+
+    var dlg = VTN.ui.dialog({
+      titleKey: 'review.title',
+      body: body,
+      actions: [
+        { labelKey: 'common.cancel', kind: 'quiet' },
+        {
+          labelKey: 'review.submit',
+          kind: 'solid',
+          keepOpen: true,
+          onClick: function (ctx) {
+            if (!confirmed.checked) {
+              feedback.textContent = t('review.confirm');
+              feedback.hidden = false;
+              confirmed.focus();
+              return;
+            }
+            VTN.api.contributions.submit(rec.id, {
+              transcriptConfirmed: true,
+              requestedScope: scopeSelect.value,
+              policyVersion: VTN.config.consentPolicyVersion
+            }).then(function (response) {
+              var updated = response && response.record || {};
+              VTN.store.records.patch(rec.id, {
+                scope: 'private',
+                requestedScope: updated.requestedScope || scopeSelect.value,
+                reviewStatus: updated.reviewStatus || 'submitted',
+                submittedAt: updated.submittedAt
+              }, { suppressSync: true });
+              VTN.ui.toast(t('review.submitted'), 'success');
+              ctx.close('submitted');
+              renderAll();
+              pullAndRender();
+            }).catch(function () {
+              feedback.textContent = t('review.failed');
+              feedback.hidden = false;
+            });
+          }
+        }
+      ]
+    });
+    return dlg;
+  }
+
+  function pullAndRender() {
+    VTN.api.records.pull().then(function () {
+      renderAll();
+      return loadReviewerQueue();
+    }).catch(function () { /* 保留本機狀態 */ });
+  }
+
+  function reviewSubmission(rec, approved) {
+    VTN.ui.confirm({
+      titleKey: approved ? 'review.approve' : 'review.reject',
+      messageKey: 'review.intro',
+      confirmLabelKey: approved ? 'review.approve' : 'review.reject',
+      cancelLabelKey: 'common.cancel',
+      danger: !approved
+    }).then(function (ok) {
+      if (!ok) return;
+      VTN.api.contributions.review(
+        rec.id,
+        approved,
+        approved ? (rec.requestedScope || 'private') : 'private',
+        ''
+      ).then(function () {
+        VTN.ui.toast(t(approved ? 'review.approvedToast' : 'review.rejectedToast'), 'success');
+        pullAndRender();
+        if (VTN.stories && VTN.stories.refreshFromServer) VTN.stories.refreshFromServer();
+      }).catch(function () {
+        VTN.ui.toast(t('review.failed'), 'error');
+      });
+    });
+  }
+
+  function renderDoneBody(rec, body, options) {
+    var reviewOnly = !!(options && options.reviewOnly);
     var tags = U.node('div', { class: 'vtn-rec-card__tags' });
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive') }));
     tags.appendChild(U.node('span', {
@@ -218,6 +321,12 @@
       text: t('scope.label', { scope: t(VTN.SCOPE_META[VTN.store.scopeOf(rec)].labelKey) })
     }));
     if (rec.rolePlayed) tags.appendChild(U.node('span', { class: 'vtn-rec-pill vtn-rec-pill--gold', text: t('story.rolePlayed') }));
+    if (rec.reviewStatus && t('review.status.' + rec.reviewStatus) !== 'review.status.' + rec.reviewStatus) {
+      tags.appendChild(U.node('span', {
+        class: 'vtn-rec-pill',
+        text: t('review.status.' + rec.reviewStatus)
+      }));
+    }
     body.appendChild(tags);
 
     if (rec.audioDataURL) {
@@ -279,32 +388,61 @@
       body.appendChild(U.node('p', { class: 'vtn-rec-note', text: t('rec.noWords') }));
     }
 
-    var actions = U.node('div', { class: 'vtn-rec-card__actions' });
-    var scopeBtn = U.node('button', { class: 'vtn-rec-card__retry', type: 'button', text: t('story.scope') });
-    scopeBtn.addEventListener('click', function () {
-      VTN.stories.openScopeDialog(rec);
-      /* 範圍改動會經 store 觸發刷新 */
-    });
-    var exportBtn = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('export.one') });
-    exportBtn.addEventListener('click', function () { exportRecord(rec); });
-    actions.appendChild(scopeBtn);
-    actions.appendChild(exportBtn);
-    body.appendChild(actions);
+    if (!reviewOnly) {
+      var actions = U.node('div', { class: 'vtn-rec-card__actions' });
+      var scopeBtn = U.node('button', { class: 'vtn-rec-card__retry', type: 'button', text: t('story.scope') });
+      scopeBtn.addEventListener('click', function () {
+        VTN.stories.openScopeDialog(rec);
+        /* 範圍改動會經 store 觸發刷新 */
+      });
+      var exportBtn = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('export.one') });
+      exportBtn.addEventListener('click', function () { exportRecord(rec); });
+      actions.appendChild(scopeBtn);
+      actions.appendChild(exportBtn);
+      body.appendChild(actions);
 
-    var actions2 = U.node('div', { class: 'vtn-rec-card__actions' });
-    var correct = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.correct') });
-    correct.addEventListener('click', function () { if (VTN.account) VTN.account.openCorrection(rec); });
-    var withdraw = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.withdraw') });
-    withdraw.addEventListener('click', function () { if (VTN.account) VTN.account.openWithdraw(rec); });
-    actions2.appendChild(correct);
-    actions2.appendChild(withdraw);
-    body.appendChild(actions2);
+      var actions2 = U.node('div', { class: 'vtn-rec-card__actions' });
+      var correct = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.correct') });
+      correct.addEventListener('click', function () { if (VTN.account) VTN.account.openCorrection(rec); });
+      var withdraw = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.withdraw') });
+      withdraw.addEventListener('click', function () { if (VTN.account) VTN.account.openWithdraw(rec); });
+      actions2.appendChild(correct);
+      actions2.appendChild(withdraw);
+      body.appendChild(actions2);
+    }
 
-    var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
-    var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
-    del.addEventListener('click', function () { removeRecord(rec); });
-    actions3.appendChild(del);
-    body.appendChild(actions3);
+    if (!reviewOnly && (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected')) {
+      var reviewActions = U.node('div', { class: 'vtn-rec-card__actions' });
+      var submit = U.node('button', {
+        class: 'vtn-rec-card__retry', type: 'button', text: t('review.submit')
+      });
+      submit.addEventListener('click', function () { openSubmission(rec); });
+      reviewActions.appendChild(submit);
+      body.appendChild(reviewActions);
+    }
+
+    if (VTN.store.role() === 'admin' && rec.reviewStatus === 'submitted') {
+      var moderation = U.node('div', { class: 'vtn-rec-card__actions' });
+      var approve = U.node('button', {
+        class: 'vtn-rec-card__retry', type: 'button', text: t('review.approve')
+      });
+      approve.addEventListener('click', function () { reviewSubmission(rec, true); });
+      var reject = U.node('button', {
+        class: 'vtn-rec-card__remove', type: 'button', text: t('review.reject')
+      });
+      reject.addEventListener('click', function () { reviewSubmission(rec, false); });
+      moderation.appendChild(approve);
+      moderation.appendChild(reject);
+      body.appendChild(moderation);
+    }
+
+    if (!reviewOnly) {
+      var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
+      var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
+      del.addEventListener('click', function () { removeRecord(rec); });
+      actions3.appendChild(del);
+      body.appendChild(actions3);
+    }
   }
 
   /* =========================================================================
@@ -335,13 +473,22 @@
       danger: true
     }).then(function (ok) {
       if (!ok) return;
-      VTN.store.records.remove(rec.id);
-      VTN.store.audit.log('record.delete', { id: rec.id, synced: rec.sync === 'synced' });
-      renderAll();
+      function removeLocal() {
+        VTN.store.records.remove(rec.id);
+        VTN.store.audit.log('record.delete', { id: rec.id, synced: rec.sync === 'synced' });
+        renderAll();
+      }
+      if (rec.sync !== 'synced') {
+        removeLocal();
+        VTN.ui.toast(t('delete.localOnly'), 'success');
+        return;
+      }
       VTN.api.records.remove(rec.id).then(function () {
+        removeLocal();
         VTN.ui.toast(t('delete.serverOk'), 'success');
       }).catch(function (error) {
         if (error && error.status === 404) {
+          removeLocal();
           VTN.ui.toast(t('delete.localOnly'), 'success');
         } else {
           VTN.ui.toast(t('delete.serverFailed'), 'error');
@@ -394,7 +541,9 @@
     var empty = document.getElementById(emptyId);
     if (!host) return;
     host.textContent = '';
-    list.forEach(function (rec) { host.appendChild(buildCard(rec)); });
+    list.forEach(function (rec) {
+      host.appendChild(buildCard(rec, { reviewOnly: !!rec._reviewOnly }));
+    });
     if (empty) empty.hidden = list.length > 0;
     var panel = host.parentNode;
     if (panel) panel.classList.toggle('has-list', list.length > 0);
@@ -407,6 +556,14 @@
       pending: all.filter(function (r) { return r.status === 'pending'; }),
       done: all.filter(function (r) { return r.status === 'done'; })
     };
+    if (VTN.store.role() === 'admin') {
+      var byId = {};
+      groups.done.forEach(function (rec) { byId[rec.id] = rec; });
+      reviewerQueue.forEach(function (rec) {
+        if (!byId[rec.id]) byId[rec.id] = Object.assign({}, rec, { _reviewOnly: true });
+      });
+      groups.done = Object.keys(byId).map(function (id) { return byId[id]; });
+    }
 
     renderList('recListDrafts', 'emptyDrafts', groups.drafts, 'draft');
     renderList('recListPending', 'emptyPending', groups.pending, 'pending');
@@ -441,6 +598,24 @@
     }));
   }
 
+  function loadReviewerQueue() {
+    if (VTN.store.role() !== 'admin' || !VTN.api.contributions || reviewerQueueLoading) {
+      if (VTN.store.role() !== 'admin') reviewerQueue = [];
+      return Promise.resolve(reviewerQueue);
+    }
+    reviewerQueueLoading = true;
+    return VTN.api.contributions.list('submitted').then(function (data) {
+      reviewerQueue = (data && data.records) || [];
+      renderAll();
+      return reviewerQueue;
+    }).catch(function () {
+      return reviewerQueue;
+    }).then(function (result) {
+      reviewerQueueLoading = false;
+      return result;
+    });
+  }
+
   /* =========================================================================
    * 5. 深鏈與事件
    * ======================================================================= */
@@ -465,7 +640,8 @@
   function init() {
     initTabs();
     renderAll();
-    var onStore = function () { renderAll(); };
+    loadReviewerQueue();
+    var onStore = function () { renderAll(); loadReviewerQueue(); };
     U.on('vtn:store-changed', onStore);
     U.on('vtn:session-changed', onStore);
     window.addEventListener('storage', function (event) {

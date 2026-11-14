@@ -8,10 +8,11 @@
   var VTN = window.VTN;
   var U = VTN.util;
   var healthTimer = null;
+  var pullingRemote = false;
 
   function syncPendingRecords() {
     var pending = VTN.store.records.all().filter(function (rec) {
-      return rec.sync === 'failed' && rec.status === 'done' && rec.audioDataURL;
+      return rec.sync === 'failed' && rec.status === 'done';
     }).slice(0, 2);
     pending.forEach(function (rec) {
       VTN.api.records.sync(rec).then(function () {
@@ -20,11 +21,41 @@
     });
   }
 
+  function pullRemoteRecords() {
+    if (pullingRemote) return Promise.resolve(null);
+    pullingRemote = true;
+    return VTN.api.records.pull().then(function (result) {
+      return result;
+    }).catch(function () {
+      return null;
+    }).then(function (result) {
+      pullingRemote = false;
+      return result;
+    });
+  }
+
+  var SYNC_ONLY_KEYS = {
+    audioUrl: true,
+    sync: true,
+    syncAt: true,
+    syncError: true
+  };
+
+  function recordNeedsServerSync(detail) {
+    if (!detail || detail.suppressSync || !detail.record || detail.record.sync !== 'synced') return false;
+    var keys = Object.keys(detail.patch || {});
+    if (!keys.length) return false;
+    return keys.some(function (key) { return !SYNC_ONLY_KEYS[key]; });
+  }
+
   function checkHealth(force) {
     return VTN.api.health(force).then(function (data) {
       VTN.ui.renderStatus();
       if (VTN.assistant) VTN.assistant.refresh();
-      if (data && data.storage_ready) syncPendingRecords();
+      if (data && data.storage_ready) {
+        syncPendingRecords();
+        pullRemoteRecords();
+      }
       return data;
     }).catch(function () {
       VTN.ui.renderStatus();
@@ -77,6 +108,13 @@
         VTN.about.render();
         VTN.ui.renderStatus();
       });
+      U.on('vtn:record-updated', function (detail) {
+        if (recordNeedsServerSync(detail)) {
+          VTN.api.records.syncIfSynced(detail.record.id).catch(function () {
+            VTN.ui.toast(VTN.i18n.t('sync.failed'), 'error');
+          });
+        }
+      });
 
       window.VTN_READY = true;
       U.emit('vtn:ready', { version: VTN.config.version, apiBase: VTN.api.base() });
@@ -97,4 +135,5 @@
 
   VTN.boot = boot;
   VTN.refreshHealth = checkHealth;
+  VTN.pullRemoteRecords = pullRemoteRecords;
 })();

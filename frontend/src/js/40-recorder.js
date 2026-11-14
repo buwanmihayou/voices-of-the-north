@@ -638,6 +638,9 @@
       var words = normalizeWords(data.words);
       var updated = VTN.store.records.patch(rec.id, {
         status: 'done',
+        contributionFlow: true,
+        reviewStatus: 'ready',
+        requestedScope: rec.scope || VTN.store.getPref('scope') || 'private',
         mode: data.mode || 'online',
         rawText: data.raw_text || '',
         words: words,
@@ -977,6 +980,7 @@
     close();
     VTN.router.go('recording', { tab: 'done' });
     applyQuotaWarning(saved.quota);
+    syncToServer(saved.record);
   }
 
   /* =========================================================================
