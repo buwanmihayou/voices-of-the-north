@@ -31,3 +31,5 @@ At capture time the fix was a draft, not merged or deployed. The live service st
 Branch `codex/local-integration-20261114` combines PR #15 at `a53dcc9` with PR #14 at `32b5f98`. The original repository checkout now uses this branch; local `main` was fast-forwarded to remote main `a6b932a` before integration.
 
 See the [PR #15 findings and reproduction steps](pr15-integration-review.md) and [combined local validation](local-integration-validation.md). The known content-review, owner privacy narrowing and reviewer-queue findings remain open. This branch is a candidate for further work; staging acceptance is outstanding.
+
+The findings and combined-branch validation were [published to PR #15](https://github.com/phatdat220707/voices-of-the-north/pull/15#issuecomment-6878198220). [Screenshot of the posted comment](pr15-review-comment-posted.jpg).
