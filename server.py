@@ -44,6 +44,14 @@ from google.cloud import speech_v1p1beta1 as speech
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from lab_api import router as lab_router
+from storage import (
+    Connection,
+    backend_name,
+    connect as db_connect,
+    is_postgres,
+    safe_error,
+    schema_for,
+)
 from story_corpus import all_stories, is_visible, load_data, retrieve_answer, visible_stories
 
 APP_VERSION = "2026.11.05"
@@ -184,7 +192,6 @@ if gemini_api_key:
 # SQLite：錄音、帳戶、更正、撤回、同意、稽核
 # ---------------------------------------------------------------------------
 RECORDS_DIR = Path(os.environ.get("VTN_RECORDS_DIR", "records"))
-DB_PATH = Path(os.environ.get("VTN_DB_PATH", "records.db"))
 RECORD_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 STORAGE_MODE = "token" if RECORDS_TOKEN else "scoped"
 _db_lock = threading.Lock()
@@ -194,13 +201,15 @@ storage_reason = ""
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS records (
     id TEXT PRIMARY KEY,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL,
     status TEXT,
     source TEXT,
     has_audio INTEGER NOT NULL DEFAULT 0,
     audio_path TEXT,
-    data_json TEXT NOT NULL
+    data_json TEXT NOT NULL,
+    owner TEXT DEFAULT '',
+    scope TEXT DEFAULT 'private'
 );
 CREATE TABLE IF NOT EXISTS deletion_events (
     log_id TEXT PRIMARY KEY,
@@ -273,22 +282,41 @@ CREATE TABLE IF NOT EXISTS consent_log (
 );
 """
 
+RLS_TABLES = (
+    "records",
+    "deletion_events",
+    "auth_codes",
+    "users",
+    "corrections",
+    "story_versions",
+    "withdrawals",
+    "audit_log",
+    "consent_log",
+)
 
-def _connect():
-    return sqlite3.connect(DB_PATH, timeout=5)
+
+def _connect() -> Connection:
+    return db_connect()
 
 
 def _init_storage():
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = _connect()
     try:
-        conn.executescript(SCHEMA)
-        columns = {row[1] for row in conn.execute("PRAGMA table_info(records)")}
-        if "owner" not in columns:
-            conn.execute("ALTER TABLE records ADD COLUMN owner TEXT DEFAULT ''")
-        if "scope" not in columns:
-            conn.execute("ALTER TABLE records ADD COLUMN scope TEXT DEFAULT 'private'")
+        conn.executescript(schema_for(SCHEMA))
+        if is_postgres():
+            conn.execute("ALTER TABLE records ADD COLUMN IF NOT EXISTS owner TEXT DEFAULT ''")
+            conn.execute("ALTER TABLE records ADD COLUMN IF NOT EXISTS scope TEXT DEFAULT 'private'")
+            conn.execute("ALTER TABLE records ALTER COLUMN created_at TYPE BIGINT USING created_at::BIGINT")
+            conn.execute("ALTER TABLE records ALTER COLUMN updated_at TYPE BIGINT USING updated_at::BIGINT")
+            for table in RLS_TABLES:
+                conn.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
+        else:
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(records)")}
+            if "owner" not in columns:
+                conn.execute("ALTER TABLE records ADD COLUMN owner TEXT DEFAULT ''")
+            if "scope" not in columns:
+                conn.execute("ALTER TABLE records ADD COLUMN scope TEXT DEFAULT 'private'")
         conn.commit()
     finally:
         conn.close()
@@ -298,7 +326,7 @@ try:
     _init_storage()
     storage_ready = True
 except Exception as exc:
-    storage_reason = str(exc)[:300]
+    storage_reason = safe_error(exc)
 
 
 def _records_count() -> int:
@@ -392,12 +420,21 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SCOPES = {"private", "family", "community", "public"}
 
 
-def _can_read_record(owner: str, who: dict) -> bool:
-    # Requested sharing scope does not publish a recording.
+def _can_manage_record(owner: str, who: dict) -> bool:
     if who["role"] == "admin":
         return True
     owner = (owner or "").lower()
     return bool(who["role"] == "member" and owner and owner == who["email"])
+
+
+def _can_read_record(owner: str, who: dict, data_json: str = "", scope: str = "private") -> bool:
+    if _can_manage_record(owner, who):
+        return True
+    payload = _json_record(data_json)
+    return bool(
+        (scope or "private") == "public"
+        and payload.get("reviewStatus") == "approved"
+    )
 
 
 def _withdrawn_ids() -> set[str]:
@@ -409,7 +446,7 @@ def _withdrawn_ids() -> set[str]:
             return {row[0] for row in conn.execute("SELECT story_id FROM withdrawals")}
         finally:
             conn.close()
-    except sqlite3.Error as exc:
+    except Exception as exc:
         raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE") from exc
 
 
@@ -475,7 +512,7 @@ def _row_to_record(data_json: str, has_audio: int, rid: str, owner: str = "", sc
     return rec
 
 
-CONTRIBUTION_STATUSES = {"ready", "submitted", "approved", "rejected"}
+CONTRIBUTION_STATUSES = {"ready", "submitted", "approved", "rejected", "withdrawn"}
 
 
 def _load_contribution(conn, rid: str):
@@ -498,6 +535,126 @@ def _save_contribution(conn, rid: str, payload: dict, scope: str) -> None:
         "UPDATE records SET data_json=?, scope=?, updated_at=? WHERE id=?",
         (json.dumps(payload, ensure_ascii=False), scope, int(time.time() * 1000), rid),
     )
+
+
+def _record_keywords(payload: dict) -> list[str]:
+    values: list[str] = []
+    for key in ("title", "titleEn", "villageKey"):
+        value = str(payload.get(key) or "").strip()
+        if len(value) >= 2:
+            values.append(value)
+    for key in ("keywords", "topicKeys"):
+        raw = payload.get(key)
+        if isinstance(raw, list):
+            values.extend(str(item).strip() for item in raw if len(str(item).strip()) >= 2)
+    return list(dict.fromkeys(values))[:30]
+
+
+def _published_record_story(
+    rid: str,
+    data_json: str,
+    has_audio: int,
+    owner: str,
+    scope: str,
+) -> dict | None:
+    payload = _json_record(data_json)
+    if scope != "public" or payload.get("reviewStatus") != "approved":
+        return None
+    words = payload.get("words") if isinstance(payload.get("words"), list) else []
+    measured_end = 0.0
+    for word in words:
+        if isinstance(word, dict):
+            try:
+                measured_end = max(measured_end, float(word.get("end") or 0))
+            except (TypeError, ValueError):
+                pass
+    duration = float(payload.get("durationSec") or measured_end or 0)
+    text = str(payload.get("formalText") or payload.get("rawText") or "").strip()
+    segments = []
+    raw_segments = payload.get("segments")
+    if isinstance(raw_segments, list):
+        for segment in raw_segments:
+            if not isinstance(segment, dict) or not str(segment.get("text") or "").strip():
+                continue
+            try:
+                start = max(0.0, float(segment.get("start") or 0))
+                end = max(start, float(segment.get("end") or start))
+            except (TypeError, ValueError):
+                continue
+            keywords = segment.get("keywords")
+            segments.append({
+                "start": start,
+                "end": end,
+                "text": str(segment.get("text") or "")[:5000],
+                "keywords": [str(item) for item in keywords if str(item).strip()]
+                if isinstance(keywords, list) else [],
+            })
+    if not segments and text:
+        end = duration or float(payload.get("durationSec") or 0) or 1.0
+        segments.append({
+            "start": 0.0,
+            "end": max(1.0, end),
+            "text": text,
+            "keywords": _record_keywords(payload),
+        })
+    if not segments:
+        return None
+    location = payload.get("location")
+    if not (
+        isinstance(location, dict)
+        and isinstance(location.get("lat"), (int, float))
+        and isinstance(location.get("lng"), (int, float))
+    ):
+        location = None
+    return {
+        "id": rid,
+        "title": str(payload.get("title") or text[:40] or "Community contribution"),
+        "titleEn": str(payload.get("titleEn") or payload.get("title") or ""),
+        "villageKey": str(payload.get("villageKey") or "other"),
+        "topicKeys": payload.get("topicKeys") if isinstance(payload.get("topicKeys"), list) else ["community"],
+        "eraKey": str(payload.get("eraKey") or ""),
+        "storyType": str(payload.get("storyType") or "oral"),
+        "mood": str(payload.get("mood") or ""),
+        "year": payload.get("year") if isinstance(payload.get("year"), int) else None,
+        "languageKey": str(payload.get("languageKey") or "yue"),
+        "teller": str(payload.get("teller") or owner or "Contributor"),
+        "rolePlayed": False,
+        "authorized": True,
+        "consentRef": str(payload.get("consentRef") or ""),
+        "scope": "public",
+        "owner": owner,
+        "publishedAt": payload.get("reviewedAt") or payload.get("submittedAt"),
+        "reviewStatus": "approved",
+        "location": location,
+        "audio": f"api/records/{rid}/audio" if has_audio else None,
+        "durationSec": max(duration, max(seg["end"] for seg in segments)),
+        "durationSource": "measured",
+        "segments": segments,
+        "sourceRecordId": rid,
+    }
+
+
+def _published_record_stories(excluded: set[str]) -> list[dict]:
+    if not storage_ready:
+        raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE")
+    try:
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                "SELECT id, data_json, has_audio, owner, scope FROM records ORDER BY created_at DESC"
+            ).fetchall()
+        finally:
+            conn.close()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="STORAGE_UNAVAILABLE") from exc
+    stories = []
+    for rid, data_json, has_audio, owner, scope in rows:
+        if rid in excluded:
+            continue
+        story = _published_record_story(rid, data_json, has_audio, owner, scope)
+        if story:
+            stories.append(story)
+    return stories
 
 
 # ---------------------------------------------------------------------------
@@ -543,9 +700,10 @@ async def create_record(request: Request):
                 detail=f"音訊超過 {MAX_AUDIO_BYTES // (1024 * 1024)}MB 上限",
             )
 
-    scope = str(payload.get("scope") or "private")
-    if scope not in SCOPES:
-        scope = "private"
+    requested_scope = str(payload.get("requestedScope") or payload.get("scope") or "private")
+    if requested_scope not in SCOPES:
+        requested_scope = "private"
+    scope = "private"
     # 擁有者一律由伺服器決定，避免前端偽造
     owner = who["email"]
 
@@ -558,31 +716,43 @@ async def create_record(request: Request):
     mime = str(clean.get("mime") or "audio/webm")
     status = str(clean.get("status") or "done")
     source = str(clean.get("source") or "live")
-    requested_scope = str(payload.get("requestedScope") or payload.get("scope") or "private")
-    if requested_scope not in SCOPES:
-        requested_scope = "private"
-    contribution_flow = bool(payload.get("contributionFlow"))
-    if contribution_flow:
-        # A contributor may request a scope, but the story stays private until review.
-        scope = "private"
-        clean["scope"] = "private"
-        clean["requestedScope"] = requested_scope
-        clean["reviewStatus"] = "ready"
-    clean.pop("submittedAt", None)
-    clean.pop("reviewedBy", None)
-    clean.pop("reviewedAt", None)
-    clean.pop("reviewNote", None)
 
     conn = _connect()
     try:
         with _db_lock:
             existing = conn.execute(
-                "SELECT audio_path, has_audio, owner FROM records WHERE id=?", (rid,)
+                "SELECT audio_path, has_audio, owner, data_json, scope, created_at "
+                "FROM records WHERE id=?",
+                (rid,),
             ).fetchone()
-            if existing and not _can_read_record(existing[2], who):
+            if not existing and status != "done":
+                raise HTTPException(
+                    status_code=400,
+                    detail="只會將已完成錄音寫入正式資料庫；草稿及待轉寫內容只保留在瀏覽器",
+                )
+            if existing and not _can_manage_record(existing[2], who):
                 raise HTTPException(status_code=403, detail="此錄音屬於其他帳戶")
             if existing:
                 owner = existing[2]
+                scope = existing[4] or "private"
+                created_at = int(existing[5])
+                previous = _json_record(existing[3])
+                for key in (
+                    "scope", "contributionFlow", "requestedScope", "reviewStatus",
+                    "submittedAt", "reviewedBy", "reviewedAt", "reviewNote", "consentRef",
+                ):
+                    if key in previous:
+                        clean[key] = previous[key]
+                    else:
+                        clean.pop(key, None)
+            else:
+                clean["scope"] = "private"
+                clean["requestedScope"] = requested_scope
+                clean["reviewStatus"] = "ready"
+                clean.pop("submittedAt", None)
+                clean.pop("reviewedBy", None)
+                clean.pop("reviewedAt", None)
+                clean.pop("reviewNote", None)
             clean["owner"] = owner
             audio_path, has_audio = "", 0
             if audio_bytes:
@@ -594,9 +764,19 @@ async def create_record(request: Request):
             elif existing and existing[0]:
                 audio_path, has_audio = existing[0], existing[1]
             conn.execute(
-                """INSERT OR REPLACE INTO records
+                """INSERT INTO records
                    (id, created_at, updated_at, status, source, has_audio, audio_path, data_json, owner, scope)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(id) DO UPDATE SET
+                     created_at=excluded.created_at,
+                     updated_at=excluded.updated_at,
+                     status=excluded.status,
+                     source=excluded.source,
+                     has_audio=excluded.has_audio,
+                     audio_path=excluded.audio_path,
+                     data_json=excluded.data_json,
+                     owner=excluded.owner,
+                     scope=excluded.scope""",
                 (rid, created_at, updated_at, status, source, has_audio, audio_path,
                  json.dumps(clean, ensure_ascii=False), owner, scope),
             )
@@ -619,23 +799,15 @@ async def list_records(request: Request, response: Response):
     who = viewer(request)
     conn = _connect()
     try:
-        if who["role"] == "admin":
-            rows = conn.execute(
-                "SELECT id, data_json, has_audio, owner, scope FROM records ORDER BY created_at DESC"
-            ).fetchall()
-        elif who["role"] == "member" and who["email"]:
-            rows = conn.execute(
-                "SELECT id, data_json, has_audio, owner, scope FROM records "
-                "WHERE owner=? ORDER BY created_at DESC",
-                (who["email"],),
-            ).fetchall()
-        else:
-            rows = []
+        rows = conn.execute(
+            "SELECT id, data_json, has_audio, owner, scope FROM records ORDER BY created_at DESC"
+        ).fetchall()
     finally:
         conn.close()
     records = [
         _row_to_record(data_json, has_audio, rid, owner, scope)
         for rid, data_json, has_audio, owner, scope in rows
+        if _can_read_record(owner, who, data_json, scope)
     ]
     return {"records": records, "count": len(records), "mode": STORAGE_MODE}
 
@@ -656,13 +828,13 @@ async def get_record_audio(rid: str, request: Request):
     conn = _connect()
     try:
         row = conn.execute(
-            "SELECT audio_path, has_audio, owner FROM records WHERE id=?", (rid,)
+            "SELECT audio_path, has_audio, owner, data_json, scope FROM records WHERE id=?", (rid,)
         ).fetchone()
     finally:
         conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="音訊檔不存在")
-    if not _can_read_record(row[2], who):
+    if not _can_read_record(row[2], who, row[3], row[4]):
         raise HTTPException(status_code=403, detail="未獲授權收聽此錄音")
     if not row[1] or not row[0] or not Path(row[0]).is_file():
         raise HTTPException(status_code=404, detail="音訊檔不存在")
@@ -689,7 +861,7 @@ async def get_record(rid: str, request: Request, response: Response):
         conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="找不到該錄音")
-    if not _can_read_record(row[2], who):
+    if not _can_read_record(row[2], who, row[0], row[3]):
         raise HTTPException(status_code=403, detail="未獲授權查看此錄音")
     return _row_to_record(row[0], row[1], rid, row[2], row[3])
 
@@ -714,7 +886,7 @@ async def delete_record(rid: str, request: Request):
             ).fetchone()
             if not row:
                 return {"ok": True, "id": rid, "serverHad": False, "deletedAt": deleted_at}
-            if not _can_read_record(row[1], who):
+            if not _can_manage_record(row[1], who):
                 raise HTTPException(status_code=403, detail="只可刪除自己的錄音")
 
             audio_removed = False
@@ -872,7 +1044,9 @@ async def review_contribution(rid: str, request: Request):
         body = {}
     if not isinstance(body, dict):
         body = {}
-    approved = bool(body.get("approved"))
+    if not isinstance(body.get("approved"), bool):
+        raise HTTPException(status_code=400, detail="approved 必須是 JSON boolean")
+    approved = body["approved"]
     approved_scope = str(body.get("approvedScope") or "private")
     if approved_scope not in SCOPES:
         raise HTTPException(status_code=400, detail="無效的核准分享範圍")
@@ -886,6 +1060,13 @@ async def review_contribution(rid: str, request: Request):
             payload = _json_record(row[0])
             if payload.get("reviewStatus") != "submitted":
                 raise HTTPException(status_code=409, detail="此錄音不在待審核狀態")
+            requested_scope = str(payload.get("requestedScope") or "private")
+            scope_order = {"private": 0, "family": 1, "community": 2, "public": 3}
+            if approved and scope_order[approved_scope] > scope_order.get(requested_scope, 0):
+                raise HTTPException(
+                    status_code=409,
+                    detail="審核不可擴大長者原本同意的分享範圍",
+                )
             now = datetime.now(timezone.utc).isoformat()
             payload["reviewStatus"] = "approved" if approved else "rejected"
             payload["scope"] = approved_scope if approved else "private"
@@ -949,9 +1130,15 @@ def current_visible_stories(request: Request) -> list[dict]:
     excluded = _withdrawn_ids()
     versions = _story_versions()
     result = []
-    for story in visible_stories(
-        viewer_user=who["email"], role=who["role"], excluded=excluded
-    ):
+    candidates = all_stories() + _published_record_stories(excluded)
+    seen_ids: set[str] = set()
+    for story in candidates:
+        story_id = str(story.get("id") or "")
+        if not story_id or story_id in seen_ids:
+            continue
+        if not is_visible(story, who["email"], who["role"], excluded):
+            continue
+        seen_ids.add(story_id)
         item = dict(story)
         item["audioUrl"] = ("/" + str(story["audio"]).lstrip("/")) if story.get("audio") else None
         item["transcriptOnly"] = not bool(story.get("audio"))
@@ -1036,8 +1223,11 @@ async def request_code(request: Request):
     try:
         with _db_lock:
             conn.execute(
-                "INSERT OR REPLACE INTO auth_codes (email, code_hash, expires_at, attempts, created_at) "
-                "VALUES (?, ?, ?, 0, ?)",
+                "INSERT INTO auth_codes (email, code_hash, expires_at, attempts, created_at) "
+                "VALUES (?, ?, ?, 0, ?) "
+                "ON CONFLICT(email) DO UPDATE SET "
+                "code_hash=excluded.code_hash, expires_at=excluded.expires_at, "
+                "attempts=excluded.attempts, created_at=excluded.created_at",
                 (email, _email_hash(code), now + 600, now),
             )
             conn.commit()
@@ -1114,7 +1304,10 @@ async def verify_login(request: Request):
         try:
             with _db_lock:
                 conn.execute(
-                    "INSERT OR REPLACE INTO users (email, name, school, role, created_at) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO users (email, name, school, role, created_at) VALUES (?, ?, ?, ?, ?) "
+                    "ON CONFLICT(email) DO UPDATE SET "
+                    "name=excluded.name, school=excluded.school, role=excluded.role, "
+                    "created_at=excluded.created_at",
                     (email, name, school, role, datetime.now(timezone.utc).isoformat()),
                 )
                 conn.commit()
@@ -1275,8 +1468,6 @@ async def withdraw_story(story_id: str, request: Request):
         raise HTTPException(status_code=400, detail="無效的故事 ID")
     if not storage_ready:
         raise HTTPException(status_code=503, detail="撤回服務未就緒")
-    if not any(story["id"] == story_id for story in all_stories()):
-        raise HTTPException(status_code=404, detail="找不到故事")
     try:
         body = await request.json()
     except Exception:
@@ -1287,13 +1478,36 @@ async def withdraw_story(story_id: str, request: Request):
     conn = _connect()
     try:
         with _db_lock:
+            existing_withdrawal = conn.execute(
+                "SELECT withdrawn_at FROM withdrawals WHERE story_id=?",
+                (story_id,),
+            ).fetchone()
+            if existing_withdrawal:
+                return {"ok": True, "id": story_id, "withdrawnAt": existing_withdrawal[0]}
+            record_row = conn.execute(
+                "SELECT data_json, has_audio, owner, scope FROM records WHERE id=?",
+                (story_id,),
+            ).fetchone()
+            record_story = (
+                _published_record_story(story_id, *record_row)
+                if record_row else None
+            )
+            if not any(story["id"] == story_id for story in all_stories()) and not record_story:
+                raise HTTPException(status_code=404, detail="找不到故事")
             conn.execute(
-                "INSERT OR IGNORE INTO withdrawals (story_id, withdrawn_at, by_user, reason) VALUES (?, ?, ?, ?)",
-                (story_id, now, who["email"], str(body.get("reason") or "")[:400]),
+                "INSERT INTO withdrawals (story_id, withdrawn_at, by_user, reason) VALUES (?, ?, ?, ?) "
+                "ON CONFLICT(story_id) DO NOTHING",
+                (story_id, now, who["email"] or "visitor", str(body.get("reason") or "")[:400]),
             )
             now = conn.execute(
                 "SELECT withdrawn_at FROM withdrawals WHERE story_id=?", (story_id,)
             ).fetchone()[0]
+            if record_story:
+                payload = _json_record(record_row[0])
+                payload["reviewStatus"] = "withdrawn"
+                payload["scope"] = "private"
+                payload["withdrawnAt"] = now
+                _save_contribution(conn, story_id, payload, "private")
             conn.commit()
     finally:
         conn.close()
@@ -1385,6 +1599,7 @@ async def health_check():
         "storage_ready": storage_ready,
         "storage_reason": storage_reason,
         "storage_mode": STORAGE_MODE,
+        "database_backend": backend_name(),
         "records_count": _records_count(),
         "ask_village_ready": story_count > 0,
         "story_count": story_count,

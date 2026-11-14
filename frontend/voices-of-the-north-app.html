@@ -8374,14 +8374,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   /**
    * 局部更新（狀態機轉換用），回傳更新後紀錄。
    */
-  function patchRecord(id, patch) {
+  function patchRecord(id, patch, options) {
     var rec = getRecord(id);
     if (!rec) return null;
     var merged = Object.assign({}, rec, patch, { updatedAt: Date.now() });
     var updated = saveRecord(merged).record;
     U.emit('vtn:record-updated', {
       record: updated,
-      patch: Object.assign({}, patch || {})
+      patch: Object.assign({}, patch || {}),
+      suppressSync: !!(options && options.suppressSync)
     });
     return updated;
   }
@@ -11397,6 +11398,18 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     }
   }
 
+  function refreshFromServer() {
+    if (!VTN.api || !VTN.api.stories) return Promise.resolve(false);
+    return VTN.api.stories().then(function (stories) {
+      if (!Array.isArray(stories) || !stories.length) return false;
+      DATA.stories = stories;
+      render();
+      return true;
+    }).catch(function () {
+      return false;
+    });
+  }
+
   function toggleOverview(force) {
     setMode(typeof force === 'boolean' ? (force ? 'map' : 'list') : (state.mode === 'list' ? 'map' : 'list'));
   }
@@ -11499,6 +11512,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     if (VTN.sheet) VTN.sheet.init();
 
     render();
+    refreshFromServer();
   }
 
   VTN.stories = {
@@ -11507,6 +11521,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     all: all,
     get: get,
     visible: visible,
+    refreshFromServer: refreshFromServer,
     filtered: filtered,
     inBbox: inBbox,
     queryContext: queryContext,
@@ -14435,7 +14450,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
                 requestedScope: updated.requestedScope || scopeSelect.value,
                 reviewStatus: updated.reviewStatus || 'submitted',
                 submittedAt: updated.submittedAt
-              });
+              }, { suppressSync: true });
               VTN.ui.toast(t('review.submitted'), 'success');
               ctx.close('submitted');
               renderAll();
@@ -14474,6 +14489,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       ).then(function () {
         VTN.ui.toast(t(approved ? 'review.approvedToast' : 'review.rejectedToast'), 'success');
         pullAndRender();
+        if (VTN.stories && VTN.stories.refreshFromServer) VTN.stories.refreshFromServer();
       }).catch(function () {
         VTN.ui.toast(t('review.failed'), 'error');
       });
@@ -16952,7 +16968,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   };
 
   function recordNeedsServerSync(detail) {
-    if (!detail || !detail.record || detail.record.sync !== 'synced') return false;
+    if (!detail || detail.suppressSync || !detail.record || detail.record.sync !== 'synced') return false;
     var keys = Object.keys(detail.patch || {});
     if (!keys.length) return false;
     return keys.some(function (key) { return !SYNC_ONLY_KEYS[key]; });

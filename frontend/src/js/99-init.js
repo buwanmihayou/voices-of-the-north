@@ -42,7 +42,7 @@
   };
 
   function recordNeedsServerSync(detail) {
-    if (!detail || !detail.record || detail.record.sync !== 'synced') return false;
+    if (!detail || detail.suppressSync || !detail.record || detail.record.sync !== 'synced') return false;
     var keys = Object.keys(detail.patch || {});
     if (!keys.length) return false;
     return keys.some(function (key) { return !SYNC_ONLY_KEYS[key]; });

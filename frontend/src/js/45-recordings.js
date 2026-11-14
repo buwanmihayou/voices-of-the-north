@@ -258,7 +258,7 @@
                 requestedScope: updated.requestedScope || scopeSelect.value,
                 reviewStatus: updated.reviewStatus || 'submitted',
                 submittedAt: updated.submittedAt
-              });
+              }, { suppressSync: true });
               VTN.ui.toast(t('review.submitted'), 'success');
               ctx.close('submitted');
               renderAll();
@@ -297,6 +297,7 @@
       ).then(function () {
         VTN.ui.toast(t(approved ? 'review.approvedToast' : 'review.rejectedToast'), 'success');
         pullAndRender();
+        if (VTN.stories && VTN.stories.refreshFromServer) VTN.stories.refreshFromServer();
       }).catch(function () {
         VTN.ui.toast(t('review.failed'), 'error');
       });

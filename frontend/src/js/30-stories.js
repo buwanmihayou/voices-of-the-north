@@ -1397,6 +1397,18 @@
     }
   }
 
+  function refreshFromServer() {
+    if (!VTN.api || !VTN.api.stories) return Promise.resolve(false);
+    return VTN.api.stories().then(function (stories) {
+      if (!Array.isArray(stories) || !stories.length) return false;
+      DATA.stories = stories;
+      render();
+      return true;
+    }).catch(function () {
+      return false;
+    });
+  }
+
   function toggleOverview(force) {
     setMode(typeof force === 'boolean' ? (force ? 'map' : 'list') : (state.mode === 'list' ? 'map' : 'list'));
   }
@@ -1499,6 +1511,7 @@
     if (VTN.sheet) VTN.sheet.init();
 
     render();
+    refreshFromServer();
   }
 
   VTN.stories = {
@@ -1507,6 +1520,7 @@
     all: all,
     get: get,
     visible: visible,
+    refreshFromServer: refreshFromServer,
     filtered: filtered,
     inBbox: inBbox,
     queryContext: queryContext,

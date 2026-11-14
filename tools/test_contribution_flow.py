@@ -75,6 +75,7 @@ def main() -> None:
                     "formalText": "A synthetic transcript for review.",
                     "rawText": "A synthetic transcript for review.",
                     "words": [{"word": "synthetic", "start": 0, "end": 0.2, "confidence": None}],
+                    "location": {"area": "Yuen Long", "lat": 22.4445, "lng": 114.015, "radiusM": 800},
                     "qaList": [],
                     "consentRef": "CONSENT-2026-11-v2",
                     "contributionFlow": True,
@@ -114,6 +115,31 @@ def main() -> None:
         )
         guest_list = client.get("/api/records").json()["records"]
         check("guest cannot discover pending record", all(r["id"] != "CON-OWNER-001" for r in guest_list))
+
+        forged_create = client.post(
+            "/api/records",
+            headers=auth_a,
+            json={
+                "id": "CON-FORGED-003",
+                "status": "done",
+                "source": "live",
+                "title": "Forged publication attempt",
+                "formalText": "This must stay private.",
+                "scope": "public",
+                "contributionFlow": False,
+                "reviewStatus": "approved",
+                "reviewedBy": "attacker@example.test",
+            },
+        )
+        check("forged moderation fields are accepted only as private ready record", (
+            forged_create.status_code == 200
+            and forged_create.json()["record"]["scope"] == "private"
+            and forged_create.json()["record"]["reviewStatus"] == "ready"
+        ), forged_create.text)
+        check(
+            "guest cannot read forged public record",
+            client.get("/api/records/CON-FORGED-003").status_code == 403,
+        )
 
         check(
             "submission requires transcript confirmation",
@@ -155,12 +181,29 @@ def main() -> None:
         check("owner submits pending story", submitted.status_code == 200, submitted.text)
         check("submitted story remains private", submitted.json()["record"]["scope"] == "private")
         check("submitted review status", submitted.json()["record"]["reviewStatus"] == "submitted")
+        submitted_at = submitted.json()["record"]["submittedAt"]
+        resync = dict(submitted.json()["record"])
+        resync["scope"] = "public"
+        resync["contributionFlow"] = False
+        resync["reviewStatus"] = "approved"
+        resync["reviewedBy"] = "attacker@example.test"
+        resync["iconKey"] = "oral"
+        resync.pop("audioUrl", None)
+        resync["status"] = "pending_review"
+        synced = client.post("/api/records", headers=auth_a, json=resync)
+        check("generic sync accepts allowed metadata update", synced.status_code == 200, synced.text)
+        check("generic sync preserves submitted state", (
+            synced.json()["record"]["reviewStatus"] == "submitted"
+            and synced.json()["record"]["submittedAt"] == submitted_at
+            and synced.json()["record"]["scope"] == "private"
+            and synced.json()["record"]["reviewedBy"] is None
+        ), synced.text)
         check(
             "non-reviewer cannot inspect submission queue",
             client.get("/api/contributions", headers=auth_b).status_code == 403,
         )
         queue = client.get("/api/contributions", headers=auth_admin)
-        check("reviewer sees pending queue", queue.status_code == 200 and queue.json()["count"] == 1)
+        check("reviewer still sees pending queue after sync", queue.status_code == 200 and queue.json()["count"] == 1)
 
         approved = client.post(
             "/api/contributions/CON-OWNER-001/review",
@@ -181,6 +224,110 @@ def main() -> None:
         check(
             "guest can play approved public audio",
             client.get("/api/records/CON-OWNER-001/audio").status_code == 200,
+        )
+        catalog = client.get(
+            "/api/stories",
+            params={"bbox": "113.8,22.2,114.5,22.6"},
+        ).json()["visibleIds"]
+        check("approved record enters public catalog and map", "CON-OWNER-001" in catalog)
+        answer = client.post(
+            "/api/ask-village",
+            json={
+                "question": "Synthetic private contribution",
+                "storyIds": ["CON-OWNER-001"],
+            },
+        ).json()
+        check("approved record is searchable by Ask the Village", (
+            answer["inScope"] is True
+            and answer["storyId"] == "CON-OWNER-001"
+            and len(answer["sources"]) >= 1
+        ), str(answer))
+
+        withdrawn = client.post(
+            "/api/stories/CON-OWNER-001/withdraw",
+            headers=auth_admin,
+            json={"reason": "Synthetic withdrawal"},
+        )
+        check("reviewer can withdraw approved record", withdrawn.status_code == 200, withdrawn.text)
+        repeated_withdrawal = client.post(
+            "/api/stories/CON-OWNER-001/withdraw",
+            headers=auth_admin,
+            json={},
+        )
+        check("contribution withdrawal preserves first timestamp", (
+            repeated_withdrawal.json()["withdrawnAt"] == withdrawn.json()["withdrawnAt"]
+        ))
+        check(
+            "withdrawn contribution leaves catalog",
+            "CON-OWNER-001" not in client.get("/api/stories").json()["visibleIds"],
+        )
+        check(
+            "withdrawn contribution audio is blocked",
+            client.get("/api/records/CON-OWNER-001/audio").status_code == 403,
+        )
+
+        client.post(
+            "/api/records",
+            headers=auth_a,
+            json={
+                "id": "CON-INVALID-004",
+                "status": "done",
+                "source": "live",
+                "title": "Boolean validation",
+                "formalText": "Boolean validation",
+                "consentRef": "CONSENT-2026-11-v2",
+                "contributionFlow": True,
+                "requestedScope": "public",
+            },
+        )
+        client.post(
+            "/api/contributions/CON-INVALID-004/submit",
+            headers=auth_a,
+            json={
+                "transcriptConfirmed": True,
+                "requestedScope": "public",
+                "policyVersion": "CONSENT-2026-11-v2",
+            },
+        )
+        check(
+            "string false is not accepted as approval",
+            client.post(
+                "/api/contributions/CON-INVALID-004/review",
+                headers=auth_admin,
+                json={"approved": "false", "approvedScope": "public"},
+            ).status_code == 400,
+        )
+
+        client.post(
+            "/api/records",
+            headers=auth_a,
+            json={
+                "id": "CON-SCOPE-005",
+                "status": "done",
+                "source": "live",
+                "title": "Private scope",
+                "formalText": "Private scope",
+                "consentRef": "CONSENT-2026-11-v2",
+                "contributionFlow": True,
+                "requestedScope": "private",
+            },
+        )
+        client.post(
+            "/api/contributions/CON-SCOPE-005/submit",
+            headers=auth_a,
+            json={
+                "transcriptConfirmed": True,
+                "requestedScope": "private",
+                "policyVersion": "CONSENT-2026-11-v2",
+            },
+        )
+        check(
+            "reviewer cannot broaden private intent",
+            client.post(
+                "/api/contributions/CON-SCOPE-005/review",
+                headers=auth_admin,
+                json={"approved": True, "approvedScope": "public"},
+            ).status_code == 409,
         )
 
         create_record("CON-REJECT-002", requested_scope="community")
