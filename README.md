@@ -141,6 +141,7 @@ python -m http.server 8421 --directory frontend
 ## 6. AI 行為紅線
 
 - 只根據**已授權**逐字稿回答，答案必附可點擊時間戳（`#stories?story=YL-001&t=17`）。
+- **檢索語言限制**：目前按逐字稿段落的人工關鍵詞及別名匹配，並非通用跨語言語意搜尋。英文輸入示例 `What was Yuen Long like when you were a child?` 由 `Yuen Long` 別名命中 `YL-001` 的 `00:00` 段落；伺服器及離線前端共用此語料。未收錄的英文別名可能無命中；答案保留逐字稿原語言，不自動翻譯。
 - 範圍外一律回覆「錄製的故事中未包含此資訊」，不引用外部知識。
 - 取不到逐詞置信度時回傳 `null`，介面顯示「未能取得置信度」，不造假數字。
 - AI 狀態（在線 / 降級 / 離線）在介面明示，不再靜默降級；降級時答案會標明「只用本機已授權語料產生」。
@@ -151,6 +152,7 @@ python -m http.server 8421 --directory frontend
 python tools/test_records_api.py    # 錄音 API 與權限（歷史腳本，與現行分享範圍契約待對齊）
 python tools/test_lab_api.py        # 實驗室 API
 python tools/audit_frontend.mjs     # 前端靜態檢查（需 node）
+python -X utf8 tools/verify/english_retrieval.py # 英文示例、中英文出處一致、範圍與拒答（需 node）
 ```
 
 評審修復的回歸腳本放在 `tools/verify/`（`douglas_review.py`、`waveform.py`、`bbox_api.py`、`external_waveforms.py`）。地圖／問答的視口、篩選、空集合、授權、拒答與離線降級另以 `python tools/verify/story_scope.py` 驗證；淺色主題、首次引導、現有故事／三語與歷史 Word 腳本以 `python tools/verify/light_onboarding.py` 驗證。測試使用隔離資料庫，不改動現有錄音。
