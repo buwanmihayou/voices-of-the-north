@@ -25,3 +25,9 @@ python -m uvicorn server:app --host 127.0.0.1 --port 8000
 Open `http://127.0.0.1:8000/voices-of-the-north-app.html` and use the home-page assistant with the full corpus selected. Both questions above should return YL-001 at 00:00. Click the source to open its transcript. For offline fallback, load `?api=http://127.0.0.1:8767` while that port has no server and submit a fresh question. `What was your childhood like?` should still refuse.
 
 At capture time the fix was a draft, not merged or deployed. The live service still had the reproduced issue. The coordination comment requests updated heads and test steps; it does not record Boris's agreement.
+
+## Local integration candidate
+
+Branch `codex/local-integration-20261114` combines PR #15 at `a53dcc9` with PR #14 at `32b5f98`. The original repository checkout now uses this branch; local `main` was fast-forwarded to remote main `a6b932a` before integration.
+
+See the [PR #15 findings and reproduction steps](pr15-integration-review.md) and [combined local validation](local-integration-validation.md). The known content-review, owner privacy narrowing and reviewer-queue findings remain open. This branch is a candidate for further work; staging acceptance is outstanding.

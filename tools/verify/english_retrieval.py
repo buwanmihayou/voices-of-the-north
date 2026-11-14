@@ -79,7 +79,9 @@ def backend_checks(data):
             ("unauthorized", {**story, "authorized": False}),
             ("private", {**story, "scope": "private", "owner": "other@example.test"}),
         ):
-            with patch("story_corpus.all_stories", return_value=[replacement]):
+            # The publication bridge reads the imported catalog function too.
+            with (patch("story_corpus.all_stories", return_value=[replacement]),
+                  patch.object(server, "all_stories", return_value=[replacement])):
                 result = ask(storyIds=["YL-001"])
                 check(f"API cannot restore {label} YL-001 by ID",
                       is_refusal(result) and result["visibleIds"] == [], result)
