@@ -418,6 +418,12 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # 共用：分享範圍與紀錄擁有權
 # ---------------------------------------------------------------------------
 SCOPES = {"private", "family", "community", "public"}
+SCOPE_ORDER = {"private": 0, "family": 1, "community": 2, "public": 3}
+REVIEW_SENSITIVE_FIELDS = {
+    "rawText", "formalText", "segments", "words", "qaList", "durationSec",
+    "durationSource", "mime", "teller", "location", "villageKey", "year",
+    "storyType", "topicKeys", "eraKey", "mood", "languageKey",
+}
 
 
 def _can_manage_record(owner: str, who: dict) -> bool:
@@ -528,6 +534,15 @@ def _json_record(data_json: str) -> dict:
         return payload if isinstance(payload, dict) else {}
     except Exception:
         return {}
+
+
+def _content_changed(previous: dict, incoming: dict, has_new_audio: bool) -> bool:
+    if has_new_audio:
+        return True
+    for key in REVIEW_SENSITIVE_FIELDS:
+        if key in incoming and incoming.get(key) != previous.get(key):
+            return True
+    return False
 
 
 def _save_contribution(conn, rid: str, payload: dict, scope: str) -> None:
@@ -754,6 +769,31 @@ async def create_record(request: Request):
                 clean.pop("reviewedAt", None)
                 clean.pop("reviewNote", None)
             clean["owner"] = owner
+            content_changed = (
+                _content_changed(previous, payload, bool(audio_bytes))
+                if existing else False
+            )
+            previous_review = str(previous.get("reviewStatus") or "") if existing else ""
+            if existing and content_changed and previous_review in ("submitted", "approved"):
+                scope = "private"
+                clean["scope"] = "private"
+                clean["reviewStatus"] = "ready"
+                clean.pop("submittedAt", None)
+                clean.pop("reviewedBy", None)
+                clean.pop("reviewedAt", None)
+                clean.pop("reviewNote", None)
+            elif (
+                existing and previous_review == "approved"
+                and SCOPE_ORDER[requested_scope] < SCOPE_ORDER.get(scope, SCOPE_ORDER["public"])
+            ):
+                scope = requested_scope
+                clean["scope"] = scope
+                clean["requestedScope"] = requested_scope
+                clean["reviewStatus"] = "ready"
+                clean.pop("submittedAt", None)
+                clean.pop("reviewedBy", None)
+                clean.pop("reviewedAt", None)
+                clean.pop("reviewNote", None)
             audio_path, has_audio = "", 0
             if audio_bytes:
                 audio_path = str(RECORDS_DIR / (rid + _ext_of_mime(mime)))

@@ -243,6 +243,82 @@ def main() -> None:
             and len(answer["sources"]) >= 1
         ), str(answer))
 
+        create_record("CON-EDIT-006")
+        client.post(
+            "/api/contributions/CON-EDIT-006/submit",
+            headers=auth_a,
+            json={
+                "transcriptConfirmed": True,
+                "requestedScope": "public",
+                "policyVersion": "CONSENT-2026-11-v2",
+            },
+        )
+        client.post(
+            "/api/contributions/CON-EDIT-006/review",
+            headers=auth_admin,
+            json={"approved": True, "approvedScope": "public"},
+        )
+        metadata_edit = dict(client.get("/api/records/CON-EDIT-006", headers=auth_a).json())
+        metadata_edit["iconKey"] = "oral"
+        metadata_kept = client.post("/api/records", headers=auth_a, json=metadata_edit)
+        check("harmless metadata edit keeps publication", (
+            metadata_kept.status_code == 200
+            and metadata_kept.json()["record"]["scope"] == "public"
+            and metadata_kept.json()["record"]["reviewStatus"] == "approved"
+        ), metadata_kept.text)
+        content_edit = dict(metadata_kept.json()["record"])
+        content_edit.pop("audioUrl", None)
+        content_edit["formalText"] = "reviewescape replacement transcript"
+        content_edit["rawText"] = "reviewescape replacement transcript"
+        content_edit["words"] = [{"word": "reviewescape", "start": 0, "end": 0.3, "confidence": None}]
+        content_edit["audioBase64"] = synthetic_wav_base64(0.3)
+        requeued = client.post("/api/records", headers=auth_a, json=content_edit)
+        check("content replacement returns approved item to review", (
+            requeued.status_code == 200
+            and requeued.json()["record"]["scope"] == "private"
+            and requeued.json()["record"]["reviewStatus"] == "ready"
+            and requeued.json()["record"].get("reviewedBy") is None
+        ), requeued.text)
+        check(
+            "guest cannot read unreviewed replacement",
+            client.get("/api/records/CON-EDIT-006").status_code == 403,
+        )
+        check(
+            "unreviewed replacement leaves public catalog",
+            "CON-EDIT-006" not in client.get("/api/stories").json()["visibleIds"],
+        )
+
+        create_record("CON-NARROW-007")
+        client.post(
+            "/api/contributions/CON-NARROW-007/submit",
+            headers=auth_a,
+            json={
+                "transcriptConfirmed": True,
+                "requestedScope": "public",
+                "policyVersion": "CONSENT-2026-11-v2",
+            },
+        )
+        client.post(
+            "/api/contributions/CON-NARROW-007/review",
+            headers=auth_admin,
+            json={"approved": True, "approvedScope": "public"},
+        )
+        narrow = dict(client.get("/api/records/CON-NARROW-007", headers=auth_a).json())
+        narrow.pop("audioUrl", None)
+        narrow["scope"] = "private"
+        narrow["requestedScope"] = "private"
+        narrowed = client.post("/api/records", headers=auth_a, json=narrow)
+        check("owner privacy narrowing is applied", (
+            narrowed.status_code == 200
+            and narrowed.json()["record"]["scope"] == "private"
+            and narrowed.json()["record"]["reviewStatus"] == "ready"
+        ), narrowed.text)
+        check(
+            "narrowed record is not public",
+            client.get("/api/records/CON-NARROW-007").status_code == 403
+            and "CON-NARROW-007" not in client.get("/api/stories").json()["visibleIds"],
+        )
+
         withdrawn = client.post(
             "/api/stories/CON-OWNER-001/withdraw",
             headers=auth_admin,

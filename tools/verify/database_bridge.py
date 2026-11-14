@@ -102,6 +102,7 @@ def main() -> None:
         store_js = (ROOT / "frontend/src/js/10-store.js").read_text(encoding="utf-8")
         recorder_js = (ROOT / "frontend/src/js/40-recorder.js").read_text(encoding="utf-8")
         recordings_js = (ROOT / "frontend/src/js/45-recordings.js").read_text(encoding="utf-8")
+        stories_js = (ROOT / "frontend/src/js/30-stories.js").read_text(encoding="utf-8")
         init_js = (ROOT / "frontend/src/js/99-init.js").read_text(encoding="utf-8")
         bundled = (ROOT / "frontend/voices-of-the-north-app.html").read_text(encoding="utf-8")
         check("frontend create/pull/delete API exists", all(
@@ -118,6 +119,15 @@ def main() -> None:
             "syncToServer(updated)" in recorder_js and "syncToServer(saved.record)" in recorder_js,
         )
         check("approved stories can refresh from the server", "refreshFromServer" in bundled)
+        check(
+            "reviewer queue uses the contribution API",
+            "contributions.list('submitted')" in recordings_js
+            and "reviewOnly: !!rec._reviewOnly" in recordings_js,
+        )
+        check(
+            "empty server catalog clears local stories",
+            "if (!Array.isArray(stories)) return false;" in stories_js,
+        )
         check("startup pulls remote database records", "pullRemoteRecords" in init_js)
         check("bundled frontend contains database bridge", "syncIfSynced" in bundled and "/api/records" in bundled)
         print("\nALL PASSED: completed-record frontend ↔ database bridge")

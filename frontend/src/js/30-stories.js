@@ -1400,7 +1400,7 @@
   function refreshFromServer() {
     if (!VTN.api || !VTN.api.stories) return Promise.resolve(false);
     return VTN.api.stories().then(function (stories) {
-      if (!Array.isArray(stories) || !stories.length) return false;
+      if (!Array.isArray(stories)) return false;
       DATA.stories = stories;
       render();
       return true;

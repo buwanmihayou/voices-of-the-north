@@ -13,6 +13,8 @@
 
   var expanded = {};
   var currentTab = 'drafts';
+  var reviewerQueue = [];
+  var reviewerQueueLoading = false;
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
 
@@ -89,7 +91,7 @@
     return { cls: 'vtn-rec-card__icon', icon: 'fa-file-lines' };
   }
 
-  function buildCard(rec) {
+  function buildCard(rec, options) {
     var state = rec.status;
     var card = U.node('article', {
       class: 'vtn-rec-card' + (state === 'pending' ? ' is-pending' : ''),
@@ -134,9 +136,9 @@
 
     if (state === 'draft') renderDraftBody(rec, body);
     else if (state === 'pending') renderPendingBody(rec, body);
-    else renderDoneBody(rec, body);
+    else renderDoneBody(rec, body, options);
 
-    if (VTN.recIcons) {
+    if (VTN.recIcons && !(options && options.reviewOnly)) {
       body.appendChild(VTN.recIcons.build(rec.iconKey, function (key) {
         VTN.store.records.patch(rec.id, { iconKey: key });
         VTN.ui.toast(t('rec.iconSaved'), 'success');
@@ -277,6 +279,7 @@
   function pullAndRender() {
     VTN.api.records.pull().then(function () {
       renderAll();
+      return loadReviewerQueue();
     }).catch(function () { /* 保留本機狀態 */ });
   }
 
@@ -304,7 +307,8 @@
     });
   }
 
-  function renderDoneBody(rec, body) {
+  function renderDoneBody(rec, body, options) {
+    var reviewOnly = !!(options && options.reviewOnly);
     var tags = U.node('div', { class: 'vtn-rec-card__tags' });
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive') }));
     tags.appendChild(U.node('span', {
@@ -384,28 +388,30 @@
       body.appendChild(U.node('p', { class: 'vtn-rec-note', text: t('rec.noWords') }));
     }
 
-    var actions = U.node('div', { class: 'vtn-rec-card__actions' });
-    var scopeBtn = U.node('button', { class: 'vtn-rec-card__retry', type: 'button', text: t('story.scope') });
-    scopeBtn.addEventListener('click', function () {
-      VTN.stories.openScopeDialog(rec);
-      /* 範圍改動會經 store 觸發刷新 */
-    });
-    var exportBtn = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('export.one') });
-    exportBtn.addEventListener('click', function () { exportRecord(rec); });
-    actions.appendChild(scopeBtn);
-    actions.appendChild(exportBtn);
-    body.appendChild(actions);
+    if (!reviewOnly) {
+      var actions = U.node('div', { class: 'vtn-rec-card__actions' });
+      var scopeBtn = U.node('button', { class: 'vtn-rec-card__retry', type: 'button', text: t('story.scope') });
+      scopeBtn.addEventListener('click', function () {
+        VTN.stories.openScopeDialog(rec);
+        /* 範圍改動會經 store 觸發刷新 */
+      });
+      var exportBtn = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('export.one') });
+      exportBtn.addEventListener('click', function () { exportRecord(rec); });
+      actions.appendChild(scopeBtn);
+      actions.appendChild(exportBtn);
+      body.appendChild(actions);
 
-    var actions2 = U.node('div', { class: 'vtn-rec-card__actions' });
-    var correct = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.correct') });
-    correct.addEventListener('click', function () { if (VTN.account) VTN.account.openCorrection(rec); });
-    var withdraw = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.withdraw') });
-    withdraw.addEventListener('click', function () { if (VTN.account) VTN.account.openWithdraw(rec); });
-    actions2.appendChild(correct);
-    actions2.appendChild(withdraw);
-    body.appendChild(actions2);
+      var actions2 = U.node('div', { class: 'vtn-rec-card__actions' });
+      var correct = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.correct') });
+      correct.addEventListener('click', function () { if (VTN.account) VTN.account.openCorrection(rec); });
+      var withdraw = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.withdraw') });
+      withdraw.addEventListener('click', function () { if (VTN.account) VTN.account.openWithdraw(rec); });
+      actions2.appendChild(correct);
+      actions2.appendChild(withdraw);
+      body.appendChild(actions2);
+    }
 
-    if (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected') {
+    if (!reviewOnly && (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected')) {
       var reviewActions = U.node('div', { class: 'vtn-rec-card__actions' });
       var submit = U.node('button', {
         class: 'vtn-rec-card__retry', type: 'button', text: t('review.submit')
@@ -430,11 +436,13 @@
       body.appendChild(moderation);
     }
 
-    var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
-    var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
-    del.addEventListener('click', function () { removeRecord(rec); });
-    actions3.appendChild(del);
-    body.appendChild(actions3);
+    if (!reviewOnly) {
+      var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
+      var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
+      del.addEventListener('click', function () { removeRecord(rec); });
+      actions3.appendChild(del);
+      body.appendChild(actions3);
+    }
   }
 
   /* =========================================================================
@@ -533,7 +541,9 @@
     var empty = document.getElementById(emptyId);
     if (!host) return;
     host.textContent = '';
-    list.forEach(function (rec) { host.appendChild(buildCard(rec)); });
+    list.forEach(function (rec) {
+      host.appendChild(buildCard(rec, { reviewOnly: !!rec._reviewOnly }));
+    });
     if (empty) empty.hidden = list.length > 0;
     var panel = host.parentNode;
     if (panel) panel.classList.toggle('has-list', list.length > 0);
@@ -546,6 +556,14 @@
       pending: all.filter(function (r) { return r.status === 'pending'; }),
       done: all.filter(function (r) { return r.status === 'done'; })
     };
+    if (VTN.store.role() === 'admin') {
+      var byId = {};
+      groups.done.forEach(function (rec) { byId[rec.id] = rec; });
+      reviewerQueue.forEach(function (rec) {
+        if (!byId[rec.id]) byId[rec.id] = Object.assign({}, rec, { _reviewOnly: true });
+      });
+      groups.done = Object.keys(byId).map(function (id) { return byId[id]; });
+    }
 
     renderList('recListDrafts', 'emptyDrafts', groups.drafts, 'draft');
     renderList('recListPending', 'emptyPending', groups.pending, 'pending');
@@ -580,6 +598,24 @@
     }));
   }
 
+  function loadReviewerQueue() {
+    if (VTN.store.role() !== 'admin' || !VTN.api.contributions || reviewerQueueLoading) {
+      if (VTN.store.role() !== 'admin') reviewerQueue = [];
+      return Promise.resolve(reviewerQueue);
+    }
+    reviewerQueueLoading = true;
+    return VTN.api.contributions.list('submitted').then(function (data) {
+      reviewerQueue = (data && data.records) || [];
+      renderAll();
+      return reviewerQueue;
+    }).catch(function () {
+      return reviewerQueue;
+    }).then(function (result) {
+      reviewerQueueLoading = false;
+      return result;
+    });
+  }
+
   /* =========================================================================
    * 5. 深鏈與事件
    * ======================================================================= */
@@ -604,7 +640,8 @@
   function init() {
     initTabs();
     renderAll();
-    var onStore = function () { renderAll(); };
+    loadReviewerQueue();
+    var onStore = function () { renderAll(); loadReviewerQueue(); };
     U.on('vtn:store-changed', onStore);
     U.on('vtn:session-changed', onStore);
     window.addEventListener('storage', function (event) {

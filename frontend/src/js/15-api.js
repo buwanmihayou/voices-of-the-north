@@ -155,10 +155,15 @@
     return request('/api/records', { method: 'POST', body: payload, timeout: 30000 })
       .then(function (data) {
         var patch = { sync: 'synced', syncAt: Date.now(), syncError: null };
-        if (data && data.record && data.record.audioUrl) {
-          patch.audioUrl = tokenizeAudioUrl(data.record.audioUrl);
+        var serverRecord = data && data.record || {};
+        if (serverRecord.audioUrl) {
+          patch.audioUrl = tokenizeAudioUrl(serverRecord.audioUrl);
         }
-        return VTN.store.records.patch(rec.id, patch);
+        ['scope', 'requestedScope', 'reviewStatus', 'submittedAt', 'reviewedBy', 'reviewedAt', 'reviewNote']
+          .forEach(function (key) {
+            if (Object.prototype.hasOwnProperty.call(serverRecord, key)) patch[key] = serverRecord[key];
+          });
+        return VTN.store.records.patch(rec.id, patch, { suppressSync: true });
       });
   }
 
@@ -204,7 +209,12 @@
 
   function listContributions(status) {
     var suffix = status ? '?status=' + encodeURIComponent(status) : '';
-    return request('/api/contributions' + suffix, { timeout: 12000 });
+    return request('/api/contributions' + suffix, { timeout: 12000 }).then(function (data) {
+      ((data && data.records) || []).forEach(function (rec) {
+        if (rec.audioUrl) rec.audioUrl = tokenizeAudioUrl(rec.audioUrl);
+      });
+      return data;
+    });
   }
 
   function reviewContribution(id, approved, approvedScope, note) {

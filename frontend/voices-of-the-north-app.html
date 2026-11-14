@@ -9008,10 +9008,15 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     return request('/api/records', { method: 'POST', body: payload, timeout: 30000 })
       .then(function (data) {
         var patch = { sync: 'synced', syncAt: Date.now(), syncError: null };
-        if (data && data.record && data.record.audioUrl) {
-          patch.audioUrl = tokenizeAudioUrl(data.record.audioUrl);
+        var serverRecord = data && data.record || {};
+        if (serverRecord.audioUrl) {
+          patch.audioUrl = tokenizeAudioUrl(serverRecord.audioUrl);
         }
-        return VTN.store.records.patch(rec.id, patch);
+        ['scope', 'requestedScope', 'reviewStatus', 'submittedAt', 'reviewedBy', 'reviewedAt', 'reviewNote']
+          .forEach(function (key) {
+            if (Object.prototype.hasOwnProperty.call(serverRecord, key)) patch[key] = serverRecord[key];
+          });
+        return VTN.store.records.patch(rec.id, patch, { suppressSync: true });
       });
   }
 
@@ -9057,7 +9062,12 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   function listContributions(status) {
     var suffix = status ? '?status=' + encodeURIComponent(status) : '';
-    return request('/api/contributions' + suffix, { timeout: 12000 });
+    return request('/api/contributions' + suffix, { timeout: 12000 }).then(function (data) {
+      ((data && data.records) || []).forEach(function (rec) {
+        if (rec.audioUrl) rec.audioUrl = tokenizeAudioUrl(rec.audioUrl);
+      });
+      return data;
+    });
   }
 
   function reviewContribution(id, approved, approvedScope, note) {
@@ -11401,7 +11411,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function refreshFromServer() {
     if (!VTN.api || !VTN.api.stories) return Promise.resolve(false);
     return VTN.api.stories().then(function (stories) {
-      if (!Array.isArray(stories) || !stories.length) return false;
+      if (!Array.isArray(stories)) return false;
       DATA.stories = stories;
       render();
       return true;
@@ -14205,6 +14215,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
   var expanded = {};
   var currentTab = 'drafts';
+  var reviewerQueue = [];
+  var reviewerQueueLoading = false;
 
   function t(key, vars) { return VTN.i18n.t(key, vars); }
 
@@ -14281,7 +14293,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     return { cls: 'vtn-rec-card__icon', icon: 'fa-file-lines' };
   }
 
-  function buildCard(rec) {
+  function buildCard(rec, options) {
     var state = rec.status;
     var card = U.node('article', {
       class: 'vtn-rec-card' + (state === 'pending' ? ' is-pending' : ''),
@@ -14326,9 +14338,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
 
     if (state === 'draft') renderDraftBody(rec, body);
     else if (state === 'pending') renderPendingBody(rec, body);
-    else renderDoneBody(rec, body);
+    else renderDoneBody(rec, body, options);
 
-    if (VTN.recIcons) {
+    if (VTN.recIcons && !(options && options.reviewOnly)) {
       body.appendChild(VTN.recIcons.build(rec.iconKey, function (key) {
         VTN.store.records.patch(rec.id, { iconKey: key });
         VTN.ui.toast(t('rec.iconSaved'), 'success');
@@ -14469,6 +14481,7 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function pullAndRender() {
     VTN.api.records.pull().then(function () {
       renderAll();
+      return loadReviewerQueue();
     }).catch(function () { /* 保留本機狀態 */ });
   }
 
@@ -14496,7 +14509,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     });
   }
 
-  function renderDoneBody(rec, body) {
+  function renderDoneBody(rec, body, options) {
+    var reviewOnly = !!(options && options.reviewOnly);
     var tags = U.node('div', { class: 'vtn-rec-card__tags' });
     tags.appendChild(U.node('span', { class: 'vtn-rec-pill', text: rec.source === 'demo' ? t('rec.sourceDemo') : t('rec.sourceLive') }));
     tags.appendChild(U.node('span', {
@@ -14576,28 +14590,30 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       body.appendChild(U.node('p', { class: 'vtn-rec-note', text: t('rec.noWords') }));
     }
 
-    var actions = U.node('div', { class: 'vtn-rec-card__actions' });
-    var scopeBtn = U.node('button', { class: 'vtn-rec-card__retry', type: 'button', text: t('story.scope') });
-    scopeBtn.addEventListener('click', function () {
-      VTN.stories.openScopeDialog(rec);
-      /* 範圍改動會經 store 觸發刷新 */
-    });
-    var exportBtn = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('export.one') });
-    exportBtn.addEventListener('click', function () { exportRecord(rec); });
-    actions.appendChild(scopeBtn);
-    actions.appendChild(exportBtn);
-    body.appendChild(actions);
+    if (!reviewOnly) {
+      var actions = U.node('div', { class: 'vtn-rec-card__actions' });
+      var scopeBtn = U.node('button', { class: 'vtn-rec-card__retry', type: 'button', text: t('story.scope') });
+      scopeBtn.addEventListener('click', function () {
+        VTN.stories.openScopeDialog(rec);
+        /* 範圍改動會經 store 觸發刷新 */
+      });
+      var exportBtn = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('export.one') });
+      exportBtn.addEventListener('click', function () { exportRecord(rec); });
+      actions.appendChild(scopeBtn);
+      actions.appendChild(exportBtn);
+      body.appendChild(actions);
 
-    var actions2 = U.node('div', { class: 'vtn-rec-card__actions' });
-    var correct = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.correct') });
-    correct.addEventListener('click', function () { if (VTN.account) VTN.account.openCorrection(rec); });
-    var withdraw = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.withdraw') });
-    withdraw.addEventListener('click', function () { if (VTN.account) VTN.account.openWithdraw(rec); });
-    actions2.appendChild(correct);
-    actions2.appendChild(withdraw);
-    body.appendChild(actions2);
+      var actions2 = U.node('div', { class: 'vtn-rec-card__actions' });
+      var correct = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.correct') });
+      correct.addEventListener('click', function () { if (VTN.account) VTN.account.openCorrection(rec); });
+      var withdraw = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('story.withdraw') });
+      withdraw.addEventListener('click', function () { if (VTN.account) VTN.account.openWithdraw(rec); });
+      actions2.appendChild(correct);
+      actions2.appendChild(withdraw);
+      body.appendChild(actions2);
+    }
 
-    if (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected') {
+    if (!reviewOnly && (rec.reviewStatus === 'ready' || rec.reviewStatus === 'rejected')) {
       var reviewActions = U.node('div', { class: 'vtn-rec-card__actions' });
       var submit = U.node('button', {
         class: 'vtn-rec-card__retry', type: 'button', text: t('review.submit')
@@ -14622,11 +14638,13 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       body.appendChild(moderation);
     }
 
-    var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
-    var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
-    del.addEventListener('click', function () { removeRecord(rec); });
-    actions3.appendChild(del);
-    body.appendChild(actions3);
+    if (!reviewOnly) {
+      var actions3 = U.node('div', { class: 'vtn-rec-card__actions' });
+      var del = U.node('button', { class: 'vtn-rec-card__remove', type: 'button', text: t('rec.deleteRecord') });
+      del.addEventListener('click', function () { removeRecord(rec); });
+      actions3.appendChild(del);
+      body.appendChild(actions3);
+    }
   }
 
   /* =========================================================================
@@ -14725,7 +14743,9 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     var empty = document.getElementById(emptyId);
     if (!host) return;
     host.textContent = '';
-    list.forEach(function (rec) { host.appendChild(buildCard(rec)); });
+    list.forEach(function (rec) {
+      host.appendChild(buildCard(rec, { reviewOnly: !!rec._reviewOnly }));
+    });
     if (empty) empty.hidden = list.length > 0;
     var panel = host.parentNode;
     if (panel) panel.classList.toggle('has-list', list.length > 0);
@@ -14738,6 +14758,14 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
       pending: all.filter(function (r) { return r.status === 'pending'; }),
       done: all.filter(function (r) { return r.status === 'done'; })
     };
+    if (VTN.store.role() === 'admin') {
+      var byId = {};
+      groups.done.forEach(function (rec) { byId[rec.id] = rec; });
+      reviewerQueue.forEach(function (rec) {
+        if (!byId[rec.id]) byId[rec.id] = Object.assign({}, rec, { _reviewOnly: true });
+      });
+      groups.done = Object.keys(byId).map(function (id) { return byId[id]; });
+    }
 
     renderList('recListDrafts', 'emptyDrafts', groups.drafts, 'draft');
     renderList('recListPending', 'emptyPending', groups.pending, 'pending');
@@ -14772,6 +14800,24 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
     }));
   }
 
+  function loadReviewerQueue() {
+    if (VTN.store.role() !== 'admin' || !VTN.api.contributions || reviewerQueueLoading) {
+      if (VTN.store.role() !== 'admin') reviewerQueue = [];
+      return Promise.resolve(reviewerQueue);
+    }
+    reviewerQueueLoading = true;
+    return VTN.api.contributions.list('submitted').then(function (data) {
+      reviewerQueue = (data && data.records) || [];
+      renderAll();
+      return reviewerQueue;
+    }).catch(function () {
+      return reviewerQueue;
+    }).then(function (result) {
+      reviewerQueueLoading = false;
+      return result;
+    });
+  }
+
   /* =========================================================================
    * 5. 深鏈與事件
    * ======================================================================= */
@@ -14796,7 +14842,8 @@ window.VTN_WAVEFORMS = {"YL-001":[0.465,0.68,0.536,0.384,0.455,0.63,0.623,0.483,
   function init() {
     initTabs();
     renderAll();
-    var onStore = function () { renderAll(); };
+    loadReviewerQueue();
+    var onStore = function () { renderAll(); loadReviewerQueue(); };
     U.on('vtn:store-changed', onStore);
     U.on('vtn:session-changed', onStore);
     window.addEventListener('storage', function (event) {
